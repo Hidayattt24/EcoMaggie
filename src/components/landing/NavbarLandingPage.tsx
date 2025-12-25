@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 
 // Icons sebagai SVG components
@@ -168,56 +169,74 @@ const UserAddIcon = () => (
 );
 
 const navigationItems = [
-  { name: "Beranda", href: "/", icon: HomeIcon },
-  { name: "Tentang", href: "/about", icon: InfoIcon },
-  { name: "Solusi", href: "/solution", icon: LightbulbIcon },
-  { name: "Dampak", href: "/impact", icon: ChartIcon },
-  { name: "Produk", href: "/product", icon: PackageIcon },
-  { name: "Testimoni", href: "/testimonials", icon: StarIcon },
+  { name: "Beranda", href: "#beranda-section", icon: HomeIcon },
+  { name: "Tentang", href: "#tentang-section", icon: InfoIcon },
+  { name: "Solusi", href: "#solusi-section", icon: LightbulbIcon },
+  { name: "Dampak", href: "#dampak-section", icon: ChartIcon },
+  { name: "Produk", href: "#produk-section", icon: PackageIcon },
+  { name: "Testimoni", href: "#testimoni-section", icon: StarIcon },
 ];
 
 export default function NavbarLandingPage() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("beranda-section");
+
+  // Scroll handler untuk smooth scrolling
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    e.preventDefault();
+    const targetId = href.replace("#", "");
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      setActiveSection(targetId);
+      setMobileMenuOpen(false);
+    }
+  };
 
   return (
     <>
       {/* Desktop Navbar */}
-      <nav className="hidden lg:block fixed top-8 left-1/2 -translate-x-1/2 z-50">
+      <nav className="hidden lg:block fixed top-4 left-1/2 -translate-x-1/2 z-50">
         <div
-          className="bg-white shadow-lg backdrop-blur-sm bg-white/95"
+          className="bg-white/90 shadow-lg backdrop-blur-md"
           style={{
-            width: "1196px",
-            height: "89px",
-            borderRadius: "52px",
+            width: "1100px",
+            height: "70px",
+            borderRadius: "45px",
           }}
         >
-          <div className="flex items-center justify-between h-full px-8">
+          <div className="flex items-center justify-between h-full px-6">
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <Image
                 src="/assets/logo.svg"
                 alt="EcoMaggie Logo"
-                width={100}
-                height={100}
-                className="w-40 h-40"
+                width={80}
+                height={80}
+                className="w-32 h-32"
               />
             </Link>
 
             {/* Navigation Menu */}
             <div className="flex items-center gap-3">
               {navigationItems.map((item) => {
-                const isActive = pathname === item.href;
+                const sectionId = item.href.replace("#", "");
+                const isActive = activeSection === sectionId;
                 const Icon = item.icon;
                 return (
-                  <Link
+                  <a
                     key={item.name}
                     href={item.href}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     className={cn(
-                      "flex items-center gap-1.5 text-sm poppins-medium transition-all duration-300 relative py-2 px-2.5 rounded-lg",
+                      "flex items-center gap-1.5 text-sm poppins-medium transition-all duration-300 relative py-2 px-2.5 rounded-lg cursor-pointer",
                       isActive
                         ? "text-[#2D5016] font-semibold bg-green-50"
                         : "text-gray-700 hover:text-[#2D5016] hover:bg-green-50"
@@ -228,7 +247,7 @@ export default function NavbarLandingPage() {
                     {isActive && (
                       <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D5016] rounded-full" />
                     )}
-                  </Link>
+                  </a>
                 );
               })}
             </div>
@@ -291,15 +310,16 @@ export default function NavbarLandingPage() {
           <div className="absolute top-20 left-0 right-0 bg-white shadow-lg border-t">
             <div className="flex flex-col p-4 space-y-2">
               {navigationItems.map((item) => {
-                const isActive = pathname === item.href;
+                const sectionId = item.href.replace("#", "");
+                const isActive = activeSection === sectionId;
                 const Icon = item.icon;
                 return (
-                  <Link
+                  <a
                     key={item.name}
                     href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     className={cn(
-                      "flex items-center gap-3 text-base poppins-medium transition-all duration-300 py-3 px-4 rounded-lg",
+                      "flex items-center gap-3 text-base poppins-medium transition-all duration-300 py-3 px-4 rounded-lg cursor-pointer",
                       isActive
                         ? "text-[#2D5016] font-semibold bg-green-50"
                         : "text-gray-700 hover:text-[#2D5016] hover:bg-green-50"
@@ -307,7 +327,7 @@ export default function NavbarLandingPage() {
                   >
                     <Icon />
                     <span>{item.name}</span>
-                  </Link>
+                  </a>
                 );
               })}
 

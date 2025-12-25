@@ -182,6 +182,40 @@ export default function NavbarLandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("beranda-section");
 
+  // Detect active section on scroll
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const sections = [
+        "beranda-section",
+        "tentang-section",
+        "solusi-section",
+        "dampak-section",
+        "produk-section",
+        "testimoni-section",
+      ];
+
+      const scrollPosition = window.scrollY + 150; // Offset untuk navbar
+
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (
+            scrollPosition >= offsetTop &&
+            scrollPosition < offsetTop + offsetHeight
+          ) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initial check
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Scroll handler untuk smooth scrolling
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -218,9 +252,9 @@ export default function NavbarLandingPage() {
               <Image
                 src="/assets/logo.svg"
                 alt="EcoMaggie Logo"
-                width={80}
-                height={80}
-                className="w-32 h-32"
+                width={100}
+                height={100}
+                className="w-36 h-36"
               />
             </Link>
 
@@ -282,34 +316,62 @@ export default function NavbarLandingPage() {
       </nav>
 
       {/* Mobile Navbar */}
-      <nav className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-        <div className="flex items-center justify-between h-20 px-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/assets/logo.svg"
-              alt="EcoMaggie Logo"
-              width={80}
-              height={80}
-              className="w-20 h-20"
-            />
-          </Link>
+      <nav className="lg:hidden fixed top-0 left-0 right-0 z-50">
+        {/* Navbar Container with Gradient */}
+        <div className="bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-lg shadow-lg border-b border-green-100">
+          <div className="flex items-center justify-between h-20 px-4">
+            {/* Logo - Enlarged */}
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/assets/logo.svg"
+                alt="EcoMaggie Logo"
+                width={100}
+                height={100}
+                className="w-28 h-28"
+              />
+            </Link>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-gray-700 hover:text-[#2D5016] transition-colors"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
-          </button>
+            {/* Hamburger Button - Enhanced */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="relative p-3 rounded-2xl bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label="Toggle menu"
+            >
+              <div className="w-6 h-6 flex flex-col justify-center items-center">
+                <span
+                  className={cn(
+                    "block w-6 h-0.5 bg-white rounded-full transition-all duration-300",
+                    mobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
+                  )}
+                ></span>
+                <span
+                  className={cn(
+                    "block w-6 h-0.5 bg-white rounded-full my-1 transition-all duration-300",
+                    mobileMenuOpen ? "opacity-0" : "opacity-100"
+                  )}
+                ></span>
+                <span
+                  className={cn(
+                    "block w-6 h-0.5 bg-white rounded-full transition-all duration-300",
+                    mobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
+                  )}
+                ></span>
+              </div>
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
-        {mobileMenuOpen && (
-          <div className="absolute top-20 left-0 right-0 bg-white shadow-lg border-t">
-            <div className="flex flex-col p-4 space-y-2">
-              {navigationItems.map((item) => {
+        {/* Mobile Menu Dropdown - Enhanced Design */}
+        <div
+          className={cn(
+            "absolute top-20 left-0 right-0 bg-white/95 backdrop-blur-xl shadow-2xl border-b border-green-100 transition-all duration-300 overflow-hidden",
+            mobileMenuOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+          )}
+        >
+          <div className="p-4 space-y-3">
+            {/* Navigation Items */}
+            <div className="space-y-2">
+              {navigationItems.map((item, index) => {
                 const sectionId = item.href.replace("#", "");
                 const isActive = activeSection === sectionId;
                 const Icon = item.icon;
@@ -319,39 +381,78 @@ export default function NavbarLandingPage() {
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
                     className={cn(
-                      "flex items-center gap-3 text-base poppins-medium transition-all duration-300 py-3 px-4 rounded-lg cursor-pointer",
+                      "flex items-center gap-3 text-base poppins-medium transition-all duration-300 py-3.5 px-4 rounded-xl cursor-pointer transform",
                       isActive
-                        ? "text-[#2D5016] font-semibold bg-green-50"
-                        : "text-gray-700 hover:text-[#2D5016] hover:bg-green-50"
+                        ? "text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] shadow-md scale-[1.02]"
+                        : "text-gray-700 hover:text-[#2D5016] hover:bg-green-50 hover:pl-6"
                     )}
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                      animation: mobileMenuOpen
+                        ? "slideInRight 0.3s ease-out forwards"
+                        : "none",
+                    }}
                   >
-                    <Icon />
+                    <div
+                      className={cn(
+                        "p-2 rounded-lg transition-all",
+                        isActive ? "bg-white/20" : "bg-green-50"
+                      )}
+                    >
+                      <Icon />
+                    </div>
                     <span>{item.name}</span>
+                    {isActive && (
+                      <svg
+                        className="w-5 h-5 ml-auto"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
                   </a>
                 );
               })}
+            </div>
 
-              <div className="pt-4 space-y-3 border-t">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full px-6 py-3 text-[#2D5016] poppins-semibold rounded-full transition-all duration-300 border-2 border-[#2D5016] hover:bg-[#2D5016] hover:text-white"
-                >
-                  <LoginIcon />
-                  Masuk
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white poppins-semibold rounded-full hover:from-[#3d6b1e] hover:to-[#4a8022] transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  <UserAddIcon />
-                  Daftar
-                </Link>
+            {/* Divider */}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-3 text-xs text-gray-500 bg-white poppins-medium">
+                  Akses Akun
+                </span>
               </div>
             </div>
+
+            {/* Auth Buttons */}
+            <div className="space-y-3 pt-2">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-[#2D5016] poppins-semibold rounded-xl transition-all duration-300 border-2 border-[#2D5016] hover:bg-[#2D5016] hover:text-white transform hover:scale-[1.02] active:scale-95"
+              >
+                <LoginIcon />
+                Masuk ke Akun
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-gradient-to-r from-[#2D5016] via-[#3d6b1e] to-[#4a8022] text-white poppins-semibold rounded-xl hover:from-[#3d6b1e] hover:to-[#4a8022] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95"
+              >
+                <UserAddIcon />
+                Daftar Sekarang
+              </Link>
+            </div>
           </div>
-        )}
+        </div>
       </nav>
     </>
   );

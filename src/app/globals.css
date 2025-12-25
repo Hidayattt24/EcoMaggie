@@ -24,6 +24,28 @@ body {
   font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
 }
 
+/* Hide Scrollbar untuk Horizontal Scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Slide In Animation for Mobile Menu */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Custom Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 12px;

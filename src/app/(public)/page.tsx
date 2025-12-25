@@ -1,5 +1,6 @@
 import NavbarLandingPage from "@/components/landing/NavbarLandingPage";
 import HeroSection from "@/components/landing/HeroSection";
+import StatisticsSection from "@/components/landing/StatisticsSection";
 import TentangSection from "@/components/landing/TentangSection";
 import SolusiSection from "@/components/landing/SolusiSection";
 import DampakSection from "@/components/landing/DampakSection";
@@ -15,6 +16,7 @@ export default function Home() {
       {/* Scroll Sections */}
       <main className="scroll-smooth">
         <HeroSection />
+        <StatisticsSection />
         <TentangSection />
         <SolusiSection />
         <DampakSection />

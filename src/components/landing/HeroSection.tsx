@@ -16,11 +16,20 @@ export default function HeroSection() {
     >
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
+        {/* Desktop Image */}
         <Image
-          src="/assets/landing/sampah-beranda.png"
+          src="/assets/landing/beranda.svg"
           alt="Sampah Beranda Background"
           fill
-          className="object-cover brightness-75"
+          className="hidden lg:block object-cover brightness-75"
+          priority
+        />
+        {/* Mobile Image */}
+        <Image
+          src="/assets/landing/beranda-mobile.svg"
+          alt="Sampah Beranda Background Mobile"
+          fill
+          className="lg:hidden object-cover brightness-75"
           priority
         />
         {/* Gradient Overlay */}
@@ -34,54 +43,86 @@ export default function HeroSection() {
       </div>
 
       {/* Content */}
-      <div
-        className="relative z-10 w-full py-20 lg:py-0"
-        style={{ paddingLeft: "135px" }}
-      >
-        <div className="max-w-4xl text-left">
+      <div className="relative z-10 w-full py-20 lg:py-0 px-4 sm:px-6 lg:px-0">
+        <div className="max-w-4xl text-left mx-auto lg:mx-0 lg:ml-[135px]">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-md rounded-full mb-4 sm:mb-6 animate-fade-in-up border border-white/20">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-white/90 text-[10px] sm:text-xs poppins-medium">
+              Platform Digital Pengelolaan Sampah Organik
+            </span>
+          </div>
+
           {/* Main Heading */}
-          <h1
-            className="text-white mb-5 poppins-semibold leading-tight animate-fade-in-up"
-            style={{ fontSize: "52px" }}
-          >
+          <h1 className="text-white mb-4 sm:mb-5 poppins-bold leading-tight animate-fade-in-up text-3xl sm:text-4xl md:text-5xl lg:text-[52px]">
             Dari Maggot Kecil,
             <br />
             Lahir Perubahan Besar
           </h1>
 
           {/* Description */}
-          <p
-            className="text-white mb-10 poppins-regular max-w-3xl leading-relaxed animate-fade-in-up animation-delay-200"
-            style={{ fontSize: "16px" }}
-          >
+          <p className="text-white/90 mb-6 sm:mb-8 poppins-regular max-w-2xl lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200 text-sm sm:text-base lg:text-[16px]">
             EcoMaggie menghubungkan penghasil sampah organik dengan petani
             maggot melalui platform digital untuk menciptakan solusi pengelolaan
             limbah yang berkelanjutan dan bernilai ekonomi.
           </p>
 
-          {/* CTA Button */}
-          <button
-            onClick={scrollToNext}
-            className="group relative inline-flex items-center gap-2 px-8 py-3 bg-white text-[#16321A] poppins-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:scale-105 animate-fade-in-up animation-delay-400"
-            style={{ fontSize: "14px" }}
-          >
-            <span>Jelajahi EcoMaggie</span>
-            <span className="w-8 h-8 flex items-center justify-center bg-[#16321A] text-white rounded-full group-hover:translate-x-1 transition-transform duration-300">
+          {/* Stats */}
+          <div className="flex flex-wrap justify-start gap-3 sm:gap-4 mb-6 sm:mb-8 animate-fade-in-up animation-delay-300">
+            <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+              </svg>
+              <span className="text-white text-[10px] sm:text-xs poppins-medium">
+                100+ Partner
+              </span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
+                  fillRule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clipRule="evenodd"
                 />
               </svg>
-            </span>
-          </button>
+              <span className="text-white text-[10px] sm:text-xs poppins-medium">
+                Tersedia 24/7
+              </span>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="flex justify-start animate-fade-in-up animation-delay-400">
+            <button
+              onClick={scrollToNext}
+              className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-8 sm:py-3.5 bg-white text-[#16321A] poppins-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:scale-105 text-xs sm:text-sm"
+            >
+              <span>Jelajahi EcoMaggie</span>
+              <span className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-[#16321A] text-white rounded-full group-hover:translate-x-1 transition-transform duration-300">
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

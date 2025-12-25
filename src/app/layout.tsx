@@ -11,9 +11,14 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "EcoMaggie - Platform Pengelolaan Sampah Organik",
+  title: "EcoMaggie",
   description:
     "EcoMaggie adalah platform berbasis web yang berfokus pada pengelolaan sampah organik dan pemanfaatannya melalui budidaya maggot. Menghubungkan penghasil sampah organik, transporter, dan petani maggot dalam satu sistem digital terintegrasi untuk menciptakan nilai ekonomi berkelanjutan.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

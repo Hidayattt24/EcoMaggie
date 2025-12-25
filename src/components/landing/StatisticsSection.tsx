@@ -98,7 +98,10 @@ export default function StatisticsSection() {
   ];
 
   return (
-    <section className="relative py-16 overflow-hidden" style={{ background: '#0A2710' }}>
+    <section
+      className="relative py-16 overflow-hidden"
+      style={{ background: "#0A2710" }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {stats.map((stat, index) => (

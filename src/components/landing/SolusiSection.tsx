@@ -33,7 +33,19 @@ export default function SolusiSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="text-left mb-12 lg:mb-16">
+          <div className="text-center mb-12 lg:mb-16">
+            <div
+              className={`inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full mb-6 transition-all duration-700 ease-out ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-green-700 text-sm poppins-semibold">
+                Solusi Kami
+              </span>
+            </div>
             <h2
               className={`text-4xl md:text-5xl lg:text-6xl poppins-semibold text-white leading-tight transition-all duration-700 ease-out ${
                 isVisible

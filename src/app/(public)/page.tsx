@@ -4,8 +4,9 @@ import StatisticsSection from "@/components/landing/StatisticsSection";
 import TentangSection from "@/components/landing/TentangSection";
 import SolusiSection from "@/components/landing/SolusiSection";
 import DampakSection from "@/components/landing/DampakSection";
-import ProdukSection from "@/components/landing/ProdukSection";
 import TestimoniSection from "@/components/landing/TestimoniSection";
+import FooterSection from "@/components/landing/FooterSection";
+import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
 
 export default function Home() {
   return (
@@ -20,9 +21,14 @@ export default function Home() {
         <TentangSection />
         <SolusiSection />
         <DampakSection />
-        <ProdukSection />
         <TestimoniSection />
       </main>
+
+      {/* Footer */}
+      <FooterSection />
+
+      {/* Floating WhatsApp Button */}
+      <FloatingWhatsApp />
     </div>
   );
 }

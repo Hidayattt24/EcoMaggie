@@ -173,7 +173,6 @@ const navigationItems = [
   { name: "Tentang", href: "#tentang-section", icon: InfoIcon },
   { name: "Solusi", href: "#solusi-section", icon: LightbulbIcon },
   { name: "Dampak", href: "#dampak-section", icon: ChartIcon },
-  { name: "Produk", href: "#produk-section", icon: PackageIcon },
   { name: "Testimoni", href: "#testimoni-section", icon: StarIcon },
 ];
 
@@ -190,7 +189,6 @@ export default function NavbarLandingPage() {
         "tentang-section",
         "solusi-section",
         "dampak-section",
-        "produk-section",
         "testimoni-section",
       ];
 

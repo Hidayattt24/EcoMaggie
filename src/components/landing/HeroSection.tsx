@@ -2,8 +2,29 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 export default function HeroSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const scrollToNext = () => {
     const nextSection = document.getElementById("tentang-section");
     nextSection?.scrollIntoView({ behavior: "smooth" });
@@ -12,6 +33,7 @@ export default function HeroSection() {
   return (
     <section
       id="beranda-section"
+      ref={sectionRef}
       className="relative min-h-screen flex items-center overflow-hidden"
     >
       {/* Background Image */}
@@ -46,7 +68,13 @@ export default function HeroSection() {
       <div className="relative z-10 w-full py-20 lg:py-0 px-4 sm:px-6 lg:px-0">
         <div className="max-w-4xl text-left mx-auto lg:mx-0 lg:ml-[135px]">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-md rounded-full mb-4 sm:mb-6 animate-fade-in-up border border-white/20">
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-md rounded-full mb-4 sm:mb-6 border border-white/20 transition-all duration-1000 ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+            }`}
+          >
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-white/90 text-[10px] sm:text-xs poppins-medium">
               Platform Digital Pengelolaan Sampah Organik
@@ -54,21 +82,39 @@ export default function HeroSection() {
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-white mb-4 sm:mb-5 poppins-bold leading-tight animate-fade-in-up text-3xl sm:text-4xl md:text-5xl lg:text-[52px]">
+          <h1
+            className={`text-white mb-4 sm:mb-5 poppins-bold leading-tight text-3xl sm:text-4xl md:text-5xl lg:text-[52px] transition-all duration-1000 delay-150 ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+            }`}
+          >
             Dari Maggot Kecil,
             <br />
             Lahir Perubahan Besar
           </h1>
 
           {/* Description */}
-          <p className="text-white/90 mb-6 sm:mb-8 poppins-regular max-w-2xl lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200 text-sm sm:text-base lg:text-[16px]">
+          <p
+            className={`text-white/90 mb-6 sm:mb-8 poppins-regular max-w-2xl lg:mx-0 leading-relaxed text-sm sm:text-base lg:text-[16px] transition-all duration-1000 delay-300 ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+            }`}
+          >
             EcoMaggie menghubungkan penghasil sampah organik dengan petani
             maggot melalui platform digital untuk menciptakan solusi pengelolaan
             limbah yang berkelanjutan dan bernilai ekonomi.
           </p>
 
           {/* Stats */}
-          <div className="flex flex-wrap justify-start gap-3 sm:gap-4 mb-6 sm:mb-8 animate-fade-in-up animation-delay-300">
+          <div
+            className={`flex flex-wrap justify-start gap-3 sm:gap-4 mb-6 sm:mb-8 transition-all duration-700 delay-300 ease-out ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            }`}
+          >
             <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <svg
                 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
@@ -100,7 +146,13 @@ export default function HeroSection() {
           </div>
 
           {/* CTA Button */}
-          <div className="flex justify-start animate-fade-in-up animation-delay-400">
+          <div
+            className={`flex justify-start transition-all duration-700 delay-400 ease-out ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            }`}
+          >
             <button
               onClick={scrollToNext}
               className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-8 sm:py-3.5 bg-white text-[#16321A] poppins-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:scale-105 text-xs sm:text-sm"

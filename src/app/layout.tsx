@@ -12,6 +12,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ecomaggie.id"),
   title: {
     default:
       "EcoMaggie - Platform Pengelolaan Sampah Organik & Budidaya Maggot Indonesia",
@@ -82,11 +83,6 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
     creator: "@ecomaggie",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
   verification: {
     google: "your-google-verification-code",
     // yandex: "your-yandex-verification-code",
@@ -96,6 +92,12 @@ export const metadata: Metadata = {
     canonical: "https://ecomaggie.id",
   },
   category: "Technology",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

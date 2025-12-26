@@ -41,7 +41,7 @@ export default function HeroSection() {
         {/* Desktop Image */}
         <Image
           src="/assets/landing/beranda.svg"
-          alt="Sampah Beranda Background"
+          alt="Platform EcoMaggie - Pengelolaan Sampah Organik dan Budidaya Maggot BSF untuk Ekonomi Sirkular Berkelanjutan"
           fill
           className="hidden lg:block object-cover brightness-75"
           priority
@@ -49,7 +49,7 @@ export default function HeroSection() {
         {/* Mobile Image */}
         <Image
           src="/assets/landing/beranda-mobile.svg"
-          alt="Sampah Beranda Background Mobile"
+          alt="EcoMaggie - Solusi Digital Pengelolaan Sampah Organik dan Budidaya Maggot di Indonesia"
           fill
           className="lg:hidden object-cover brightness-75"
           priority

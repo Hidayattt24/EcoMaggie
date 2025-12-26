@@ -249,7 +249,7 @@ export default function NavbarLandingPage() {
             >
               <Image
                 src="/assets/logo.svg"
-                alt="EcoMaggie Logo"
+                alt="Logo EcoMaggie - Platform Pengelolaan Sampah Organik dan Budidaya Maggot Indonesia"
                 width={100}
                 height={100}
                 className="w-36 h-36"

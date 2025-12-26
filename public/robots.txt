@@ -1,0 +1,19 @@
+# robots.txt for EcoMaggie
+# Allow all search engines to crawl the website
+
+User-agent: *
+Allow: /
+
+# Disallow admin or private areas (if any in future)
+# Disallow: /admin/
+# Disallow: /api/
+
+# Sitemap location
+Sitemap: https://ecomaggie.id/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+# Crawl-delay: 1
+
+# Block specific bots if needed (uncomment to use)
+# User-agent: BadBot
+# Disallow: /

@@ -97,7 +97,7 @@ export default function FooterSection() {
             <Link href="/" className="inline-block mb-6 group">
               <Image
                 src="/assets/logo.svg"
-                alt="EcoMaggie Logo"
+                alt="Logo EcoMaggie - Platform Pengelolaan Sampah Organik dan Budidaya Maggot Indonesia"
                 width={120}
                 height={120}
                 className="w-40 h-40 transform group-hover:scale-105 transition-transform duration-300"

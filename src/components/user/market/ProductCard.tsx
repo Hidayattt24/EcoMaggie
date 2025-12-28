@@ -29,16 +29,22 @@ export default function ProductCard({
     <div className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100">
       {/* Product Image */}
       <div className="relative aspect-square bg-gradient-to-br from-green-50 to-white overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        <Link href={`/market/products/${product.id}`}>
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+          />
+        </Link>
 
         {/* Wishlist Button */}
         <button
-          onClick={() => onToggleWishlist(product.id)}
-          className="absolute top-1.5 right-1.5 h-6 w-6 bg-white/95 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all active:scale-95"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleWishlist(product.id);
+          }}
+          className="absolute top-1.5 right-1.5 h-6 w-6 bg-white/95 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all active:scale-95 z-10"
         >
           <svg
             className={`h-3 w-3 transition-colors ${
@@ -58,13 +64,13 @@ export default function ProductCard({
         </button>
 
         {/* Category Badge */}
-        <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#2D5016]/90 text-white text-[9px] font-semibold rounded-full">
+        <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#2D5016]/90 text-white text-[9px] font-semibold rounded-full pointer-events-none">
           {product.category}
         </div>
 
         {/* Discount Badge */}
         {product.discount && (
-          <div className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[9px] font-bold rounded-full shadow-lg animate-pulse">
+          <div className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[9px] font-bold rounded-full shadow-lg animate-pulse pointer-events-none">
             🔥 DISKON {product.discount}%
           </div>
         )}

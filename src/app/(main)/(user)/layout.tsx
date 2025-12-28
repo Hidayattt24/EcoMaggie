@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NavbarUser } from "@/components/user/NavbarUser";
 
 export const metadata: Metadata = {
   title: "EcoMaggie - Dashboard",
@@ -12,8 +13,10 @@ export default function UserLayout({
 }) {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar akan ditambahkan di sini */}
-      <main className="container mx-auto px-4 py-6">{children}</main>
+      <NavbarUser />
+      <main className="container mx-auto px-4 pt-24 pb-28 lg:pb-6">
+        {children}
+      </main>
     </div>
   );
 }

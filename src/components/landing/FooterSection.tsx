@@ -184,7 +184,7 @@ export default function FooterSection() {
                     href="mailto:info@ecomaggie.id"
                     className="hover:text-green-400 transition-colors"
                   >
-                    info@ecomaggie.id
+                    cs@Ecomaggie.id
                   </a>
                 </div>
               </li>
@@ -196,7 +196,7 @@ export default function FooterSection() {
                     href="tel:+6281234567890"
                     className="hover:text-green-400 transition-colors"
                   >
-                    +62 812-3456-7890
+                    +62 822-8895-3268
                   </a>
                 </div>
               </li>
@@ -204,7 +204,10 @@ export default function FooterSection() {
                 <MapPin className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-white mb-1">Alamat</p>
-                  <p>Jakarta, Indonesia</p>
+                  <p>
+                    Jl.T. Batee Treun Gampong Ganoe Desa Lamdingin Kec. Kuta
+                    Alam Banda Aceh
+                  </p>
                 </div>
               </li>
             </ul>

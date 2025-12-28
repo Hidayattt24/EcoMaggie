@@ -248,10 +248,7 @@ export default function FooterSection() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm poppins-regular text-center md:text-left">
-              © {new Date().getFullYear()} EcoMaggie. All rights reserved. Made
-              with{" "}
-              <Heart className="inline w-4 h-4 text-red-500 fill-red-500" /> for
-              a sustainable future.
+              © {new Date().getFullYear()} EcoMaggie.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <a

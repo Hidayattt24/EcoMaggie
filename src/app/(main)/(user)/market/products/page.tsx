@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 
 // Dummy data produk maggot
 const products = [
@@ -151,14 +152,56 @@ export default function MarketProductsPage() {
       )}
 
       <div className="max-w-[1400px] mx-auto px-4 py-4">
+        {/* Hero Section */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center gap-2 bg-[#2D5016]/10 px-4 py-2 rounded-full mb-4">
+            <svg
+              className="h-4 w-4 text-[#2D5016]"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+            </svg>
+            <span className="text-xs font-bold text-[#2D5016] tracking-wider uppercase font-poppins">
+              Market Pengolahan Maggot
+            </span>
+          </div>
+
+          <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4 leading-tight font-poppins">
+            DI MANA <span className="text-[#2D5016]">TEKNOLOGI</span>
+            <br />
+            BERTEMU <span className="text-[#2D5016]">ALAM</span>
+          </h1>
+
+          <p className="text-base lg:text-lg text-gray-600 mb-8 leading-relaxed font-poppins max-w-3xl mx-auto">
+            EcoMaggie memanfaatkan teknologi untuk mendukung pengelolaan sampah
+            organik yang lebih{" "}
+            <span className="font-semibold text-[#2D5016]">
+              efisien, berkelanjutan
+            </span>{" "}
+            dan berdampak bagi lingkungan serta masyarakat.
+          </p>
+
+          {/* Search Bar */}
+          <div className="max-w-3xl mx-auto">
+            <PlaceholdersAndVanishInput
+              placeholders={[
+                "Maggot BSF hidup...",
+                "Maggot BSF kering...",
+                "Maggot BSF ukuran sedang...",
+                "Maggot BSF 1 kg...",
+                "Maggot BSF curah...",
+              ]}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onSubmit={(e) => e.preventDefault()}
+            />
+          </div>
+        </div>
+
         <div className="flex gap-4">
           {/* Left Sidebar - Filter */}
-          <div
-            className={`w-56 flex-shrink-0 lg:block ${
-              isFilterOpen ? "fixed" : "hidden"
-            } lg:sticky left-0 top-0 lg:top-24 h-screen lg:h-auto z-50 lg:z-auto transition-transform duration-300`}
-          >
-            <div className="bg-white rounded-none lg:rounded-xl shadow-sm border-r lg:border border-gray-200 p-4 h-full lg:max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-[#2D5016] scrollbar-track-gray-100">
+          <div className="w-56 flex-shrink-0 hidden lg:block">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-[#2D5016] scrollbar-track-gray-100">
               {/* Filter Header */}
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] flex items-center justify-center">
@@ -176,56 +219,9 @@ export default function MarketProductsPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="font-bold text-base text-[#2D5016] flex-1">
+                <h2 className="font-bold text-base text-[#2D5016] flex-1 font-poppins">
                   Filter Produk
                 </h2>
-                <button
-                  onClick={() => setIsFilterOpen(false)}
-                  className="lg:hidden h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Search Bar */}
-              <div className="mb-4">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#2D5016] mb-1.5">
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  Cari produk
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Ketik nama produk..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs text-[#2D5016] placeholder:text-gray-400 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2D5016]/20 focus:border-[#2D5016] outline-none transition-all"
-                  />
-                </div>
               </div>
 
               {/* Jenis Category */}

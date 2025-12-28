@@ -1,10 +1,13 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
-import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
+import ProductCard, { Product } from "@/components/user/market/ProductCard";
+import FilterSidebar from "@/components/user/market/FilterSidebar";
+import MobileFilterPanel from "@/components/user/market/MobileFilterPanel";
+import ProductsHeader from "@/components/user/market/ProductsHeader";
+import Pagination from "@/components/user/market/Pagination";
 
 // Dummy data produk maggot
-const products = [
+const products: Product[] = [
   {
     id: 1,
     name: "Maggot BSF Premium",
@@ -300,502 +303,44 @@ export default function MarketProductsPage() {
   const endIndex = startIndex + itemsPerPage;
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filters change
-  const handleFilterChange = () => {
-    setCurrentPage(1);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Filter Overlay */}
-      {isFilterOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setIsFilterOpen(false)}
-          />
-
-          {/* Mobile Filter Panel */}
-          <div className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
-            <div className="bg-white rounded-t-3xl shadow-2xl max-h-[80vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between rounded-t-3xl">
-                <h2 className="font-bold text-lg text-[#2D5016] font-poppins">
-                  Filter & Urutkan
-                </h2>
-                <button
-                  onClick={() => setIsFilterOpen(false)}
-                  className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
-                >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="p-4 space-y-6">
-                {/* Jenis Category */}
-                <div>
-                  <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2D5016] mb-3">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                      />
-                    </svg>
-                    <span>Jenis Produk</span>
-                  </h3>
-                  <div className="space-y-2">
-                    {categories.map((category) => (
-                      <label
-                        key={category}
-                        className="flex items-center gap-2 cursor-pointer group px-3 py-2 rounded-lg hover:bg-green-50 transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.includes(category)}
-                          onChange={() => toggleCategory(category)}
-                          className="w-4 h-4 rounded border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
-                        />
-                        <span
-                          className={`text-sm transition-colors ${
-                            selectedCategories.includes(category)
-                              ? "text-[#2D5016] font-semibold"
-                              : "text-gray-700 group-hover:text-[#2D5016]"
-                          }`}
-                        >
-                          {category}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range */}
-                <div>
-                  <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2D5016] mb-3">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span>Rentang Harga</span>
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-xs text-[#2D5016] font-semibold">
-                      <span>Rp {minPrice.toLocaleString("id-ID")}</span>
-                      <span>Rp {maxPrice.toLocaleString("id-ID")}</span>
-                    </div>
-                    <div className="space-y-3">
-                      <input
-                        type="range"
-                        min="0"
-                        max="200000"
-                        step="5000"
-                        value={minPrice}
-                        onChange={(e) =>
-                          setMinPrice(
-                            Math.min(parseInt(e.target.value), maxPrice - 5000)
-                          )
-                        }
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-                        style={{
-                          background: `linear-gradient(to right, #2D5016 0%, #2D5016 ${
-                            (minPrice / 200000) * 100
-                          }%, #e5e7eb ${
-                            (minPrice / 200000) * 100
-                          }%, #e5e7eb 100%)`,
-                        }}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="200000"
-                        step="5000"
-                        value={maxPrice}
-                        onChange={(e) =>
-                          setMaxPrice(
-                            Math.max(parseInt(e.target.value), minPrice + 5000)
-                          )
-                        }
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-                        style={{
-                          background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
-                            (maxPrice / 200000) * 100
-                          }%, #2D5016 ${
-                            (maxPrice / 200000) * 100
-                          }%, #2D5016 100%)`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sort Options */}
-                <div>
-                  <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2D5016] mb-3">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                      />
-                    </svg>
-                    <span>Urutkan</span>
-                  </h3>
-                  <div className="space-y-2">
-                    {[
-                      { value: "newest", label: "Terbaru" },
-                      { value: "price-low", label: "Harga Terendah" },
-                      { value: "price-high", label: "Harga Tertinggi" },
-                      { value: "rating", label: "Rating Tertinggi" },
-                      { value: "name-az", label: "Nama A-Z" },
-                    ].map((option) => (
-                      <label
-                        key={option.value}
-                        className="flex items-center gap-2 cursor-pointer group px-3 py-2 rounded-lg hover:bg-green-50 transition-colors"
-                      >
-                        <input
-                          type="radio"
-                          name="sort"
-                          value={option.value}
-                          checked={sortBy === option.value}
-                          onChange={(e) => setSortBy(e.target.value)}
-                          className="w-4 h-4 border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
-                        />
-                        <span
-                          className={`text-sm transition-colors ${
-                            sortBy === option.value
-                              ? "text-[#2D5016] font-semibold"
-                              : "text-gray-700 group-hover:text-[#2D5016]"
-                          }`}
-                        >
-                          {option.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Apply Button */}
-                <button
-                  onClick={() => setIsFilterOpen(false)}
-                  className="w-full py-3 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white rounded-lg font-semibold text-sm shadow-md active:scale-95 transition-transform"
-                >
-                  Terapkan Filter
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <MobileFilterPanel
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        categories={categories}
+        selectedCategories={selectedCategories}
+        onToggleCategory={toggleCategory}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onMinPriceChange={setMinPrice}
+        onMaxPriceChange={setMaxPrice}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
 
       <div className="max-w-[1400px] mx-auto px-4 py-4">
         {/* Hero Section */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-[#2D5016]/10 px-4 py-2 rounded-full mb-4">
-            <svg
-              className="h-4 w-4 text-[#2D5016]"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-            </svg>
-            <span className="text-xs font-bold text-[#2D5016] tracking-wider uppercase font-poppins">
-              Market Pengolahan Maggot
-            </span>
-          </div>
-
-          <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4 leading-tight font-poppins">
-            DI MANA <span className="text-[#2D5016]">TEKNOLOGI</span>
-            <br />
-            BERTEMU <span className="text-[#2D5016]">ALAM</span>
-          </h1>
-
-          <p className="text-base lg:text-lg text-gray-600 mb-8 leading-relaxed font-poppins max-w-3xl mx-auto">
-            EcoMaggie memanfaatkan teknologi untuk mendukung pengelolaan sampah
-            organik yang lebih{" "}
-            <span className="font-semibold text-[#2D5016]">
-              efisien, berkelanjutan
-            </span>{" "}
-            dan berdampak bagi lingkungan serta masyarakat.
-          </p>
-
-          {/* Search Bar */}
-          <div className="max-w-3xl mx-auto">
-            <PlaceholdersAndVanishInput
-              placeholders={[
-                "Maggot BSF hidup...",
-                "Maggot BSF kering...",
-                "Maggot BSF ukuran sedang...",
-                "Maggot BSF 1 kg...",
-                "Maggot BSF curah...",
-              ]}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onSubmit={(e) => e.preventDefault()}
-            />
-          </div>
-        </div>
+        <ProductsHeader
+          searchQuery={searchQuery}
+          onSearchChange={(e) => setSearchQuery(e.target.value)}
+        />
 
         <div className="flex gap-4">
           {/* Left Sidebar - Filter */}
           <div className="w-56 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-[#2D5016] scrollbar-track-gray-100">
-              {/* Filter Header */}
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] flex items-center justify-center">
-                  <svg
-                    className="h-4 w-4 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
-                  </svg>
-                </div>
-                <h2 className="font-bold text-base text-[#2D5016] flex-1 font-poppins">
-                  Filter Produk
-                </h2>
-              </div>
-
-              {/* Jenis Category */}
-              <div className="mb-4">
-                <button className="flex items-center gap-1.5 w-full text-xs font-semibold text-[#2D5016] mb-2">
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                    />
-                  </svg>
-                  <span>Jenis Produk</span>
-                  <svg
-                    className="h-3 w-3 ml-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                <div className="space-y-1.5">
-                  {categories.map((category) => (
-                    <label
-                      key={category}
-                      className="flex items-center gap-1.5 cursor-pointer group px-2 py-1 rounded-md hover:bg-green-50 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => toggleCategory(category)}
-                        className="w-3.5 h-3.5 rounded border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
-                      />
-                      <span
-                        className={`text-xs transition-colors ${
-                          selectedCategories.includes(category)
-                            ? "text-[#2D5016] font-semibold"
-                            : "text-gray-700 group-hover:text-[#2D5016]"
-                        }`}
-                      >
-                        {category}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div className="mb-4">
-                <button className="flex items-center gap-1.5 w-full text-xs font-semibold text-[#2D5016] mb-2">
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Rentang Harga</span>
-                  <svg
-                    className="h-3 w-3 ml-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-[10px] text-[#2D5016] font-semibold">
-                    <span>Rp {minPrice.toLocaleString("id-ID")}</span>
-                    <span>Rp {maxPrice.toLocaleString("id-ID")}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <input
-                      type="range"
-                      min="0"
-                      max="200000"
-                      step="5000"
-                      value={minPrice}
-                      onChange={(e) =>
-                        setMinPrice(
-                          Math.min(parseInt(e.target.value), maxPrice - 5000)
-                        )
-                      }
-                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-                      style={{
-                        background: `linear-gradient(to right, #2D5016 0%, #2D5016 ${
-                          (minPrice / 200000) * 100
-                        }%, #e5e7eb ${
-                          (minPrice / 200000) * 100
-                        }%, #e5e7eb 100%)`,
-                      }}
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max="200000"
-                      step="5000"
-                      value={maxPrice}
-                      onChange={(e) =>
-                        setMaxPrice(
-                          Math.max(parseInt(e.target.value), minPrice + 5000)
-                        )
-                      }
-                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-                      style={{
-                        background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
-                          (maxPrice / 200000) * 100
-                        }%, #2D5016 ${
-                          (maxPrice / 200000) * 100
-                        }%, #2D5016 100%)`,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Sort Options */}
-              <div>
-                <button className="flex items-center gap-1.5 w-full text-xs font-semibold text-[#2D5016] mb-2">
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                    />
-                  </svg>
-                  <span>Urutkan</span>
-                  <svg
-                    className="h-3 w-3 ml-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                <div className="space-y-1.5">
-                  {[
-                    { value: "newest", label: "Terbaru" },
-                    { value: "price-low", label: "Harga Terendah" },
-                    { value: "price-high", label: "Harga Tertinggi" },
-                    { value: "rating", label: "Rating Tertinggi" },
-                    { value: "name-az", label: "Nama A-Z" },
-                  ].map((option) => (
-                    <label
-                      key={option.value}
-                      className="flex items-center gap-1.5 cursor-pointer group px-2 py-1 rounded-md hover:bg-green-50 transition-colors"
-                    >
-                      <input
-                        type="radio"
-                        name="sort"
-                        value={option.value}
-                        checked={sortBy === option.value}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="w-3.5 h-3.5 border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
-                      />
-                      <span
-                        className={`text-xs transition-colors ${
-                          sortBy === option.value
-                            ? "text-[#2D5016] font-semibold"
-                            : "text-gray-700 group-hover:text-[#2D5016]"
-                        }`}
-                      >
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <FilterSidebar
+              categories={categories}
+              selectedCategories={selectedCategories}
+              onToggleCategory={toggleCategory}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onMinPriceChange={setMinPrice}
+              onMaxPriceChange={setMaxPrice}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+            />
           </div>
 
           {/* Right Content - Products */}
@@ -883,170 +428,12 @@ export default function MarketProductsPage() {
             {/* Products Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
               {paginatedProducts.map((product) => (
-                <div
+                <ProductCard
                   key={product.id}
-                  className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100"
-                >
-                  {/* Product Image */}
-                  <div className="relative aspect-square bg-gradient-to-br from-green-50 to-white overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-
-                    {/* Wishlist Button */}
-                    <button
-                      onClick={() => toggleWishlist(product.id)}
-                      className="absolute top-1.5 right-1.5 h-6 w-6 bg-white/95 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all active:scale-95"
-                    >
-                      <svg
-                        className={`h-3 w-3 transition-colors ${
-                          wishlist.includes(product.id)
-                            ? "fill-red-500 stroke-red-500"
-                            : "fill-none stroke-gray-600"
-                        }`}
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
-                    </button>
-
-                    {/* Category Badge */}
-                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#2D5016]/90 text-white text-[9px] font-semibold rounded-full">
-                      {product.category}
-                    </div>
-
-                    {/* Discount Badge */}
-                    {product.discount && (
-                      <div className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[9px] font-bold rounded-full shadow-lg animate-pulse">
-                        🔥 DISKON {product.discount}%
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-2">
-                    {/* Product Name */}
-                    <h3 className="font-bold text-xs text-[#2D5016] mb-0.5 line-clamp-1">
-                      {product.name}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-[9px] text-[#2D5016]/70 mb-1.5 line-clamp-1">
-                      {product.description}
-                    </p>
-
-                    {/* Rating & Stock */}
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-0.5">
-                        <svg
-                          className="h-2.5 w-2.5 fill-yellow-400"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        <span className="text-[10px] font-semibold text-gray-800">
-                          {product.rating}
-                        </span>
-                        <span className="text-[9px] text-gray-500">
-                          ({product.reviews})
-                        </span>
-                      </div>
-                      <span className="text-[9px] text-gray-500">
-                        {product.stock} kg
-                      </span>
-                    </div>
-
-                    {/* Price */}
-                    <div className="mb-1.5">
-                      {product.discount ? (
-                        <div className="space-y-0.5">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-sm font-bold text-[#2D5016]">
-                              Rp{" "}
-                              {Math.round(
-                                product.price * (1 - product.discount / 100)
-                              ).toLocaleString("id-ID")}
-                            </span>
-                            <span className="text-[9px] text-gray-500">
-                              /{product.unit}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[9px] text-gray-400 line-through">
-                              Rp {product.price.toLocaleString("id-ID")}
-                            </span>
-                            <span className="text-[8px] px-1 py-0.5 bg-red-100 text-red-600 font-bold rounded">
-                              -{product.discount}%
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-baseline gap-0.5">
-                          <span className="text-sm font-bold text-[#2D5016]">
-                            Rp {product.price.toLocaleString("id-ID")}
-                          </span>
-                          <span className="text-[9px] text-gray-500">
-                            /{product.unit}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-1">
-                      <button className="flex-1 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white py-1.5 rounded-md font-semibold text-[10px] hover:shadow-md hover:scale-105 transition-all active:scale-95">
-                        <div className="flex items-center justify-center gap-1">
-                          <svg
-                            className="h-3 w-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                            />
-                          </svg>
-                          <span>Keranjang</span>
-                        </div>
-                      </button>
-
-                      <Link
-                        href={`/market/products/${product.id}`}
-                        className="px-2 py-1.5 bg-gray-100 text-gray-700 rounded-md font-semibold text-[10px] hover:bg-gray-200 hover:scale-105 transition-all active:scale-95 flex items-center justify-center"
-                      >
-                        <svg
-                          className="h-3 w-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                  product={product}
+                  wishlist={wishlist}
+                  onToggleWishlist={toggleWishlist}
+                />
               ))}
             </div>
 
@@ -1077,101 +464,11 @@ export default function MarketProductsPage() {
 
             {/* Pagination */}
             {filteredProducts.length > itemsPerPage && (
-              <div className="mt-8 flex items-center justify-center gap-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016] disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-700"
-                >
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                    <span className="hidden sm:inline">Kembali</span>
-                  </div>
-                </button>
-
-                {/* Page Numbers */}
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => {
-                      // Show first page, last page, current page, and pages around current
-                      const showPage =
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1);
-
-                      const showEllipsis =
-                        (page === currentPage - 2 && currentPage > 3) ||
-                        (page === currentPage + 2 &&
-                          currentPage < totalPages - 2);
-
-                      if (showEllipsis) {
-                        return (
-                          <span key={page} className="px-2 text-gray-400">
-                            ...
-                          </span>
-                        );
-                      }
-
-                      if (!showPage) return null;
-
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`h-10 w-10 rounded-lg font-semibold text-sm transition-all ${
-                            currentPage === page
-                              ? "bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white shadow-md"
-                              : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016]"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    }
-                  )}
-                </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016] disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-700"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="hidden sm:inline">Selanjutnya</span>
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                </button>
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             )}
           </div>
         </div>

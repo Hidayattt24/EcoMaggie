@@ -134,11 +134,11 @@ export default function ProductDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-8">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
         {/* Back Button */}
         <Link
           href="/market/products"
-          className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
+          className="inline-flex items-center gap-2 mb-4 lg:mb-6 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
         >
           <svg
             className="h-5 w-5 text-[#2D5016] group-hover:-translate-x-1 transition-transform"
@@ -159,11 +159,11 @@ export default function ProductDetailPage({ params }: PageProps) {
         </Link>
 
         {/* Main Content */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
           {/* Left: Images */}
           <div>
             {/* Main Image */}
-            <div className="bg-white rounded-2xl shadow-lg p-4 mb-4 border border-gray-100">
+            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-3 lg:p-4 mb-3 lg:mb-4 border border-gray-100">
               <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-white shadow-inner">
                 <img
                   src={product.images[selectedImage]}
@@ -171,7 +171,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                   className="w-full h-full object-cover"
                 />
                 {product.discount && (
-                  <div className="absolute top-4 left-4 px-4 py-2 bg-gradient-to-r from-red-500 via-red-600 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg animate-pulse">
+                  <div className="absolute top-2 left-2 lg:top-4 lg:left-4 px-3 py-1.5 lg:px-4 lg:py-2 bg-gradient-to-r from-red-500 via-red-600 to-orange-500 text-white text-xs lg:text-sm font-bold rounded-full shadow-lg animate-pulse">
                     <div className="flex items-center gap-1.5">
                       <svg
                         className="h-4 w-4"
@@ -189,7 +189,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </div>
                 )}
                 {/* Wishlist Badge */}
-                <button className="absolute top-4 right-4 w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all group border border-gray-200">
+                <button className="absolute top-2 right-2 lg:top-4 lg:right-4 w-9 h-9 lg:w-10 lg:h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all group border border-gray-200">
                   <svg
                     className="h-5 w-5 text-gray-600 group-hover:text-red-500 group-hover:fill-red-500 transition-all"
                     fill="none"
@@ -231,9 +231,9 @@ export default function ProductDetailPage({ params }: PageProps) {
 
           {/* Right: Product Info */}
           <div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-4 border border-gray-100">
+            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-4 lg:p-6 lg:sticky lg:top-4 border border-gray-100">
               {/* Category Badge */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-3 lg:mb-4">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#2D5016]/10 to-emerald-100 text-[#2D5016] text-xs font-bold rounded-full border border-[#2D5016]/20">
                   <svg
                     className="h-3.5 w-3.5"
@@ -265,12 +265,12 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Product Name */}
-              <h1 className="text-3xl font-bold text-[#2D5016] mb-4">
+              <h1 className="text-2xl lg:text-3xl font-bold text-[#2D5016] mb-3 lg:mb-4">
                 {product.name}
               </h1>
 
               {/* Rating & Reviews */}
-              <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b-2 border-dashed border-gray-200">
+              <div className="flex flex-wrap items-center gap-2 lg:gap-4 mb-4 lg:mb-6 pb-4 lg:pb-6 border-b-2 border-dashed border-gray-200">
                 <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -322,18 +322,18 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Price */}
-              <div className="mb-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border-2 border-emerald-200">
+              <div className="mb-4 lg:mb-6 p-3 lg:p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border-2 border-emerald-200">
                 {product.discount ? (
                   <div>
-                    <div className="flex items-baseline gap-3 mb-2">
-                      <span className="text-4xl font-bold bg-gradient-to-r from-[#2D5016] to-emerald-700 bg-clip-text text-transparent">
+                    <div className="flex flex-wrap items-baseline gap-2 lg:gap-3 mb-2">
+                      <span className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-[#2D5016] to-emerald-700 bg-clip-text text-transparent">
                         Rp {finalPrice.toLocaleString("id-ID")}
                       </span>
-                      <span className="text-lg text-gray-500 line-through">
+                      <span className="text-sm lg:text-lg text-gray-500 line-through">
                         Rp {product.price.toLocaleString("id-ID")}
                       </span>
                     </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold rounded-lg shadow-md">
+                    <div className="inline-flex items-center gap-1 lg:gap-1.5 px-2 py-1 lg:px-3 lg:py-1.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs lg:text-sm font-bold rounded-lg shadow-md">
                       <svg
                         className="h-4 w-4"
                         fill="currentColor"
@@ -353,7 +353,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </div>
                   </div>
                 ) : (
-                  <span className="text-4xl font-bold text-[#2D5016]">
+                  <span className="text-2xl lg:text-4xl font-bold text-[#2D5016]">
                     Rp {product.price.toLocaleString("id-ID")}
                   </span>
                 )}
@@ -361,14 +361,14 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Quantity Selector */}
-              <div className="mb-6">
+              <div className="mb-4 lg:mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Jumlah
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 lg:gap-3">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-[#2D5016] hover:bg-[#2D5016] hover:text-white transition-all flex items-center justify-center font-bold text-[#2D5016] hover:text-white"
+                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#2D5016] hover:bg-[#2D5016] hover:text-white transition-all flex items-center justify-center font-bold text-[#2D5016] hover:text-white text-sm lg:text-base"
                   >
                     -
                   </button>
@@ -378,18 +378,19 @@ export default function ProductDetailPage({ params }: PageProps) {
                     onChange={(e) =>
                       setQuantity(Math.max(1, parseInt(e.target.value) || 1))
                     }
-                    className="w-20 h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-[#2D5016] focus:outline-none text-[#2D5016]"
+                    className="w-16 h-9 lg:w-20 lg:h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-[#2D5016] focus:outline-none text-[#2D5016] text-sm lg:text-base"
                   />
                   <button
                     onClick={() =>
                       setQuantity(Math.min(product.stock, quantity + 1))
                     }
-                    className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-[#2D5016] hover:bg-[#2D5016] hover:text-white transition-all flex items-center justify-center font-bold text-[#2D5016] hover:text-white"
+                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#2D5016] hover:bg-[#2D5016] hover:text-white transition-all flex items-center justify-center font-bold text-[#2D5016] hover:text-white text-sm lg:text-base"
                   >
                     +
                   </button>
-                  <span className="text-gray-600 ml-2">
-                    Subtotal:{" "}
+                  <span className="text-gray-600 text-xs lg:text-base ml-1 lg:ml-2">
+                    <span className="hidden lg:inline">Subtotal: </span>
+                    <span className="lg:hidden block mt-2">Subtotal: </span>
                     <span className="font-bold text-[#2D5016]">
                       Rp {(finalPrice * quantity).toLocaleString("id-ID")}
                     </span>
@@ -398,8 +399,8 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <button className="py-3.5 px-4 bg-gradient-to-r from-[#2D5016] via-emerald-700 to-[#3d6b1e] text-white rounded-xl font-bold hover:shadow-xl hover:shadow-emerald-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-emerald-800">
+              <div className="flex flex-col sm:grid sm:grid-cols-2 gap-2 lg:gap-3 mb-4 lg:mb-6">
+                <button className="py-3 lg:py-3.5 px-4 bg-gradient-to-r from-[#2D5016] via-emerald-700 to-[#3d6b1e] text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:shadow-emerald-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-emerald-800 text-sm lg:text-base">
                   <svg
                     className="h-5 w-5"
                     fill="none"
@@ -415,7 +416,10 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </svg>
                   <span>+ Keranjang</span>
                 </button>
-                <button className="py-3.5 px-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-orange-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-orange-700">
+                <button
+                  onClick={() => router.push("/market/checkout")}
+                  className="py-3 lg:py-3.5 px-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:shadow-orange-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-orange-700 text-sm lg:text-base"
+                >
                   <svg
                     className="h-5 w-5"
                     fill="currentColor"
@@ -433,7 +437,7 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Seller Info */}
-              <div className="border-t-2 border-dashed border-gray-200 pt-6">
+              <div className="border-t-2 border-dashed border-gray-200 pt-4 lg:pt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <svg
                     className="h-5 w-5 text-[#2D5016]"
@@ -450,9 +454,9 @@ export default function ProductDetailPage({ params }: PageProps) {
                     Informasi Penjual
                   </h3>
                 </div>
-                <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200 mb-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2D5016] via-emerald-600 to-[#3d6b1e] flex items-center justify-center shadow-lg border-2 border-white">
+                <div className="p-3 lg:p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg lg:rounded-xl border border-emerald-200 mb-3 lg:mb-4">
+                  <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
+                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-[#2D5016] via-emerald-600 to-[#3d6b1e] flex items-center justify-center shadow-lg border-2 border-white">
                       <svg
                         className="h-8 w-8 text-white"
                         fill="currentColor"
@@ -466,7 +470,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-[#2D5016] text-lg">
+                      <p className="font-bold text-[#2D5016] text-base lg:text-lg">
                         {product.seller.name}
                       </p>
                       <div className="flex items-center gap-1.5">
@@ -504,7 +508,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
-                <button className="w-full py-3.5 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-green-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-green-700">
+                <button className="w-full py-3 lg:py-3.5 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:shadow-green-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 lg:gap-2.5 border border-green-700 text-sm lg:text-base">
                   <svg
                     className="h-6 w-6"
                     fill="currentColor"
@@ -512,8 +516,11 @@ export default function ProductDetailPage({ params }: PageProps) {
                   >
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
                   </svg>
-                  <span className="text-base">
-                    Hubungi Penjual via WhatsApp
+                  <span className="text-sm lg:text-base">
+                    <span className="hidden sm:inline">
+                      Hubungi Penjual via WhatsApp
+                    </span>
+                    <span className="sm:hidden">Hubungi via WhatsApp</span>
                   </span>
                 </button>
               </div>
@@ -522,12 +529,12 @@ export default function ProductDetailPage({ params }: PageProps) {
         </div>
 
         {/* Product Details Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="bg-white rounded-xl lg:rounded-2xl shadow-sm p-4 lg:p-6">
           {/* Tabs Header */}
-          <div className="flex gap-6 border-b border-gray-200 mb-6">
+          <div className="flex gap-4 lg:gap-6 border-b border-gray-200 mb-4 lg:mb-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab("description")}
-              className={`pb-4 px-2 font-semibold transition-all relative ${
+              className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
                 activeTab === "description"
                   ? "text-[#2D5016]"
                   : "text-gray-600 hover:text-gray-900"
@@ -540,7 +547,7 @@ export default function ProductDetailPage({ params }: PageProps) {
             </button>
             <button
               onClick={() => setActiveTab("specifications")}
-              className={`pb-4 px-2 font-semibold transition-all relative ${
+              className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
                 activeTab === "specifications"
                   ? "text-[#2D5016]"
                   : "text-gray-600 hover:text-gray-900"
@@ -553,7 +560,7 @@ export default function ProductDetailPage({ params }: PageProps) {
             </button>
             <button
               onClick={() => setActiveTab("reviews")}
-              className={`pb-4 px-2 font-semibold transition-all relative ${
+              className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
                 activeTab === "reviews"
                   ? "text-[#2D5016]"
                   : "text-gray-600 hover:text-gray-900"
@@ -660,9 +667,9 @@ export default function ProductDetailPage({ params }: PageProps) {
             {activeTab === "reviews" && (
               <div className="space-y-6">
                 {/* Rating Summary */}
-                <div className="flex items-center gap-8 p-6 bg-gradient-to-br from-green-50 to-white rounded-xl">
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-[#2D5016] mb-2">
+                <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-8 p-4 lg:p-6 bg-gradient-to-br from-green-50 to-white rounded-xl">
+                  <div className="text-center sm:text-left">
+                    <div className="text-4xl lg:text-5xl font-bold text-[#2D5016] mb-2">
                       {product.rating}
                     </div>
                     <div className="flex items-center gap-1 mb-1">
@@ -684,7 +691,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                       {product.reviews} ulasan
                     </p>
                   </div>
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-2 w-full sm:w-auto">
                     {[5, 4, 3, 2, 1].map((star) => (
                       <div key={star} className="flex items-center gap-3">
                         <span className="text-sm text-gray-600 w-12">
@@ -721,7 +728,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* Purchase Requirement Message */}
-                <div className="p-6 bg-blue-50 border border-blue-200 rounded-xl mb-4">
+                <div className="p-4 lg:p-6 bg-blue-50 border border-blue-200 rounded-xl mb-4">
                   <div className="flex items-center gap-3">
                     <svg
                       className="h-6 w-6 text-blue-600 flex-shrink-0"
@@ -753,7 +760,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                   {reviewsData.map((review) => (
                     <div
                       key={review.id}
-                      className="p-6 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
+                      className="p-4 lg:p-6 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">

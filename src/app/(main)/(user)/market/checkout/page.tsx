@@ -326,27 +326,30 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-white to-green-50/30">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-12">
+        <div className="mb-6 sm:mb-12">
           <Link
             href="/market/products"
-            className="inline-flex items-center gap-2 text-sm text-[#2D5016]/70 hover:text-[#2D5016] transition-colors mb-6 group"
+            className="inline-flex items-center gap-2 text-sm text-[#2D5016]/70 hover:text-[#2D5016] transition-colors mb-4 sm:mb-6 group"
           >
             <ChevronRight className="h-4 w-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Kembali ke Produk</span>
           </Link>
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
-              <ShoppingBag className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-[#2D5016]">Checkout</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#2D5016]">
+              Checkout
+            </h1>
           </div>
         </div>
 
         {/* Modern Stepper */}
-        <div className="mb-12">
-          <div className="flex items-center max-w-2xl mx-auto">
+        <div className="mb-6 sm:mb-12">
+          {/* Desktop Stepper - Horizontal */}
+          <div className="hidden sm:flex items-center max-w-2xl mx-auto">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
@@ -387,11 +390,54 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
+
+          {/* Mobile Stepper - Compact Pills */}
+          <div className="sm:hidden flex items-center justify-center gap-2">
+            {steps.map((step) => (
+              <div
+                key={step.number}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all ${
+                  currentStep === step.number
+                    ? "border-[#2D5016] bg-gradient-to-br from-[#2D5016] to-[#2D5016]/90 shadow-lg shadow-[#2D5016]/20"
+                    : currentStep > step.number
+                    ? "border-[#2D5016]/30 bg-green-50"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    currentStep === step.number
+                      ? "bg-white text-[#2D5016]"
+                      : currentStep > step.number
+                      ? "bg-[#2D5016] text-white"
+                      : "bg-gray-100 text-gray-400"
+                  }`}
+                >
+                  {currentStep > step.number ? (
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  ) : (
+                    step.number
+                  )}
+                </div>
+                <span
+                  className={`text-xs font-bold ${
+                    currentStep === step.number
+                      ? "text-white"
+                      : currentStep > step.number
+                      ? "text-[#2D5016]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {step.title}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             <AnimatePresence mode="wait">
               {/* STEP 1: Address */}
               {currentStep === 1 && (
@@ -402,18 +448,18 @@ export default function CheckoutPage() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
-                        <MapPin className="h-6 w-6 text-white" />
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+                        <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <h2 className="text-2xl font-bold text-[#2D5016]">
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016]">
                         Alamat Pengiriman
                       </h2>
                     </div>
                     <button
                       onClick={() => setShowAddressForm(!showAddressForm)}
-                      className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-[#2D5016] hover:text-white bg-white hover:bg-gradient-to-r hover:from-[#2D5016] hover:to-[#2D5016]/90 border-2 border-[#2D5016] rounded-xl transition-all shadow-md hover:shadow-lg"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-[#2D5016] hover:text-white bg-white hover:bg-gradient-to-r hover:from-[#2D5016] hover:to-[#2D5016]/90 border-2 border-[#2D5016] rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
                     >
                       {showAddressForm ? (
                         <Minus className="h-4 w-4" />
@@ -436,7 +482,7 @@ export default function CheckoutPage() {
                       >
                         <form
                           onSubmit={handleSaveAddress}
-                          className="border-2 border-[#2D5016]/20 bg-gradient-to-br from-white to-green-50/30 rounded-2xl p-8 space-y-5 shadow-xl shadow-[#2D5016]/10"
+                          className="border-2 border-[#2D5016]/20 bg-gradient-to-br from-white to-green-50/30 rounded-2xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 shadow-xl shadow-[#2D5016]/10"
                         >
                           {isBandaAceh && (
                             <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-green-50/50 border-2 border-[#2D5016]/30 rounded-xl">
@@ -638,7 +684,7 @@ export default function CheckoutPage() {
                       <button
                         key={address.id}
                         onClick={() => setSelectedAddress(address)}
-                        className={`w-full text-left p-6 border-2 rounded-2xl transition-all ${
+                        className={`w-full text-left p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl transition-all ${
                           selectedAddress?.id === address.id
                             ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg shadow-[#2D5016]/20"
                             : "border-[#2D5016]/20 hover:border-[#2D5016]/40 bg-white hover:shadow-md"
@@ -689,7 +735,7 @@ export default function CheckoutPage() {
                   <button
                     onClick={handleNextStep}
                     disabled={!canProceedToStep2}
-                    className={`w-full mt-8 py-4 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full mt-6 sm:mt-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 ${
                       canProceedToStep2
                         ? "bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white hover:shadow-xl hover:shadow-[#2D5016]/30"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -710,23 +756,23 @@ export default function CheckoutPage() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
-                        <Truck className="h-6 w-6 text-white" />
+                  <div className="flex items-center justify-between mb-6 sm:mb-8">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+                        <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <h2 className="text-2xl font-bold text-[#2D5016]">
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016]">
                         Metode Pengiriman
                       </h2>
                     </div>
                   </div>
 
                   {/* Selected Address Info */}
-                  <div className="p-6 bg-gradient-to-br from-green-50 to-green-100/50 border-2 border-[#2D5016]/20 rounded-2xl mb-6 shadow-md">
-                    <div className="flex items-start justify-between">
+                  <div className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100/50 border-2 border-[#2D5016]/20 rounded-xl sm:rounded-2xl mb-6 shadow-md">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0">
                       <div className="flex items-start gap-3">
                         <div className="p-2 bg-[#2D5016] rounded-xl">
-                          <MapPin className="h-5 w-5 text-white" />
+                          <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <div>
                           <p className="font-bold text-[#2D5016]">
@@ -747,12 +793,12 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Shipping Options */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {shippingMethods.map((method) => (
                       <button
                         key={method.id}
                         onClick={() => setSelectedShipping(method.id)}
-                        className={`w-full text-left p-6 border-2 rounded-2xl transition-all ${
+                        className={`w-full text-left p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl transition-all ${
                           selectedShipping === method.id
                             ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg shadow-[#2D5016]/20"
                             : "border-[#2D5016]/20 hover:border-[#2D5016]/40 bg-white hover:shadow-md"
@@ -803,17 +849,17 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  <div className="flex gap-3 mt-8">
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
                     <button
                       onClick={() => setCurrentStep(1)}
-                      className="px-8 py-3 text-sm font-bold text-[#2D5016]/70 hover:text-[#2D5016] hover:bg-green-50 rounded-xl transition-all"
+                      className="px-6 sm:px-8 py-3 text-sm font-bold text-[#2D5016]/70 hover:text-[#2D5016] hover:bg-green-50 rounded-xl transition-all order-2 sm:order-1"
                     >
                       Kembali
                     </button>
                     <button
                       onClick={handleNextStep}
                       disabled={!canProceedToStep3}
-                      className={`flex-1 py-4 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
+                      className={`flex-1 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 order-1 sm:order-2 ${
                         canProceedToStep3
                           ? "bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white hover:shadow-xl hover:shadow-[#2D5016]/30"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -835,21 +881,21 @@ export default function CheckoutPage() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
-                        <CreditCard className="h-6 w-6 text-white" />
+                  <div className="flex items-center justify-between mb-6 sm:mb-8">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+                        <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <h2 className="text-2xl font-bold text-[#2D5016]">
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016]">
                         Metode Pembayaran
                       </h2>
                     </div>
                   </div>
 
                   {/* Doku Badge */}
-                  <div className="flex items-center gap-3 p-6 bg-gradient-to-br from-green-50 to-green-100/50 border-2 border-[#2D5016]/20 rounded-2xl mb-6 shadow-md">
-                    <div className="p-2.5 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/90 rounded-xl shadow-lg">
-                      <Building2 className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-3 p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100/50 border-2 border-[#2D5016]/20 rounded-xl sm:rounded-2xl mb-6 shadow-md">
+                    <div className="p-2 sm:p-2.5 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/90 rounded-xl shadow-lg">
+                      <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <div>
                       <p className="font-bold text-[#2D5016]">
@@ -862,12 +908,12 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Payment Methods */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {paymentMethods.map((method) => (
                       <button
                         key={method.id}
                         onClick={() => setSelectedPayment(method.id)}
-                        className={`w-full text-left p-6 border-2 rounded-2xl transition-all ${
+                        className={`w-full text-left p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl transition-all ${
                           selectedPayment === method.id
                             ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg shadow-[#2D5016]/20"
                             : "border-[#2D5016]/20 hover:border-[#2D5016]/40 bg-white hover:shadow-md"
@@ -913,18 +959,18 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  <div className="flex gap-3 mt-8">
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
                     <button
                       onClick={() => setCurrentStep(2)}
                       disabled={isProcessingPayment}
-                      className="px-8 py-3 text-sm font-bold text-[#2D5016]/70 hover:text-[#2D5016] hover:bg-green-50 rounded-xl transition-all disabled:opacity-50"
+                      className="px-6 sm:px-8 py-3 text-sm font-bold text-[#2D5016]/70 hover:text-[#2D5016] hover:bg-green-50 rounded-xl transition-all disabled:opacity-50 order-2 sm:order-1"
                     >
                       Kembali
                     </button>
                     <button
                       onClick={handlePayment}
                       disabled={!canCompleteOrder || isProcessingPayment}
-                      className={`flex-1 py-4 rounded-xl text-base font-bold transition-all ${
+                      className={`flex-1 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all order-1 sm:order-2 ${
                         canCompleteOrder && !isProcessingPayment
                           ? "bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white hover:shadow-xl hover:shadow-[#2D5016]/30"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -946,7 +992,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order Summary Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1">
             <div className="border-2 border-[#2D5016]/20 bg-gradient-to-br from-white to-green-50/50 rounded-2xl p-6 sticky top-4 shadow-xl shadow-[#2D5016]/10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/90 rounded-xl shadow-lg">

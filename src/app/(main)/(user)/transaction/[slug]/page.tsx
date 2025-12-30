@@ -12,12 +12,13 @@ import {
   CreditCard,
   Calendar,
   Hash,
+  FileText,
   Printer,
   CheckCircle2,
   Clock,
   XCircle,
-  Star,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { StatusLabel } from "@/components/transaction/StatusLabel";
 import { TransactionDetailItem } from "@/components/transaction/TransactionDetailItem";
@@ -32,7 +33,7 @@ interface Product {
   slug: string;
 }
 
-interface Order {
+interface Transaction {
   id: string;
   orderId: string;
   farmName: string;
@@ -60,7 +61,7 @@ interface Order {
 }
 
 // Mock data - Replace with actual API call
-const mockOrderData: { [key: string]: Order } = {
+const mockTransactionData: { [key: string]: Transaction } = {
   "ORD-2025-12-001": {
     id: "1",
     orderId: "ORD-2025-12-001",
@@ -106,56 +107,12 @@ const mockOrderData: { [key: string]: Order } = {
       postalCode: "12345",
     },
   },
-  "ORD-2025-12-002": {
-    id: "2",
-    orderId: "ORD-2025-12-002",
-    farmName: "Maggot Organik Sentosa",
-    farmerId: 2,
-    farmerPhone: "6281234567891",
-    status: "packed",
-    products: [
-      {
-        id: 2,
-        name: "Maggot BSF Organik",
-        variant: "1kg",
-        quantity: 3,
-        price: 38000,
-        image: "/assets/dummy/magot.png",
-        slug: "maggot-bsf-organik",
-      },
-      {
-        id: 3,
-        name: "Maggot BSF Kering",
-        variant: "250gr",
-        quantity: 1,
-        price: 52000,
-        image: "/assets/dummy/magot.png",
-        slug: "maggot-bsf-kering",
-      },
-    ],
-    totalItems: 4,
-    subtotal: 166000,
-    shippingCost: 12000,
-    discount: 0,
-    totalPrice: 178000,
-    shippingMethod: "Regular",
-    date: "30 Des 2025",
-    paymentMethod: "GoPay",
-    shippingAddress: {
-      name: "Ahmad Wijaya",
-      phone: "082345678901",
-      address: "Jl. Sudirman No. 456, Blok B",
-      city: "Bandung",
-      province: "Jawa Barat",
-      postalCode: "40123",
-    },
-  },
   "ORD-2025-12-003": {
     id: "3",
     orderId: "ORD-2025-12-003",
     farmName: "Ternak Maggot Jaya",
     farmerId: 3,
-    farmerPhone: "6281234567892",
+    farmerPhone: "6281234567891",
     status: "completed",
     products: [
       {
@@ -176,71 +133,36 @@ const mockOrderData: { [key: string]: Order } = {
     shippingMethod: "Express",
     trackingNumber: "ECO-JKT-20251225001",
     date: "25 Des 2025",
-    paymentMethod: "Transfer Bank BCA",
+    paymentMethod: "GoPay",
     shippingAddress: {
       name: "Siti Nurhaliza",
-      phone: "083456789012",
-      address: "Jl. Gatot Subroto No. 789",
-      city: "Surabaya",
-      province: "Jawa Timur",
-      postalCode: "60123",
-    },
-  },
-  "ORD-2025-12-004": {
-    id: "4",
-    orderId: "ORD-2025-12-004",
-    farmName: "BSF Farm Indonesia",
-    farmerId: 4,
-    farmerPhone: "6281234567893",
-    status: "unpaid",
-    products: [
-      {
-        id: 3,
-        name: "Maggot BSF Kering",
-        variant: "250gr",
-        quantity: 2,
-        price: 52000,
-        image: "/assets/dummy/magot.png",
-        slug: "maggot-bsf-kering",
-      },
-    ],
-    totalItems: 2,
-    subtotal: 104000,
-    shippingCost: 10000,
-    discount: 0,
-    totalPrice: 114000,
-    shippingMethod: "Regular",
-    date: "30 Des 2025",
-    paymentMethod: "Belum Dibayar",
-    shippingAddress: {
-      name: "Rina Kusuma",
-      phone: "084567890123",
-      address: "Jl. Diponegoro No. 321",
-      city: "Yogyakarta",
-      province: "DI Yogyakarta",
-      postalCode: "55123",
+      phone: "082345678901",
+      address: "Jl. Gatot Subroto No. 456, Blok A",
+      city: "Bandung",
+      province: "Jawa Barat",
+      postalCode: "40123",
     },
   },
 };
 
-export default function OrderDetailPage({
+export default function TransactionDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
   const router = useRouter();
   const resolvedParams = use(params);
-  const [order, setOrder] = useState<Order | null>(null);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
-      const data = mockOrderData[resolvedParams.id];
-      setOrder(data || null);
+      const data = mockTransactionData[resolvedParams.slug];
+      setTransaction(data || null);
       setIsLoading(false);
     }, 500);
-  }, [resolvedParams.id]);
+  }, [resolvedParams.slug]);
 
   const handlePrintInvoice = () => {
     window.print();
@@ -252,14 +174,14 @@ export default function OrderDetailPage({
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#2D5016]/20 border-t-[#2D5016] rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-sm text-gray-500 font-medium">
-            Memuat detail pesanan...
+            Memuat detail transaksi...
           </p>
         </div>
       </div>
     );
   }
 
-  if (!order) {
+  if (!transaction) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-50/20 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
@@ -267,16 +189,16 @@ export default function OrderDetailPage({
             <XCircle className="h-10 w-10 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-[#2D5016] mb-2">
-            Pesanan Tidak Ditemukan
+            Transaksi Tidak Ditemukan
           </h2>
           <p className="text-gray-600 mb-6">
-            Maaf, pesanan yang Anda cari tidak ditemukan.
+            Maaf, transaksi yang Anda cari tidak ditemukan.
           </p>
           <button
-            onClick={() => router.push("/market/orders")}
+            onClick={() => router.push("/transaction")}
             className="px-6 py-3 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold hover:shadow-lg transition-all"
           >
-            Kembali ke Pesanan
+            Kembali ke Transaksi
           </button>
         </div>
       </div>
@@ -291,7 +213,7 @@ export default function OrderDetailPage({
     cancelled: XCircle,
   };
 
-  const StatusIconComponent = statusIcons[order.status];
+  const StatusIconComponent = statusIcons[transaction.status];
 
   return (
     <motion.div
@@ -312,10 +234,10 @@ export default function OrderDetailPage({
             </button>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold text-[#2D5016] truncate">
-                Detail Pesanan
+                Detail Transaksi
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5 truncate">
-                {order.orderId}
+                {transaction.orderId}
               </p>
             </div>
             <button
@@ -340,18 +262,18 @@ export default function OrderDetailPage({
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex justify-center sm:justify-start">
-                  <StatusLabel status={order.status} size="lg" />
+                  <StatusLabel status={transaction.status} size="lg" />
                 </div>
                 <p className="text-xs sm:text-sm text-gray-600 mt-2 px-2 sm:px-0">
-                  {order.status === "shipped" &&
+                  {transaction.status === "shipped" &&
                     "Pesanan Anda sedang dalam perjalanan"}
-                  {order.status === "packed" &&
+                  {transaction.status === "packed" &&
                     "Pesanan Anda sedang dikemas oleh petani"}
-                  {order.status === "completed" &&
+                  {transaction.status === "completed" &&
                     "Pesanan telah selesai. Terima kasih!"}
-                  {order.status === "unpaid" &&
+                  {transaction.status === "unpaid" &&
                     "Segera selesaikan pembayaran Anda"}
-                  {order.status === "cancelled" &&
+                  {transaction.status === "cancelled" &&
                     "Pesanan ini telah dibatalkan"}
                 </p>
               </div>
@@ -360,7 +282,7 @@ export default function OrderDetailPage({
                   Total Pembayaran
                 </p>
                 <p className="text-xl sm:text-3xl font-bold text-[#2D5016] break-words">
-                  Rp {order.totalPrice.toLocaleString("id-ID")}
+                  Rp {transaction.totalPrice.toLocaleString("id-ID")}
                 </p>
               </div>
             </div>
@@ -390,20 +312,22 @@ export default function OrderDetailPage({
             <TransactionDetailItem
               icon={Package}
               label="Metode Pengiriman"
-              value={order.shippingMethod}
+              value={transaction.shippingMethod}
             />
-            {order.trackingNumber && (
+            {transaction.trackingNumber && (
               <TransactionDetailItem
                 icon={Hash}
                 label="Nomor Resi"
                 value={
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <span className="break-all text-sm sm:text-base">
-                      {order.trackingNumber}
+                      {transaction.trackingNumber}
                     </span>
                     <button
                       onClick={() =>
-                        navigator.clipboard.writeText(order.trackingNumber!)
+                        navigator.clipboard.writeText(
+                          transaction.trackingNumber!
+                        )
                       }
                       className="text-xs px-2 py-1 bg-green-100 text-[#2D5016] rounded font-bold hover:bg-green-200 transition-colors w-fit"
                     >
@@ -418,17 +342,19 @@ export default function OrderDetailPage({
               label="Alamat Pengiriman"
               value={
                 <div className="space-y-1">
-                  <p className="font-bold">{order.shippingAddress.name}</p>
-                  <p className="text-sm text-gray-600">
-                    {order.shippingAddress.phone}
+                  <p className="font-bold">
+                    {transaction.shippingAddress.name}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {order.shippingAddress.address}
+                    {transaction.shippingAddress.phone}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {order.shippingAddress.city},{" "}
-                    {order.shippingAddress.province}{" "}
-                    {order.shippingAddress.postalCode}
+                    {transaction.shippingAddress.address}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {transaction.shippingAddress.city},{" "}
+                    {transaction.shippingAddress.province}{" "}
+                    {transaction.shippingAddress.postalCode}
                   </p>
                 </div>
               }
@@ -438,9 +364,9 @@ export default function OrderDetailPage({
               label="Penjual"
               value={
                 <div className="space-y-1">
-                  <p className="font-bold">{order.farmName}</p>
+                  <p className="font-bold">{transaction.farmName}</p>
                   <a
-                    href={`https://wa.me/${order.farmerPhone}`}
+                    href={`https://wa.me/${transaction.farmerPhone}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-sm text-[#2D5016] hover:underline"
@@ -473,11 +399,11 @@ export default function OrderDetailPage({
           </div>
           <div className="p-4 sm:p-6">
             <div className="space-y-4">
-              {order.products.map((product, index) => (
+              {transaction.products.map((product, index) => (
                 <div
                   key={product.id}
                   className={`flex gap-4 pb-4 ${
-                    index !== order.products.length - 1
+                    index !== transaction.products.length - 1
                       ? "border-b-2 border-gray-50"
                       : ""
                   }`}
@@ -538,23 +464,23 @@ export default function OrderDetailPage({
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">
-                  Subtotal ({order.totalItems} produk)
+                  Subtotal ({transaction.totalItems} produk)
                 </span>
                 <span className="font-bold text-[#2D5016]">
-                  Rp {order.subtotal.toLocaleString("id-ID")}
+                  Rp {transaction.subtotal.toLocaleString("id-ID")}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Ongkos Kirim</span>
                 <span className="font-bold text-[#2D5016]">
-                  Rp {order.shippingCost.toLocaleString("id-ID")}
+                  Rp {transaction.shippingCost.toLocaleString("id-ID")}
                 </span>
               </div>
-              {order.discount > 0 && (
+              {transaction.discount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Diskon</span>
                   <span className="font-bold text-green-600">
-                    - Rp {order.discount.toLocaleString("id-ID")}
+                    - Rp {transaction.discount.toLocaleString("id-ID")}
                   </span>
                 </div>
               )}
@@ -564,7 +490,7 @@ export default function OrderDetailPage({
                     Total Pembayaran
                   </span>
                   <span className="font-bold text-xl sm:text-2xl text-[#2D5016]">
-                    Rp {order.totalPrice.toLocaleString("id-ID")}
+                    Rp {transaction.totalPrice.toLocaleString("id-ID")}
                   </span>
                 </div>
               </div>
@@ -572,77 +498,30 @@ export default function OrderDetailPage({
                 <TransactionDetailItem
                   icon={CreditCard}
                   label="Metode Pembayaran"
-                  value={order.paymentMethod}
+                  value={transaction.paymentMethod}
                 />
               </div>
               <div className="pt-1">
                 <TransactionDetailItem
                   icon={Calendar}
                   label="Tanggal Transaksi"
-                  value={order.date}
+                  value={transaction.date}
                 />
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Action Buttons based on Status */}
-        {order.status === "completed" && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-3"
-          >
-            <Link
-              href={`/market/products/${order.products[0].slug}#ulasan`}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
-            >
-              <Star className="h-4 w-4 sm:h-5 sm:w-5" />
-              Beri Ulasan
-            </Link>
-            <button
-              onClick={handlePrintInvoice}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-xl font-bold text-sm hover:bg-green-50 transition-all active:scale-95"
-            >
-              <Printer className="h-4 w-4 sm:h-5 sm:w-5" />
-              Cetak Invoice
-            </button>
-          </motion.div>
-        )}
-
-        {order.status === "packed" && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <a
-              href={`https://wa.me/${
-                order.farmerPhone
-              }?text=${encodeURIComponent(
-                `Halo, saya ingin menanyakan status pesanan saya dengan ID: ${order.orderId}`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
-            >
-              <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
-              Hubungi Penjual via WhatsApp
-            </a>
-          </motion.div>
-        )}
-
         {/* Print Invoice Button (Mobile) */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.5 }}
           className="sm:hidden pb-2"
         >
           <button
             onClick={handlePrintInvoice}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-xl font-bold text-sm hover:bg-green-50 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
           >
             <Printer className="h-4 w-4" />
             Cetak Invoice

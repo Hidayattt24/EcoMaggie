@@ -12,9 +12,11 @@ import {
   ShoppingBag,
   Tag,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CartItem {
   id: number;
@@ -40,6 +42,7 @@ interface RecommendedProduct {
 }
 
 export default function CartPage() {
+  const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: 1,
@@ -160,6 +163,17 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Back Button - Mobile Only */}
+        <button
+          onClick={() => router.back()}
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#2D5016] hover:text-[#2D5016]/80 transition-colors"
+        >
+          <div className="p-2 bg-white border-2 border-[#2D5016]/20 rounded-lg hover:bg-green-50 transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+          </div>
+          <span className="font-semibold text-sm">Kembali</span>
+        </button>
+
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-2">

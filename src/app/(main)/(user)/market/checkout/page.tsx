@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Bike,
   Minus,
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -327,11 +328,22 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-white to-green-50/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* Back Button - Mobile Only */}
+        <button
+          onClick={() => router.back()}
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#2D5016] hover:text-[#2D5016]/80 transition-colors"
+        >
+          <div className="p-2 bg-white border-2 border-[#2D5016]/20 rounded-lg hover:bg-green-50 transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+          </div>
+          <span className="font-semibold text-sm">Kembali</span>
+        </button>
+
         {/* Header */}
         <div className="mb-6 sm:mb-12">
           <Link
             href="/market/products"
-            className="inline-flex items-center gap-2 text-sm text-[#2D5016]/70 hover:text-[#2D5016] transition-colors mb-4 sm:mb-6 group"
+            className="hidden lg:inline-flex items-center gap-2 text-sm text-[#2D5016]/70 hover:text-[#2D5016] transition-colors mb-4 sm:mb-6 group"
           >
             <ChevronRight className="h-4 w-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Kembali ke Produk</span>

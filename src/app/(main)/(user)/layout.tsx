@@ -15,7 +15,7 @@ export default function UserLayout({
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavbarUser />
-      <main className="flex-1 pt-24 pb-28 lg:pb-6">{children}</main>
+      <main className="flex-1 pt-24 pb-6 lg:pb-6">{children}</main>
       <FooterSection />
     </div>
   );

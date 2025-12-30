@@ -10,9 +10,11 @@ import {
   Star,
   TrendingUp,
   AlertCircle,
+  ArrowLeft,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface WishlistItem {
   id: number;
@@ -30,6 +32,7 @@ interface WishlistItem {
 }
 
 export default function WishlistPage() {
+  const router = useRouter();
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([
     {
       id: 1,
@@ -163,8 +166,19 @@ export default function WishlistPage() {
   const inStockCount = wishlistItems.filter((item) => item.stock > 0).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-white to-green-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-white to-green-50/30 pb-6 lg:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Back Button - Mobile Only */}
+        <button
+          onClick={() => router.back()}
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#2D5016] hover:text-[#2D5016]/80 transition-colors"
+        >
+          <div className="p-2 bg-white border-2 border-[#2D5016]/20 rounded-lg hover:bg-green-50 transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+          </div>
+          <span className="font-semibold text-sm">Kembali</span>
+        </button>
+
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4">

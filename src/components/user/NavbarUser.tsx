@@ -50,25 +50,6 @@ export function NavbarUser() {
         </svg>
       ),
     },
-    {
-      name: "Tentang",
-      link: "/about",
-      icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-    },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -109,45 +90,6 @@ export function NavbarUser() {
             strokeLinejoin="round"
             strokeWidth={2}
             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Cart",
-      link: "/market/cart",
-      badge: 3,
-      icon: (
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "About",
-      link: "/about",
-      icon: (
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
       ),
@@ -306,13 +248,40 @@ export function NavbarUser() {
                 </Link>
 
                 <Link
+                  href="/market/cart"
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] active:scale-95 ${
+                    pathname === "/market/cart"
+                      ? "bg-green-50 text-[#2D5016] scale-105"
+                      : "text-gray-600"
+                  }`}
+                  title="Keranjang"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#2D5016] text-[10px] font-bold text-white">
+                    3
+                  </span>
+                </Link>
+
+                <Link
                   href="/transaction"
                   className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] active:scale-95 ${
                     pathname === "/transaction"
                       ? "bg-green-50 text-[#2D5016] scale-105"
                       : "text-gray-600"
                   }`}
-                  title="Transaksi Saya"
+                  title="Transaksi"
                 >
                   <svg
                     className="h-5 w-5"
@@ -359,58 +328,55 @@ export function NavbarUser() {
       </div>
 
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 pb-safe">
-        <div className="mx-2 mb-3">
-          <nav className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#2D5016]/10 via-transparent to-[#3d6b1e]/10 pointer-events-none"></div>
+        {/* Hide navbar bottom on wishlist, checkout, and cart pages */}
+        {!pathname?.includes("/wishlist") &&
+          !pathname?.includes("/checkout") &&
+          !pathname?.includes("/cart") && (
+            <div className="mx-2 mb-3">
+              <nav className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3">
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#2D5016]/10 via-transparent to-[#3d6b1e]/10 pointer-events-none"></div>
 
-            <div className="relative flex items-center justify-around">
-              {mobileNavItems.map((item, idx) => {
-                const isActive =
-                  pathname === item.link ||
-                  pathname?.startsWith(item.link + "/");
-                return (
-                  <Link
-                    key={`bottom-nav-${idx}`}
-                    href={item.link}
-                    className="flex flex-col items-center gap-1 py-1.5 px-3 transition-all relative group"
-                  >
-                    {isActive && (
-                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] rounded-full"></div>
-                    )}
-
-                    <div className="relative">
-                      <div
-                        className={`transition-all ${
-                          isActive
-                            ? "text-[#2D5016] scale-110"
-                            : "text-gray-500 group-hover:text-[#2D5016] group-hover:scale-105"
-                        }`}
+                <div className="relative flex items-center justify-around">
+                  {mobileNavItems.map((item, idx) => {
+                    const isActive =
+                      pathname === item.link ||
+                      pathname?.startsWith(item.link + "/");
+                    return (
+                      <Link
+                        key={`bottom-nav-${idx}`}
+                        href={item.link}
+                        className="flex flex-col items-center gap-1 py-1.5 px-3 transition-all relative group"
                       >
-                        {item.icon}
-                      </div>
+                        {isActive && (
+                          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] rounded-full"></div>
+                        )}
 
-                      {item.badge && (
-                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#2D5016] text-[9px] font-bold text-white shadow-md">
-                          {item.badge}
+                        <div
+                          className={`transition-all ${
+                            isActive
+                              ? "text-[#2D5016] scale-110"
+                              : "text-gray-500 group-hover:text-[#2D5016] group-hover:scale-105"
+                          }`}
+                        >
+                          {item.icon}
+                        </div>
+
+                        <span
+                          className={`text-[10px] font-medium transition-all ${
+                            isActive
+                              ? "text-[#2D5016]"
+                              : "text-gray-500 group-hover:text-[#2D5016]"
+                          }`}
+                        >
+                          {item.name}
                         </span>
-                      )}
-                    </div>
-
-                    <span
-                      className={`text-[10px] font-medium transition-all ${
-                        isActive
-                          ? "text-[#2D5016]"
-                          : "text-gray-500 group-hover:text-[#2D5016]"
-                      }`}
-                    >
-                      {item.name}
-                    </span>
-                  </Link>
-                );
-              })}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </nav>
             </div>
-          </nav>
-        </div>
+          )}
       </div>
     </>
   );

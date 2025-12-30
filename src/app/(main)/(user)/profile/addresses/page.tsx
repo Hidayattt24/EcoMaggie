@@ -46,6 +46,7 @@ export default function AddressesPage() {
   ]);
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [newAddress, setNewAddress] = useState<
     Omit<Address, "id" | "isPrimary">
   >({
@@ -60,11 +61,21 @@ export default function AddressesPage() {
 
   const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = Math.max(...addresses.map((a) => a.id), 0) + 1;
-    setAddresses([
-      ...addresses,
-      { ...newAddress, id: newId, isPrimary: addresses.length === 0 },
-    ]);
+    if (editingAddress) {
+      // Update existing address
+      setAddresses(
+        addresses.map((addr) =>
+          addr.id === editingAddress.id ? { ...addr, ...newAddress } : addr
+        )
+      );
+    } else {
+      // Add new address
+      const newId = Math.max(...addresses.map((a) => a.id), 0) + 1;
+      setAddresses([
+        ...addresses,
+        { ...newAddress, id: newId, isPrimary: addresses.length === 0 },
+      ]);
+    }
     setNewAddress({
       label: "",
       name: "",
@@ -75,6 +86,7 @@ export default function AddressesPage() {
       address: "",
     });
     setShowAddForm(false);
+    setEditingAddress(null);
   };
 
   const handleSetPrimary = (id: number) => {
@@ -97,6 +109,20 @@ export default function AddressesPage() {
     setAddresses(updatedAddresses);
   };
 
+  const handleEditAddress = (address: Address) => {
+    setEditingAddress(address);
+    setNewAddress({
+      label: address.label,
+      name: address.name,
+      phone: address.phone,
+      province: address.province,
+      city: address.city,
+      postalCode: address.postalCode,
+      address: address.address,
+    });
+    setShowAddForm(true);
+  };
+
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-6">
       {/* Header */}
@@ -104,10 +130,22 @@ export default function AddressesPage() {
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-[#2D5016] mb-3 transition-colors"
+            className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm font-medium">Kembali</span>
+            <svg
+              className="h-5 w-5 text-[#2D5016] group-hover:-translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span className="text-sm font-medium text-gray-700">Kembali</span>
           </button>
           <div className="flex items-center justify-between">
             <div>
@@ -119,7 +157,19 @@ export default function AddressesPage() {
               </p>
             </div>
             <button
-              onClick={() => setShowAddForm(true)}
+              onClick={() => {
+                setShowAddForm(true);
+                setEditingAddress(null);
+                setNewAddress({
+                  label: "",
+                  name: "",
+                  phone: "",
+                  province: "",
+                  city: "",
+                  postalCode: "",
+                  address: "",
+                });
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-all shadow-sm active:scale-95"
             >
               <Plus className="h-5 w-5" />
@@ -145,11 +195,23 @@ export default function AddressesPage() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-[#2D5016]">
-                    Tambah Alamat Baru
+                    {editingAddress ? "Edit Alamat" : "Tambah Alamat Baru"}
                   </h3>
                   <button
                     type="button"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setEditingAddress(null);
+                      setNewAddress({
+                        label: "",
+                        name: "",
+                        phone: "",
+                        province: "",
+                        city: "",
+                        postalCode: "",
+                        address: "",
+                      });
+                    }}
                     className="p-2 hover:bg-red-100 rounded-full transition-colors"
                   >
                     <X className="h-5 w-5 text-red-600" />
@@ -168,7 +230,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, label: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
                       placeholder="Rumah, Kantor, dll"
                     />
                   </div>
@@ -184,7 +246,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, name: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
                       placeholder="Nama lengkap"
                     />
                   </div>
@@ -200,7 +262,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, phone: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
                       placeholder="08xxxxxxxxxx"
                     />
                   </div>
@@ -219,7 +281,7 @@ export default function AddressesPage() {
                           province: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
                       placeholder="Jawa Barat"
                     />
                   </div>
@@ -235,7 +297,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, city: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
                       placeholder="Bandung"
                     />
                   </div>
@@ -254,7 +316,7 @@ export default function AddressesPage() {
                           postalCode: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
                       placeholder="40123"
                     />
                   </div>
@@ -273,7 +335,7 @@ export default function AddressesPage() {
                         })
                       }
                       rows={3}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all resize-none"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all resize-none text-[#2D5016] font-medium"
                       placeholder="Jalan, nomor, RT/RW, Kecamatan, dll"
                     />
                   </div>
@@ -284,11 +346,23 @@ export default function AddressesPage() {
                     type="submit"
                     className="flex-1 px-6 py-3 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-all font-medium active:scale-95"
                   >
-                    Simpan Alamat
+                    {editingAddress ? "Simpan Perubahan" : "Simpan Alamat"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setEditingAddress(null);
+                      setNewAddress({
+                        label: "",
+                        name: "",
+                        phone: "",
+                        province: "",
+                        city: "",
+                        postalCode: "",
+                        address: "",
+                      });
+                    }}
                     className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium"
                   >
                     Batal
@@ -368,7 +442,10 @@ export default function AddressesPage() {
                       Jadikan Utama
                     </button>
                   )}
-                  <button className="flex-1 sm:flex-none px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm active:scale-95">
+                  <button
+                    onClick={() => handleEditAddress(address)}
+                    className="flex-1 sm:flex-none px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm active:scale-95"
+                  >
                     Edit
                   </button>
                   <button

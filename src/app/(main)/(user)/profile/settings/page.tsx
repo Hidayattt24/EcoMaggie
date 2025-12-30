@@ -89,10 +89,22 @@ export default function ProfileSettings() {
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-[#2D5016] mb-3 transition-colors"
+            className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm font-medium">Kembali</span>
+            <svg
+              className="h-5 w-5 text-[#2D5016] group-hover:-translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span className="text-sm font-medium text-gray-700">Kembali</span>
           </button>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#2D5016]">
             Pengaturan Akun
@@ -161,7 +173,7 @@ export default function ProfileSettings() {
                   setProfileData({ ...profileData, name: e.target.value })
                 }
                 disabled={!isEditMode}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
               />
             </div>
 
@@ -177,7 +189,7 @@ export default function ProfileSettings() {
                     setProfileData({ ...profileData, email: e.target.value })
                   }
                   disabled={!isEditMode}
-                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
+                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
                 />
                 <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
               </div>
@@ -198,7 +210,7 @@ export default function ProfileSettings() {
                   setProfileData({ ...profileData, phone: e.target.value })
                 }
                 disabled={!isEditMode}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
               />
             </div>
           </div>
@@ -256,7 +268,7 @@ export default function ProfileSettings() {
                       oldPassword: e.target.value,
                     })
                   }
-                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-blue-600 font-medium"
                   placeholder="Masukkan password lama"
                 />
                 <button
@@ -289,7 +301,7 @@ export default function ProfileSettings() {
                       newPassword: e.target.value,
                     })
                   }
-                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-blue-600 font-medium"
                   placeholder="Minimal 8 karakter"
                 />
                 <button
@@ -322,7 +334,7 @@ export default function ProfileSettings() {
                       confirmPassword: e.target.value,
                     })
                   }
-                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-blue-600 font-medium"
                   placeholder="Ulangi password baru"
                 />
                 <button

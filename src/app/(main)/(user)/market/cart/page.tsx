@@ -264,25 +264,27 @@ export default function CartPage() {
                         {/* Checkbox */}
                         <div className="flex-shrink-0">
                           <label className="cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedItems.includes(item.id)}
-                              onChange={() => toggleSelectItem(item.id)}
-                              className="peer w-5 h-5 rounded-md border-2 border-[#2D5016]/30 checked:bg-[#2D5016] checked:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 cursor-pointer transition-all appearance-none"
-                            />
-                            <svg
-                              className="absolute mt-0.5 ml-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
+                            <div className="relative">
+                              <input
+                                type="checkbox"
+                                checked={selectedItems.includes(item.id)}
+                                onChange={() => toggleSelectItem(item.id)}
+                                className="peer w-5 h-5 rounded-md border-2 border-[#2D5016]/30 checked:bg-[#2D5016] checked:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 cursor-pointer transition-all appearance-none"
                               />
-                            </svg>
+                              <svg
+                                className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </div>
                           </label>
                         </div>
 

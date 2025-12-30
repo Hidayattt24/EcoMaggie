@@ -23,6 +23,7 @@ export default function ProfileSettings() {
     name: "Budi Santoso",
     email: "budi.santoso@example.com",
     phone: "081234567890",
+    jenisPengguna: "UMKM",
     profilePicture: "/assets/dummy/profile.jpg",
   });
   const [imagePreview, setImagePreview] = useState(profileData.profilePicture);
@@ -212,6 +213,169 @@ export default function ProfileSettings() {
                 disabled={!isEditMode}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jenis Pengguna
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                {/* UMKM Card */}
+                <label
+                  className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
+                    profileData.jenisPengguna === "UMKM"
+                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                  } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="jenisPengguna"
+                    value="UMKM"
+                    checked={profileData.jenisPengguna === "UMKM"}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        jenisPengguna: e.target.value,
+                      })
+                    }
+                    disabled={!isEditMode}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                      profileData.jenisPengguna === "UMKM"
+                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
+                        : "bg-gray-100 group-hover:bg-green-50"
+                    }`}
+                  >
+                    <svg
+                      className={`w-5 h-5 transition-colors duration-300 ${
+                        profileData.jenisPengguna === "UMKM"
+                          ? "text-white"
+                          : "text-gray-400 group-hover:text-[#2D5016]"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-sm font-semibold transition-colors duration-300 ${
+                      profileData.jenisPengguna === "UMKM"
+                        ? "text-[#2D5016]"
+                        : "text-gray-700 group-hover:text-[#2D5016]"
+                    }`}
+                  >
+                    UMKM
+                  </span>
+                  <span className="text-xs text-gray-500 mt-1 text-center">
+                    Usaha Kecil
+                  </span>
+                  {profileData.jenisPengguna === "UMKM" && (
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </label>
+
+                {/* Rumah Tangga Card */}
+                <label
+                  className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
+                    profileData.jenisPengguna === "Rumah Tangga"
+                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                  } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="jenisPengguna"
+                    value="Rumah Tangga"
+                    checked={profileData.jenisPengguna === "Rumah Tangga"}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        jenisPengguna: e.target.value,
+                      })
+                    }
+                    disabled={!isEditMode}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                      profileData.jenisPengguna === "Rumah Tangga"
+                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
+                        : "bg-gray-100 group-hover:bg-green-50"
+                    }`}
+                  >
+                    <svg
+                      className={`w-5 h-5 transition-colors duration-300 ${
+                        profileData.jenisPengguna === "Rumah Tangga"
+                          ? "text-white"
+                          : "text-gray-400 group-hover:text-[#2D5016]"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-sm font-semibold transition-colors duration-300 ${
+                      profileData.jenisPengguna === "Rumah Tangga"
+                        ? "text-[#2D5016]"
+                        : "text-gray-700 group-hover:text-[#2D5016]"
+                    }`}
+                  >
+                    Rumah Tangga
+                  </span>
+                  <span className="text-xs text-gray-500 mt-1 text-center">
+                    Keluarga
+                  </span>
+                  {profileData.jenisPengguna === "Rumah Tangga" && (
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </label>
+              </div>
             </div>
           </div>
 

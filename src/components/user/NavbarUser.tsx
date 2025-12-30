@@ -5,12 +5,16 @@ import {
   NavItems,
   NavbarLogo,
 } from "@/components/ui/resizable-navbar";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from "@/components/user/LogoutButton";
 
 export function NavbarUser() {
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
+
   const navItems = [
     {
       name: "Market Maggot",
@@ -53,7 +57,7 @@ export function NavbarUser() {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const mobileNavItems = [
     {
@@ -95,6 +99,34 @@ export function NavbarUser() {
       ),
     },
   ];
+
+  // Close dropdown when clicking outside or scrolling
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    const handleScroll = () => {
+      setShowProfileDropdown(false);
+    };
+
+    if (showProfileDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("scroll", handleScroll, true);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [showProfileDropdown]);
 
   return (
     <>
@@ -178,29 +210,125 @@ export function NavbarUser() {
               </svg>
             </Link>
 
-            <Link
-              href="/profile"
-              className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white transition-all hover:shadow-lg hover:scale-105 ${
-                pathname === "/profile"
-                  ? "shadow-xl scale-110 ring-2 ring-[#2D5016] ring-offset-2"
-                  : ""
-              }`}
-              title="Profile"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white transition-all hover:shadow-lg hover:scale-105 ${
+                  pathname?.startsWith("/profile")
+                    ? "shadow-xl scale-110 ring-2 ring-[#2D5016] ring-offset-2"
+                    : ""
+                }`}
+                title="Profile"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </Link>
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showProfileDropdown && (
+                <div className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden z-50">
+                  {/* User Info Header */}
+                  <div className="p-4 border-b-2 border-gray-100 bg-gradient-to-br from-green-50/50 to-white">
+                    <p className="font-bold text-base text-[#2D5016]">
+                      Budi Santoso
+                    </p>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      +62 812-3456-7890
+                    </p>
+                  </div>
+
+                  {/* Menu Options */}
+                  <div className="p-2">
+                    <Link
+                      href="/profile/settings"
+                      onClick={() => setShowProfileDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all group"
+                    >
+                      <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 transition-all">
+                        <svg
+                          className="h-5 w-5 text-[#2D5016]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm text-gray-900">
+                          Pengaturan Akun
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Edit profil & password
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      href="/profile/addresses"
+                      onClick={() => setShowProfileDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all group"
+                    >
+                      <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-all">
+                        <svg
+                          className="h-5 w-5 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm text-gray-900">
+                          Daftar Alamat
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Kelola alamat pengiriman
+                        </p>
+                      </div>
+                    </Link>
+
+                    <LogoutButton
+                      onClose={() => setShowProfileDropdown(false)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </NavBody>
       </Navbar>
@@ -298,29 +426,125 @@ export function NavbarUser() {
                   </svg>
                 </Link>
 
-                <Link
-                  href="/profile"
-                  className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white transition-all hover:shadow-lg active:scale-95 ${
-                    pathname === "/profile"
-                      ? "shadow-xl scale-105 ring-2 ring-white"
-                      : ""
-                  }`}
-                  title="Profile"
-                >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="relative" ref={mobileDropdownRef}>
+                  <button
+                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white transition-all hover:shadow-lg active:scale-95 ${
+                      pathname?.startsWith("/profile")
+                        ? "shadow-xl scale-105 ring-2 ring-white"
+                        : ""
+                    }`}
+                    title="Profile"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </Link>
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Mobile Dropdown Menu */}
+                  {showProfileDropdown && (
+                    <div className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden z-50">
+                      {/* User Info Header */}
+                      <div className="p-4 border-b-2 border-gray-100 bg-gradient-to-br from-green-50/50 to-white">
+                        <p className="font-bold text-base text-[#2D5016]">
+                          Budi Santoso
+                        </p>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                          +62 812-3456-7890
+                        </p>
+                      </div>
+
+                      {/* Menu Options */}
+                      <div className="p-2">
+                        <Link
+                          href="/profile/settings"
+                          onClick={() => setShowProfileDropdown(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all group"
+                        >
+                          <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 transition-all">
+                            <svg
+                              className="h-5 w-5 text-[#2D5016]"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-gray-900">
+                              Pengaturan Akun
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Edit profil & password
+                            </p>
+                          </div>
+                        </Link>
+
+                        <Link
+                          href="/profile/addresses"
+                          onClick={() => setShowProfileDropdown(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all group"
+                        >
+                          <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-all">
+                            <svg
+                              className="h-5 w-5 text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-gray-900">
+                              Daftar Alamat
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Kelola alamat pengiriman
+                            </p>
+                          </div>
+                        </Link>
+
+                        <LogoutButton
+                          onClose={() => setShowProfileDropdown(false)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -328,10 +552,11 @@ export function NavbarUser() {
       </div>
 
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 pb-safe">
-        {/* Hide navbar bottom on wishlist, checkout, and cart pages */}
+        {/* Hide navbar bottom on wishlist, checkout, cart, and profile pages */}
         {!pathname?.includes("/wishlist") &&
           !pathname?.includes("/checkout") &&
-          !pathname?.includes("/cart") && (
+          !pathname?.includes("/cart") &&
+          !pathname?.includes("/profile") && (
             <div className="mx-2 mb-3">
               <nav className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3">
                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#2D5016]/10 via-transparent to-[#3d6b1e]/10 pointer-events-none"></div>

@@ -272,7 +272,7 @@ export default function FooterSection() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 left-6 w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-110 transition-all duration-300 z-40 group"
+          className="fixed bottom-6 left-6 w-12 h-12 bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-110 transition-all duration-300 z-40 group"
           aria-label="Scroll to top"
         >
           <ArrowUp className="w-5 h-5 group-hover:-translate-y-1 transition-transform duration-300" />

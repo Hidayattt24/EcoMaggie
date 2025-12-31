@@ -24,13 +24,13 @@ export default function ProductsHeader({
         </span>
       </div>
 
-      <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4 leading-tight font-poppins">
+      <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-4 leading-tight font-poppins">
         DI MANA <span className="text-[#2D5016]">TEKNOLOGI</span>
         <br />
         BERTEMU <span className="text-[#2D5016]">ALAM</span>
       </h1>
 
-      <p className="text-base lg:text-lg text-gray-600 mb-8 leading-relaxed font-poppins max-w-3xl mx-auto">
+      <p className="text-sm lg:text-base text-gray-600 mb-8 leading-relaxed font-poppins max-w-3xl mx-auto">
         EcoMaggie memanfaatkan teknologi untuk mendukung pengelolaan sampah
         organik yang lebih{" "}
         <span className="font-semibold text-[#2D5016]">

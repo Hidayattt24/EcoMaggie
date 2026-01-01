@@ -272,7 +272,7 @@ export default function RegisterPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 py-12"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12"
       style={{
         background:
           "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
@@ -281,7 +281,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-2xl">
         {/* Card */}
         <div
-          className="bg-white rounded-2xl shadow-2xl p-10 relative overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
           style={{ borderTop: "4px solid #A3AF87" }}
         >
           {/* Decorative corner */}
@@ -294,10 +294,10 @@ export default function RegisterPage() {
           ></div>
 
           {/* Logo & Title */}
-          <div className="text-center mb-8 relative z-10">
+          <div className="text-center mb-6 sm:mb-8 relative z-10">
             <Link href="/" className="inline-block">
               <div
-                className="w-16 h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
+                className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
                 style={{ backgroundColor: "#A3AF87" }}
               >
                 <Image
@@ -310,18 +310,21 @@ export default function RegisterPage() {
               </div>
             </Link>
             <h1
-              className="text-2xl font-bold poppins-bold mt-4"
+              className="text-xl sm:text-2xl font-bold poppins-bold mt-3 sm:mt-4"
               style={{ color: "#A3AF87" }}
             >
               Daftar Akun
             </h1>
-            <p className="text-gray-600 mt-2 text-sm poppins-regular">
+            <p className="text-gray-600 mt-1.5 sm:mt-2 text-xs sm:text-sm poppins-regular">
               Bergabunglah dengan EcoMaggie
             </p>
           </div>
 
           {/* Register Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-3 sm:space-y-4 relative z-10"
+          >
             {/* Nama Lengkap */}
             <div className="space-y-2">
               <label
@@ -354,9 +357,9 @@ export default function RegisterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, namaLengkap: e.target.value })
                   }
-                  className={`block w-full pl-11 pr-4 py-3 border ${
+                  className={`block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border ${
                     errors.namaLengkap ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -436,9 +439,9 @@ export default function RegisterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className={`block w-full pl-11 pr-4 py-3 border ${
+                  className={`block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border ${
                     errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -510,9 +513,9 @@ export default function RegisterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, nomorWhatsapp: e.target.value })
                   }
-                  className={`block w-full pl-11 pr-4 py-3 border ${
+                  className={`block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border ${
                     errors.nomorWhatsapp ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -600,9 +603,9 @@ export default function RegisterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className={`block w-full pl-11 pr-12 py-3 border ${
+                  className={`block w-full pl-10 sm:pl-11 pr-11 sm:pr-12 py-2.5 sm:py-3 border ${
                     errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -725,11 +728,11 @@ export default function RegisterPage() {
                       confirmPassword: e.target.value,
                     })
                   }
-                  className={`block w-full pl-11 pr-12 py-3 border ${
+                  className={`block w-full pl-10 sm:pl-11 pr-11 sm:pr-12 py-2.5 sm:py-3 border ${
                     errors.confirmPassword
                       ? "border-red-500"
                       : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -873,10 +876,10 @@ export default function RegisterPage() {
                   Opsional
                 </span>
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {/* UMKM Card */}
                 <label
-                  className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
+                  className={`relative flex flex-col items-center justify-center p-4 sm:p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     formData.jenisPengguna === "UMKM"
                       ? "shadow-lg scale-[1.02]"
                       : "border-gray-200 bg-white hover:shadow-md hover:scale-[1.01]"
@@ -979,7 +982,7 @@ export default function RegisterPage() {
 
                 {/* Rumah Tangga Card */}
                 <label
-                  className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
+                  className={`relative flex flex-col items-center justify-center p-4 sm:p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     formData.jenisPengguna === "Rumah Tangga"
                       ? "shadow-lg scale-[1.02]"
                       : "border-gray-200 bg-white hover:shadow-md hover:scale-[1.01]"
@@ -1117,7 +1120,7 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, namaUsaha: e.target.value })
                     }
-                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                    className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
                     style={
                       { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                     }
@@ -1196,7 +1199,7 @@ export default function RegisterPage() {
                         kabupatenKota: "", // Reset kabupaten/kota when province changes
                       });
                     }}
-                    className={`block w-full pl-11 pr-10 py-3 border rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none ${
+                    className={`block w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none ${
                       errors.provinsi ? "border-red-500" : "border-gray-300"
                     }`}
                     style={
@@ -1268,7 +1271,7 @@ export default function RegisterPage() {
                       })
                     }
                     disabled={!formData.provinsi}
-                    className={`block w-full pl-11 pr-10 py-3 border rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    className={`block w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
                       errors.kabupatenKota
                         ? "border-red-500"
                         : "border-gray-300"
@@ -1370,7 +1373,7 @@ export default function RegisterPage() {
                       const value = e.target.value.replace(/\D/g, "");
                       setFormData({ ...formData, kodePos: value });
                     }}
-                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                    className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
                     style={
                       { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                     }
@@ -1423,7 +1426,7 @@ export default function RegisterPage() {
                         alamatLengkap: e.target.value,
                       })
                     }
-                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular resize-none text-sm shadow-sm"
+                    className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular resize-none shadow-sm"
                     style={
                       { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                     }
@@ -1465,7 +1468,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+                className="w-full flex justify-center items-center gap-2 py-2.5 sm:py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm sm:text-base text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
                 style={
                   {
                     backgroundColor: "#A3AF87",
@@ -1542,7 +1545,7 @@ export default function RegisterPage() {
           <div className="text-center">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border-2 rounded-xl hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 border-2 rounded-xl hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-xs sm:text-sm bg-white"
               style={{ borderColor: "#A3AF87", color: "#A3AF87" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#A3AF87";
@@ -1572,10 +1575,10 @@ export default function RegisterPage() {
         </div>
 
         {/* Back to Home */}
-        <div className="text-center mt-6">
+        <div className="text-center mt-4 sm:mt-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:shadow-md"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 sm:py-2 text-gray-600 transition-all duration-200 poppins-medium text-xs sm:text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:shadow-md"
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "#A3AF87";
               e.currentTarget.style.borderColor = "#A3AF87";

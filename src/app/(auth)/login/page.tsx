@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
       style={{
         background:
           "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
@@ -31,7 +31,7 @@ export default function LoginPage() {
       <div className="w-full max-w-lg">
         {/* Card */}
         <div
-          className="bg-white rounded-2xl shadow-2xl p-8 relative overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
           style={{ borderTop: "4px solid #A3AF87" }}
         >
           {/* Decorative corner */}
@@ -44,10 +44,10 @@ export default function LoginPage() {
           ></div>
 
           {/* Logo & Title */}
-          <div className="text-center mb-8 relative z-10">
+          <div className="text-center mb-6 sm:mb-8 relative z-10">
             <Link href="/" className="inline-block">
               <div
-                className="w-16 h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
+                className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
                 style={{ backgroundColor: "#A3AF87" }}
               >
                 <Image
@@ -60,18 +60,21 @@ export default function LoginPage() {
               </div>
             </Link>
             <h1
-              className="text-2xl font-bold poppins-bold mt-4"
+              className="text-xl sm:text-2xl font-bold poppins-bold mt-3 sm:mt-4"
               style={{ color: "#A3AF87" }}
             >
               Masuk ke Akun
             </h1>
-            <p className="text-gray-600 mt-2 text-sm poppins-regular">
+            <p className="text-gray-600 mt-1.5 sm:mt-2 text-xs sm:text-sm poppins-regular">
               Selamat datang kembali di EcoMaggie
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 sm:space-y-5 relative z-10"
+          >
             {/* Email Field */}
             <div className="space-y-2">
               <label
@@ -105,7 +108,7 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                  className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -171,7 +174,7 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className="block w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                  className="block w-full pl-10 sm:pl-11 pr-11 sm:pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
                   style={
                     { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
                   }
@@ -262,7 +265,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              className="w-full flex justify-center items-center gap-2 py-2.5 sm:py-3 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-sm sm:text-base text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
               style={
                 {
                   backgroundColor: "#A3AF87",
@@ -327,7 +330,7 @@ export default function LoginPage() {
           <div className="text-center">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all duration-200 poppins-semibold"
+              className="inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-lg border-2 transition-all duration-200 poppins-semibold"
               style={{
                 backgroundColor: "rgba(163, 175, 135, 0.1)",
                 color: "#A3AF87",
@@ -364,10 +367,10 @@ export default function LoginPage() {
         </div>
 
         {/* Back to Home */}
-        <div className="text-center mt-6">
+        <div className="text-center mt-4 sm:mt-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 poppins-regular text-sm"
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/50 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 poppins-regular text-xs sm:text-sm"
           >
             <svg
               className="w-4 h-4"

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -21,10 +21,16 @@ interface Product {
     location: string;
     joined: string;
   };
-  specifications: {
-    label: string;
-    value: string;
-  }[];
+}
+
+interface Review {
+  id: number;
+  author: string;
+  rating: number;
+  date: string;
+  comment: string;
+  verified: boolean;
+  images?: string[];
 }
 
 // Dummy data produk
@@ -53,20 +59,12 @@ const productData: Record<number, Product> = {
       location: "Banda Aceh",
       joined: "",
     },
-    specifications: [
-      { label: "Kandungan Protein", value: "40-45%" },
-      { label: "Kandungan Lemak", value: "28-32%" },
-      { label: "Kelembaban", value: "< 10%" },
-      { label: "Ukuran", value: "1.5-2 cm" },
-      { label: "Masa Simpan", value: "3 bulan (kering)" },
-      { label: "Sertifikat", value: "BPOM, Halal" },
-    ],
   },
   // Add more products as needed
 };
 
-// Dummy reviews
-const reviewsData = [
+// Dummy reviews with images
+const reviewsData: Review[] = [
   {
     id: 1,
     author: "Budi Santoso",
@@ -75,6 +73,7 @@ const reviewsData = [
     comment:
       "Kualitas maggot sangat bagus, ikan lele saya cepat besar. Packing rapi dan pengiriman cepat!",
     verified: true,
+    images: ["/assets/dummy/magot.png", "/assets/dummy/magot.png"],
   },
   {
     id: 2,
@@ -84,6 +83,7 @@ const reviewsData = [
     comment:
       "Sudah order berkali-kali, selalu puas. Maggot fresh dan harga bersaing.",
     verified: true,
+    images: ["/assets/dummy/magot.png"],
   },
   {
     id: 3,
@@ -105,9 +105,14 @@ export default function ProductDetailPage({ params }: PageProps) {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<
-    "description" | "specifications" | "reviews"
-  >("description");
+  const [activeTab, setActiveTab] = useState<"description" | "reviews">(
+    "description"
+  );
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -132,16 +137,73 @@ export default function ProductDetailPage({ params }: PageProps) {
     ? Math.round(product.price * (1 - product.discount / 100))
     : product.price;
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newImages: string[] = [];
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            newImages.push(event.target.result as string);
+            if (newImages.length === files.length) {
+              setReviewImages((prev) => [...prev, ...newImages].slice(0, 5));
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeReviewImage = (index: number) => {
+    setReviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+    <div className="min-h-screen bg-gray-50 pb-6">
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-3xl max-h-[90vh]">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
+            />
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100"
+            >
+              <svg
+                className="w-5 h-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-6xl mx-auto px-4 py-4">
         {/* Back Button */}
         <Link
           href="/market/products"
-          className="inline-flex items-center gap-2 mb-4 lg:mb-6 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
+          className="inline-flex items-center gap-1.5 mb-4 text-sm text-[#5a6c5b] hover:text-[#4a5c4b] transition-colors"
         >
           <svg
-            className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform"
+            className="h-4 w-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -153,51 +215,30 @@ export default function ProductDetailPage({ params }: PageProps) {
               d="M15 19l-7-7 7-7"
             />
           </svg>
-          <span className="text-[#5a6c5b] font-semibold">
-            Kembali ke Produk
-          </span>
+          <span className="font-medium">Kembali</span>
         </Link>
 
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
-          {/* Left: Images */}
-          <div>
-            {/* Main Image */}
-            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-3 lg:p-4 mb-3 lg:mb-4 border border-gray-100">
-              <div
-                className="relative aspect-square rounded-xl overflow-hidden shadow-inner"
-                style={{
-                  background:
-                    "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05), white)",
-                }}
-              >
+        {/* Main Content - Compact Layout */}
+        <div className="grid lg:grid-cols-5 gap-4 mb-4">
+          {/* Left: Images - Smaller */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+              {/* Main Image */}
+              <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-50">
                 <img
                   src={product.images[selectedImage]}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                  onClick={() => setPreviewImage(product.images[selectedImage])}
                 />
                 {product.discount && (
-                  <div className="absolute top-2 left-2 lg:top-4 lg:left-4 px-3 py-1.5 lg:px-4 lg:py-2 bg-gradient-to-r from-red-500 via-red-600 to-orange-500 text-white text-xs lg:text-sm font-bold rounded-full shadow-lg animate-pulse">
-                    <div className="flex items-center gap-1.5">
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span>DISKON {product.discount}%</span>
-                    </div>
+                  <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-md">
+                    -{product.discount}%
                   </div>
                 )}
-                {/* Wishlist Badge */}
-                <button className="absolute top-2 right-2 lg:top-4 lg:right-4 w-9 h-9 lg:w-10 lg:h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all group border border-gray-200">
+                <button className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-all">
                   <svg
-                    className="h-5 w-5 text-gray-600 group-hover:text-red-500 group-hover:fill-red-500 transition-all"
+                    className="h-4 w-4 text-gray-500 hover:text-red-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -211,233 +252,173 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </svg>
                 </button>
               </div>
-            </div>
-
-            {/* Thumbnail Images */}
-            <div className="grid grid-cols-4 gap-2">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImage === index
-                      ? "border-[#A3AF87] shadow-md"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+              {/* Thumbnails */}
+              <div className="grid grid-cols-4 gap-1.5">
+                {product.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${
+                      selectedImage === index
+                        ? "border-[#A3AF87]"
+                        : "border-transparent hover:border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Right: Product Info */}
-          <div>
-            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-4 lg:p-6 lg:sticky lg:top-4 border border-gray-100">
-              {/* Category Badge */}
-              <div className="flex flex-wrap items-center gap-2 mb-3 lg:mb-4">
-                <div
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border"
-                  style={{
-                    background: "rgba(163, 175, 135, 0.2)",
-                    color: "#5a6c5b",
-                    borderColor: "rgba(163, 175, 135, 0.3)",
-                  }}
-                >
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>{product.category}</span>
-                </div>
-                <div
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full"
-                  style={{
-                    background: "rgba(163, 175, 135, 0.2)",
-                    color: "#5a6c5b",
-                  }}
-                >
-                  <svg
-                    className="h-3 w-3"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>Terverifikasi</span>
-                </div>
-              </div>
-
-              {/* Product Name */}
-              <h1 className="text-2xl lg:text-3xl font-bold text-[#5a6c5b] mb-3 lg:mb-4">
-                {product.name}
-              </h1>
-
-              {/* Rating & Reviews */}
-              <div className="flex flex-wrap items-center gap-2 lg:gap-4 mb-4 lg:mb-6 pb-4 lg:pb-6 border-b-2 border-dashed border-gray-200">
-                <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
+          {/* Right: Product Info - Compact */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#A3AF87]/20 text-[#5a6c5b]">
+                      {product.category}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-[#5a6c5b]">
                       <svg
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(product.rating)
-                            ? "fill-yellow-400"
-                            : "fill-gray-300"
-                        }`}
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-lg font-bold text-[#5a6c5b]">
-                    {product.rating}
-                  </span>
-                </div>
-                <span className="text-gray-400">•</span>
-                <div className="flex items-center gap-1.5 text-[#5a6c5b] font-semibold">
-                  <svg
-                    className="h-4 w-4 text-blue-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
-                    <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
-                  </svg>
-                  <span className="font-medium">{product.reviews}</span>
-                  <span className="text-sm">ulasan</span>
-                </div>
-                <span className="text-gray-400">•</span>
-                <div className="flex items-center gap-1.5 text-emerald-700 font-semibold">
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>{product.stock} kg tersedia</span>
-                </div>
-              </div>
-
-              {/* Price */}
-              <div
-                className="mb-4 lg:mb-6 p-3 lg:p-4 rounded-xl border-2"
-                style={{
-                  background:
-                    "linear-gradient(to right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05))",
-                  borderColor: "rgba(163, 175, 135, 0.3)",
-                }}
-              >
-                {product.discount ? (
-                  <div>
-                    <div className="flex flex-wrap items-baseline gap-2 lg:gap-3 mb-2">
-                      <span className="text-2xl lg:text-4xl font-bold text-[#5a6c5b]">
-                        Rp {finalPrice.toLocaleString("id-ID")}
-                      </span>
-                      <span className="text-sm lg:text-lg text-gray-500 line-through">
-                        Rp {product.price.toLocaleString("id-ID")}
-                      </span>
-                    </div>
-                    <div className="inline-flex items-center gap-1 lg:gap-1.5 px-2 py-1 lg:px-3 lg:py-1.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs lg:text-sm font-bold rounded-lg shadow-md">
-                      <svg
-                        className="h-4 w-4"
+                        className="h-3 w-3"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
                         <path
                           fillRule="evenodd"
-                          d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span>
-                        Hemat Rp{" "}
-                        {(product.price - finalPrice).toLocaleString("id-ID")} (
-                        {product.discount}%)
-                      </span>
-                    </div>
+                      Terverifikasi
+                    </span>
                   </div>
-                ) : (
-                  <span className="text-2xl lg:text-4xl font-bold text-[#5a6c5b]">
-                    Rp {product.price.toLocaleString("id-ID")}
-                  </span>
-                )}
-                <p className="text-gray-600 mt-1">per {product.unit}</p>
+                  <h1 className="text-xl font-bold text-[#5a6c5b]">
+                    {product.name}
+                  </h1>
+                </div>
               </div>
 
-              {/* Quantity Selector */}
-              <div className="mb-4 lg:mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Jumlah
-                </label>
-                <div className="flex items-center gap-2 lg:gap-3">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#A3AF87] hover:bg-[#A3AF87] hover:text-white transition-all flex items-center justify-center font-bold text-[#5a6c5b] hover:text-white text-sm lg:text-base"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={(e) =>
-                      setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                    }
-                    className="w-16 h-9 lg:w-20 lg:h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-[#A3AF87] focus:outline-none text-[#5a6c5b] text-sm lg:text-base"
-                  />
-                  <button
-                    onClick={() =>
-                      setQuantity(Math.min(product.stock, quantity + 1))
-                    }
-                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#A3AF87] hover:bg-[#A3AF87] hover:text-white transition-all flex items-center justify-center font-bold text-[#5a6c5b] hover:text-white text-sm lg:text-base"
-                  >
-                    +
-                  </button>
-                  <span className="text-gray-600 text-xs lg:text-base ml-1 lg:ml-2">
-                    <span className="hidden lg:inline">Subtotal: </span>
-                    <span className="lg:hidden block mt-2">Subtotal: </span>
-                    <span className="font-bold text-[#5a6c5b]">
+              {/* Rating & Stock Row */}
+              <div className="flex flex-wrap items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-1">
+                  <svg className="h-4 w-4 fill-yellow-400" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-[#5a6c5b]">
+                    {product.rating}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    ({product.reviews} ulasan)
+                  </span>
+                </div>
+                <span className="text-gray-300">|</span>
+                <span className="text-xs text-emerald-600 font-medium">
+                  {product.stock} {product.unit} tersedia
+                </span>
+              </div>
+
+              {/* Price */}
+              <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-[#A3AF87]/10 to-transparent">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-2xl font-bold text-[#5a6c5b]">
+                    Rp {finalPrice.toLocaleString("id-ID")}
+                  </span>
+                  {product.discount && (
+                    <>
+                      <span className="text-sm text-gray-400 line-through">
+                        Rp {product.price.toLocaleString("id-ID")}
+                      </span>
+                      <span className="px-1.5 py-0.5 text-xs font-semibold bg-red-100 text-red-600 rounded">
+                        Hemat {product.discount}%
+                      </span>
+                    </>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  per {product.unit}
+                </p>
+              </div>
+
+              {/* Quantity & Actions */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#5a6c5b]">
+                    Jumlah:
+                  </span>
+                  <div className="flex items-center border border-gray-200 rounded-lg">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors rounded-l-lg"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 12H4"
+                        />
+                      </svg>
+                    </button>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) =>
+                        setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                      }
+                      className="w-12 h-8 text-center text-sm font-medium border-x border-gray-200 focus:outline-none"
+                    />
+                    <button
+                      onClick={() =>
+                        setQuantity(Math.min(product.stock, quantity + 1))
+                      }
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors rounded-r-lg"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    ={" "}
+                    <span className="font-semibold text-[#5a6c5b]">
                       Rp {(finalPrice * quantity).toLocaleString("id-ID")}
                     </span>
                   </span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:grid sm:grid-cols-2 gap-2 lg:gap-3 mb-4 lg:mb-6">
-                <button
-                  className="py-3 lg:py-3.5 px-4 bg-[#A3AF87] text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-[#5a6c5b] text-sm lg:text-base"
-                  style={{
-                    boxShadow: "0 10px 25px -5px rgba(163, 175, 135, 0.3)",
-                  }}
-                >
+              {/* Action Buttons - With Animation */}
+              <div className="flex gap-2 mb-4">
+                <button className="group flex-1 py-2.5 px-4 bg-[#A3AF87] text-white rounded-lg font-medium hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm">
                   <svg
-                    className="h-5 w-5"
+                    className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-200"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                   >
                     <path
                       strokeLinecap="round"
@@ -445,64 +426,36 @@ export default function ProductDetailPage({ params }: PageProps) {
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
-                  <span>+ Keranjang</span>
+                  Keranjang
                 </button>
                 <button
                   onClick={() => router.push("/market/checkout")}
-                  className="py-3 lg:py-3.5 px-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:shadow-orange-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-orange-700 text-sm lg:text-base"
+                  className="group flex-1 py-2.5 px-4 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm"
                 >
                   <svg
-                    className="h-5 w-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    className="h-5 w-5 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-200"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
                   >
-                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                     <path
-                      fillRule="evenodd"
-                      d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
-                      clipRule="evenodd"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
                     />
                   </svg>
-                  <span>Beli Sekarang</span>
+                  Beli Sekarang
                 </button>
               </div>
 
-              {/* Seller Info */}
-              <div className="border-t-2 border-dashed border-gray-200 pt-4 lg:pt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <svg
-                    className="h-5 w-5 text-[#5a6c5b]"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <h3 className="font-bold text-[#5a6c5b] text-lg">
-                    Informasi Penjual
-                  </h3>
-                </div>
-                <div
-                  className="p-3 lg:p-4 rounded-lg lg:rounded-xl border mb-3 lg:mb-4"
-                  style={{
-                    background:
-                      "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05))",
-                    borderColor: "rgba(163, 175, 135, 0.3)",
-                  }}
-                >
-                  <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
-                    <div
-                      className="w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
-                      style={{
-                        background:
-                          "linear-gradient(to bottom right, #A3AF87, #5a6c5b)",
-                      }}
-                    >
+              {/* Seller Info - Compact */}
+              <div className="pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center">
                       <svg
-                        className="h-8 w-8 text-white"
+                        className="h-5 w-5 text-white"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -514,115 +467,68 @@ export default function ProductDetailPage({ params }: PageProps) {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-[#5a6c5b] text-base lg:text-lg">
+                      <p className="font-semibold text-sm text-[#5a6c5b]">
                         {product.seller.name}
                       </p>
-                      <div className="flex items-center gap-1.5">
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 rounded-full">
-                          <svg
-                            className="h-3.5 w-3.5 fill-yellow-500"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                          <span className="text-sm font-bold text-yellow-700">
-                            {product.seller.rating}
-                          </span>
-                        </div>
-                        <span
-                          className="text-xs font-semibold"
-                          style={{ color: "#5a6c5b" }}
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <svg
+                          className="h-3 w-3 fill-yellow-500"
+                          viewBox="0 0 24 24"
                         >
-                          Penjual Terpercaya
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        <span className="font-medium">
+                          {product.seller.rating}
                         </span>
+                        <span className="text-gray-300">•</span>
+                        <span>{product.seller.location}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-full hover:bg-green-600 transition-colors">
                     <svg
                       className="h-4 w-4"
-                      style={{ color: "#5a6c5b" }}
                       fill="currentColor"
-                      viewBox="0 0 20 20"
+                      viewBox="0 0 24 24"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                        clipRule="evenodd"
-                      />
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
                     </svg>
-                    <p className="font-semibold text-[#5a6c5b]">
-                      {product.seller.location}
-                    </p>
-                  </div>
+                    Chat
+                  </button>
                 </div>
-                <button
-                  className="w-full py-3 lg:py-3.5 bg-[#A3AF87] text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 lg:gap-2.5 border text-sm lg:text-base"
-                  style={{
-                    borderColor: "#5a6c5b",
-                    boxShadow: "0 10px 25px -5px rgba(163, 175, 135, 0.3)",
-                  }}
-                >
-                  <svg
-                    className="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                  </svg>
-                  <span className="text-sm lg:text-base">
-                    <span className="hidden sm:inline">
-                      Hubungi Penjual via WhatsApp
-                    </span>
-                    <span className="sm:hidden">Hubungi via WhatsApp</span>
-                  </span>
-                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Product Details Tabs */}
-        <div className="bg-white rounded-xl lg:rounded-2xl shadow-sm p-4 lg:p-6">
-          {/* Tabs Header */}
-          <div className="flex gap-4 lg:gap-6 border-b border-gray-200 mb-4 lg:mb-6 overflow-x-auto">
+        {/* Product Details Tabs - Compact */}
+        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+          {/* Tabs Header - Without Specifications */}
+          <div className="flex gap-4 border-b border-gray-200 mb-4">
             <button
               onClick={() => setActiveTab("description")}
-              className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
+              className={`pb-2.5 px-1 text-sm font-medium transition-all relative ${
                 activeTab === "description"
                   ? "text-[#5a6c5b]"
-                  : "text-gray-600 hover:text-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               Deskripsi
               {activeTab === "description" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87]"></div>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("specifications")}
-              className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
-                activeTab === "specifications"
-                  ? "text-[#5a6c5b]"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Spesifikasi
-              {activeTab === "specifications" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87]"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87] rounded-full"></div>
               )}
             </button>
             <button
               onClick={() => setActiveTab("reviews")}
-              className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
+              className={`pb-2.5 px-1 text-sm font-medium transition-all relative ${
                 activeTab === "reviews"
                   ? "text-[#5a6c5b]"
-                  : "text-gray-600 hover:text-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               Ulasan ({product.reviews})
               {activeTab === "reviews" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87]"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87] rounded-full"></div>
               )}
             </button>
           </div>
@@ -630,119 +536,54 @@ export default function ProductDetailPage({ params }: PageProps) {
           {/* Tabs Content */}
           <div>
             {activeTab === "description" && (
-              <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed">
+              <div>
+                <p className="text-sm text-gray-700 leading-relaxed mb-4">
                   {product.description}
                 </p>
-                <div
-                  className="mt-6 p-4 rounded-lg"
-                  style={{ background: "rgba(163, 175, 135, 0.15)" }}
-                >
-                  <h4 className="font-bold text-[#2D5016] mb-2">
+                <div className="p-3 rounded-lg bg-[#A3AF87]/10">
+                  <h4 className="font-semibold text-sm text-[#5a6c5b] mb-2">
                     Keunggulan Produk:
                   </h4>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <svg
-                        className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Kandungan protein tinggi 40-45%
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <svg
-                        className="h-5 w-5 flex-shrink-0 mt-0.5"
-                        style={{ color: "#5a6c5b" }}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Diproses dengan standar kebersihan tinggi
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <svg
-                        className="h-5 w-5 flex-shrink-0 mt-0.5"
-                        style={{ color: "#5a6c5b" }}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Cocok untuk semua jenis ternak dan ikan
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <svg
-                        className="h-5 w-5 flex-shrink-0 mt-0.5"
-                        style={{ color: "#5a6c5b" }}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Bersertifikat dan terjamin kualitasnya
-                    </li>
+                  <ul className="space-y-1.5 text-sm text-gray-700">
+                    {[
+                      "Kandungan protein tinggi 40-45%",
+                      "Diproses dengan standar kebersihan tinggi",
+                      "Cocok untuk semua jenis ternak dan ikan",
+                      "Bersertifikat dan terjamin kualitasnya",
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <svg
+                          className="h-4 w-4 text-[#5a6c5b] flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {item}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
             )}
 
-            {activeTab === "specifications" && (
-              <div className="grid md:grid-cols-2 gap-4">
-                {product.specifications.map((spec, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
-                  >
-                    <span className="font-medium text-gray-700">
-                      {spec.label}
-                    </span>
-                    <span className="font-bold text-[#5a6c5b]">
-                      {spec.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {activeTab === "reviews" && (
-              <div className="space-y-6">
-                {/* Rating Summary */}
-                <div
-                  className="flex flex-col sm:flex-row items-center gap-4 lg:gap-8 p-4 lg:p-6 rounded-xl"
-                  style={{
-                    background:
-                      "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white)",
-                  }}
-                >
-                  <div className="text-center sm:text-left">
-                    <div className="text-4xl lg:text-5xl font-bold text-[#2D5016] mb-2">
+              <div className="space-y-4">
+                {/* Rating Summary - Compact */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-lg bg-gradient-to-br from-[#A3AF87]/10 to-transparent">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-[#5a6c5b]">
                       {product.rating}
                     </div>
-                    <div className="flex items-center gap-1 mb-1">
+                    <div className="flex items-center gap-0.5 mb-1">
                       {[...Array(5)].map((_, i) => (
                         <svg
                           key={i}
-                          className={`h-5 w-5 ${
+                          className={`h-4 w-4 ${
                             i < Math.floor(product.rating)
                               ? "fill-yellow-400"
                               : "fill-gray-300"
@@ -753,17 +594,17 @@ export default function ProductDetailPage({ params }: PageProps) {
                         </svg>
                       ))}
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-500">
                       {product.reviews} ulasan
                     </p>
                   </div>
-                  <div className="flex-1 space-y-2 w-full sm:w-auto">
+                  <div className="flex-1 space-y-1 w-full sm:w-auto">
                     {[5, 4, 3, 2, 1].map((star) => (
-                      <div key={star} className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600 w-12">
+                      <div key={star} className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 w-8">
                           {star} ★
                         </span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-yellow-400"
                             style={{
@@ -779,7 +620,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                             }}
                           ></div>
                         </div>
-                        <span className="text-sm text-gray-600 w-8">
+                        <span className="text-xs text-gray-500 w-6">
                           {star === 5
                             ? 93
                             : star === 4
@@ -793,72 +634,170 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                {/* Purchase Requirement Message */}
-                <div className="p-4 lg:p-6 bg-blue-50 border border-blue-200 rounded-xl mb-4">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="h-6 w-6 text-blue-600 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <div>
-                      <h4 className="font-bold text-blue-900 mb-1">
-                        Ingin memberikan ulasan?
-                      </h4>
-                      <p className="text-sm text-blue-700">
-                        Anda dapat memberikan komentar dan ulasan setelah
-                        membeli produk ini.
-                      </p>
+                {/* Write Review Form - With Photo Upload */}
+                <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h4 className="font-semibold text-sm text-[#5a6c5b] mb-3">
+                    Tulis Ulasan
+                  </h4>
+
+                  {/* Rating Select */}
+                  <div className="mb-3">
+                    <label className="text-xs text-gray-600 mb-1 block">
+                      Rating
+                    </label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setReviewRating(star)}
+                          className="focus:outline-none"
+                        >
+                          <svg
+                            className={`h-6 w-6 transition-colors ${
+                              star <= reviewRating
+                                ? "fill-yellow-400"
+                                : "fill-gray-300 hover:fill-yellow-200"
+                            }`}
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        </button>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Review Text */}
+                  <div className="mb-3">
+                    <textarea
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder="Bagikan pengalaman Anda dengan produk ini..."
+                      className="w-full p-2.5 text-sm border border-gray-200 rounded-lg focus:border-[#A3AF87] focus:ring-1 focus:ring-[#A3AF87] focus:outline-none resize-none"
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Photo Upload */}
+                  <div className="mb-3">
+                    <label className="text-xs text-gray-600 mb-1.5 block">
+                      Upload Foto (Maks 5)
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {reviewImages.map((img, index) => (
+                        <div
+                          key={index}
+                          className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200"
+                        >
+                          <img
+                            src={img}
+                            alt={`Review ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            onClick={() => removeReviewImage(index)}
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      {reviewImages.length < 5 && (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-[#A3AF87] hover:text-[#A3AF87] transition-colors"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                          <span className="text-[10px]">Foto</span>
+                        </button>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <button className="w-full py-2 bg-[#A3AF87] text-white text-sm font-medium rounded-lg hover:bg-[#95a17a] transition-colors">
+                    Kirim Ulasan
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    * Anda hanya dapat memberikan ulasan setelah membeli produk
+                    ini
+                  </p>
                 </div>
 
-                {/* Reviews List */}
-                <div className="space-y-4">
+                {/* Reviews List - Compact with Photo Support */}
+                <div className="space-y-3">
                   {reviewsData.map((review) => (
                     <div
                       key={review.id}
-                      className="p-4 lg:p-6 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
+                      className="p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                            style={{
-                              background:
-                                "linear-gradient(to bottom right, #A3AF87, #5a6c5b)",
-                            }}
-                          >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center text-white text-sm font-medium">
                             {review.author.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-semibold text-[#5a6c5b]">
+                            <p className="font-medium text-sm text-[#5a6c5b]">
                               {review.author}
                             </p>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-xs text-gray-500">
                               {review.date}
                             </p>
                           </div>
                         </div>
                         {review.verified && (
-                          <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                            ✓ Pembeli Terverifikasi
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-medium rounded-full flex items-center gap-1">
+                            <svg
+                              className="w-3 h-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Terverifikasi
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 mb-3">
+                      <div className="flex items-center gap-0.5 mb-2">
                         {[...Array(5)].map((_, i) => (
                           <svg
                             key={i}
-                            className={`h-4 w-4 ${
+                            className={`h-3.5 w-3.5 ${
                               i < review.rating
                                 ? "fill-yellow-400"
                                 : "fill-gray-300"
@@ -869,9 +808,28 @@ export default function ProductDetailPage({ params }: PageProps) {
                           </svg>
                         ))}
                       </div>
-                      <p className="text-gray-700 leading-relaxed">
+                      <p className="text-sm text-gray-700 leading-relaxed">
                         {review.comment}
                       </p>
+
+                      {/* Review Images */}
+                      {review.images && review.images.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          {review.images.map((img, imgIndex) => (
+                            <button
+                              key={imgIndex}
+                              onClick={() => setPreviewImage(img)}
+                              className="w-14 h-14 rounded-md overflow-hidden border border-gray-200 hover:border-[#A3AF87] transition-colors"
+                            >
+                              <img
+                                src={img}
+                                alt={`Review photo ${imgIndex + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

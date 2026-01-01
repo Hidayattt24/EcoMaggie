@@ -14,13 +14,13 @@ export function TransactionDetailItem({
   icon: Icon,
   label,
   value,
-  iconColor = "text-[#2D5016]",
-  valueColor = "text-[#2D5016]",
+  iconColor = "text-[#5a6c5b]",
+  valueColor = "text-[#5a6c5b]",
 }: TransactionDetailItemProps) {
   return (
     <div className="flex items-start gap-3 sm:gap-4">
       <div
-        className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-50 to-green-100 rounded-xl flex items-center justify-center ${iconColor}`}
+        className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 rounded-xl flex items-center justify-center ${iconColor}`}
       >
         <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>

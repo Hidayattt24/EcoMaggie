@@ -14,6 +14,8 @@ import {
   ChevronRight,
   Phone,
   FileText,
+  Store,
+  Calendar,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,27 +51,27 @@ interface TransactionCardProps {
 const statusConfig = {
   unpaid: {
     label: "Menunggu Pembayaran",
-    color: "bg-orange-100 text-orange-700",
+    color: "bg-orange-50 text-orange-600 border border-orange-200",
     icon: Clock,
   },
   packed: {
     label: "Sedang Dikemas",
-    color: "bg-blue-100 text-blue-700",
+    color: "bg-blue-50 text-blue-600 border border-blue-200",
     icon: Package,
   },
   shipped: {
     label: "Dalam Pengiriman",
-    color: "bg-purple-100 text-purple-700",
+    color: "bg-purple-50 text-purple-600 border border-purple-200",
     icon: Truck,
   },
   completed: {
     label: "Pesanan Selesai",
-    color: "bg-green-100 text-green-700",
+    color: "bg-green-50 text-green-600 border border-green-200",
     icon: CheckCircle2,
   },
   cancelled: {
     label: "Dibatalkan",
-    color: "bg-red-100 text-red-700",
+    color: "bg-red-50 text-red-500 border border-red-200",
     icon: XCircle,
   },
 };
@@ -91,11 +93,11 @@ export function TransactionCard({
           <>
             <Link
               href={`/market/checkout?orderId=${transaction.orderId}`}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-lg font-bold text-sm hover:shadow-lg transition-all text-center"
+              className="flex-1 px-4 py-2.5 bg-[#A3AF87] text-white rounded-xl font-bold text-sm hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all text-center"
             >
               Bayar Sekarang
             </Link>
-            <button className="px-4 py-2.5 border-2 border-gray-200 text-gray-600 rounded-lg font-bold text-sm hover:bg-gray-50 transition-all">
+            <button className="px-4 py-2.5 border border-gray-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all">
               Batalkan
             </button>
           </>
@@ -104,13 +106,13 @@ export function TransactionCard({
         const whatsappMessage = encodeURIComponent(
           `Halo, saya ingin menanyakan status pesanan saya dengan ID: ${transaction.orderId}`
         );
-        const whatsappNumber = "6281234567890"; // Replace with actual farmer's WhatsApp number
+        const whatsappNumber = "6281234567890";
         return (
           <a
             href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 px-4 py-2.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-lg font-bold text-sm hover:bg-green-50 transition-all flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 border border-[#A3AF87] text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Hubungi WhatsApp
@@ -120,7 +122,7 @@ export function TransactionCard({
         return (
           <button
             onClick={() => onTrack?.(transaction)}
-            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-lg font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-[#A3AF87] text-white rounded-xl font-bold text-sm hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2"
           >
             <MapPin className="h-4 w-4" />
             Lacak Pesanan
@@ -131,17 +133,17 @@ export function TransactionCard({
           <>
             <Link
               href={`/market/products/${firstProduct.id}#ulasan`}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-lg font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-[#A3AF87] text-white rounded-xl font-bold text-sm hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2"
             >
               <Star className="h-4 w-4" />
               Beri Nilai
             </Link>
             <Link
               href={`/transaction/${transaction.orderId}`}
-              className="flex-1 px-4 py-2.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-lg font-bold text-sm hover:bg-green-50 transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 border border-[#A3AF87] text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex items-center justify-center gap-2"
             >
               <FileText className="h-4 w-4" />
-              Detail Pesanan
+              Detail
             </Link>
           </>
         );
@@ -149,7 +151,7 @@ export function TransactionCard({
         return (
           <Link
             href="/market/products"
-            className="flex-1 px-4 py-2.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-lg font-bold text-sm hover:bg-green-50 transition-all flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 border border-[#A3AF87] text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex items-center justify-center gap-2"
           >
             <ShoppingBag className="h-4 w-4" />
             Belanja Lagi
@@ -166,31 +168,36 @@ export function TransactionCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white border-2 border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-all"
+      className="bg-white border border-[#A3AF87]/20 rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-[#A3AF87]/10 transition-all"
     >
       {/* Header */}
-      <div className="p-4 border-b-2 border-gray-50 bg-gradient-to-r from-green-50/50 to-white">
+      <div className="p-4 border-b border-[#A3AF87]/10 bg-gradient-to-r from-[#A3AF87]/5 to-white">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-[#2D5016]" />
-            <span className="font-bold text-sm text-[#2D5016]">
+            <div className="w-7 h-7 bg-[#A3AF87]/10 rounded-lg flex items-center justify-center">
+              <Store className="h-4 w-4 text-[#A3AF87]" />
+            </div>
+            <span className="font-bold text-sm text-[#5a6c5b]">
               {transaction.farmName}
             </span>
           </div>
           <Link
             href={`/market/orders/${transaction.orderId}`}
-            className="flex items-center gap-1 text-xs text-[#2D5016] hover:gap-2 transition-all"
+            className="flex items-center gap-1 text-xs text-[#5a6c5b] hover:text-[#A3AF87] hover:gap-2 transition-all font-semibold"
           >
-            <span className="font-bold">Detail</span>
-            <ChevronRight className="h-3 w-3" />
+            <span>Detail</span>
+            <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 font-medium">
-            ID: {transaction.orderId}
-          </span>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{transaction.date}</span>
+            <span className="text-gray-300">•</span>
+            <span className="font-medium">{transaction.orderId}</span>
+          </div>
           <div
-            className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${config.color}`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 ${config.color}`}
           >
             <StatusIcon className="h-3.5 w-3.5" />
             {config.label}
@@ -201,7 +208,7 @@ export function TransactionCard({
       {/* Body - Products */}
       <div className="p-4">
         <div className="flex gap-3 mb-3">
-          <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-50 to-green-100 rounded-lg overflow-hidden">
+          <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-[#A3AF87]/10 rounded-xl overflow-hidden border border-[#A3AF87]/10">
             <img
               src={firstProduct.image}
               alt={firstProduct.name}
@@ -209,7 +216,7 @@ export function TransactionCard({
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm text-[#2D5016] line-clamp-1 mb-1">
+            <h3 className="font-bold text-sm text-[#5a6c5b] line-clamp-1 mb-1">
               {firstProduct.name}
             </h3>
             <p className="text-xs text-gray-500 mb-1">
@@ -218,28 +225,28 @@ export function TransactionCard({
             <p className="text-xs text-gray-500">x{firstProduct.quantity}</p>
           </div>
           <div className="text-right">
-            <p className="font-bold text-sm text-[#2D5016]">
+            <p className="font-bold text-sm text-[#5a6c5b]">
               Rp {firstProduct.price.toLocaleString("id-ID")}
             </p>
           </div>
         </div>
 
         {otherProductsCount > 0 && (
-          <div className="px-3 py-2 bg-gray-50 rounded-lg text-xs text-gray-600 font-medium">
+          <div className="px-3 py-2 bg-[#A3AF87]/5 rounded-lg text-xs text-[#5a6c5b] font-medium border border-[#A3AF87]/10">
             + {otherProductsCount} produk lainnya
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t-2 border-gray-50 bg-gray-50/50">
+      <div className="p-4 border-t border-[#A3AF87]/10 bg-[#A3AF87]/5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-gray-500 font-medium">
             {transaction.totalItems} Produk
           </span>
           <div className="text-right">
-            <span className="text-xs text-gray-500 mr-2">Total Belanja:</span>
-            <span className="text-base font-bold text-[#2D5016]">
+            <span className="text-xs text-gray-500 mr-2">Total:</span>
+            <span className="text-base font-bold text-[#5a6c5b]">
               Rp {transaction.totalPrice.toLocaleString("id-ID")}
             </span>
           </div>

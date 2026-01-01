@@ -22,13 +22,13 @@ import {
   MessageCircle,
   Leaf,
   TreePine,
-  LocateFixed,
   Loader2,
   MapPinOff,
   Sparkles,
   History,
+  UserCircle,
 } from "lucide-react";
-import { useLocationPersistence } from "@/hooks/useLocationPersistence";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 // Dummy data riwayat supply dengan detail lebih lengkap
 const supplyHistory = [
@@ -159,8 +159,8 @@ const statusConfig = {
 type SupplyItem = (typeof supplyHistory)[0];
 
 export default function SupplyHistoryPage() {
-  const { isLocationAllowed, checkLocation, locationStatus, isLoading } =
-    useLocationPersistence();
+  const { userLocation, isSupplyConnectAvailable, isLoading } =
+    useUserLocation();
 
   const [activeTab, setActiveTab] = useState<
     "all" | "waiting" | "picked_up" | "completed"
@@ -183,8 +183,26 @@ export default function SupplyHistoryPage() {
     (s) => s.status === "completed"
   ).length;
 
-  // Location not allowed state
-  if (!isLoading && !isLocationAllowed) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
+          <p className="text-gray-600">Memuat...</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Location not allowed state - user not registered or outside service area
+  if (!isSupplyConnectAvailable) {
+    const isNotRegistered = !userLocation;
+
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <motion.div
@@ -192,33 +210,41 @@ export default function SupplyHistoryPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100"
         >
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <MapPinOff className="h-10 w-10 text-red-500" />
+          <div
+            className={`w-20 h-20 ${
+              isNotRegistered ? "bg-amber-100" : "bg-red-100"
+            } rounded-full flex items-center justify-center mx-auto mb-6`}
+          >
+            {isNotRegistered ? (
+              <UserCircle className="h-10 w-10 text-amber-500" />
+            ) : (
+              <MapPinOff className="h-10 w-10 text-red-500" />
+            )}
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Verifikasi Lokasi Diperlukan
+            {isNotRegistered
+              ? "Data Alamat Tidak Ditemukan"
+              : "Di Luar Jangkauan Layanan"}
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            Untuk melihat Riwayat Supply, pastikan lokasi Anda berada dalam
-            jangkauan layanan (Kota Banda Aceh).
+            {isNotRegistered
+              ? "Silakan lengkapi data alamat Anda saat mendaftar untuk melihat Riwayat Supply."
+              : `Alamat Anda (${userLocation?.kabupatenKota}, ${userLocation?.provinsi}) berada di luar wilayah layanan. Saat ini Supply Connect hanya tersedia di Kota Banda Aceh.`}
           </p>
-          <button
-            onClick={checkLocation}
-            disabled={locationStatus === "checking"}
-            className="w-full flex items-center justify-center gap-2 bg-[#2D5016] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#3d6b1e] transition-colors disabled:opacity-50"
-          >
-            {locationStatus === "checking" ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Mengecek Lokasi...
-              </>
-            ) : (
-              <>
-                <LocateFixed className="h-5 w-5" />
-                Verifikasi Lokasi
-              </>
-            )}
-          </button>
+          {isNotRegistered ? (
+            <Link
+              href="/register"
+              className="w-full flex items-center justify-center gap-2 bg-[#A3AF87] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#95a17a] transition-colors"
+            >
+              <UserCircle className="h-5 w-5" />
+              Daftar Sekarang
+            </Link>
+          ) : (
+            <div className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-500 py-3.5 rounded-xl font-semibold mb-3">
+              <MapPinOff className="h-5 w-5" />
+              Layanan Tidak Tersedia
+            </div>
+          )}
           <Link
             href="/supply"
             className="w-full flex items-center justify-center gap-2 text-gray-600 py-3 font-medium hover:text-gray-900 transition-colors"
@@ -292,7 +318,7 @@ export default function SupplyHistoryPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari berdasarkan jenis atau ID..."
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/20 transition-all text-sm"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all text-sm"
                 />
               </div>
 
@@ -323,7 +349,7 @@ export default function SupplyHistoryPage() {
                     onClick={() => setActiveTab(tab.key as typeof activeTab)}
                     className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
                       activeTab === tab.key
-                        ? "bg-[#2D5016] text-white"
+                        ? "bg-[#A3AF87] text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
@@ -376,7 +402,7 @@ export default function SupplyHistoryPage() {
                         onClick={() => setSelectedItem(item)}
                         className={`w-full text-left bg-white rounded-xl p-4 border-2 transition-all ${
                           isSelected
-                            ? "border-[#2D5016] shadow-md bg-[#2D5016]/5"
+                            ? "border-[#A3AF87] shadow-md bg-[#A3AF87]/5"
                             : "border-gray-100 hover:border-gray-200 hover:shadow-sm"
                         }`}
                       >
@@ -391,7 +417,7 @@ export default function SupplyHistoryPage() {
                               <h3
                                 className={`font-semibold text-sm truncate ${
                                   isSelected
-                                    ? "text-[#2D5016]"
+                                    ? "text-[#A3AF87]"
                                     : "text-gray-900"
                                 }`}
                               >
@@ -449,7 +475,7 @@ export default function SupplyHistoryPage() {
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
                 >
                   {/* Detail Header */}
-                  <div className="bg-gradient-to-br from-[#2D5016] to-[#4a7c23] p-6 text-white">
+                  <div className="bg-gradient-to-br from-[#A3AF87] to-[#95a17a] p-6 text-white">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-white/70 text-sm mb-1">
@@ -515,8 +541,8 @@ export default function SupplyHistoryPage() {
                   <div className="p-6 space-y-6">
                     {/* Address */}
                     <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-                      <div className="p-2 bg-[#2D5016]/10 rounded-lg">
-                        <MapPin className="h-5 w-5 text-[#2D5016]" />
+                      <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                        <MapPin className="h-5 w-5 text-[#A3AF87]" />
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">
@@ -537,7 +563,7 @@ export default function SupplyHistoryPage() {
                     {selectedItem.courier && (
                       <div className="border border-gray-100 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <Truck className="h-4 w-4 text-[#2D5016]" />
+                          <Truck className="h-4 w-4 text-[#A3AF87]" />
                           Informasi Kurir
                         </h3>
                         <div className="flex items-center justify-between">
@@ -557,7 +583,7 @@ export default function SupplyHistoryPage() {
                           <div className="flex items-center gap-2">
                             <a
                               href={`tel:${selectedItem.courier.phone}`}
-                              className="p-2.5 bg-[#2D5016]/10 text-[#2D5016] rounded-xl hover:bg-[#2D5016]/20 transition-colors"
+                              className="p-2.5 bg-[#A3AF87]/10 text-[#A3AF87] rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
                             >
                               <Phone className="h-5 w-5" />
                             </a>
@@ -591,7 +617,7 @@ export default function SupplyHistoryPage() {
                     {selectedItem.farmer && (
                       <div className="border border-gray-100 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <TreePine className="h-4 w-4 text-[#2D5016]" />
+                          <TreePine className="h-4 w-4 text-[#A3AF87]" />
                           Disalurkan ke Peternak
                         </h3>
                         <div className="flex items-center gap-3">
@@ -613,7 +639,7 @@ export default function SupplyHistoryPage() {
                     {/* Timeline / Status */}
                     <div className="border border-gray-100 rounded-xl p-4">
                       <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <History className="h-4 w-4 text-[#2D5016]" />
+                        <History className="h-4 w-4 text-[#A3AF87]" />
                         Status Tracking
                       </h3>
                       <div className="space-y-4">
@@ -702,7 +728,7 @@ export default function SupplyHistoryPage() {
                     <div className="flex gap-3">
                       <Link
                         href={`/supply/${selectedItem.id}`}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#2D5016] text-white rounded-xl font-semibold hover:bg-[#3d6b1e] transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#95a17a] transition-colors"
                       >
                         <FileText className="h-4 w-4" />
                         Lihat Detail Lengkap

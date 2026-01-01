@@ -133,7 +133,7 @@ export default function AddressesPage() {
             className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
             <svg
-              className="h-5 w-5 text-[#2D5016] group-hover:-translate-x-1 transition-transform"
+              className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -149,7 +149,7 @@ export default function AddressesPage() {
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#2D5016]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
                 Daftar Alamat
               </h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">
@@ -170,7 +170,7 @@ export default function AddressesPage() {
                   address: "",
                 });
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-all shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all shadow-sm active:scale-95"
             >
               <Plus className="h-5 w-5" />
               <span className="hidden sm:inline font-medium">Tambah</span>
@@ -191,10 +191,10 @@ export default function AddressesPage() {
             >
               <form
                 onSubmit={handleAddAddress}
-                className="bg-gradient-to-br from-green-50 to-white rounded-2xl border-2 border-green-200 p-4 sm:p-6 shadow-sm"
+                className="bg-gradient-to-br from-[#A3AF87]/20 to-white rounded-2xl border-2 border-[#A3AF87]/30 p-4 sm:p-6 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-[#2D5016]">
+                  <h3 className="text-lg font-bold text-[#5a6c5b]">
                     {editingAddress ? "Edit Alamat" : "Tambah Alamat Baru"}
                   </h3>
                   <button
@@ -230,7 +230,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, label: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="Rumah, Kantor, dll"
                     />
                   </div>
@@ -246,7 +246,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, name: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="Nama lengkap"
                     />
                   </div>
@@ -262,7 +262,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, phone: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="08xxxxxxxxxx"
                     />
                   </div>
@@ -281,7 +281,7 @@ export default function AddressesPage() {
                           province: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="Jawa Barat"
                     />
                   </div>
@@ -297,7 +297,7 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, city: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="Bandung"
                     />
                   </div>
@@ -316,7 +316,7 @@ export default function AddressesPage() {
                           postalCode: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="40123"
                     />
                   </div>
@@ -335,7 +335,7 @@ export default function AddressesPage() {
                         })
                       }
                       rows={3}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all resize-none text-[#2D5016] font-medium"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all resize-none text-[#5a6c5b] font-medium"
                       placeholder="Jalan, nomor, RT/RW, Kecamatan, dll"
                     />
                   </div>
@@ -344,7 +344,7 @@ export default function AddressesPage() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-all font-medium active:scale-95"
+                    className="flex-1 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all font-medium active:scale-95"
                   >
                     {editingAddress ? "Simpan Perubahan" : "Simpan Alamat"}
                   </button>
@@ -380,7 +380,7 @@ export default function AddressesPage() {
             <p className="text-gray-500">Belum ada alamat tersimpan</p>
             <button
               onClick={() => setShowAddForm(true)}
-              className="mt-4 px-6 py-3 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-all font-medium"
+              className="mt-4 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all font-medium"
             >
               Tambah Alamat Pertama
             </button>
@@ -394,19 +394,19 @@ export default function AddressesPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-6 hover:border-[#2D5016] hover:shadow-md transition-all"
+                className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-6 hover:border-[#A3AF87] hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-50 rounded-xl">
-                      <MapPin className="h-5 w-5 text-[#2D5016]" />
+                    <div className="p-2 bg-[#A3AF87]/20 rounded-xl">
+                      <MapPin className="h-5 w-5 text-[#5a6c5b]" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 text-base sm:text-lg">
                         {address.label}
                       </h3>
                       {address.isPrimary && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white text-xs font-bold rounded-full mt-1">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white text-xs font-bold rounded-full mt-1">
                           <Check className="h-3 w-3" />
                           Utama
                         </span>
@@ -437,7 +437,7 @@ export default function AddressesPage() {
                   {!address.isPrimary && (
                     <button
                       onClick={() => handleSetPrimary(address.id)}
-                      className="flex-1 sm:flex-none px-4 py-2 bg-green-50 text-[#2D5016] rounded-xl hover:bg-green-100 transition-all font-medium text-sm active:scale-95"
+                      className="flex-1 sm:flex-none px-4 py-2 bg-[#A3AF87]/20 text-[#5a6c5b] rounded-xl hover:bg-[#A3AF87]/30 transition-all font-medium text-sm active:scale-95"
                     >
                       Jadikan Utama
                     </button>

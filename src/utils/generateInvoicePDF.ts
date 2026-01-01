@@ -1,5 +1,14 @@
 import jsPDF from "jspdf";
 
+interface InvoiceItem {
+  name: string;
+  variant?: string;
+  quantity: number;
+  unit?: string;
+  price: number;
+  subtotal: number;
+}
+
 interface InvoiceData {
   orderId: string;
   orderDate: string;
@@ -9,306 +18,402 @@ interface InvoiceData {
   subtotal: number;
   shippingCost: number;
   shippingMethod: string;
+  discount?: number;
   total: number;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
   paymentMethod: string;
   paymentStatus: "pending" | "paid" | "failed";
+  items?: InvoiceItem[];
+  trackingNumber?: string;
+  notes?: string;
 }
 
 export function generateInvoicePDF(data: InvoiceData) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
   const margin = 20;
-  let yPos = 20;
+  let yPos = 0;
 
-  // Brand Color
-  const brandColor = "#2D5016";
-  const brandColorRGB: [number, number, number] = [45, 80, 22]; // RGB values
-  const lightGreenRGB: [number, number, number] = [240, 253, 244]; // Light green background
+  // Professional Black & White Colors
+  const black: [number, number, number] = [0, 0, 0];
+  const darkGray: [number, number, number] = [51, 51, 51];
+  const mediumGray: [number, number, number] = [102, 102, 102];
+  const lightGray: [number, number, number] = [245, 245, 245];
+  const borderGray: [number, number, number] = [200, 200, 200];
 
-  // Helper function to add text with color
-  const addText = (
-    text: string,
-    x: number,
-    y: number,
-    options?: {
-      fontSize?: number;
-      fontStyle?: "normal" | "bold";
-      color?: [number, number, number];
-      align?: "left" | "center" | "right";
-    }
-  ) => {
-    if (options?.fontSize) doc.setFontSize(options.fontSize);
-    if (options?.fontStyle) doc.setFont("helvetica", options.fontStyle);
-    if (options?.color)
-      doc.setTextColor(options.color[0], options.color[1], options.color[2]);
+  // ========================================
+  // HEADER / KOP SURAT
+  // ========================================
 
-    if (options?.align === "right") {
-      doc.text(text, x, y, { align: "right" });
-    } else if (options?.align === "center") {
-      doc.text(text, x, y, { align: "center" });
-    } else {
-      doc.text(text, x, y);
-    }
-  };
+  yPos = margin;
 
-  // Header Section
-  doc.setFillColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.rect(0, 0, pageWidth, 45, "F");
+  // Company Name (Large, Bold)
+  doc.setTextColor(black[0], black[1], black[2]);
+  doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
+  doc.text("ECO-MAGGIE", margin, yPos);
 
-  // Company Name
-  doc.setTextColor(255, 255, 255);
+  // Tagline
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+  doc.text("Solusi Pertanian Berkelanjutan", margin, yPos + 7);
+
+  // Invoice Label (Right aligned)
+  doc.setTextColor(black[0], black[1], black[2]);
   doc.setFontSize(24);
   doc.setFont("helvetica", "bold");
-  doc.text("Eco-maggie", margin, 20);
+  doc.text("INVOICE", pageWidth - margin, yPos, { align: "right" });
 
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.text("Invoice Pesanan", margin, 28);
+  yPos += 15;
 
-  // Order ID and Date (Right side)
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.text(data.orderId, pageWidth - margin, 20, { align: "right" });
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  const formattedDate = new Date(data.orderDate).toLocaleDateString("id-ID", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  doc.text(formattedDate, pageWidth - margin, 28, { align: "right" });
-
-  yPos = 55;
-
-  // Company Info Box
-  doc.setFillColor(lightGreenRGB[0], lightGreenRGB[1], lightGreenRGB[2]);
-  doc.roundedRect(margin, yPos, 80, 45, 3, 3, "F");
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(margin, yPos, 80, 45, 3, 3, "S");
-
-  doc.setTextColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text("DARI", margin + 5, yPos + 7);
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text("PT Eco-maggie Indonesia", margin + 5, yPos + 14);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Jl. Teuku Umar No. 99", margin + 5, yPos + 20);
-  doc.text("Banda Aceh, Aceh 23111", margin + 5, yPos + 26);
-  doc.text("+62 812-3456-7890", margin + 5, yPos + 32);
-  doc.text("info@ecomaggie.id", margin + 5, yPos + 38);
-
-  // Customer Info Box
-  doc.setFillColor(lightGreenRGB[0], lightGreenRGB[1], lightGreenRGB[2]);
-  doc.roundedRect(pageWidth - margin - 80, yPos, 80, 45, 3, 3, "F");
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.roundedRect(pageWidth - margin - 80, yPos, 80, 45, 3, 3, "S");
-
-  doc.setTextColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text("KEPADA", pageWidth - margin - 75, yPos + 7);
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(data.customerName, pageWidth - margin - 75, yPos + 14);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  const addressLines = doc.splitTextToSize(data.customerAddress, 70);
-  let addressY = yPos + 20;
-  addressLines.forEach((line: string) => {
-    doc.text(line, pageWidth - margin - 75, addressY);
-    addressY += 5;
-  });
-  doc.text(data.customerPhone, pageWidth - margin - 75, addressY);
-
-  yPos = 110;
-
-  // Detail Pesanan Header
-  doc.setTextColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text("DETAIL PESANAN", margin, yPos);
+  // Header separator line
+  doc.setDrawColor(black[0], black[1], black[2]);
+  doc.setLineWidth(1);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
 
   yPos += 8;
 
+  // Company Contact Info (Below line)
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    "Jl. T. Batee Treun Gampong Ganoe Desa Lamdingin Kec. Kuta Alam, Banda Aceh",
+    margin,
+    yPos
+  );
+  doc.text(
+    "Email: cs@Ecomaggie.id  |  Telp: +62 822-8895-3268",
+    margin,
+    yPos + 5
+  );
+
+  yPos += 18;
+
+  // ========================================
+  // INVOICE INFO SECTION
+  // ========================================
+
+  // Invoice details box
+  doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+  doc.rect(pageWidth - margin - 70, yPos, 70, 28, "F");
+
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("No. Invoice:", pageWidth - margin - 65, yPos + 7);
+  doc.text("Tanggal:", pageWidth - margin - 65, yPos + 14);
+  doc.text("Status:", pageWidth - margin - 65, yPos + 21);
+
+  doc.setTextColor(black[0], black[1], black[2]);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.orderId, pageWidth - margin - 5, yPos + 7, { align: "right" });
+
+  const formattedDate = new Date(data.orderDate).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  doc.text(formattedDate, pageWidth - margin - 5, yPos + 14, {
+    align: "right",
+  });
+
+  const statusText =
+    data.paymentStatus === "paid"
+      ? "LUNAS"
+      : data.paymentStatus === "pending"
+      ? "BELUM BAYAR"
+      : "GAGAL";
+  doc.text(statusText, pageWidth - margin - 5, yPos + 21, { align: "right" });
+
+  // Bill To section
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("TAGIHAN KEPADA:", margin, yPos + 5);
+
+  doc.setTextColor(black[0], black[1], black[2]);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.customerName, margin, yPos + 13);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+  const addressLines = doc.splitTextToSize(data.customerAddress, 95);
+  let addrY = yPos + 20;
+  addressLines.slice(0, 2).forEach((line: string) => {
+    doc.text(line, margin, addrY);
+    addrY += 5;
+  });
+  doc.text(`Telp: ${data.customerPhone}`, margin, addrY);
+
+  yPos += 45;
+
+  // ========================================
+  // ITEMS TABLE
+  // ========================================
+
   // Table Header
-  doc.setFillColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
+  doc.setFillColor(black[0], black[1], black[2]);
   doc.rect(margin, yPos, pageWidth - 2 * margin, 10, "F");
 
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text("Produk", margin + 3, yPos + 6);
-  doc.text("Jumlah", pageWidth - 110, yPos + 6);
-  doc.text("Harga Satuan", pageWidth - 75, yPos + 6);
-  doc.text("Total", pageWidth - margin - 3, yPos + 6, { align: "right" });
+  doc.text("NO", margin + 5, yPos + 7);
+  doc.text("DESKRIPSI PRODUK", margin + 18, yPos + 7);
+  doc.text("QTY", pageWidth - 95, yPos + 7);
+  doc.text("HARGA", pageWidth - 70, yPos + 7);
+  doc.text("JUMLAH", pageWidth - margin - 5, yPos + 7, { align: "right" });
 
   yPos += 10;
 
-  // Table Row
-  doc.setFillColor(250, 250, 250);
-  doc.rect(margin, yPos, pageWidth - 2 * margin, 12, "F");
-  doc.setDrawColor(200, 200, 200);
-  doc.setLineWidth(0.3);
-  doc.rect(margin, yPos, pageWidth - 2 * margin, 12, "S");
+  // Table Rows
+  const items = data.items || [
+    {
+      name: data.productName,
+      quantity: data.quantity,
+      unit: "kg",
+      price: data.price,
+      subtotal: data.subtotal,
+    },
+  ];
 
-  doc.setTextColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
+  items.forEach((item, index) => {
+    // Alternating row colors
+    if (index % 2 === 0) {
+      doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+      doc.rect(margin, yPos, pageWidth - 2 * margin, 12, "F");
+    }
+
+    // Row border
+    doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPos + 12, pageWidth - margin, yPos + 12);
+
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${index + 1}`, margin + 5, yPos + 8);
+
+    // Product name with variant
+    const productText = item.variant
+      ? `${item.name} - ${item.variant}`
+      : item.name;
+    const truncated =
+      productText.length > 40
+        ? productText.substring(0, 40) + "..."
+        : productText;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(black[0], black[1], black[2]);
+    doc.text(truncated, margin + 18, yPos + 8);
+
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.text(`${item.quantity} ${item.unit || "kg"}`, pageWidth - 95, yPos + 8);
+    doc.text(
+      `Rp ${item.price.toLocaleString("id-ID")}`,
+      pageWidth - 70,
+      yPos + 8
+    );
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(black[0], black[1], black[2]);
+    doc.text(
+      `Rp ${item.subtotal.toLocaleString("id-ID")}`,
+      pageWidth - margin - 5,
+      yPos + 8,
+      { align: "right" }
+    );
+
+    yPos += 12;
+  });
+
+  yPos += 10;
+
+  // ========================================
+  // SUMMARY SECTION
+  // ========================================
+
+  const summaryX = pageWidth - margin - 80;
+
+  // Subtotal
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
   doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(data.productName, margin + 3, yPos + 6);
-
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text(`${data.quantity} kg`, pageWidth - 110, yPos + 9);
-  doc.text(
-    `Rp ${data.price.toLocaleString("id-ID")}`,
-    pageWidth - 75,
-    yPos + 9
-  );
-  doc.setFont("helvetica", "bold");
+  doc.text("Subtotal", summaryX, yPos);
+  doc.setTextColor(black[0], black[1], black[2]);
   doc.text(
     `Rp ${data.subtotal.toLocaleString("id-ID")}`,
-    pageWidth - margin - 3,
-    yPos + 9,
+    pageWidth - margin,
+    yPos,
     { align: "right" }
   );
 
-  yPos += 20;
+  yPos += 7;
 
-  // Summary Box
-  const summaryBoxWidth = 85;
-  const summaryBoxX = pageWidth - margin - summaryBoxWidth;
-
-  doc.setFillColor(lightGreenRGB[0], lightGreenRGB[1], lightGreenRGB[2]);
-  doc.roundedRect(summaryBoxX, yPos, summaryBoxWidth, 32, 3, 3, "F");
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(summaryBoxX, yPos, summaryBoxWidth, 32, 3, 3, "S");
-
-  doc.setTextColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.text("Subtotal", summaryBoxX + 5, yPos + 8);
-  doc.setFont("helvetica", "bold");
-  doc.text(
-    `Rp ${data.subtotal.toLocaleString("id-ID")}`,
-    summaryBoxX + summaryBoxWidth - 5,
-    yPos + 8,
-    { align: "right" }
-  );
-
-  doc.setFont("helvetica", "normal");
-  doc.text(`Ongkir (${data.shippingMethod})`, summaryBoxX + 5, yPos + 15);
-  doc.setFont("helvetica", "bold");
-  const shippingText =
+  // Shipping
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+  doc.text(`Ongkos Kirim (${data.shippingMethod})`, summaryX, yPos);
+  doc.setTextColor(black[0], black[1], black[2]);
+  const shippingDisplay =
     data.shippingCost === 0
       ? "GRATIS"
       : `Rp ${data.shippingCost.toLocaleString("id-ID")}`;
-  doc.text(shippingText, summaryBoxX + summaryBoxWidth - 5, yPos + 15, {
-    align: "right",
-  });
+  doc.text(shippingDisplay, pageWidth - margin, yPos, { align: "right" });
 
-  // Total line
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setLineWidth(0.5);
-  doc.line(
-    summaryBoxX + 5,
-    yPos + 19,
-    summaryBoxX + summaryBoxWidth - 5,
-    yPos + 19
-  );
+  yPos += 7;
 
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.text("Total", summaryBoxX + 5, yPos + 26);
-  doc.text(
-    `Rp ${data.total.toLocaleString("id-ID")}`,
-    summaryBoxX + summaryBoxWidth - 5,
-    yPos + 26,
-    { align: "right" }
-  );
-
-  yPos += 42;
-
-  // Payment Info Section
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPos, pageWidth - margin, yPos);
-
-  yPos += 10;
-
-  // Payment Method
-  doc.setTextColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text("METODE PEMBAYARAN", margin, yPos);
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(data.paymentMethod, margin, yPos + 7);
-
-  // Payment Status
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text("STATUS PEMBAYARAN", pageWidth / 2, yPos);
-
-  // Status Badge
-  let statusText = "";
-  let statusBgColor: [number, number, number] = lightGreenRGB;
-  let statusTextColor: [number, number, number] = brandColorRGB;
-
-  if (data.paymentStatus === "paid") {
-    statusText = "Lunas";
-    statusBgColor = brandColorRGB;
-    statusTextColor = [255, 255, 255];
-  } else if (data.paymentStatus === "pending") {
-    statusText = "Menunggu Pembayaran";
-    statusBgColor = lightGreenRGB;
-    statusTextColor = brandColorRGB;
-  } else {
-    statusText = "Gagal";
-    statusBgColor = [254, 242, 242];
-    statusTextColor = [185, 28, 28];
+  // Discount (if any)
+  if (data.discount && data.discount > 0) {
+    doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+    doc.text("Diskon", summaryX, yPos);
+    doc.setTextColor(black[0], black[1], black[2]);
+    doc.text(
+      `- Rp ${data.discount.toLocaleString("id-ID")}`,
+      pageWidth - margin,
+      yPos,
+      { align: "right" }
+    );
+    yPos += 7;
   }
 
-  const statusWidth = doc.getTextWidth(statusText) + 8;
-  doc.setFillColor(statusBgColor[0], statusBgColor[1], statusBgColor[2]);
-  doc.roundedRect(pageWidth / 2, yPos + 2, statusWidth, 7, 2, 2, "F");
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(pageWidth / 2, yPos + 2, statusWidth, 7, 2, 2, "S");
-
-  doc.setTextColor(statusTextColor[0], statusTextColor[1], statusTextColor[2]);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text(statusText, pageWidth / 2 + 4, yPos + 7);
-
-  yPos += 20;
-
-  // Footer Note
-  doc.setDrawColor(brandColorRGB[0], brandColorRGB[1], brandColorRGB[2]);
-  doc.setLineWidth(0.3);
-  doc.line(margin, yPos, pageWidth - margin, yPos);
+  // Separator line
+  doc.setDrawColor(black[0], black[1], black[2]);
+  doc.setLineWidth(0.5);
+  doc.line(summaryX, yPos, pageWidth - margin, yPos);
 
   yPos += 8;
 
-  doc.setTextColor(100, 100, 100);
+  // Total
+  doc.setFillColor(black[0], black[1], black[2]);
+  doc.rect(summaryX - 5, yPos - 5, pageWidth - margin - summaryX + 10, 14, "F");
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("TOTAL", summaryX, yPos + 4);
+  doc.setFontSize(12);
+  doc.text(
+    `Rp ${data.total.toLocaleString("id-ID")}`,
+    pageWidth - margin - 5,
+    yPos + 4,
+    { align: "right" }
+  );
+
+  // ========================================
+  // PAYMENT INFO SECTION (Left side)
+  // ========================================
+
+  const infoY = yPos - 30;
+
+  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("INFORMASI PEMBAYARAN", margin, infoY);
+
+  doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+  doc.setLineWidth(0.3);
+  doc.line(margin, infoY + 3, margin + 60, infoY + 3);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+  doc.text(`Metode: ${data.paymentMethod}`, margin, infoY + 10);
+  doc.text(`Pengiriman: ${data.shippingMethod}`, margin, infoY + 17);
+
+  if (data.trackingNumber) {
+    doc.text(`No. Resi: ${data.trackingNumber}`, margin, infoY + 24);
+  }
+
+  yPos += 25;
+
+  // ========================================
+  // NOTES SECTION (if any)
+  // ========================================
+
+  if (data.notes) {
+    yPos += 10;
+    doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, yPos, pageWidth - 2 * margin, 20, "S");
+
+    doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.text("CATATAN:", margin + 5, yPos + 6);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    const noteLines = doc.splitTextToSize(
+      data.notes,
+      pageWidth - 2 * margin - 15
+    );
+    doc.text(noteLines.slice(0, 2), margin + 5, yPos + 13);
+  }
+
+  // ========================================
+  // FOOTER
+  // ========================================
+
+  // Footer separator
+  doc.setDrawColor(black[0], black[1], black[2]);
+  doc.setLineWidth(0.5);
+  doc.line(margin, pageHeight - 38, pageWidth - margin, pageHeight - 38);
+
+  // Footer content - 3 columns
+  const footerY = pageHeight - 32;
+  const colWidth = (pageWidth - 2 * margin) / 3;
+
+  // Column 1 - Thank you
+  doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("Terima Kasih", margin, footerY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.text("Atas kepercayaan Anda berbelanja", margin, footerY + 5);
+  doc.text("di Eco-Maggie.", margin, footerY + 10);
+
+  // Column 2 - Contact
+  const col2X = margin + colWidth;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("Hubungi Kami", col2X, footerY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.text("Email: cs@Ecomaggie.id", col2X, footerY + 5);
+  doc.text("Telp: +62 822-8895-3268", col2X, footerY + 10);
+
+  // Column 3 - Legal
+  const col3X = margin + colWidth * 2;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("Catatan Legal", col3X, footerY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.text("Invoice ini sah tanpa tanda tangan.", col3X, footerY + 5);
+  doc.text("Dokumen dibuat secara elektronik.", col3X, footerY + 10);
+
+  // Bottom bar
+  doc.setFillColor(black[0], black[1], black[2]);
+  doc.rect(0, pageHeight - 8, pageWidth, 8, "F");
+
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
-  const footerText =
-    "Terima kasih atas pesanan Anda. Invoice ini dibuat secara otomatis dan sah tanpa tanda tangan.";
-  doc.text(footerText, pageWidth / 2, yPos, { align: "center" });
+  doc.text(
+    "www.ecomaggie.id  |  Jl. T. Batee Treun Gampong Ganoe, Lamdingin, Kuta Alam, Banda Aceh",
+    pageWidth / 2,
+    pageHeight - 3,
+    { align: "center" }
+  );
 
   // Save PDF
   doc.save(`Invoice-${data.orderId}.pdf`);

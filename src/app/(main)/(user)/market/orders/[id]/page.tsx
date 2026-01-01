@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { StatusLabel } from "@/components/transaction/StatusLabel";
 import { TransactionDetailItem } from "@/components/transaction/TransactionDetailItem";
+import { generateInvoicePDF } from "@/utils/generateInvoicePDF";
 
 interface Product {
   id: number;
@@ -243,15 +244,49 @@ export default function OrderDetailPage({
   }, [resolvedParams.id]);
 
   const handlePrintInvoice = () => {
-    window.print();
+    if (!order) return;
+
+    const fullAddress = `${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippingAddress.province} ${order.shippingAddress.postalCode}`;
+
+    generateInvoicePDF({
+      orderId: order.orderId,
+      orderDate: order.date,
+      productName: order.products[0].name,
+      quantity: order.totalItems,
+      price: order.products[0].price,
+      subtotal: order.subtotal,
+      shippingCost: order.shippingCost,
+      shippingMethod: order.shippingMethod,
+      discount: order.discount,
+      total: order.totalPrice,
+      customerName: order.shippingAddress.name,
+      customerPhone: order.shippingAddress.phone,
+      customerAddress: fullAddress,
+      paymentMethod: order.paymentMethod,
+      paymentStatus:
+        order.status === "completed"
+          ? "paid"
+          : order.status === "cancelled"
+          ? "failed"
+          : "pending",
+      items: order.products.map((p) => ({
+        name: p.name,
+        variant: p.variant,
+        quantity: p.quantity,
+        unit: "pcs",
+        price: p.price,
+        subtotal: p.price * p.quantity,
+      })),
+      trackingNumber: order.trackingNumber,
+    });
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-50/20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/10 via-white to-[#A3AF87]/5 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#2D5016]/20 border-t-[#2D5016] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm text-gray-500 font-medium">
+          <div className="w-16 h-16 border-4 border-[#A3AF87]/20 border-t-[#A3AF87] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm text-[#5a6c5b] font-medium">
             Memuat detail pesanan...
           </p>
         </div>
@@ -261,12 +296,12 @@ export default function OrderDetailPage({
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-50/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/10 via-white to-[#A3AF87]/5 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <XCircle className="h-10 w-10 text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-[#2D5016] mb-2">
+          <h2 className="text-2xl font-bold text-[#5a6c5b] mb-2">
             Pesanan Tidak Ditemukan
           </h2>
           <p className="text-gray-600 mb-6">
@@ -274,7 +309,7 @@ export default function OrderDetailPage({
           </p>
           <button
             onClick={() => router.push("/market/orders")}
-            className="px-6 py-3 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold hover:shadow-lg transition-all"
+            className="px-6 py-3 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-xl font-bold hover:shadow-lg transition-all"
           >
             Kembali ke Pesanan
           </button>
@@ -298,7 +333,7 @@ export default function OrderDetailPage({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-50/20 pb-6"
+      className="min-h-screen bg-gradient-to-br from-[#A3AF87]/10 via-white to-[#A3AF87]/5 pb-6"
     >
       {/* Header */}
       <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10 lg:static">
@@ -306,12 +341,12 @@ export default function OrderDetailPage({
           <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
             <button
               onClick={() => router.back()}
-              className="p-2 sm:p-2.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+              className="p-2 sm:p-2.5 hover:bg-[#A3AF87]/10 rounded-lg transition-colors flex-shrink-0"
             >
-              <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 text-[#2D5016]" />
+              <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 text-[#5a6c5b]" />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-[#2D5016] truncate">
+              <h1 className="text-lg sm:text-2xl font-bold text-[#5a6c5b] truncate">
                 Detail Pesanan
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5 truncate">
@@ -320,7 +355,7 @@ export default function OrderDetailPage({
             </div>
             <button
               onClick={handlePrintInvoice}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-lg font-bold text-sm hover:bg-green-50 transition-all flex-shrink-0"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 border-2 border-[#A3AF87]/50 text-[#5a6c5b] rounded-lg font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex-shrink-0"
             >
               <Printer className="h-4 w-4" />
               Cetak Invoice
@@ -332,17 +367,17 @@ export default function OrderDetailPage({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl sm:rounded-2xl p-4 sm:p-8 border-2 border-[#2D5016]/10"
+            className="bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 rounded-xl sm:rounded-2xl p-4 sm:p-8 border-2 border-[#A3AF87]/30"
           >
             <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
               <div className="w-14 h-14 sm:w-20 sm:h-20 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
-                <StatusIconComponent className="h-7 w-7 sm:h-10 sm:w-10 text-[#2D5016]" />
+                <StatusIconComponent className="h-7 w-7 sm:h-10 sm:w-10 text-[#5a6c5b]" />
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex justify-center sm:justify-start">
                   <StatusLabel status={order.status} size="lg" />
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 mt-2 px-2 sm:px-0">
+                <p className="text-xs sm:text-sm text-[#5a6c5b] mt-2 px-2 sm:px-0">
                   {order.status === "shipped" &&
                     "Pesanan Anda sedang dalam perjalanan"}
                   {order.status === "packed" &&
@@ -356,10 +391,10 @@ export default function OrderDetailPage({
                 </p>
               </div>
               <div className="text-center sm:text-right w-full sm:w-auto">
-                <p className="text-xs sm:text-xs text-gray-500 mb-1">
+                <p className="text-xs sm:text-xs text-[#5a6c5b] mb-1">
                   Total Pembayaran
                 </p>
-                <p className="text-xl sm:text-3xl font-bold text-[#2D5016] break-words">
+                <p className="text-xl sm:text-3xl font-bold text-[#5a6c5b] break-words">
                   Rp {order.totalPrice.toLocaleString("id-ID")}
                 </p>
               </div>
@@ -376,12 +411,12 @@ export default function OrderDetailPage({
           transition={{ delay: 0.2 }}
           className="bg-white rounded-xl sm:rounded-2xl border-2 border-gray-100 overflow-hidden"
         >
-          <div className="p-3 sm:p-6 border-b-2 border-gray-50 bg-gradient-to-r from-green-50/30 to-white">
+          <div className="p-3 sm:p-6 border-b-2 border-gray-50 bg-gradient-to-r from-[#A3AF87]/10 to-white">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 bg-[#2D5016] rounded-lg">
+              <div className="p-1.5 sm:p-2 bg-[#A3AF87] rounded-lg">
                 <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <h2 className="text-base sm:text-xl font-bold text-[#2D5016]">
+              <h2 className="text-base sm:text-xl font-bold text-[#5a6c5b]">
                 Informasi Pengiriman
               </h2>
             </div>
@@ -405,7 +440,7 @@ export default function OrderDetailPage({
                       onClick={() =>
                         navigator.clipboard.writeText(order.trackingNumber!)
                       }
-                      className="text-xs px-2 py-1 bg-green-100 text-[#2D5016] rounded font-bold hover:bg-green-200 transition-colors w-fit"
+                      className="text-xs px-2 py-1 bg-[#A3AF87]/20 text-[#5a6c5b] rounded font-bold hover:bg-[#A3AF87]/30 transition-colors w-fit"
                     >
                       Salin
                     </button>
@@ -443,7 +478,7 @@ export default function OrderDetailPage({
                     href={`https://wa.me/${order.farmerPhone}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-[#2D5016] hover:underline"
+                    className="inline-flex items-center gap-2 text-sm text-[#5a6c5b] hover:underline"
                   >
                     <Phone className="h-3 w-3" />
                     Hubungi Penjual
@@ -461,12 +496,12 @@ export default function OrderDetailPage({
           transition={{ delay: 0.3 }}
           className="bg-white rounded-2xl border-2 border-gray-100 overflow-hidden"
         >
-          <div className="p-4 sm:p-6 border-b-2 border-gray-50 bg-gradient-to-r from-green-50/30 to-white">
+          <div className="p-4 sm:p-6 border-b-2 border-gray-50 bg-gradient-to-r from-[#A3AF87]/10 to-white">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#2D5016] rounded-lg">
+              <div className="p-2 bg-[#A3AF87] rounded-lg">
                 <Package className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#2D5016]">
+              <h2 className="text-lg sm:text-xl font-bold text-[#5a6c5b]">
                 Rincian Produk
               </h2>
             </div>
@@ -482,7 +517,7 @@ export default function OrderDetailPage({
                       : ""
                   }`}
                 >
-                  <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-50 to-green-100 rounded-xl overflow-hidden">
+                  <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 rounded-xl overflow-hidden">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -492,7 +527,7 @@ export default function OrderDetailPage({
                   <div className="flex-1 min-w-0">
                     <Link
                       href={`/market/products/${product.slug}`}
-                      className="font-bold text-sm sm:text-base text-[#2D5016] hover:underline line-clamp-2"
+                      className="font-bold text-sm sm:text-base text-[#5a6c5b] hover:underline line-clamp-2"
                     >
                       {product.name}
                     </Link>
@@ -503,7 +538,7 @@ export default function OrderDetailPage({
                       <p className="text-xs sm:text-sm text-gray-600">
                         x{product.quantity}
                       </p>
-                      <p className="font-bold text-sm sm:text-base text-[#2D5016]">
+                      <p className="font-bold text-sm sm:text-base text-[#5a6c5b]">
                         Rp{" "}
                         {(product.price * product.quantity).toLocaleString(
                           "id-ID"
@@ -524,12 +559,12 @@ export default function OrderDetailPage({
           transition={{ delay: 0.4 }}
           className="bg-white rounded-2xl border-2 border-gray-100 overflow-hidden"
         >
-          <div className="p-4 sm:p-6 border-b-2 border-gray-50 bg-gradient-to-r from-green-50/30 to-white">
+          <div className="p-4 sm:p-6 border-b-2 border-gray-50 bg-gradient-to-r from-[#A3AF87]/10 to-white">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#2D5016] rounded-lg">
+              <div className="p-2 bg-[#A3AF87] rounded-lg">
                 <CreditCard className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#2D5016]">
+              <h2 className="text-lg sm:text-xl font-bold text-[#5a6c5b]">
                 Rincian Pembayaran
               </h2>
             </div>
@@ -540,13 +575,13 @@ export default function OrderDetailPage({
                 <span className="text-gray-600">
                   Subtotal ({order.totalItems} produk)
                 </span>
-                <span className="font-bold text-[#2D5016]">
+                <span className="font-bold text-[#5a6c5b]">
                   Rp {order.subtotal.toLocaleString("id-ID")}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Ongkos Kirim</span>
-                <span className="font-bold text-[#2D5016]">
+                <span className="font-bold text-[#5a6c5b]">
                   Rp {order.shippingCost.toLocaleString("id-ID")}
                 </span>
               </div>
@@ -563,7 +598,7 @@ export default function OrderDetailPage({
                   <span className="font-bold text-base sm:text-lg text-gray-700">
                     Total Pembayaran
                   </span>
-                  <span className="font-bold text-xl sm:text-2xl text-[#2D5016]">
+                  <span className="font-bold text-xl sm:text-2xl text-[#5a6c5b]">
                     Rp {order.totalPrice.toLocaleString("id-ID")}
                   </span>
                 </div>
@@ -596,14 +631,14 @@ export default function OrderDetailPage({
           >
             <Link
               href={`/market/products/${order.products[0].slug}#ulasan`}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
             >
               <Star className="h-4 w-4 sm:h-5 sm:w-5" />
               Beri Ulasan
             </Link>
             <button
               onClick={handlePrintInvoice}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-xl font-bold text-sm hover:bg-green-50 transition-all active:scale-95"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-[#A3AF87]/50 text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all active:scale-95"
             >
               <Printer className="h-4 w-4 sm:h-5 sm:w-5" />
               Cetak Invoice
@@ -625,7 +660,7 @@ export default function OrderDetailPage({
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95"
             >
               <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
               Hubungi Penjual via WhatsApp
@@ -642,7 +677,7 @@ export default function OrderDetailPage({
         >
           <button
             onClick={handlePrintInvoice}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-[#2D5016]/30 text-[#2D5016] rounded-xl font-bold text-sm hover:bg-green-50 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-[#A3AF87]/50 text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all active:scale-95"
           >
             <Printer className="h-4 w-4" />
             Cetak Invoice

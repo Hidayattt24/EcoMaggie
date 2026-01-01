@@ -26,11 +26,11 @@ import {
   Info,
   X,
   Sparkles,
-  LocateFixed,
   Loader2,
   MapPinOff,
+  UserCircle,
 } from "lucide-react";
-import { useLocationPersistence } from "@/hooks/useLocationPersistence";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 const wasteTypes = [
   {
@@ -89,13 +89,8 @@ const impactStats = [
 
 export default function SupplyInputPage() {
   const router = useRouter();
-  const {
-    isLocationAllowed,
-    locationData,
-    checkLocation,
-    locationStatus,
-    isLoading,
-  } = useLocationPersistence();
+  const { userLocation, isSupplyConnectAvailable, isLoading } =
+    useUserLocation();
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -137,8 +132,26 @@ export default function SupplyInputPage() {
   const canProceedStep1 = formData.wasteType && formData.weight;
   const canProceedStep2 = formData.date && formData.timeSlot;
 
-  // Location not allowed state
-  if (!isLoading && !isLocationAllowed) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
+          <p className="text-gray-600">Memuat...</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Location not allowed state - user not registered or outside service area
+  if (!isSupplyConnectAvailable) {
+    const isNotRegistered = !userLocation;
+
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <motion.div
@@ -146,33 +159,41 @@ export default function SupplyInputPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100"
         >
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <MapPinOff className="h-10 w-10 text-red-500" />
+          <div
+            className={`w-20 h-20 ${
+              isNotRegistered ? "bg-amber-100" : "bg-red-100"
+            } rounded-full flex items-center justify-center mx-auto mb-6`}
+          >
+            {isNotRegistered ? (
+              <UserCircle className="h-10 w-10 text-amber-500" />
+            ) : (
+              <MapPinOff className="h-10 w-10 text-red-500" />
+            )}
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Verifikasi Lokasi Diperlukan
+            {isNotRegistered
+              ? "Data Alamat Tidak Ditemukan"
+              : "Di Luar Jangkauan Layanan"}
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            Untuk menggunakan fitur Input Sampah, pastikan lokasi Anda berada
-            dalam jangkauan layanan (Kota Banda Aceh).
+            {isNotRegistered
+              ? "Silakan lengkapi data alamat Anda saat mendaftar untuk menggunakan fitur Supply Connect."
+              : `Alamat Anda (${userLocation?.kabupatenKota}, ${userLocation?.provinsi}) berada di luar wilayah layanan. Saat ini Supply Connect hanya tersedia di Kota Banda Aceh.`}
           </p>
-          <button
-            onClick={checkLocation}
-            disabled={locationStatus === "checking"}
-            className="w-full flex items-center justify-center gap-2 bg-[#2D5016] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#3d6b1e] transition-colors disabled:opacity-50"
-          >
-            {locationStatus === "checking" ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Mengecek Lokasi...
-              </>
-            ) : (
-              <>
-                <LocateFixed className="h-5 w-5" />
-                Verifikasi Lokasi
-              </>
-            )}
-          </button>
+          {isNotRegistered ? (
+            <Link
+              href="/register"
+              className="w-full flex items-center justify-center gap-2 bg-[#A3AF87] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#95a17a] transition-colors"
+            >
+              <UserCircle className="h-5 w-5" />
+              Daftar Sekarang
+            </Link>
+          ) : (
+            <div className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-500 py-3.5 rounded-xl font-semibold mb-3">
+              <MapPinOff className="h-5 w-5" />
+              Layanan Tidak Tersedia
+            </div>
+          )}
           <Link
             href="/supply"
             className="w-full flex items-center justify-center gap-2 text-gray-600 py-3 font-medium hover:text-gray-900 transition-colors"
@@ -240,7 +261,7 @@ export default function SupplyInputPage() {
           <div className="space-y-3">
             <Link
               href="/supply/history"
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#2D5016] to-[#4a7c23] text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
             >
               Lihat Riwayat
             </Link>
@@ -291,12 +312,12 @@ export default function SupplyInputPage() {
         <div className="flex gap-2 mb-8 max-w-xl">
           <div
             className={`flex-1 h-2 rounded-full transition-colors ${
-              step >= 1 ? "bg-[#2D5016]" : "bg-gray-200"
+              step >= 1 ? "bg-[#A3AF87]" : "bg-gray-200"
             }`}
           />
           <div
             className={`flex-1 h-2 rounded-full transition-colors ${
-              step >= 2 ? "bg-[#2D5016]" : "bg-gray-200"
+              step >= 2 ? "bg-[#A3AF87]" : "bg-gray-200"
             }`}
           />
         </div>
@@ -340,7 +361,7 @@ export default function SupplyInputPage() {
                               }
                               className={`p-4 lg:p-5 rounded-2xl border-2 text-left transition-all ${
                                 isSelected
-                                  ? "border-[#2D5016] bg-[#2D5016]/5 shadow-md"
+                                  ? "border-[#A3AF87] bg-[#A3AF87]/5 shadow-md"
                                   : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm`
                               }`}
                             >
@@ -352,7 +373,7 @@ export default function SupplyInputPage() {
                               <p
                                 className={`font-semibold text-sm lg:text-base ${
                                   isSelected
-                                    ? "text-[#2D5016]"
+                                    ? "text-[#A3AF87]"
                                     : "text-gray-900"
                                 }`}
                               >
@@ -388,7 +409,7 @@ export default function SupplyInputPage() {
                               }
                               className={`p-4 rounded-xl text-center transition-all ${
                                 isSelected
-                                  ? "bg-[#2D5016] text-white shadow-lg"
+                                  ? "bg-[#A3AF87] text-white shadow-lg"
                                   : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                               }`}
                             >
@@ -431,7 +452,7 @@ export default function SupplyInputPage() {
                           </button>
                         </div>
                       ) : (
-                        <label className="block w-full max-w-sm p-8 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-center hover:border-[#2D5016]/50 hover:bg-gray-100 transition-all cursor-pointer">
+                        <label className="block w-full max-w-sm p-8 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-center hover:border-[#A3AF87]/50 hover:bg-gray-100 transition-all cursor-pointer">
                           <Camera className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                           <p className="text-sm text-gray-600 font-medium">
                             Klik untuk upload foto
@@ -457,7 +478,7 @@ export default function SupplyInputPage() {
                       disabled={!canProceedStep1}
                       className={`w-full lg:w-auto lg:px-12 py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                         canProceedStep1
-                          ? "bg-gradient-to-r from-[#2D5016] to-[#4a7c23] text-white shadow-lg hover:shadow-xl"
+                          ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
@@ -483,14 +504,14 @@ export default function SupplyInputPage() {
                       </label>
                       <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                         <div className="flex items-start gap-4">
-                          <div className="p-3 bg-[#2D5016]/10 rounded-xl">
-                            <MapPin className="h-6 w-6 text-[#2D5016]" />
+                          <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
+                            <MapPin className="h-6 w-6 text-[#A3AF87]" />
                           </div>
                           <div className="flex-1">
                             <p className="text-gray-900 font-medium">
                               {formData.address}
                             </p>
-                            <button className="text-sm text-[#2D5016] font-medium mt-2 hover:underline">
+                            <button className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline">
                               Ubah alamat pickup
                             </button>
                           </div>
@@ -514,7 +535,7 @@ export default function SupplyInputPage() {
                               setFormData({ ...formData, date: e.target.value })
                             }
                             min={new Date().toISOString().split("T")[0]}
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/20 transition-all text-gray-900"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all text-gray-900"
                           />
                         </div>
                       </div>
@@ -540,7 +561,7 @@ export default function SupplyInputPage() {
                                 }
                                 className={`p-3 lg:p-4 rounded-xl text-center transition-all ${
                                   isSelected
-                                    ? "bg-[#2D5016] text-white shadow-lg"
+                                    ? "bg-[#A3AF87] text-white shadow-lg"
                                     : "bg-gray-50 text-gray-700 border border-gray-200 hover:border-gray-300"
                                 }`}
                               >
@@ -581,7 +602,7 @@ export default function SupplyInputPage() {
                         }
                         placeholder="Contoh: Sampah di depan pagar, warna kantong hitam..."
                         rows={3}
-                        className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/20 transition-all resize-none text-gray-900"
+                        className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all resize-none text-gray-900"
                       />
                     </div>
 
@@ -597,7 +618,7 @@ export default function SupplyInputPage() {
                       disabled={!canProceedStep2 || isSubmitting}
                       className={`w-full lg:w-auto lg:px-12 py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                         canProceedStep2 && !isSubmitting
-                          ? "bg-gradient-to-r from-[#2D5016] to-[#4a7c23] text-white shadow-lg hover:shadow-xl"
+                          ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
@@ -627,7 +648,7 @@ export default function SupplyInputPage() {
             className="lg:col-span-5 xl:col-span-4 space-y-6"
           >
             {/* Summary Card */}
-            <div className="bg-gradient-to-br from-[#2D5016] to-[#4a7c23] rounded-2xl p-6 text-white shadow-lg">
+            <div className="bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-2xl p-6 text-white shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-white/20 rounded-lg">
                   <Package className="h-5 w-5" />
@@ -688,8 +709,8 @@ export default function SupplyInputPage() {
                   "Pastikan sampah tidak tercampur plastik/logam",
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#2D5016]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-[#2D5016]">
+                    <div className="w-6 h-6 bg-[#A3AF87]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-[#A3AF87]">
                         {index + 1}
                       </span>
                     </div>
@@ -702,8 +723,8 @@ export default function SupplyInputPage() {
             {/* Impact Stats */}
             <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-100">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#2D5016]/10 rounded-lg">
-                  <Sparkles className="h-5 w-5 text-[#2D5016]" />
+                <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-[#A3AF87]" />
                 </div>
                 <h3 className="font-bold text-gray-900">Dampak Anda</h3>
               </div>
@@ -715,8 +736,8 @@ export default function SupplyInputPage() {
                       key={index}
                       className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100"
                     >
-                      <div className="p-2 bg-[#2D5016]/10 rounded-lg">
-                        <Icon className="h-4 w-4 text-[#2D5016]" />
+                      <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                        <Icon className="h-4 w-4 text-[#A3AF87]" />
                       </div>
                       <div>
                         <p className="text-lg font-bold text-gray-900">

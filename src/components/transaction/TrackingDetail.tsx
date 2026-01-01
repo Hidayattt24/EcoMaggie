@@ -9,7 +9,10 @@ import {
   CheckCircle2,
   Clock,
   Building2,
+  Copy,
+  Check,
 } from "lucide-react";
+import { useState } from "react";
 
 interface TrackingEvent {
   time: string;
@@ -66,6 +69,16 @@ export function TrackingDetail({
   onClose,
   transaction,
 }: TrackingDetailProps) {
+  const [copied, setCopied] = useState(false);
+
+  const copyTrackingNumber = () => {
+    if (transaction.trackingNumber) {
+      navigator.clipboard.writeText(transaction.trackingNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -87,32 +100,44 @@ export function TrackingDetail({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto"
           >
-            <div className="sticky top-0 bg-white border-b-2 border-gray-100 px-6 py-4 rounded-t-3xl">
+            <div className="sticky top-0 bg-white border-b border-[#A3AF87]/20 px-6 py-4 rounded-t-3xl">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-bold text-[#2D5016]">
+                <h2 className="text-xl font-bold text-[#5a6c5b]">
                   Lacak Pesanan
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-[#A3AF87]/10 rounded-full transition-colors"
                 >
                   <X className="h-5 w-5 text-gray-600" />
                 </button>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <p className="text-sm text-gray-600">
                   No. Pesanan:{" "}
-                  <span className="font-bold text-[#2D5016]">
+                  <span className="font-bold text-[#5a6c5b]">
                     {transaction.orderId}
                   </span>
                 </p>
                 {transaction.trackingNumber && (
-                  <p className="text-sm text-gray-600">
-                    No. Resi:{" "}
-                    <span className="font-bold text-[#2D5016]">
-                      {transaction.trackingNumber}
-                    </span>
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-600">
+                      No. Resi:{" "}
+                      <span className="font-bold text-[#5a6c5b]">
+                        {transaction.trackingNumber}
+                      </span>
+                    </p>
+                    <button
+                      onClick={copyTrackingNumber}
+                      className="p-1.5 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                    >
+                      {copied ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -120,19 +145,21 @@ export function TrackingDetail({
             {/* Map Placeholder (Local Delivery) */}
             {transaction.shippingMethod === "Local Delivery" && (
               <div className="mx-6 mt-4 mb-6">
-                <div className="relative w-full h-48 bg-gradient-to-br from-green-100 to-green-50 rounded-xl overflow-hidden border-2 border-[#2D5016]/10">
+                <div className="relative w-full h-48 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl overflow-hidden border border-[#A3AF87]/20">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <MapPin className="h-12 w-12 text-[#2D5016] mx-auto mb-2" />
-                      <p className="text-sm font-bold text-[#2D5016]">
+                      <div className="w-14 h-14 bg-[#A3AF87] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#A3AF87]/30">
+                        <MapPin className="h-7 w-7 text-white" />
+                      </div>
+                      <p className="text-sm font-bold text-[#5a6c5b]">
                         Estimasi Kurir di Area Anda
                       </p>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         Banda Aceh, Aceh
                       </p>
                     </div>
                   </div>
-                  <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-[#2D5016] shadow-lg">
+                  <div className="absolute top-3 right-3 px-3 py-1.5 bg-white rounded-lg text-xs font-bold text-[#5a6c5b] shadow-md border border-[#A3AF87]/20">
                     ± 15 menit lagi
                   </div>
                 </div>
@@ -141,7 +168,7 @@ export function TrackingDetail({
 
             {/* Timeline */}
             <div className="px-6 pb-6">
-              <h3 className="text-sm font-bold text-[#2D5016] mb-4">
+              <h3 className="text-sm font-bold text-[#5a6c5b] mb-4">
                 Riwayat Pengiriman
               </h3>
               <div className="space-y-4">
@@ -149,7 +176,7 @@ export function TrackingDetail({
                   <div key={index} className="relative flex gap-4">
                     {/* Timeline Line */}
                     {index < mockTrackingEvents.length - 1 && (
-                      <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-gray-200" />
+                      <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-[#A3AF87]/20" />
                     )}
 
                     {/* Icon */}
@@ -157,16 +184,16 @@ export function TrackingDetail({
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center ${
                           event.status === "current"
-                            ? "bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 shadow-lg shadow-[#2D5016]/30"
+                            ? "bg-[#A3AF87] shadow-lg shadow-[#A3AF87]/30"
                             : event.status === "completed"
-                            ? "bg-green-100"
+                            ? "bg-[#A3AF87]/20"
                             : "bg-gray-100"
                         }`}
                       >
                         {event.status === "current" ? (
                           <Truck className="h-5 w-5 text-white" />
                         ) : event.status === "completed" ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                          <CheckCircle2 className="h-5 w-5 text-[#5a6c5b]" />
                         ) : (
                           <Clock className="h-5 w-5 text-gray-400" />
                         )}
@@ -179,7 +206,7 @@ export function TrackingDetail({
                         <span
                           className={`text-sm font-bold ${
                             event.status === "current"
-                              ? "text-[#2D5016]"
+                              ? "text-[#5a6c5b]"
                               : event.status === "completed"
                               ? "text-gray-700"
                               : "text-gray-400"
@@ -194,7 +221,7 @@ export function TrackingDetail({
                       <p
                         className={`text-sm font-bold mb-1 ${
                           event.status === "current"
-                            ? "text-[#2D5016]"
+                            ? "text-[#5a6c5b]"
                             : "text-gray-700"
                         }`}
                       >
@@ -216,16 +243,16 @@ export function TrackingDetail({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="hidden lg:block fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl"
+            className="hidden lg:block fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-[#A3AF87]/20"
           >
-            <div className="sticky top-0 bg-white border-b-2 border-gray-100 px-6 py-4">
+            <div className="sticky top-0 bg-white border-b border-[#A3AF87]/20 px-6 py-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-bold text-[#2D5016]">
+                <h2 className="text-xl font-bold text-[#5a6c5b]">
                   Lacak Pesanan
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-[#A3AF87]/10 rounded-full transition-colors"
                 >
                   <X className="h-5 w-5 text-gray-600" />
                 </button>
@@ -233,17 +260,29 @@ export function TrackingDetail({
               <div className="flex gap-6">
                 <p className="text-sm text-gray-600">
                   No. Pesanan:{" "}
-                  <span className="font-bold text-[#2D5016]">
+                  <span className="font-bold text-[#5a6c5b]">
                     {transaction.orderId}
                   </span>
                 </p>
                 {transaction.trackingNumber && (
-                  <p className="text-sm text-gray-600">
-                    No. Resi:{" "}
-                    <span className="font-bold text-[#2D5016]">
-                      {transaction.trackingNumber}
-                    </span>
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-600">
+                      No. Resi:{" "}
+                      <span className="font-bold text-[#5a6c5b]">
+                        {transaction.trackingNumber}
+                      </span>
+                    </p>
+                    <button
+                      onClick={copyTrackingNumber}
+                      className="p-1.5 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                    >
+                      {copied ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -252,19 +291,21 @@ export function TrackingDetail({
               {/* Map Placeholder */}
               {transaction.shippingMethod === "Local Delivery" && (
                 <div className="p-6 pb-0">
-                  <div className="relative w-full h-64 bg-gradient-to-br from-green-100 to-green-50 rounded-xl overflow-hidden border-2 border-[#2D5016]/10">
+                  <div className="relative w-full h-64 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl overflow-hidden border border-[#A3AF87]/20">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <MapPin className="h-16 w-16 text-[#2D5016] mx-auto mb-3" />
-                        <p className="text-base font-bold text-[#2D5016]">
+                        <div className="w-16 h-16 bg-[#A3AF87] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#A3AF87]/30">
+                          <MapPin className="h-8 w-8 text-white" />
+                        </div>
+                        <p className="text-base font-bold text-[#5a6c5b]">
                           Estimasi Kurir di Area Anda
                         </p>
-                        <p className="text-sm text-gray-600 mt-2">
+                        <p className="text-sm text-gray-500 mt-2">
                           Banda Aceh, Aceh
                         </p>
                       </div>
                     </div>
-                    <div className="absolute top-4 right-4 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-sm font-bold text-[#2D5016] shadow-lg">
+                    <div className="absolute top-4 right-4 px-4 py-2 bg-white rounded-lg text-sm font-bold text-[#5a6c5b] shadow-md border border-[#A3AF87]/20">
                       ± 15 menit lagi
                     </div>
                   </div>
@@ -273,29 +314,29 @@ export function TrackingDetail({
 
               {/* Timeline */}
               <div className="p-6">
-                <h3 className="text-sm font-bold text-[#2D5016] mb-4">
+                <h3 className="text-sm font-bold text-[#5a6c5b] mb-4">
                   Riwayat Pengiriman
                 </h3>
                 <div className="space-y-4">
                   {mockTrackingEvents.map((event, index) => (
                     <div key={index} className="relative flex gap-4">
                       {index < mockTrackingEvents.length - 1 && (
-                        <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-gray-200" />
+                        <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-[#A3AF87]/20" />
                       )}
                       <div className="flex-shrink-0">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center ${
                             event.status === "current"
-                              ? "bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 shadow-lg shadow-[#2D5016]/30"
+                              ? "bg-[#A3AF87] shadow-lg shadow-[#A3AF87]/30"
                               : event.status === "completed"
-                              ? "bg-green-100"
+                              ? "bg-[#A3AF87]/20"
                               : "bg-gray-100"
                           }`}
                         >
                           {event.status === "current" ? (
                             <Truck className="h-5 w-5 text-white" />
                           ) : event.status === "completed" ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            <CheckCircle2 className="h-5 w-5 text-[#5a6c5b]" />
                           ) : (
                             <Clock className="h-5 w-5 text-gray-400" />
                           )}
@@ -306,7 +347,7 @@ export function TrackingDetail({
                           <span
                             className={`text-sm font-bold ${
                               event.status === "current"
-                                ? "text-[#2D5016]"
+                                ? "text-[#5a6c5b]"
                                 : event.status === "completed"
                                 ? "text-gray-700"
                                 : "text-gray-400"
@@ -321,7 +362,7 @@ export function TrackingDetail({
                         <p
                           className={`text-sm font-bold mb-1 ${
                             event.status === "current"
-                              ? "text-[#2D5016]"
+                              ? "text-[#5a6c5b]"
                               : "text-gray-700"
                           }`}
                         >

@@ -2,12 +2,23 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+// Mode demo - set true untuk pengembangan (lokasi selalu di Banda Aceh)
+const DEMO_MODE = true;
+
 // Koordinat batas Banda Aceh yang lebih akurat
 const BANDA_ACEH_BOUNDS = {
   north: 5.6,
   south: 5.5,
   east: 95.4,
   west: 95.25,
+};
+
+// Koordinat demo Banda Aceh (Lamnyong)
+const DEMO_LOCATION = {
+  latitude: 5.5483,
+  longitude: 95.3238,
+  accuracy: 10,
+  address: "Lamnyong, Kota Banda Aceh, Aceh",
 };
 
 const STORAGE_KEY = "ecomaggie_location_data";
@@ -125,6 +136,25 @@ export function useLocationPersistence(): UseLocationPersistenceReturn {
   const checkLocation = useCallback(() => {
     setLocationStatus("checking");
     setErrorMessage("");
+
+    // Demo mode - langsung set lokasi di Banda Aceh
+    if (DEMO_MODE) {
+      setTimeout(() => {
+        const newLocationData: LocationData = {
+          latitude: DEMO_LOCATION.latitude,
+          longitude: DEMO_LOCATION.longitude,
+          accuracy: DEMO_LOCATION.accuracy,
+          address: DEMO_LOCATION.address,
+          timestamp: Date.now(),
+          isBandaAceh: true,
+        };
+
+        setLocationData(newLocationData);
+        setLocationStatus("allowed");
+        saveLocationToStorage(newLocationData, "allowed");
+      }, 1000); // Simulasi delay 1 detik
+      return;
+    }
 
     if (!navigator.geolocation) {
       setLocationStatus("error");

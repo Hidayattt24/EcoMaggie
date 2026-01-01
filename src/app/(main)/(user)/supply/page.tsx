@@ -15,128 +15,49 @@ import {
   Truck,
   TreePine,
   Globe,
-  LocateFixed,
   AlertTriangle,
   Leaf,
   Users,
   Scale,
   MapPinOff,
-  RefreshCw,
   Info,
   Sparkles,
+  UtensilsCrossed,
+  Apple,
+  Egg,
+  Soup,
+  UserCircle,
 } from "lucide-react";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
-// Koordinat batas Banda Aceh yang lebih akurat
-const BANDA_ACEH_BOUNDS = {
-  north: 5.6,
-  south: 5.5,
-  east: 95.4,
-  west: 95.25,
-};
-
-type LocationStatus =
-  | "idle"
-  | "checking"
-  | "allowed"
-  | "not_allowed"
-  | "error"
-  | "denied";
-
-interface LocationData {
-  latitude: number | null;
-  longitude: number | null;
-  accuracy: number | null;
-  address: string;
-}
+type LocationStatus = "loading" | "allowed" | "not_allowed" | "not_registered";
 
 export default function SupplyPage() {
-  const [locationStatus, setLocationStatus] = useState<LocationStatus>("idle");
-  const [locationData, setLocationData] = useState<LocationData>({
-    latitude: null,
-    longitude: null,
-    accuracy: null,
-    address: "",
-  });
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const { userLocation, isSupplyConnectAvailable, isLoading } =
+    useUserLocation();
+  const [locationStatus, setLocationStatus] =
+    useState<LocationStatus>("loading");
 
-  const isLocationAllowed = locationStatus === "allowed";
-
-  const checkLocation = () => {
-    setLocationStatus("checking");
-    setErrorMessage("");
-
-    if (!navigator.geolocation) {
-      setLocationStatus("error");
-      setErrorMessage(
-        "Browser Anda tidak mendukung Geolocation. Silakan gunakan browser modern."
-      );
+  // Determine location status based on user registration data
+  useEffect(() => {
+    if (isLoading) {
+      setLocationStatus("loading");
       return;
     }
 
-    const options: PositionOptions = {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0,
-    };
+    if (!userLocation) {
+      setLocationStatus("not_registered");
+      return;
+    }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
+    if (isSupplyConnectAvailable) {
+      setLocationStatus("allowed");
+    } else {
+      setLocationStatus("not_allowed");
+    }
+  }, [userLocation, isSupplyConnectAvailable, isLoading]);
 
-        const isInBandaAceh =
-          latitude >= BANDA_ACEH_BOUNDS.south &&
-          latitude <= BANDA_ACEH_BOUNDS.north &&
-          longitude >= BANDA_ACEH_BOUNDS.west &&
-          longitude <= BANDA_ACEH_BOUNDS.east;
-
-        setLocationData({
-          latitude,
-          longitude,
-          accuracy,
-          address: isInBandaAceh
-            ? "Kota Banda Aceh, Aceh"
-            : "Di luar jangkauan layanan",
-        });
-
-        if (isInBandaAceh) {
-          setLocationStatus("allowed");
-        } else {
-          setLocationStatus("not_allowed");
-          setErrorMessage(
-            `Lokasi Anda terdeteksi di luar wilayah Banda Aceh. Layanan Supply Connect saat ini hanya tersedia untuk wilayah Kota Banda Aceh.`
-          );
-        }
-      },
-      (error) => {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setLocationStatus("denied");
-            setErrorMessage(
-              "Akses lokasi ditolak. Untuk menggunakan fitur ini, izinkan akses lokasi di pengaturan browser Anda."
-            );
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setLocationStatus("error");
-            setErrorMessage(
-              "Informasi lokasi tidak tersedia. Pastikan GPS perangkat Anda aktif dan coba lagi."
-            );
-            break;
-          case error.TIMEOUT:
-            setLocationStatus("error");
-            setErrorMessage(
-              "Permintaan lokasi timeout. Periksa koneksi internet Anda dan coba lagi."
-            );
-            break;
-          default:
-            setLocationStatus("error");
-            setErrorMessage(
-              "Terjadi kesalahan saat mengambil lokasi. Silakan coba lagi."
-            );
-        }
-      },
-      options
-    );
-  };
+  const isLocationAllowed = locationStatus === "allowed";
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -204,15 +125,15 @@ export default function SupplyPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8 lg:mb-12"
         >
-          <div className="inline-flex items-center gap-2 bg-[#2D5016]/10 px-4 py-2 rounded-full mb-4">
-            <Recycle className="h-4 w-4 text-[#2D5016]" />
-            <span className="text-xs font-bold text-[#2D5016] tracking-wider uppercase">
+          <div className="inline-flex items-center gap-2 bg-[#A3AF87]/10 px-4 py-2 rounded-full mb-4">
+            <Recycle className="h-4 w-4 text-[#A3AF87]" />
+            <span className="text-xs font-bold text-[#A3AF87] tracking-wider uppercase">
               Supply Connect
             </span>
           </div>
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
             Ubah Sampah Organik Jadi
-            <span className="text-[#2D5016]"> Manfaat untuk Bumi</span>
+            <span className="text-[#A3AF87]"> Manfaat untuk Bumi</span>
           </h1>
           <p className="text-gray-500 text-sm lg:text-base max-w-2xl mx-auto">
             Berkontribusi untuk lingkungan yang lebih bersih dengan menyetorkan
@@ -241,33 +162,29 @@ export default function SupplyPage() {
                     className={`p-3 rounded-xl transition-colors ${
                       locationStatus === "allowed"
                         ? "bg-green-100"
-                        : locationStatus === "not_allowed" ||
-                          locationStatus === "denied"
+                        : locationStatus === "not_allowed"
                         ? "bg-red-100"
-                        : locationStatus === "error"
+                        : locationStatus === "not_registered"
                         ? "bg-amber-100"
                         : "bg-gray-100"
                     }`}
                   >
-                    {locationStatus === "checking" ? (
+                    {locationStatus === "loading" ? (
                       <Loader2 className="h-6 w-6 text-gray-600 animate-spin" />
                     ) : locationStatus === "allowed" ? (
                       <MapPin className="h-6 w-6 text-green-600" />
-                    ) : locationStatus === "not_allowed" ||
-                      locationStatus === "denied" ? (
+                    ) : locationStatus === "not_allowed" ? (
                       <MapPinOff className="h-6 w-6 text-red-600" />
-                    ) : locationStatus === "error" ? (
-                      <AlertTriangle className="h-6 w-6 text-amber-600" />
                     ) : (
-                      <LocateFixed className="h-6 w-6 text-gray-600" />
+                      <UserCircle className="h-6 w-6 text-amber-600" />
                     )}
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">
-                      Verifikasi Lokasi
+                      Status Wilayah Layanan
                     </h3>
                     <p className="text-xs text-gray-500">
-                      Layanan tersedia di Banda Aceh
+                      Berdasarkan alamat pendaftaran Anda
                     </p>
                   </div>
                 </div>
@@ -275,32 +192,9 @@ export default function SupplyPage() {
 
               {/* Location Status Display */}
               <AnimatePresence mode="wait">
-                {locationStatus === "idle" && (
+                {locationStatus === "loading" && (
                   <motion.div
-                    key="idle"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-blue-50 rounded-xl p-4 mb-4 border border-blue-100"
-                  >
-                    <div className="flex items-start gap-3">
-                      <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-blue-800 font-medium">
-                          Verifikasi Diperlukan
-                        </p>
-                        <p className="text-xs text-blue-600 mt-1">
-                          Klik tombol di bawah untuk mengecek apakah lokasi Anda
-                          berada dalam jangkauan layanan.
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {locationStatus === "checking" && (
-                  <motion.div
-                    key="checking"
+                    key="loading"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -309,13 +203,36 @@ export default function SupplyPage() {
                     <div className="flex items-center justify-center gap-3">
                       <Loader2 className="h-5 w-5 text-gray-600 animate-spin" />
                       <p className="text-sm text-gray-700">
-                        Mengecek lokasi Anda...
+                        Memuat data lokasi...
                       </p>
                     </div>
                   </motion.div>
                 )}
 
-                {locationStatus === "allowed" && (
+                {locationStatus === "not_registered" && (
+                  <motion.div
+                    key="not_registered"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-amber-50 rounded-xl p-4 mb-4 border border-amber-200"
+                  >
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-amber-800 font-medium">
+                          Data Alamat Tidak Ditemukan
+                        </p>
+                        <p className="text-xs text-amber-600 mt-1">
+                          Silakan lengkapi alamat pada profil akun Anda atau
+                          daftar ulang untuk menggunakan fitur Supply Connect.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {locationStatus === "allowed" && userLocation && (
                   <motion.div
                     key="allowed"
                     initial={{ opacity: 0, height: 0 }}
@@ -327,64 +244,36 @@ export default function SupplyPage() {
                       <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-green-800 font-medium">
-                          {locationData.address}
+                          {userLocation.kabupatenKota}, {userLocation.provinsi}
                         </p>
                         <p className="text-xs text-green-600 mt-1">
                           Lokasi terverifikasi! Anda dapat menggunakan semua
                           fitur Supply Connect.
                         </p>
-                        {locationData.accuracy && (
-                          <p className="text-xs text-green-500 mt-1">
-                            Akurasi: ±{Math.round(locationData.accuracy)}m
-                          </p>
-                        )}
                       </div>
                     </div>
                   </motion.div>
                 )}
 
-                {(locationStatus === "not_allowed" ||
-                  locationStatus === "denied" ||
-                  locationStatus === "error") && (
+                {locationStatus === "not_allowed" && userLocation && (
                   <motion.div
-                    key="error"
+                    key="not_allowed"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className={`rounded-xl p-4 mb-4 border ${
-                      locationStatus === "error"
-                        ? "bg-amber-50 border-amber-200"
-                        : "bg-red-50 border-red-200"
-                    }`}
+                    className="bg-red-50 rounded-xl p-4 mb-4 border border-red-200"
                   >
                     <div className="flex items-start gap-3">
-                      {locationStatus === "error" ? (
-                        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                      )}
+                      <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
                       <div>
-                        <p
-                          className={`text-sm font-medium ${
-                            locationStatus === "error"
-                              ? "text-amber-800"
-                              : "text-red-800"
-                          }`}
-                        >
-                          {locationStatus === "denied"
-                            ? "Akses Lokasi Ditolak"
-                            : locationStatus === "not_allowed"
-                            ? "Di Luar Jangkauan Layanan"
-                            : "Terjadi Kesalahan"}
+                        <p className="text-sm text-red-800 font-medium">
+                          Di Luar Jangkauan Layanan
                         </p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            locationStatus === "error"
-                              ? "text-amber-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {errorMessage}
+                        <p className="text-xs text-red-600 mt-1">
+                          Alamat Anda ({userLocation.kabupatenKota},{" "}
+                          {userLocation.provinsi}) berada di luar wilayah
+                          layanan. Saat ini Supply Connect hanya tersedia untuk
+                          wilayah Kota Banda Aceh.
                         </p>
                       </div>
                     </div>
@@ -392,35 +281,26 @@ export default function SupplyPage() {
                 )}
               </AnimatePresence>
 
-              {/* Check Location Button */}
-              <button
-                onClick={checkLocation}
-                disabled={locationStatus === "checking"}
-                className={`w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
-                  locationStatus === "checking"
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : locationStatus === "allowed"
-                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                    : "bg-[#2D5016] text-white hover:bg-[#3d6b1e] shadow-lg hover:shadow-xl"
-                }`}
-              >
-                {locationStatus === "checking" ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Mengecek...
-                  </>
-                ) : locationStatus === "allowed" ? (
-                  <>
-                    <RefreshCw className="h-4 w-4" />
-                    Cek Ulang Lokasi
-                  </>
-                ) : (
-                  <>
-                    <LocateFixed className="h-4 w-4" />
-                    Cek Lokasi Presisi
-                  </>
-                )}
-              </button>
+              {/* Action Button based on status */}
+              {locationStatus === "not_registered" ? (
+                <Link
+                  href="/register"
+                  className="w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all bg-[#A3AF87] text-white hover:bg-[#95a17a] shadow-lg hover:shadow-xl"
+                >
+                  <UserCircle className="h-4 w-4" />
+                  Daftar / Lengkapi Profil
+                </Link>
+              ) : locationStatus === "not_allowed" ? (
+                <div className="text-center py-3 px-4 rounded-xl bg-gray-100 text-gray-500 text-sm">
+                  <MapPinOff className="h-4 w-4 inline mr-2" />
+                  Layanan tidak tersedia di wilayah Anda
+                </div>
+              ) : locationStatus === "allowed" ? (
+                <div className="text-center py-3 px-4 rounded-xl bg-green-100 text-green-700 text-sm font-medium">
+                  <CheckCircle className="h-4 w-4 inline mr-2" />
+                  Fitur Supply Connect Aktif
+                </div>
+              ) : null}
             </motion.div>
 
             {/* Stats Grid */}
@@ -448,10 +328,10 @@ export default function SupplyPage() {
             {/* Impact Info */}
             <motion.div
               variants={itemVariants}
-              className="bg-gradient-to-br from-[#2D5016]/5 to-[#4a7c23]/10 rounded-2xl p-5 border border-[#2D5016]/10"
+              className="bg-gradient-to-br from-[#A3AF87]/5 to-[#95a17a]/10 rounded-2xl p-5 border border-[#A3AF87]/10"
             >
               <div className="flex items-center gap-3 mb-3">
-                <Globe className="h-5 w-5 text-[#2D5016]" />
+                <Globe className="h-5 w-5 text-[#A3AF87]" />
                 <h3 className="font-semibold text-gray-900">
                   Dampak untuk Bumi
                 </h3>
@@ -485,7 +365,7 @@ export default function SupplyPage() {
                   >
                     <Link
                       href="/supply/input"
-                      className="group relative bg-gradient-to-br from-[#2D5016] to-[#4a7c23] rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all overflow-hidden"
+                      className="group relative bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all overflow-hidden"
                     >
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -508,10 +388,10 @@ export default function SupplyPage() {
 
                     <Link
                       href="/supply/history"
-                      className="group bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#2D5016]/30 hover:shadow-lg transition-all"
+                      className="group bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-lg transition-all"
                     >
-                      <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#2D5016]/10 transition-colors">
-                        <History className="h-7 w-7 text-gray-600 group-hover:text-[#2D5016] transition-colors" />
+                      <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#A3AF87]/10 transition-colors">
+                        <History className="h-7 w-7 text-gray-600 group-hover:text-[#A3AF87] transition-colors" />
                       </div>
                       <h3 className="text-gray-900 font-bold text-lg mb-1">
                         Riwayat Supply
@@ -519,7 +399,7 @@ export default function SupplyPage() {
                       <p className="text-gray-500 text-sm">
                         Lihat semua data dan status pickup Anda
                       </p>
-                      <div className="flex items-center gap-1 text-gray-400 text-sm mt-4 group-hover:text-[#2D5016] transition-colors">
+                      <div className="flex items-center gap-1 text-gray-400 text-sm mt-4 group-hover:text-[#A3AF87] transition-colors">
                         <span>Lihat Riwayat</span>
                         <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                       </div>
@@ -537,30 +417,29 @@ export default function SupplyPage() {
                       <MapPinOff className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="text-gray-700 font-semibold text-lg mb-2">
-                      Verifikasi Lokasi Diperlukan
+                      {locationStatus === "not_registered"
+                        ? "Data Alamat Tidak Ditemukan"
+                        : "Di Luar Jangkauan Layanan"}
                     </h3>
                     <p className="text-gray-500 text-sm max-w-md mx-auto mb-4">
-                      Untuk mengakses fitur Input Sampah dan Riwayat Supply,
-                      silakan verifikasi bahwa lokasi Anda berada dalam
-                      jangkauan layanan (Kota Banda Aceh).
+                      {locationStatus === "not_registered"
+                        ? "Silakan lengkapi data alamat Anda saat mendaftar untuk menggunakan fitur Supply Connect."
+                        : `Alamat Anda (${userLocation?.kabupatenKota}, ${userLocation?.provinsi}) berada di luar wilayah layanan. Saat ini Supply Connect hanya tersedia di Kota Banda Aceh.`}
                     </p>
-                    <button
-                      onClick={checkLocation}
-                      disabled={locationStatus === "checking"}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#2D5016] text-white rounded-xl font-semibold text-sm hover:bg-[#3d6b1e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {locationStatus === "checking" ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Mengecek...
-                        </>
-                      ) : (
-                        <>
-                          <LocateFixed className="h-4 w-4" />
-                          Verifikasi Sekarang
-                        </>
-                      )}
-                    </button>
+                    {locationStatus === "not_registered" ? (
+                      <Link
+                        href="/register"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-semibold text-sm hover:bg-[#95a17a] transition-colors"
+                      >
+                        <UserCircle className="h-4 w-4" />
+                        Daftar Sekarang
+                      </Link>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-500 rounded-xl font-semibold text-sm cursor-not-allowed">
+                        <MapPinOff className="h-4 w-4" />
+                        Layanan Tidak Tersedia
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -572,8 +451,8 @@ export default function SupplyPage() {
               className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-100"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-[#2D5016]/10 rounded-lg">
-                  <Sparkles className="h-5 w-5 text-[#2D5016]" />
+                <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-[#A3AF87]" />
                 </div>
                 <h3 className="font-bold text-gray-900 text-lg">
                   Bagaimana Cara Kerjanya?
@@ -589,14 +468,14 @@ export default function SupplyPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="relative bg-white rounded-xl p-4 border border-gray-100 hover:border-[#2D5016]/20 hover:shadow-md transition-all group"
+                      className="relative bg-white rounded-xl p-4 border border-gray-100 hover:border-[#A3AF87]/20 hover:shadow-md transition-all group"
                     >
-                      <div className="absolute -top-2 -left-2 w-6 h-6 bg-[#2D5016] text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      <div className="absolute -top-2 -left-2 w-6 h-6 bg-[#A3AF87] text-white rounded-full flex items-center justify-center text-xs font-bold">
                         {item.step}
                       </div>
                       <div className="flex items-start gap-3 pt-2">
-                        <div className="p-2 bg-[#2D5016]/10 rounded-lg group-hover:bg-[#2D5016]/20 transition-colors">
-                          <Icon className="h-5 w-5 text-[#2D5016]" />
+                        <div className="p-2 bg-[#A3AF87]/10 rounded-lg group-hover:bg-[#A3AF87]/20 transition-colors">
+                          <Icon className="h-5 w-5 text-[#A3AF87]" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 text-sm mb-1">
@@ -625,35 +504,44 @@ export default function SupplyPage() {
                 {[
                   {
                     name: "Sisa Makanan",
-                    emoji: "🍚",
+                    icon: UtensilsCrossed,
                     color: "bg-orange-50 border-orange-100",
+                    iconColor: "text-orange-500",
                   },
                   {
                     name: "Sayuran & Buah",
-                    emoji: "🥬",
+                    icon: Apple,
                     color: "bg-green-50 border-green-100",
+                    iconColor: "text-green-500",
                   },
                   {
                     name: "Kulit Telur",
-                    emoji: "🥚",
+                    icon: Egg,
                     color: "bg-amber-50 border-amber-100",
+                    iconColor: "text-amber-500",
                   },
                   {
                     name: "Sisa Dapur",
-                    emoji: "🍖",
+                    icon: Soup,
                     color: "bg-red-50 border-red-100",
+                    iconColor: "text-red-500",
                   },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className={`${item.color} rounded-xl p-3 text-center border`}
-                  >
-                    <span className="text-2xl mb-1 block">{item.emoji}</span>
-                    <p className="text-xs font-medium text-gray-700">
-                      {item.name}
-                    </p>
-                  </div>
-                ))}
+                ].map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={index}
+                      className={`${item.color} rounded-xl p-3 text-center border`}
+                    >
+                      <div className="flex justify-center mb-1">
+                        <Icon className={`h-6 w-6 ${item.iconColor}`} />
+                      </div>
+                      <p className="text-xs font-medium text-gray-700">
+                        {item.name}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </motion.div>
           </motion.div>

@@ -93,7 +93,7 @@ export default function ProfileSettings() {
             className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
             <svg
-              className="h-5 w-5 text-[#2D5016] group-hover:-translate-x-1 transition-transform"
+              className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -107,7 +107,7 @@ export default function ProfileSettings() {
             </svg>
             <span className="text-sm font-medium text-gray-700">Kembali</span>
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#2D5016]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
             Pengaturan Akun
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
@@ -124,7 +124,7 @@ export default function ProfileSettings() {
             {!isEditMode && (
               <button
                 onClick={() => setIsEditMode(true)}
-                className="px-4 py-2 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-colors text-sm font-medium"
               >
                 Edit Profil
               </button>
@@ -142,7 +142,7 @@ export default function ProfileSettings() {
                 />
               </div>
               {isEditMode && (
-                <label className="absolute bottom-0 right-0 bg-[#2D5016] p-2 rounded-full cursor-pointer hover:bg-[#234012] transition-colors shadow-lg">
+                <label className="absolute bottom-0 right-0 bg-[#A3AF87] p-2 rounded-full cursor-pointer hover:bg-[#95a17a] transition-colors shadow-lg">
                   <Camera className="h-4 w-4 text-white" />
                   <input
                     type="file"
@@ -174,7 +174,7 @@ export default function ProfileSettings() {
                   setProfileData({ ...profileData, name: e.target.value })
                 }
                 disabled={!isEditMode}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#5a6c5b] text-[#5a6c5b] font-medium"
               />
             </div>
 
@@ -190,7 +190,7 @@ export default function ProfileSettings() {
                     setProfileData({ ...profileData, email: e.target.value })
                   }
                   disabled={!isEditMode}
-                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
+                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#5a6c5b] text-[#5a6c5b] font-medium"
                 />
                 <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
               </div>
@@ -211,7 +211,7 @@ export default function ProfileSettings() {
                   setProfileData({ ...profileData, phone: e.target.value })
                 }
                 disabled={!isEditMode}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2D5016] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#2D5016] text-[#2D5016] font-medium"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-[#5a6c5b] text-[#5a6c5b] font-medium"
               />
             </div>
 
@@ -224,8 +224,8 @@ export default function ProfileSettings() {
                 <label
                   className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     profileData.jenisPengguna === "UMKM"
-                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                      ? "border-[#A3AF87] bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:border-[#95a17a] hover:shadow-md hover:scale-[1.01]"
                   } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <input
@@ -245,15 +245,15 @@ export default function ProfileSettings() {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                       profileData.jenisPengguna === "UMKM"
-                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
-                        : "bg-gray-100 group-hover:bg-green-50"
+                        ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-lg"
+                        : "bg-gray-100 group-hover:bg-[#A3AF87]/20"
                     }`}
                   >
                     <svg
                       className={`w-5 h-5 transition-colors duration-300 ${
                         profileData.jenisPengguna === "UMKM"
                           ? "text-white"
-                          : "text-gray-400 group-hover:text-[#2D5016]"
+                          : "text-gray-400 group-hover:text-[#5a6c5b]"
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -270,8 +270,8 @@ export default function ProfileSettings() {
                   <span
                     className={`text-sm font-semibold transition-colors duration-300 ${
                       profileData.jenisPengguna === "UMKM"
-                        ? "text-[#2D5016]"
-                        : "text-gray-700 group-hover:text-[#2D5016]"
+                        ? "text-[#5a6c5b]"
+                        : "text-gray-700 group-hover:text-[#5a6c5b]"
                     }`}
                   >
                     UMKM
@@ -280,7 +280,7 @@ export default function ProfileSettings() {
                     Usaha Kecil
                   </span>
                   {profileData.jenisPengguna === "UMKM" && (
-                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#A3AF87] rounded-full flex items-center justify-center shadow-md">
                       <svg
                         className="w-3 h-3 text-white"
                         fill="none"
@@ -302,8 +302,8 @@ export default function ProfileSettings() {
                 <label
                   className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     profileData.jenisPengguna === "Rumah Tangga"
-                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                      ? "border-[#A3AF87] bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:border-[#95a17a] hover:shadow-md hover:scale-[1.01]"
                   } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <input
@@ -323,15 +323,15 @@ export default function ProfileSettings() {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                       profileData.jenisPengguna === "Rumah Tangga"
-                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
-                        : "bg-gray-100 group-hover:bg-green-50"
+                        ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-lg"
+                        : "bg-gray-100 group-hover:bg-[#A3AF87]/20"
                     }`}
                   >
                     <svg
                       className={`w-5 h-5 transition-colors duration-300 ${
                         profileData.jenisPengguna === "Rumah Tangga"
                           ? "text-white"
-                          : "text-gray-400 group-hover:text-[#2D5016]"
+                          : "text-gray-400 group-hover:text-[#5a6c5b]"
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -348,8 +348,8 @@ export default function ProfileSettings() {
                   <span
                     className={`text-sm font-semibold transition-colors duration-300 ${
                       profileData.jenisPengguna === "Rumah Tangga"
-                        ? "text-[#2D5016]"
-                        : "text-gray-700 group-hover:text-[#2D5016]"
+                        ? "text-[#5a6c5b]"
+                        : "text-gray-700 group-hover:text-[#5a6c5b]"
                     }`}
                   >
                     Rumah Tangga
@@ -358,7 +358,7 @@ export default function ProfileSettings() {
                     Keluarga
                   </span>
                   {profileData.jenisPengguna === "Rumah Tangga" && (
-                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#A3AF87] rounded-full flex items-center justify-center shadow-md">
                       <svg
                         className="w-3 h-3 text-white"
                         fill="none"
@@ -385,7 +385,7 @@ export default function ProfileSettings() {
               <button
                 onClick={handleSaveProfile}
                 disabled={isLoading}
-                className="flex-1 px-6 py-3 bg-[#2D5016] text-white rounded-xl hover:bg-[#234012] transition-all disabled:opacity-50 font-medium"
+                className="flex-1 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all disabled:opacity-50 font-medium"
               >
                 {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
               </button>

@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Package, ShoppingBag } from "lucide-react";
+import {
+  Search,
+  Package,
+  ShoppingBag,
+  Filter,
+  X,
+  RefreshCw,
+} from "lucide-react";
 import { StatusTabs } from "@/components/transaction/StatusTabs";
 import { TransactionCard } from "@/components/transaction/TransactionCard";
 import { TrackingDetail } from "@/components/transaction/TrackingDetail";
@@ -128,26 +135,26 @@ const mockTransactions = [
 // Skeleton Component
 function TransactionSkeleton() {
   return (
-    <div className="bg-white border-2 border-gray-100 rounded-xl overflow-hidden animate-pulse">
-      <div className="p-4 border-b-2 border-gray-50">
+    <div className="bg-white border border-[#A3AF87]/20 rounded-2xl overflow-hidden animate-pulse shadow-sm">
+      <div className="p-4 border-b border-[#A3AF87]/10">
         <div className="flex items-center justify-between mb-2">
-          <div className="h-4 bg-gray-200 rounded w-32" />
-          <div className="h-6 bg-gray-200 rounded w-24" />
+          <div className="h-4 bg-[#A3AF87]/20 rounded w-32" />
+          <div className="h-6 bg-[#A3AF87]/20 rounded w-24" />
         </div>
-        <div className="h-3 bg-gray-200 rounded w-24" />
+        <div className="h-3 bg-[#A3AF87]/10 rounded w-24" />
       </div>
       <div className="p-4">
         <div className="flex gap-3">
-          <div className="w-20 h-20 bg-gray-200 rounded-lg" />
+          <div className="w-20 h-20 bg-[#A3AF87]/10 rounded-xl" />
           <div className="flex-1">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-            <div className="h-3 bg-gray-200 rounded w-1/2 mb-1" />
-            <div className="h-3 bg-gray-200 rounded w-1/4" />
+            <div className="h-4 bg-[#A3AF87]/20 rounded w-3/4 mb-2" />
+            <div className="h-3 bg-[#A3AF87]/10 rounded w-1/2 mb-1" />
+            <div className="h-3 bg-[#A3AF87]/10 rounded w-1/4" />
           </div>
         </div>
       </div>
-      <div className="p-4 border-t-2 border-gray-50">
-        <div className="h-10 bg-gray-200 rounded-lg" />
+      <div className="p-4 border-t border-[#A3AF87]/10">
+        <div className="h-10 bg-[#A3AF87]/10 rounded-xl" />
       </div>
     </div>
   );
@@ -184,7 +191,6 @@ export default function TransactionPage() {
   const handleTabChange = (tab: string) => {
     setIsLoading(true);
     setActiveTab(tab);
-    // Simulate loading
     setTimeout(() => setIsLoading(false), 300);
   };
 
@@ -192,35 +198,60 @@ export default function TransactionPage() {
     setTrackingTransaction(transaction);
   };
 
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-50/20 pb-20 lg:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 pb-20 lg:pb-6">
       {/* Header */}
-      <div className="bg-white border-b-2 border-gray-100">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
-          <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-            <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
-              <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+      <div className="bg-white border-b border-[#A3AF87]/20 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5 sm:mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2.5 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg shadow-[#A3AF87]/20">
+                <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#5a6c5b]">
+                  Transaksi Saya
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                  Kelola dan pantau semua pesanan Anda
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl sm:text-3xl font-bold text-[#2D5016]">
-                Transaksi Saya
-              </h1>
-              <p className="text-xs sm:text-sm text-[#2D5016]/70 font-medium mt-0.5">
-                Kelola semua pesanan Anda
-              </p>
-            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 hover:bg-[#A3AF87]/20 text-[#5a6c5b] text-sm font-medium rounded-xl transition-all disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Cari ID pesanan atau produk..."
+              placeholder="Cari ID pesanan, nama toko, atau produk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3.5 border-2 border-gray-200 rounded-xl text-sm text-[#2D5016] placeholder:text-gray-400 font-medium focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/10 transition-all"
+              className="w-full pl-12 pr-12 py-3.5 border border-[#A3AF87]/30 rounded-xl text-sm text-[#5a6c5b] placeholder:text-gray-400 font-medium focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all bg-[#A3AF87]/5"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-4 w-4 text-gray-400" />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -233,7 +264,20 @@ export default function TransactionPage() {
       />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+        {/* Results Count */}
+        {!isLoading && filteredTransactions.length > 0 && (
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-500">
+              Menampilkan{" "}
+              <span className="font-semibold text-[#5a6c5b]">
+                {filteredTransactions.length}
+              </span>{" "}
+              transaksi
+            </p>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.div
@@ -241,9 +285,9 @@ export default function TransactionPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="space-y-4"
+              className="grid gap-4 lg:grid-cols-2"
             >
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4].map((i) => (
                 <TransactionSkeleton key={i} />
               ))}
             </motion.div>
@@ -253,21 +297,36 @@ export default function TransactionPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col items-center justify-center py-16 sm:py-20"
+              className="flex flex-col items-center justify-center py-16 sm:py-24"
             >
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-green-50 to-green-100 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4 border-[#2D5016]/10">
-                <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-[#2D5016]/30" />
+              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-2 border-[#A3AF87]/20">
+                <ShoppingBag className="h-14 w-14 sm:h-18 sm:w-18 text-[#A3AF87]/40" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016] mb-2 sm:mb-3 text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b] mb-2 sm:mb-3 text-center">
                 {searchQuery
                   ? "Transaksi Tidak Ditemukan"
                   : "Belum Ada Transaksi"}
               </h2>
-              <p className="text-sm sm:text-base text-[#2D5016]/70 mb-6 sm:mb-8 text-center max-w-md px-4">
+              <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8 text-center max-w-md px-4">
                 {searchQuery
-                  ? "Coba gunakan kata kunci yang berbeda"
-                  : "Yuk, mulai belanja produk maggot berkualitas"}
+                  ? "Coba gunakan kata kunci yang berbeda atau hapus filter pencarian"
+                  : "Yuk, mulai belanja produk maggot berkualitas dari petani lokal"}
               </p>
+              {searchQuery ? (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="px-6 py-3 bg-[#A3AF87] text-white text-sm font-bold rounded-xl hover:bg-[#95a17a] transition-all"
+                >
+                  Hapus Pencarian
+                </button>
+              ) : (
+                <a
+                  href="/market/products"
+                  className="px-6 py-3 bg-[#A3AF87] text-white text-sm font-bold rounded-xl hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all"
+                >
+                  Mulai Belanja
+                </a>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -275,7 +334,7 @@ export default function TransactionPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="space-y-4"
+              className="grid gap-4 lg:grid-cols-2"
             >
               {filteredTransactions.map((transaction, index) => (
                 <motion.div

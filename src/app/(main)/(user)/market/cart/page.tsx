@@ -166,9 +166,14 @@ export default function CartPage() {
         {/* Back Button - Mobile Only */}
         <button
           onClick={() => router.back()}
-          className="lg:hidden flex items-center gap-2 mb-4 text-[#2D5016] hover:text-[#2D5016]/80 transition-colors"
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#5a6c5b] hover:text-[#5a6c5b]/80 transition-colors"
         >
-          <div className="p-2 bg-white border-2 border-[#2D5016]/20 rounded-lg hover:bg-green-50 transition-colors">
+          <div
+            className="p-2 bg-white border-2 rounded-lg transition-colors hover:bg-[#A3AF87]/10"
+            style={
+              { borderColor: "rgba(163, 175, 135, 0.2)" } as React.CSSProperties
+            }
+          >
             <ArrowLeft className="h-5 w-5" />
           </div>
           <span className="font-semibold text-sm">Kembali</span>
@@ -177,14 +182,17 @@ export default function CartPage() {
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-2">
-            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+            <div className="p-2.5 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
               <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#2D5016]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
                 Keranjang Belanja
               </h1>
-              <p className="text-xs sm:text-sm text-[#2D5016]/70 font-medium mt-0.5">
+              <p
+                className="text-xs sm:text-sm font-medium mt-0.5"
+                style={{ color: "rgba(90, 108, 91, 0.7)" }}
+              >
                 {cartItems.length} produk di keranjang Anda
               </p>
             </div>
@@ -201,19 +209,41 @@ export default function CartPage() {
               exit={{ opacity: 0, y: -20 }}
               className="flex flex-col items-center justify-center py-16 sm:py-20"
             >
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-green-50 to-green-100 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4 border-[#2D5016]/10">
-                <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-[#2D5016]/30" />
+              <div
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4"
+                style={
+                  {
+                    backgroundColor: "rgba(163, 175, 135, 0.1)",
+                    borderColor: "rgba(163, 175, 135, 0.15)",
+                  } as React.CSSProperties
+                }
+              >
+                <ShoppingBag
+                  className="h-12 w-12 sm:h-16 sm:w-16"
+                  style={{ color: "rgba(163, 175, 135, 0.3)" }}
+                />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016] mb-2 sm:mb-3 text-center">
+              <h2
+                className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-center"
+                style={{ color: "#303646" } as React.CSSProperties}
+              >
                 Keranjang Anda Kosong
               </h2>
-              <p className="text-sm sm:text-base text-[#2D5016]/70 mb-6 sm:mb-8 text-center max-w-md px-4">
+              <p
+                className="text-sm sm:text-base mb-6 sm:mb-8 text-center max-w-md px-4"
+                style={
+                  { color: "rgba(90, 108, 91, 0.7)" } as React.CSSProperties
+                }
+              >
                 Yuk, mulai belanja produk maggot berkualitas untuk kebutuhan
                 ternak Anda
               </p>
               <Link
                 href="/market/products"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white rounded-xl font-bold text-sm sm:text-base hover:shadow-xl hover:shadow-[#2D5016]/30 transition-all"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-[#A3AF87] text-white rounded-xl font-bold text-sm sm:text-base transition-all"
+                style={{
+                  boxShadow: "0 20px 50px -12px rgba(163, 175, 135, 0.3)",
+                }}
               >
                 <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 Mulai Belanja
@@ -225,15 +255,33 @@ export default function CartPage() {
               {/* Left Column - Cart Items */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Select All Bar */}
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100/50 border-2 border-[#2D5016]/10 rounded-xl">
+                <div
+                  className="flex items-center justify-between p-4 border-2 rounded-xl"
+                  style={
+                    {
+                      backgroundColor: "rgba(163, 175, 135, 0.05)",
+                      borderColor: "rgba(163, 175, 135, 0.15)",
+                    } as React.CSSProperties
+                  }
+                >
                   <label className="flex items-center gap-2 cursor-pointer group">
                     <div className="relative">
                       <input
                         type="checkbox"
                         checked={selectedItems.length === cartItems.length}
                         onChange={toggleSelectAll}
-                        className="peer w-5 h-5 rounded-md border-2 border-[#2D5016]/30 checked:bg-[#2D5016] checked:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 cursor-pointer transition-all appearance-none"
+                        className="peer w-5 h-5 rounded-md border-2 cursor-pointer transition-all appearance-none"
+                        style={{
+                          borderColor: "rgba(90, 108, 91, 0.3)",
+                          backgroundColor: "transparent",
+                        }}
                       />
+                      <style jsx>{`
+                        input[type="checkbox"]:checked {
+                          background-color: #a3af87;
+                          border-color: #a3af87;
+                        }
+                      `}</style>
                       <svg
                         className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
                         fill="none"
@@ -248,12 +296,12 @@ export default function CartPage() {
                         />
                       </svg>
                     </div>
-                    <span className="text-sm font-bold text-[#2D5016] group-hover:text-[#2D5016]/80">
+                    <span className="text-sm font-bold text-[#5a6c5b] group-hover:text-[#5a6c5b]/80">
                       Pilih Semua ({cartItems.length})
                     </span>
                   </label>
                   {selectedItems.length > 0 && (
-                    <span className="text-xs sm:text-sm font-bold text-[#2D5016]">
+                    <span className="text-xs sm:text-sm font-bold text-[#5a6c5b]">
                       {selectedItems.length} item dipilih
                     </span>
                   )}
@@ -270,8 +318,8 @@ export default function CartPage() {
                       transition={{ delay: index * 0.05 }}
                       className={`p-4 bg-white border-2 rounded-xl transition-all ${
                         selectedItems.includes(item.id)
-                          ? "border-[#2D5016] shadow-md shadow-[#2D5016]/10"
-                          : "border-gray-200 hover:border-[#2D5016]/30"
+                          ? "border-[#A3AF87] shadow-md style={{boxShadow: '0 4px 6px -1px rgba(163, 175, 135, 0.15)'}"
+                          : "border-gray-200 hover:border-[#A3AF87]/30"
                       }`}
                     >
                       <div className="flex gap-4">
@@ -283,8 +331,22 @@ export default function CartPage() {
                                 type="checkbox"
                                 checked={selectedItems.includes(item.id)}
                                 onChange={() => toggleSelectItem(item.id)}
-                                className="peer w-5 h-5 rounded-md border-2 border-[#2D5016]/30 checked:bg-[#2D5016] checked:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 cursor-pointer transition-all appearance-none"
+                                className="peer w-5 h-5 rounded-md border-2 cursor-pointer transition-all appearance-none"
+                                style={
+                                  {
+                                    borderColor: "rgba(163, 175, 135, 0.3)",
+                                  } as React.CSSProperties
+                                }
                               />
+                              <style jsx>{`
+                                input[type="checkbox"]:checked {
+                                  background-color: #a3af87;
+                                  border-color: #a3af87;
+                                }
+                                input[type="checkbox"]:focus {
+                                  outline: 2px solid rgba(163, 175, 135, 0.3);
+                                }
+                              `}</style>
                               <svg
                                 className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
                                 fill="none"
@@ -305,7 +367,12 @@ export default function CartPage() {
                         {/* Product Image */}
                         <Link
                           href={`/market/products/${item.slug}`}
-                          className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-50 to-green-100 rounded-lg overflow-hidden hover:scale-105 transition-transform"
+                          className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden hover:scale-105 transition-transform"
+                          style={
+                            {
+                              backgroundColor: "rgba(163, 175, 135, 0.1)",
+                            } as React.CSSProperties
+                          }
                         >
                           <img
                             src={item.image}
@@ -320,11 +387,14 @@ export default function CartPage() {
                             <div className="flex-1 min-w-0">
                               <Link
                                 href={`/market/products/${item.slug}`}
-                                className="font-bold text-sm sm:text-base text-[#2D5016] hover:text-[#2D5016]/80 line-clamp-1"
+                                className="font-bold text-sm sm:text-base text-[#5a6c5b] hover:text-[#5a6c5b]/80 line-clamp-1"
                               >
                                 {item.name}
                               </Link>
-                              <p className="text-xs sm:text-sm text-[#2D5016]/70 font-medium">
+                              <p
+                                className="text-xs sm:text-sm font-medium"
+                                style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                              >
                                 Varian: {item.variant}
                               </p>
                             </div>
@@ -342,7 +412,7 @@ export default function CartPage() {
                             {item.discount ? (
                               <div className="space-y-1">
                                 <div className="flex items-baseline gap-2">
-                                  <span className="text-base sm:text-lg font-bold text-[#2D5016]">
+                                  <span className="text-base sm:text-lg font-bold text-[#5a6c5b]">
                                     Rp{" "}
                                     {Math.round(
                                       item.price * (1 - item.discount / 100)
@@ -357,7 +427,7 @@ export default function CartPage() {
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-base sm:text-lg font-bold text-[#2D5016]">
+                              <span className="text-base sm:text-lg font-bold text-[#5a6c5b]">
                                 Rp {item.price.toLocaleString("id-ID")}
                               </span>
                             )}
@@ -369,17 +439,53 @@ export default function CartPage() {
                               <button
                                 onClick={() => updateQuantity(item.id, -1)}
                                 disabled={item.quantity <= 1}
-                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md hover:bg-[#2D5016] hover:text-white hover:border-[#2D5016] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={
+                                  {
+                                    "--hover-bg": "#A3AF87",
+                                    "--hover-border": "#A3AF87",
+                                  } as React.CSSProperties
+                                }
+                                onMouseEnter={(e) => {
+                                  if (item.quantity > 1) {
+                                    e.currentTarget.style.backgroundColor =
+                                      "#A3AF87";
+                                    e.currentTarget.style.color = "white";
+                                    e.currentTarget.style.borderColor =
+                                      "#A3AF87";
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor =
+                                    "white";
+                                  e.currentTarget.style.color = "";
+                                  e.currentTarget.style.borderColor = "#e5e7eb";
+                                }}
                               >
                                 <Minus className="h-3 w-3" />
                               </button>
-                              <span className="w-8 text-center text-sm font-bold text-[#2D5016]">
+                              <span className="w-8 text-center text-sm font-bold text-[#5a6c5b]">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.id, 1)}
                                 disabled={item.quantity >= item.stock}
-                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md hover:bg-[#2D5016] hover:text-white hover:border-[#2D5016] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                onMouseEnter={(e) => {
+                                  if (item.quantity < item.stock) {
+                                    e.currentTarget.style.backgroundColor =
+                                      "#A3AF87";
+                                    e.currentTarget.style.color = "white";
+                                    e.currentTarget.style.borderColor =
+                                      "#A3AF87";
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor =
+                                    "white";
+                                  e.currentTarget.style.color = "";
+                                  e.currentTarget.style.borderColor = "#e5e7eb";
+                                }}
                               >
                                 <Plus className="h-3 w-3" />
                               </button>
@@ -387,14 +493,17 @@ export default function CartPage() {
 
                             {/* Subtotal per Item */}
                             <div className="text-right">
-                              <p className="text-xs text-[#2D5016]/70">
+                              <p
+                                className="text-xs"
+                                style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                              >
                                 Subtotal
                               </p>
                               <motion.p
                                 key={calculateItemTotal(item)}
                                 initial={{ scale: 1.2 }}
                                 animate={{ scale: 1 }}
-                                className="text-sm sm:text-base font-bold text-[#2D5016]"
+                                className="text-sm sm:text-base font-bold text-[#5a6c5b]"
                               >
                                 Rp{" "}
                                 {calculateItemTotal(item).toLocaleString(
@@ -412,50 +521,76 @@ export default function CartPage() {
 
               {/* Right Column - Summary (Desktop) */}
               <div className="hidden lg:block">
-                <div className="sticky top-4 border-2 border-[#2D5016]/20 bg-gradient-to-br from-white to-green-50/30 rounded-2xl p-6 shadow-xl shadow-[#2D5016]/10">
+                <div
+                  className="sticky top-4 border-2 rounded-2xl p-6 shadow-xl"
+                  style={
+                    {
+                      borderColor: "rgba(163, 175, 135, 0.2)",
+                      backgroundColor: "white",
+                      boxShadow: "0 20px 50px -12px rgba(163, 175, 135, 0.15)",
+                    } as React.CSSProperties
+                  }
+                >
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-[#2D5016] rounded-lg">
+                    <div
+                      className="p-2 rounded-lg"
+                      style={
+                        { backgroundColor: "#A3AF87" } as React.CSSProperties
+                      }
+                    >
                       <Package className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-[#2D5016]">
+                    <h3
+                      className="text-lg font-bold"
+                      style={{ color: "#303646" } as React.CSSProperties}
+                    >
                       Ringkasan Belanja
                     </h3>
                   </div>
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#2D5016]/70 font-medium">
+                      <span
+                        className="font-medium"
+                        style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                      >
                         Total Item
                       </span>
-                      <span className="font-bold text-[#2D5016]">
+                      <span className="font-bold text-[#5a6c5b]">
                         {totalItems} produk
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#2D5016]/70 font-medium">
+                      <span
+                        className="font-medium"
+                        style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                      >
                         Subtotal
                       </span>
                       <motion.span
                         key={subtotal}
                         initial={{ scale: 1.2 }}
                         animate={{ scale: 1 }}
-                        className="font-bold text-[#2D5016]"
+                        className="font-bold text-[#5a6c5b]"
                       >
                         Rp {subtotal.toLocaleString("id-ID")}
                       </motion.span>
                     </div>
                   </div>
 
-                  <div className="border-t-2 border-[#2D5016]/10 pt-4 mb-6">
+                  <div
+                    className="border-t-2 pt-4 mb-6"
+                    style={{ borderColor: "rgba(163, 175, 135, 0.15)" }}
+                  >
                     <div className="flex justify-between items-baseline mb-2">
-                      <span className="text-base font-bold text-[#2D5016]">
+                      <span className="text-base font-bold text-[#5a6c5b]">
                         Total Belanja
                       </span>
                       <motion.span
                         key={subtotal}
                         initial={{ scale: 1.2 }}
                         animate={{ scale: 1 }}
-                        className="text-2xl font-bold text-[#2D5016]"
+                        className="text-2xl font-bold text-[#5a6c5b]"
                       >
                         Rp {subtotal.toLocaleString("id-ID")}
                       </motion.span>
@@ -466,16 +601,27 @@ export default function CartPage() {
                     href="/market/checkout"
                     className={`w-full py-4 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
                       selectedItems.length > 0
-                        ? "bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white hover:shadow-xl hover:shadow-[#2D5016]/30"
+                        ? "bg-[#A3AF87] text-white"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
                     }`}
+                    style={
+                      selectedItems.length > 0
+                        ? {
+                            boxShadow:
+                              "0 20px 50px -12px rgba(163, 175, 135, 0.3)",
+                          }
+                        : {}
+                    }
                   >
                     <span>Checkout Sekarang</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
 
                   {selectedItems.length === 0 && (
-                    <p className="text-xs text-center text-[#2D5016]/70 mt-3">
+                    <p
+                      className="text-xs text-center mt-3"
+                      style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                    >
                       Pilih produk untuk melanjutkan
                     </p>
                   )}
@@ -495,16 +641,19 @@ export default function CartPage() {
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016]">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b]">
                   Mungkin Anda Juga Butuh
                 </h2>
-                <p className="text-sm text-[#2D5016]/70">
+                <p
+                  className="text-sm"
+                  style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                >
                   Produk terkait untuk melengkapi pesanan Anda
                 </p>
               </div>
               <Link
                 href="/market/products"
-                className="hidden sm:flex items-center gap-1 text-sm font-bold text-[#2D5016] hover:gap-2 transition-all"
+                className="hidden sm:flex items-center gap-1 text-sm font-bold text-[#5a6c5b] hover:gap-2 transition-all"
               >
                 <span>Lihat Semua</span>
                 <ChevronRight className="h-4 w-4" />
@@ -516,9 +665,16 @@ export default function CartPage() {
                 <Link
                   key={product.id}
                   href={`/market/products/${product.slug}`}
-                  className="group bg-white border-2 border-gray-100 hover:border-[#2D5016]/30 rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                  className="group bg-white border-2 border-gray-100 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#A3AF87]/30 transition-all"
                 >
-                  <div className="relative aspect-square bg-gradient-to-br from-green-50 to-green-100">
+                  <div
+                    className="relative aspect-square"
+                    style={
+                      {
+                        backgroundColor: "rgba(163, 175, 135, 0.1)",
+                      } as React.CSSProperties
+                    }
+                  >
                     <img
                       src={product.image}
                       alt={product.name}
@@ -531,10 +687,10 @@ export default function CartPage() {
                     )}
                   </div>
                   <div className="p-3">
-                    <h3 className="text-xs sm:text-sm font-bold text-[#2D5016] line-clamp-2 mb-2">
+                    <h3 className="text-xs sm:text-sm font-bold text-[#5a6c5b] line-clamp-2 mb-2">
                       {product.name}
                     </h3>
-                    <p className="text-sm sm:text-base font-bold text-[#2D5016]">
+                    <p className="text-sm sm:text-base font-bold text-[#5a6c5b]">
                       Rp{" "}
                       {product.discount
                         ? Math.round(
@@ -552,15 +708,23 @@ export default function CartPage() {
 
       {/* Mobile Sticky Bottom Bar */}
       {cartItems.length > 0 && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#2D5016]/20 shadow-2xl p-4 z-50">
+        <div
+          className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 shadow-2xl p-4 z-50"
+          style={{ borderColor: "rgba(163, 175, 135, 0.2)" }}
+        >
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-xs text-[#2D5016]/70">Total Belanja</p>
+              <p
+                className="text-xs"
+                style={{ color: "rgba(90, 108, 91, 0.7)" }}
+              >
+                Total Belanja
+              </p>
               <motion.p
                 key={subtotal}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
-                className="text-xl font-bold text-[#2D5016]"
+                className="text-xl font-bold text-[#5a6c5b]"
               >
                 Rp {subtotal.toLocaleString("id-ID")}
               </motion.p>
@@ -569,7 +733,7 @@ export default function CartPage() {
               href="/market/checkout"
               className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                 selectedItems.length > 0
-                  ? "bg-gradient-to-r from-[#2D5016] to-[#2D5016]/90 text-white hover:shadow-lg"
+                  ? "bg-[#A3AF87] text-white hover:shadow-lg"
                   : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
               }`}
             >
@@ -578,7 +742,10 @@ export default function CartPage() {
             </Link>
           </div>
           {selectedItems.length > 0 && (
-            <p className="text-xs text-center text-[#2D5016]/70">
+            <p
+              className="text-xs text-center"
+              style={{ color: "rgba(90, 108, 91, 0.7)" }}
+            >
               {totalItems} produk dipilih
             </p>
           )}

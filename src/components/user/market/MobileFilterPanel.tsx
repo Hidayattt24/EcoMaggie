@@ -38,7 +38,10 @@ export default function MobileFilterPanel({
       <div className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
         <div className="bg-white rounded-t-3xl shadow-2xl max-h-[80vh] overflow-y-auto">
           <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between rounded-t-3xl">
-            <h2 className="font-bold text-lg text-[#2D5016] font-poppins">
+            <h2
+              className="font-bold text-lg font-poppins"
+              style={{ color: "#303646" } as React.CSSProperties}
+            >
               Filter & Urutkan
             </h2>
             <button
@@ -64,7 +67,10 @@ export default function MobileFilterPanel({
           <div className="p-4 space-y-6">
             {/* Jenis Category */}
             <div>
-              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2D5016] mb-3">
+              <h3
+                className="flex items-center gap-1.5 text-sm font-semibold mb-3"
+                style={{ color: "#303646" } as React.CSSProperties}
+              >
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -84,20 +90,48 @@ export default function MobileFilterPanel({
                 {categories.map((category) => (
                   <label
                     key={category}
-                    className="flex items-center gap-2 cursor-pointer group px-3 py-2 rounded-lg hover:bg-green-50 transition-colors"
+                    className="flex items-center gap-2 cursor-pointer group px-3 py-2 rounded-lg transition-colors"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(163, 175, 135, 0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
                   >
                     <input
                       type="checkbox"
                       checked={selectedCategories.includes(category)}
                       onChange={() => onToggleCategory(category)}
-                      className="w-4 h-4 rounded border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-gray-300 appearance-none border"
+                      style={
+                        {
+                          accentColor: "#A3AF87",
+                        } as React.CSSProperties
+                      }
                     />
+                    <style jsx>{`
+                      input[type="checkbox"]:checked {
+                        background-color: #a3af87;
+                        border-color: #a3af87;
+                      }
+                      input[type="checkbox"]:focus {
+                        outline: 2px solid rgba(163, 175, 135, 0.3);
+                      }
+                    `}</style>
                     <span
                       className={`text-sm transition-colors ${
                         selectedCategories.includes(category)
-                          ? "text-[#2D5016] font-semibold"
-                          : "text-gray-700 group-hover:text-[#2D5016]"
+                          ? "font-semibold"
+                          : "text-gray-700"
                       }`}
+                      style={
+                        {
+                          color: selectedCategories.includes(category)
+                            ? "#303646"
+                            : undefined,
+                        } as React.CSSProperties
+                      }
                     >
                       {category}
                     </span>
@@ -108,7 +142,10 @@ export default function MobileFilterPanel({
 
             {/* Price Range */}
             <div>
-              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2D5016] mb-3">
+              <h3
+                className="flex items-center gap-1.5 text-sm font-semibold mb-3"
+                style={{ color: "#303646" } as React.CSSProperties}
+              >
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -125,7 +162,10 @@ export default function MobileFilterPanel({
                 <span>Rentang Harga</span>
               </h3>
               <div className="space-y-4">
-                <div className="flex justify-between text-xs text-[#2D5016] font-semibold">
+                <div
+                  className="flex justify-between text-xs font-semibold"
+                  style={{ color: "#303646" } as React.CSSProperties}
+                >
                   <span>Rp {minPrice.toLocaleString("id-ID")}</span>
                   <span>Rp {maxPrice.toLocaleString("id-ID")}</span>
                 </div>
@@ -141,12 +181,17 @@ export default function MobileFilterPanel({
                         Math.min(parseInt(e.target.value), maxPrice - 5000)
                       )
                     }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-                    style={{
-                      background: `linear-gradient(to right, #2D5016 0%, #2D5016 ${
-                        (minPrice / 200000) * 100
-                      }%, #e5e7eb ${(minPrice / 200000) * 100}%, #e5e7eb 100%)`,
-                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={
+                      {
+                        background: `linear-gradient(to right, #A3AF87 0%, #A3AF87 ${
+                          (minPrice / 200000) * 100
+                        }%, #e5e7eb ${
+                          (minPrice / 200000) * 100
+                        }%, #e5e7eb 100%)`,
+                        accentColor: "#A3AF87",
+                      } as React.CSSProperties
+                    }
                   />
                   <input
                     type="range"
@@ -159,12 +204,17 @@ export default function MobileFilterPanel({
                         Math.max(parseInt(e.target.value), minPrice + 5000)
                       )
                     }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-                    style={{
-                      background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
-                        (maxPrice / 200000) * 100
-                      }%, #2D5016 ${(maxPrice / 200000) * 100}%, #2D5016 100%)`,
-                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={
+                      {
+                        background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
+                          (maxPrice / 200000) * 100
+                        }%, #A3AF87 ${
+                          (maxPrice / 200000) * 100
+                        }%, #A3AF87 100%)`,
+                        accentColor: "#A3AF87",
+                      } as React.CSSProperties
+                    }
                   />
                 </div>
               </div>
@@ -172,7 +222,10 @@ export default function MobileFilterPanel({
 
             {/* Sort Options */}
             <div>
-              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2D5016] mb-3">
+              <h3
+                className="flex items-center gap-1.5 text-sm font-semibold mb-3"
+                style={{ color: "#303646" } as React.CSSProperties}
+              >
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -198,7 +251,14 @@ export default function MobileFilterPanel({
                 ].map((option) => (
                   <label
                     key={option.value}
-                    className="flex items-center gap-2 cursor-pointer group px-3 py-2 rounded-lg hover:bg-green-50 transition-colors"
+                    className="flex items-center gap-2 cursor-pointer group px-3 py-2 rounded-lg transition-colors"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(163, 175, 135, 0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
                   >
                     <input
                       type="radio"
@@ -206,14 +266,35 @@ export default function MobileFilterPanel({
                       value={option.value}
                       checked={sortBy === option.value}
                       onChange={(e) => onSortChange(e.target.value)}
-                      className="w-4 h-4 border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
+                      className="w-4 h-4 border-gray-300 appearance-none border rounded-full"
+                      style={
+                        {
+                          accentColor: "#A3AF87",
+                        } as React.CSSProperties
+                      }
                     />
+                    <style jsx>{`
+                      input[type="radio"]:checked {
+                        background-color: #a3af87;
+                        border-color: #a3af87;
+                        box-shadow: inset 0 0 0 3px white;
+                      }
+                      input[type="radio"]:focus {
+                        outline: 2px solid rgba(163, 175, 135, 0.3);
+                      }
+                    `}</style>
                     <span
                       className={`text-sm transition-colors ${
                         sortBy === option.value
-                          ? "text-[#2D5016] font-semibold"
-                          : "text-gray-700 group-hover:text-[#2D5016]"
+                          ? "font-semibold"
+                          : "text-gray-700"
                       }`}
+                      style={
+                        {
+                          color:
+                            sortBy === option.value ? "#303646" : undefined,
+                        } as React.CSSProperties
+                      }
                     >
                       {option.label}
                     </span>
@@ -225,7 +306,8 @@ export default function MobileFilterPanel({
             {/* Apply Button */}
             <button
               onClick={onClose}
-              className="w-full py-3 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white rounded-lg font-semibold text-sm shadow-md active:scale-95 transition-transform"
+              className="w-full py-3 text-white rounded-lg font-semibold text-sm shadow-md active:scale-95 transition-transform"
+              style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
             >
               Terapkan Filter
             </button>

@@ -124,37 +124,52 @@ export default function DampakSection() {
           {/* Header Section */}
           <div className="text-center mb-16 lg:mb-20">
             <div
-              className={`inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full mb-6 transition-all duration-700 ease-out ${
+              className={`inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 transition-all duration-700 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-6"
               }`}
+              style={{
+                border: "2px solid",
+                borderColor: "rgba(163, 175, 135, 0.2)",
+              }}
             >
-              <Leaf className="w-4 h-4 text-green-600" />
-              <span className="text-green-700 text-sm poppins-semibold">
+              <span className="relative flex h-2 w-2">
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ backgroundColor: "#A3AF87" }}
+                ></span>
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ backgroundColor: "#A3AF87" }}
+                ></span>
+              </span>
+              <span
+                className="text-sm font-semibold poppins-semibold"
+                style={{ color: "#A3AF87" }}
+              >
                 Dampak Positif
               </span>
             </div>
 
             <h2
-              className={`text-4xl md:text-5xl lg:text-6xl poppins-bold text-gray-900 mb-6 leading-tight transition-all duration-700 delay-100 ease-out ${
+              className={`text-4xl md:text-5xl font-bold mb-4 poppins-bold transition-all duration-700 delay-100 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-6"
               }`}
+              style={{ color: "#A3AF87" }}
             >
-              Dampak Nyata untuk{" "}
-              <span className="bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent">
-                Ekonomi Sirkular
-              </span>
+              Dipercaya oleh Masyarakat
             </h2>
 
             <p
-              className={`text-gray-700 poppins-regular text-base lg:text-lg leading-relaxed max-w-3xl mx-auto transition-all duration-700 delay-200 ease-out ${
+              className={`text-lg md:text-xl max-w-2xl mx-auto poppins-regular transition-all duration-700 delay-200 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
               }`}
+              style={{ color: "#5a6c5b" }}
             >
               EcoMaggie mengubah limbah organik menjadi nilai ekonomi —
               mengalihkan sampah dari TPA, mengurangi emisi, menghemat sumber
@@ -171,9 +186,6 @@ export default function DampakSection() {
               }`}
             >
               <div className="relative">
-                {/* Decorative Ring */}
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-2xl scale-110" />
-
                 <div className="relative w-72 h-72 lg:w-96 lg:h-96">
                   <svg
                     className="w-full h-full -rotate-90"
@@ -188,25 +200,13 @@ export default function DampakSection() {
                       stroke="#E5E7EB"
                       strokeWidth="14"
                     />
-                    {/* Progress Circle with Gradient */}
-                    <defs>
-                      <linearGradient
-                        id="progressGradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="100%"
-                      >
-                        <stop offset="0%" stopColor="#2D5016" />
-                        <stop offset="100%" stopColor="#3d6b1e" />
-                      </linearGradient>
-                    </defs>
+                    {/* Progress Circle - Solid Sage */}
                     <circle
                       cx="100"
                       cy="100"
                       r="85"
                       fill="none"
-                      stroke="url(#progressGradient)"
+                      stroke="#A3AF87"
                       strokeWidth="14"
                       strokeLinecap="round"
                       strokeDasharray={`${2 * Math.PI * 85}`}
@@ -220,14 +220,26 @@ export default function DampakSection() {
                   {/* Center Content */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <div className="relative">
-                      <div className="text-7xl lg:text-8xl poppins-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent">
+                      <div
+                        className="text-7xl lg:text-8xl poppins-bold"
+                        style={{ color: "#A3AF87" }}
+                      >
                         {percentageCount}%
                       </div>
-                      <div className="absolute -top-6 -right-6 w-14 h-14 bg-green-100 rounded-full flex items-center justify-center animate-pulse">
-                        <Leaf className="w-7 h-7 text-green-600" />
+                      <div
+                        className="absolute -top-6 -right-6 w-14 h-14 rounded-full flex items-center justify-center animate-pulse"
+                        style={{ backgroundColor: "rgba(163, 175, 135, 0.2)" }}
+                      >
+                        <Leaf
+                          className="w-7 h-7"
+                          style={{ color: "#A3AF87" }}
+                        />
                       </div>
                     </div>
-                    <div className="text-base lg:text-lg poppins-semibold text-gray-700 text-center mt-4 px-8">
+                    <div
+                      className="text-base lg:text-lg poppins-semibold text-center mt-4 px-8"
+                      style={{ color: "#303646" }}
+                    >
                       Penghasil Sampah
                       <br />
                       Beralih ke EcoMaggie
@@ -242,22 +254,25 @@ export default function DampakSection() {
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className={`group relative bg-white rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-2xl transition-all duration-700 ease-out hover:scale-105 border border-gray-100 overflow-hidden ${
+                  className={`group relative bg-white rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-2xl transition-all duration-700 ease-out hover:scale-105 border overflow-hidden ${
                     stat.delay
                   } ${
                     isVisible
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-8"
                   }`}
+                  style={{ borderColor: "rgba(163, 175, 135, 0.2)" }}
                 >
                   {/* Background Gradient Overlay */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                    className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+                    style={{ backgroundColor: "#A3AF87" }}
                   />
 
                   {/* Icon */}
                   <div
-                    className={`w-12 h-12 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
+                    style={{ backgroundColor: "#A3AF87" }}
                   >
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
@@ -265,19 +280,26 @@ export default function DampakSection() {
                   {/* Value */}
                   <div className="relative mb-2">
                     <span
-                      className={`text-4xl lg:text-5xl poppins-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+                      className="text-4xl lg:text-5xl poppins-bold"
+                      style={{ color: "#A3AF87" }}
                     >
                       {stat.value}
                     </span>
                     {stat.unit && (
-                      <span className="text-lg lg:text-xl poppins-semibold text-gray-600 ml-1">
+                      <span
+                        className="text-lg lg:text-xl poppins-semibold ml-1"
+                        style={{ color: "#5a6c5b" }}
+                      >
                         {stat.unit}
                       </span>
                     )}
                   </div>
 
                   {/* Label */}
-                  <p className="text-gray-700 poppins-regular text-sm lg:text-base leading-relaxed relative">
+                  <p
+                    className="poppins-regular text-sm lg:text-base leading-relaxed relative"
+                    style={{ color: "#303646" }}
+                  >
                     {stat.label}
                   </p>
                 </div>

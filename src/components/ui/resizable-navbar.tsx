@@ -70,14 +70,17 @@ export const NavItems = ({
             href={item.link}
             className={cn(
               "relative flex items-center gap-2 text-sm font-medium transition-all",
-              isActive ? "text-[#2D5016]" : "text-gray-700 hover:text-[#2D5016]"
+              isActive ? "text-[#A3AF87]" : "text-gray-700 hover:text-[#A3AF87]"
             )}
           >
             {item.icon}
             <span>{item.name}</span>
             {/* Active Indicator */}
             {isActive && (
-              <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] rounded-full" />
+              <div
+                className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full"
+                style={{ backgroundColor: "#A3AF87" }}
+              />
             )}
           </Link>
         );
@@ -105,8 +108,13 @@ export const NavbarLogo = ({
         <img src={src} alt={alt} className="h-8 w-auto" />
       ) : (
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#2D5016] to-[#3d6b1e]" />
-          <span className="text-lg font-bold text-[#2D5016]">EcoMaggie</span>
+          <div
+            className="h-8 w-8 rounded-lg"
+            style={{ backgroundColor: "#A3AF87" }}
+          />
+          <span className="text-lg font-bold" style={{ color: "#A3AF87" }}>
+            EcoMaggie
+          </span>
         </div>
       )}
     </Link>
@@ -125,10 +133,8 @@ export const NavbarButton = ({
   onClick?: () => void;
 }) => {
   const variants = {
-    primary:
-      "bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white hover:shadow-lg hover:scale-105",
-    secondary:
-      "border-2 border-[#2D5016] text-[#2D5016] hover:bg-[#2D5016] hover:text-white",
+    primary: "text-white hover:shadow-lg hover:scale-105",
+    secondary: "border-2 hover:text-white",
   };
 
   return (
@@ -139,6 +145,23 @@ export const NavbarButton = ({
         variants[variant],
         className
       )}
+      style={
+        variant === "primary"
+          ? { backgroundColor: "#A3AF87" }
+          : { borderColor: "#A3AF87", color: "#A3AF87" }
+      }
+      onMouseEnter={(e) => {
+        if (variant === "secondary") {
+          e.currentTarget.style.backgroundColor = "#A3AF87";
+          e.currentTarget.style.color = "white";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (variant === "secondary") {
+          e.currentTarget.style.backgroundColor = "transparent";
+          e.currentTarget.style.color = "#A3AF87";
+        }
+      }}
     >
       {children}
     </button>

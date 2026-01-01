@@ -100,17 +100,29 @@ export default function OTPPage() {
     : "****";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-t-[#2D5016] relative overflow-hidden">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 relative overflow-hidden"
+          style={{ borderTopColor: "#A3AF87" }}
+        >
           {/* Decorative corner */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+          <div
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            style={{
+              background:
+                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), transparent)",
+            }}
+          ></div>
 
           {/* Logo & Title */}
           <div className="text-center mb-8 relative z-10">
             <Link href="/" className="inline-block">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] rounded-2xl p-3 hover:scale-105 transition-transform duration-300 shadow-lg">
+              <div
+                className="w-20 h-20 mx-auto rounded-2xl p-3 hover:scale-105 transition-transform duration-300 shadow-lg"
+                style={{ backgroundColor: "#A3AF87" }}
+              >
                 <Image
                   src="/icon.svg"
                   alt="EcoMaggie Logo"
@@ -120,13 +132,19 @@ export default function OTPPage() {
                 />
               </div>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold mt-6">
+            <h1
+              className="text-2xl font-bold poppins-bold mt-6"
+              style={{ color: "#A3AF87" }}
+            >
               Verifikasi WhatsApp
             </h1>
             <p className="text-gray-600 mt-2 text-sm poppins-regular">
               Masukkan kode OTP yang dikirim ke
             </p>
-            <p className="text-[#2D5016] font-semibold poppins-semibold text-sm mt-1 flex items-center justify-center gap-2">
+            <p
+              className="font-semibold poppins-semibold text-sm mt-1 flex items-center justify-center gap-2"
+              style={{ color: "#A3AF87" }}
+            >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
               </svg>
@@ -151,13 +169,38 @@ export default function OTPPage() {
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
+                  onMouseEnter={(e) => {
+                    if (!digit && !error) {
+                      e.currentTarget.style.borderColor = "#A3AF87";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!digit && !error) {
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.setProperty(
+                      "--tw-ring-color",
+                      "#A3AF87"
+                    );
+                  }}
                   className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-2 rounded-xl transition-all duration-200 poppins-bold ${
                     error
                       ? "border-red-500 bg-red-50"
                       : digit
-                      ? "border-[#2D5016] bg-green-50 text-[#2D5016] shadow-md"
-                      : "border-gray-300 bg-white hover:border-[#2D5016]"
-                  } focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent`}
+                      ? "shadow-md"
+                      : "border-gray-300 bg-white"
+                  } focus:outline-none focus:ring-2 focus:border-transparent`}
+                  style={{
+                    ...(digit && !error
+                      ? {
+                          borderColor: "#A3AF87",
+                          backgroundColor: "rgba(163, 175, 135, 0.1)",
+                          color: "#A3AF87",
+                        }
+                      : {}),
+                  }}
                   aria-label={`Digit ${index + 1}`}
                 />
               ))}
@@ -185,7 +228,21 @@ export default function OTPPage() {
             <button
               type="submit"
               disabled={isLoading || otp.join("").length !== 6}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              onMouseEnter={(e) => {
+                if (!isLoading && otp.join("").length === 6) {
+                  e.currentTarget.style.backgroundColor = "#5a6c5b";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading && otp.join("").length === 6) {
+                  e.currentTarget.style.backgroundColor = "#A3AF87";
+                }
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.setProperty("--tw-ring-color", "#A3AF87");
+              }}
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              style={{ backgroundColor: "#A3AF87" }}
             >
               {isLoading ? (
                 <>
@@ -237,7 +294,14 @@ export default function OTPPage() {
                 <button
                   type="button"
                   onClick={handleResend}
-                  className="inline-flex items-center gap-2 text-sm text-[#2D5016] hover:text-[#3d6b1e] font-semibold transition-colors poppins-semibold"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#5a6c5b";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#A3AF87";
+                  }}
+                  className="inline-flex items-center gap-2 text-sm font-semibold transition-colors poppins-semibold"
+                  style={{ color: "#A3AF87" }}
                 >
                   <svg
                     className="w-4 h-4"
@@ -276,12 +340,20 @@ export default function OTPPage() {
           </form>
 
           {/* Help Text */}
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+          <div
+            className="mt-6 p-4 rounded-xl"
+            style={{
+              backgroundColor: "rgba(163, 175, 135, 0.1)",
+              borderColor: "rgba(163, 175, 135, 0.2)",
+              borderWidth: "1px",
+            }}
+          >
             <p className="text-xs text-gray-600 poppins-regular text-center flex items-start gap-2">
               <svg
-                className="w-4 h-4 text-[#2D5016] flex-shrink-0 mt-0.5"
+                className="w-4 h-4 flex-shrink-0 mt-0.5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
+                style={{ color: "#A3AF87" }}
               >
                 <path
                   fillRule="evenodd"
@@ -301,7 +373,21 @@ export default function OTPPage() {
         <div className="text-center mt-6">
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-[#2D5016] hover:shadow-md"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#A3AF87";
+              e.currentTarget.style.backgroundColor = "white";
+              e.currentTarget.style.borderColor = "#A3AF87";
+              e.currentTarget.style.boxShadow =
+                "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#4b5563";
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.5)";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl"
           >
             <svg
               className="w-4 h-4"

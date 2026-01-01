@@ -36,18 +36,31 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Success Card */}
-          <div className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-t-[#2D5016] relative overflow-hidden">
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 relative overflow-hidden"
+            style={{ borderTopColor: "#A3AF87" }}
+          >
             {/* Decorative corner */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+            <div
+              className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, rgba(163, 175, 135, 0.3), transparent)",
+              }}
+            ></div>
 
             {/* Success Icon */}
             <div className="text-center mb-6 relative z-10">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-green-100 to-emerald-100 rounded-full p-4 mb-4">
+              <div
+                className="w-20 h-20 mx-auto rounded-full p-4 mb-4"
+                style={{ background: "rgba(163, 175, 135, 0.2)" }}
+              >
                 <svg
-                  className="w-full h-full text-[#2D5016]"
+                  className="w-full h-full"
+                  style={{ color: "#A3AF87" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -66,14 +79,23 @@ export default function ForgotPasswordPage() {
               <p className="text-gray-600 mt-3 text-sm poppins-regular leading-relaxed">
                 Kami telah mengirimkan tautan untuk mengatur ulang kata sandi ke
               </p>
-              <p className="text-[#2D5016] font-semibold poppins-semibold mt-1">
+              <p
+                className="font-semibold poppins-semibold mt-1"
+                style={{ color: "#A3AF87" }}
+              >
                 {email}
               </p>
             </div>
 
             {/* Instructions */}
             <div className="space-y-4 mb-6 relative z-10">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  background: "rgba(163, 175, 135, 0.1)",
+                  border: "1px solid rgba(163, 175, 135, 0.2)",
+                }}
+              >
                 <p className="text-sm text-gray-700 poppins-regular leading-relaxed">
                   <span className="font-semibold poppins-semibold block mb-2">
                     Langkah selanjutnya:
@@ -109,7 +131,17 @@ export default function ForgotPasswordPage() {
             <div className="space-y-3 relative z-10">
               <Link
                 href="/login"
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 poppins-semibold"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 poppins-semibold"
+                style={{
+                  background: "#A3AF87",
+                  ["--tw-ring-color" as any]: "#A3AF87",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#5a6c5b")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "#A3AF87")
+                }
               >
                 <svg
                   className="w-5 h-5"
@@ -129,7 +161,17 @@ export default function ForgotPasswordPage() {
 
               <button
                 onClick={() => setIsSubmitted(false)}
-                className="w-full py-2.5 px-4 border-2 border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm"
+                className="w-full py-2.5 px-4 border-2 border-gray-200 rounded-xl text-gray-600 transition-all duration-200 poppins-medium text-sm"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#f9fafb";
+                  e.currentTarget.style.borderColor = "#A3AF87";
+                  e.currentTarget.style.color = "#A3AF87";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "";
+                  e.currentTarget.style.borderColor = "#e5e7eb";
+                  e.currentTarget.style.color = "#4b5563";
+                }}
               >
                 Kirim Ulang Email
               </button>
@@ -140,7 +182,20 @@ export default function ForgotPasswordPage() {
           <div className="text-center mt-6">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-[#2D5016] hover:shadow-md"
+              className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#A3AF87";
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.borderColor = "#A3AF87";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#4b5563";
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.5)";
+                e.currentTarget.style.borderColor = "#e5e7eb";
+                e.currentTarget.style.boxShadow = "";
+              }}
             >
               <svg
                 className="w-4 h-4"
@@ -164,17 +219,29 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-t-[#2D5016] relative overflow-hidden">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 relative overflow-hidden"
+          style={{ borderTopColor: "#A3AF87" }}
+        >
           {/* Decorative corner */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+          <div
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            style={{
+              background:
+                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.3), transparent)",
+            }}
+          ></div>
 
           {/* Logo & Title */}
           <div className="text-center mb-8 relative z-10">
             <Link href="/" className="inline-block">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg">
+              <div
+                className="w-16 h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
+                style={{ background: "#A3AF87" }}
+              >
                 <Image
                   src="/icon.svg"
                   alt="EcoMaggie Logo"
@@ -184,7 +251,10 @@ export default function ForgotPasswordPage() {
                 />
               </div>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold mt-4">
+            <h1
+              className="text-2xl font-bold poppins-bold mt-4"
+              style={{ color: "#A3AF87" }}
+            >
               Lupa Kata Sandi?
             </h1>
             <p className="text-gray-600 mt-2 text-sm poppins-regular">
@@ -201,7 +271,8 @@ export default function ForgotPasswordPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
+                  style={{ color: "#A3AF87" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -229,7 +300,14 @@ export default function ForgotPasswordPage() {
                   }}
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     error ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={{ ["--tw-ring-color" as any]: "#A3AF87" }}
+                  onMouseEnter={(e) =>
+                    !error && (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !error && (e.currentTarget.style.borderColor = "#d1d5db")
+                  }
                   placeholder="nama@email.com"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -270,7 +348,17 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              style={{
+                background: "#A3AF87",
+                ["--tw-ring-color" as any]: "#A3AF87",
+              }}
+              onMouseEnter={(e) =>
+                !isLoading && (e.currentTarget.style.background = "#5a6c5b")
+              }
+              onMouseLeave={(e) =>
+                !isLoading && (e.currentTarget.style.background = "#A3AF87")
+              }
             >
               {isLoading ? (
                 <>
@@ -318,10 +406,17 @@ export default function ForgotPasswordPage() {
           </form>
 
           {/* Info Box */}
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl relative z-10">
+          <div
+            className="mt-6 p-4 rounded-xl relative z-10"
+            style={{
+              background: "rgba(163, 175, 135, 0.1)",
+              border: "1px solid rgba(163, 175, 135, 0.2)",
+            }}
+          >
             <p className="text-xs text-gray-600 poppins-regular flex items-start gap-2">
               <svg
-                className="w-4 h-4 text-[#2D5016] flex-shrink-0 mt-0.5"
+                className="w-4 h-4 flex-shrink-0 mt-0.5"
+                style={{ color: "#A3AF87" }}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -354,7 +449,16 @@ export default function ForgotPasswordPage() {
           <div className="text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 px-6 py-2.5 border-2 border-[#2D5016] rounded-xl text-[#2D5016] hover:bg-gradient-to-r hover:from-[#2D5016] hover:to-[#3d6b1e] hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              className="inline-flex items-center gap-2 px-6 py-2.5 border-2 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              style={{ borderColor: "#A3AF87", color: "#A3AF87" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#A3AF87";
+                e.currentTarget.style.color = "white";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.color = "#A3AF87";
+              }}
             >
               <svg
                 className="w-4 h-4"
@@ -378,7 +482,20 @@ export default function ForgotPasswordPage() {
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-[#2D5016] hover:shadow-md"
+            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#A3AF87";
+              e.currentTarget.style.background = "white";
+              e.currentTarget.style.borderColor = "#A3AF87";
+              e.currentTarget.style.boxShadow =
+                "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#4b5563";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.5)";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+              e.currentTarget.style.boxShadow = "";
+            }}
           >
             <svg
               className="w-4 h-4"

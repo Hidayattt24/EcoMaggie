@@ -15,7 +15,28 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
         disabled={currentPage === 1}
-        className="px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016] disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-700"
+        className="px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 text-gray-700"
+        style={
+          {
+            "--hover-bg": "#f9fafb",
+            "--hover-border": "#A3AF87",
+            "--hover-text": "#A3AF87",
+          } as React.CSSProperties
+        }
+        onMouseEnter={(e) => {
+          if (currentPage !== 1) {
+            e.currentTarget.style.backgroundColor = "#f9fafb";
+            e.currentTarget.style.borderColor = "#A3AF87";
+            e.currentTarget.style.color = "#A3AF87";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (currentPage !== 1) {
+            e.currentTarget.style.backgroundColor = "white";
+            e.currentTarget.style.borderColor = "#e5e7eb";
+            e.currentTarget.style.color = "#374151";
+          }
+        }}
       >
         <div className="flex items-center gap-2">
           <svg
@@ -64,9 +85,28 @@ export default function Pagination({
               onClick={() => onPageChange(page)}
               className={`h-10 w-10 rounded-lg font-semibold text-sm transition-all ${
                 currentPage === page
-                  ? "bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white shadow-md"
-                  : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016]"
+                  ? "text-white shadow-md"
+                  : "bg-white border border-gray-200 text-gray-700"
               }`}
+              style={
+                currentPage === page
+                  ? { backgroundColor: "#A3AF87" }
+                  : undefined
+              }
+              onMouseEnter={(e) => {
+                if (currentPage !== page) {
+                  e.currentTarget.style.backgroundColor = "#f9fafb";
+                  e.currentTarget.style.borderColor = "#A3AF87";
+                  e.currentTarget.style.color = "#A3AF87";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== page) {
+                  e.currentTarget.style.backgroundColor = "white";
+                  e.currentTarget.style.borderColor = "#e5e7eb";
+                  e.currentTarget.style.color = "#374151";
+                }
+              }}
             >
               {page}
             </button>
@@ -78,7 +118,21 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016] disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-700"
+        className="px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 text-gray-700"
+        onMouseEnter={(e) => {
+          if (currentPage !== totalPages) {
+            e.currentTarget.style.backgroundColor = "#f9fafb";
+            e.currentTarget.style.borderColor = "#A3AF87";
+            e.currentTarget.style.color = "#A3AF87";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (currentPage !== totalPages) {
+            e.currentTarget.style.backgroundColor = "white";
+            e.currentTarget.style.borderColor = "#e5e7eb";
+            e.currentTarget.style.color = "#374151";
+          }
+        }}
       >
         <div className="flex items-center gap-2">
           <span className="hidden sm:inline">Selanjutnya</span>

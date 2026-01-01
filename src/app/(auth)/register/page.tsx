@@ -80,17 +80,35 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4 py-12">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 py-12"
+      style={{
+        background:
+          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+      }}
+    >
       <div className="w-full max-w-2xl">
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-10 border-t-4 border-t-[#2D5016] relative overflow-hidden">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-10 relative overflow-hidden"
+          style={{ borderTop: "4px solid #A3AF87" }}
+        >
           {/* Decorative corner */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+          <div
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            style={{
+              background:
+                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.2), transparent)",
+            }}
+          ></div>
 
           {/* Logo & Title */}
           <div className="text-center mb-8 relative z-10">
             <Link href="/" className="inline-block">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg">
+              <div
+                className="w-16 h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
+                style={{ backgroundColor: "#A3AF87" }}
+              >
                 <Image
                   src="/icon.svg"
                   alt="EcoMaggie Logo"
@@ -100,7 +118,10 @@ export default function RegisterPage() {
                 />
               </div>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold mt-4">
+            <h1
+              className="text-2xl font-bold poppins-bold mt-4"
+              style={{ color: "#A3AF87" }}
+            >
               Daftar Akun
             </h1>
             <p className="text-gray-600 mt-2 text-sm poppins-regular">
@@ -117,10 +138,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -143,7 +165,17 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     errors.namaLengkap ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.namaLengkap &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="Masukkan nama lengkap"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,10 +219,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -214,7 +247,16 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.email && (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="nama@email.com"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -279,7 +321,17 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     errors.nomorWhatsapp ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.nomorWhatsapp &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="08123456789 atau +628123456789"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -331,10 +383,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -358,7 +411,16 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-12 py-3 border ${
                     errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.password && (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="Min. 8 karakter"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -443,10 +505,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -475,7 +538,17 @@ export default function RegisterPage() {
                     errors.confirmPassword
                       ? "border-red-500"
                       : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.confirmPassword &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="Ulangi kata sandi"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -561,10 +634,11 @@ export default function RegisterPage() {
               <div className="relative flex justify-center">
                 <span className="px-4 bg-white text-gray-500 poppins-regular text-xs flex items-center gap-2">
                   <svg
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: "#A3AF87" }}
                   >
                     <path
                       strokeLinecap="round"
@@ -573,7 +647,13 @@ export default function RegisterPage() {
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xs poppins-medium">
+                  <span
+                    className="px-2 py-0.5 rounded-full text-xs poppins-medium"
+                    style={{
+                      backgroundColor: "rgba(163, 175, 135, 0.1)",
+                      color: "#5a6c5b",
+                    }}
+                  >
                     Opsional
                   </span>
                 </span>
@@ -584,10 +664,11 @@ export default function RegisterPage() {
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium">
                 <svg
-                  className="w-4 h-4 text-green-600"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -606,9 +687,25 @@ export default function RegisterPage() {
                 <label
                   className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     formData.jenisPengguna === "UMKM"
-                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                      ? "shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:shadow-md hover:scale-[1.01]"
                   }`}
+                  style={
+                    formData.jenisPengguna === "UMKM"
+                      ? {
+                          borderColor: "#A3AF87",
+                          backgroundColor: "rgba(163, 175, 135, 0.1)",
+                        }
+                      : {}
+                  }
+                  onMouseEnter={(e) =>
+                    formData.jenisPengguna !== "UMKM" &&
+                    (e.currentTarget.style.borderColor = "#5a6c5b")
+                  }
+                  onMouseLeave={(e) =>
+                    formData.jenisPengguna !== "UMKM" &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                 >
                   <input
                     type="radio"
@@ -624,21 +721,27 @@ export default function RegisterPage() {
                     className="sr-only"
                   />
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${
+                    className="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300"
+                    style={
                       formData.jenisPengguna === "UMKM"
-                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
-                        : "bg-gray-100 group-hover:bg-green-50"
-                    }`}
+                        ? {
+                            backgroundColor: "#A3AF87",
+                            boxShadow:
+                              "0 10px 15px -3px rgba(163, 175, 135, 0.3)",
+                          }
+                        : { backgroundColor: "#f3f4f6" }
+                    }
                   >
                     <svg
-                      className={`w-6 h-6 transition-colors duration-300 ${
-                        formData.jenisPengguna === "UMKM"
-                          ? "text-white"
-                          : "text-gray-400 group-hover:text-[#2D5016]"
-                      }`}
+                      className="w-6 h-6 transition-colors duration-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      style={
+                        formData.jenisPengguna === "UMKM"
+                          ? { color: "white" }
+                          : { color: "#9ca3af" }
+                      }
                     >
                       <path
                         strokeLinecap="round"
@@ -649,11 +752,12 @@ export default function RegisterPage() {
                     </svg>
                   </div>
                   <span
-                    className={`text-sm font-semibold poppins-semibold transition-colors duration-300 ${
+                    className="text-sm font-semibold poppins-semibold transition-colors duration-300"
+                    style={
                       formData.jenisPengguna === "UMKM"
-                        ? "text-[#2D5016]"
-                        : "text-gray-700 group-hover:text-[#2D5016]"
-                    }`}
+                        ? { color: "#A3AF87" }
+                        : { color: "#374151" }
+                    }
                   >
                     UMKM
                   </span>
@@ -661,7 +765,10 @@ export default function RegisterPage() {
                     Usaha Kecil
                   </span>
                   {formData.jenisPengguna === "UMKM" && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                    <div
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
                       <svg
                         className="w-4 h-4 text-white"
                         fill="none"
@@ -683,9 +790,25 @@ export default function RegisterPage() {
                 <label
                   className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     formData.jenisPengguna === "Rumah Tangga"
-                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                      ? "shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:shadow-md hover:scale-[1.01]"
                   }`}
+                  style={
+                    formData.jenisPengguna === "Rumah Tangga"
+                      ? {
+                          borderColor: "#A3AF87",
+                          backgroundColor: "rgba(163, 175, 135, 0.1)",
+                        }
+                      : {}
+                  }
+                  onMouseEnter={(e) =>
+                    formData.jenisPengguna !== "Rumah Tangga" &&
+                    (e.currentTarget.style.borderColor = "#5a6c5b")
+                  }
+                  onMouseLeave={(e) =>
+                    formData.jenisPengguna !== "Rumah Tangga" &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                 >
                   <input
                     type="radio"
@@ -701,21 +824,27 @@ export default function RegisterPage() {
                     className="sr-only"
                   />
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${
+                    className="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300"
+                    style={
                       formData.jenisPengguna === "Rumah Tangga"
-                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
-                        : "bg-gray-100 group-hover:bg-green-50"
-                    }`}
+                        ? {
+                            backgroundColor: "#A3AF87",
+                            boxShadow:
+                              "0 10px 15px -3px rgba(163, 175, 135, 0.3)",
+                          }
+                        : { backgroundColor: "#f3f4f6" }
+                    }
                   >
                     <svg
-                      className={`w-6 h-6 transition-colors duration-300 ${
-                        formData.jenisPengguna === "Rumah Tangga"
-                          ? "text-white"
-                          : "text-gray-400 group-hover:text-[#2D5016]"
-                      }`}
+                      className="w-6 h-6 transition-colors duration-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      style={
+                        formData.jenisPengguna === "Rumah Tangga"
+                          ? { color: "white" }
+                          : { color: "#9ca3af" }
+                      }
                     >
                       <path
                         strokeLinecap="round"
@@ -726,11 +855,12 @@ export default function RegisterPage() {
                     </svg>
                   </div>
                   <span
-                    className={`text-sm font-semibold poppins-semibold transition-colors duration-300 ${
+                    className="text-sm font-semibold poppins-semibold transition-colors duration-300"
+                    style={
                       formData.jenisPengguna === "Rumah Tangga"
-                        ? "text-[#2D5016]"
-                        : "text-gray-700 group-hover:text-[#2D5016]"
-                    }`}
+                        ? { color: "#A3AF87" }
+                        : { color: "#374151" }
+                    }
                   >
                     Rumah Tangga
                   </span>
@@ -738,7 +868,10 @@ export default function RegisterPage() {
                     Keluarga
                   </span>
                   {formData.jenisPengguna === "Rumah Tangga" && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                    <div
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
                       <svg
                         className="w-4 h-4 text-white"
                         fill="none"
@@ -766,10 +899,11 @@ export default function RegisterPage() {
                   className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
                 >
                   <svg
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: "#A3AF87" }}
                   >
                     <path
                       strokeLinecap="round"
@@ -792,7 +926,16 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, namaUsaha: e.target.value })
                     }
-                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm"
+                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                    style={
+                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    }
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#A3AF87")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "")
+                    }
                     placeholder="Contoh: Warung Makan Sederhana"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -821,10 +964,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-green-600"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -853,7 +997,14 @@ export default function RegisterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, alamat: e.target.value })
                   }
-                  className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular resize-none text-sm shadow-sm"
+                  className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular resize-none text-sm shadow-sm"
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}
                   placeholder="Lokasi pengambilan sampah"
                 />
                 <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
@@ -885,7 +1036,21 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+                style={
+                  {
+                    backgroundColor: "#A3AF87",
+                    "--tw-ring-color": "#A3AF87",
+                  } as React.CSSProperties
+                }
+                onMouseEnter={(e) =>
+                  !isLoading &&
+                  (e.currentTarget.style.backgroundColor = "#5a6c5b")
+                }
+                onMouseLeave={(e) =>
+                  !isLoading &&
+                  (e.currentTarget.style.backgroundColor = "#A3AF87")
+                }
               >
                 {isLoading ? (
                   <>
@@ -922,7 +1087,10 @@ export default function RegisterPage() {
               Dengan mendaftar, Anda menyetujui{" "}
               <Link
                 href="/terms"
-                className="text-[#2D5016] hover:text-[#3d6b1e] font-medium"
+                className="font-medium"
+                style={{ color: "#A3AF87" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#5a6c5b")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#A3AF87")}
               >
                 Syarat & Ketentuan
               </Link>
@@ -945,7 +1113,16 @@ export default function RegisterPage() {
           <div className="text-center">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border-2 border-[#2D5016] rounded-xl text-[#2D5016] hover:bg-gradient-to-r hover:from-[#2D5016] hover:to-[#3d6b1e] hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border-2 rounded-xl hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              style={{ borderColor: "#A3AF87", color: "#A3AF87" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#A3AF87";
+                e.currentTarget.style.color = "white";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "white";
+                e.currentTarget.style.color = "#A3AF87";
+              }}
             >
               <svg
                 className="w-4 h-4"
@@ -969,7 +1146,15 @@ export default function RegisterPage() {
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-[#2D5016] hover:shadow-md"
+            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:shadow-md"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#A3AF87";
+              e.currentTarget.style.borderColor = "#A3AF87";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "";
+              e.currentTarget.style.borderColor = "";
+            }}
           >
             <svg
               className="w-4 h-4"

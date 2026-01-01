@@ -137,11 +137,33 @@ export function NavbarUser() {
           <div className="flex items-center gap-4">
             <Link
               href="/wishlist"
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/wishlist"
-                  ? "bg-green-50 text-[#2D5016] shadow-md scale-105"
+                  ? "shadow-md scale-105"
                   : "text-gray-700"
               }`}
+              style={
+                {
+                  backgroundColor:
+                    pathname === "/wishlist"
+                      ? "rgba(163, 175, 135, 0.1)"
+                      : "transparent",
+                  color: pathname === "/wishlist" ? "#A3AF87" : undefined,
+                } as React.CSSProperties
+              }
+              onMouseEnter={(e) => {
+                if (pathname !== "/wishlist") {
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(163, 175, 135, 0.1)";
+                  e.currentTarget.style.color = "#A3AF87";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (pathname !== "/wishlist") {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "";
+                }
+              }}
               title="Wishlist"
             >
               <svg
@@ -161,11 +183,33 @@ export function NavbarUser() {
 
             <Link
               href="/market/cart"
-              className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] ${
+              className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/market/cart"
-                  ? "bg-green-50 text-[#2D5016] shadow-md scale-105"
+                  ? "shadow-md scale-105"
                   : "text-gray-700"
               }`}
+              style={
+                {
+                  backgroundColor:
+                    pathname === "/market/cart"
+                      ? "rgba(163, 175, 135, 0.1)"
+                      : "transparent",
+                  color: pathname === "/market/cart" ? "#A3AF87" : undefined,
+                } as React.CSSProperties
+              }
+              onMouseEnter={(e) => {
+                if (pathname !== "/market/cart") {
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(163, 175, 135, 0.1)";
+                  e.currentTarget.style.color = "#A3AF87";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (pathname !== "/market/cart") {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "";
+                }
+              }}
               title="Keranjang"
             >
               <svg
@@ -181,18 +225,43 @@ export function NavbarUser() {
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#2D5016] text-[10px] font-bold text-white">
+              <span
+                className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                style={{ backgroundColor: "#A3AF87" }}
+              >
                 3
               </span>
             </Link>
 
             <Link
               href="/transaction"
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/transaction"
-                  ? "bg-green-50 text-[#2D5016] shadow-md scale-105"
+                  ? "shadow-md scale-105"
                   : "text-gray-700"
               }`}
+              style={
+                {
+                  backgroundColor:
+                    pathname === "/transaction"
+                      ? "rgba(163, 175, 135, 0.1)"
+                      : "transparent",
+                  color: pathname === "/transaction" ? "#A3AF87" : undefined,
+                } as React.CSSProperties
+              }
+              onMouseEnter={(e) => {
+                if (pathname !== "/transaction") {
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(163, 175, 135, 0.1)";
+                  e.currentTarget.style.color = "#A3AF87";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (pathname !== "/transaction") {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "";
+                }
+              }}
               title="Transaksi Saya"
             >
               <svg
@@ -213,11 +282,19 @@ export function NavbarUser() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white transition-all hover:shadow-lg hover:scale-105 ${
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg hover:scale-105 ${
                   pathname?.startsWith("/profile")
-                    ? "shadow-xl scale-110 ring-2 ring-[#2D5016] ring-offset-2"
+                    ? "shadow-xl scale-110 ring-2 ring-offset-2"
                     : ""
                 }`}
+                style={
+                  {
+                    backgroundColor: "#A3AF87",
+                    borderColor: pathname?.startsWith("/profile")
+                      ? "#A3AF87"
+                      : undefined,
+                  } as React.CSSProperties
+                }
                 title="Profile"
               >
                 <svg
@@ -239,8 +316,17 @@ export function NavbarUser() {
               {showProfileDropdown && (
                 <div className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden z-50">
                   {/* User Info Header */}
-                  <div className="p-4 border-b-2 border-gray-100 bg-gradient-to-br from-green-50/50 to-white">
-                    <p className="font-bold text-base text-[#2D5016]">
+                  <div
+                    className="p-4 border-b-2 border-gray-100"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white)",
+                    }}
+                  >
+                    <p
+                      className="font-bold text-base"
+                      style={{ color: "#A3AF87" }}
+                    >
                       Budi Santoso
                     </p>
                     <p className="text-sm text-gray-500 mt-0.5">
@@ -255,12 +341,16 @@ export function NavbarUser() {
                       onClick={() => setShowProfileDropdown(false)}
                       className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all group"
                     >
-                      <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 transition-all">
+                      <div
+                        className="p-2 rounded-lg transition-all"
+                        style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                      >
                         <svg
-                          className="h-5 w-5 text-[#2D5016]"
+                          className="h-5 w-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
+                          style={{ color: "#A3AF87" }}
                         >
                           <path
                             strokeLinecap="round"
@@ -336,7 +426,13 @@ export function NavbarUser() {
       <div className="lg:hidden fixed top-0 inset-x-0 z-50 pt-safe">
         <div className="mx-2 mt-3">
           <div className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-4 py-3">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#2D5016]/10 via-transparent to-[#3d6b1e]/10 pointer-events-none"></div>
+            <div
+              className="absolute inset-0 rounded-3xl pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(163, 175, 135, 0.1), transparent, rgba(90, 108, 91, 0.1))",
+              }}
+            ></div>
 
             <div className="relative flex items-center justify-between">
               <Link
@@ -353,11 +449,29 @@ export function NavbarUser() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/wishlist"
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] active:scale-95 ${
-                    pathname === "/wishlist"
-                      ? "bg-green-50 text-[#2D5016] scale-105"
-                      : "text-gray-600"
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
+                    pathname === "/wishlist" ? "scale-105" : "text-gray-600"
                   }`}
+                  style={{
+                    backgroundColor:
+                      pathname === "/wishlist"
+                        ? "rgba(163, 175, 135, 0.1)"
+                        : "transparent",
+                    color: pathname === "/wishlist" ? "#A3AF87" : undefined,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (pathname !== "/wishlist") {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(163, 175, 135, 0.1)";
+                      e.currentTarget.style.color = "#A3AF87";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (pathname !== "/wishlist") {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "";
+                    }
+                  }}
                   title="Wishlist"
                 >
                   <svg
@@ -377,11 +491,29 @@ export function NavbarUser() {
 
                 <Link
                   href="/market/cart"
-                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] active:scale-95 ${
-                    pathname === "/market/cart"
-                      ? "bg-green-50 text-[#2D5016] scale-105"
-                      : "text-gray-600"
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
+                    pathname === "/market/cart" ? "scale-105" : "text-gray-600"
                   }`}
+                  style={{
+                    backgroundColor:
+                      pathname === "/market/cart"
+                        ? "rgba(163, 175, 135, 0.1)"
+                        : "transparent",
+                    color: pathname === "/market/cart" ? "#A3AF87" : undefined,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (pathname !== "/market/cart") {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(163, 175, 135, 0.1)";
+                      e.currentTarget.style.color = "#A3AF87";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (pathname !== "/market/cart") {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "";
+                    }
+                  }}
                   title="Keranjang"
                 >
                   <svg
@@ -397,18 +529,39 @@ export function NavbarUser() {
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#2D5016] text-[10px] font-bold text-white">
+                  <span
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                    style={{ backgroundColor: "#A3AF87" }}
+                  >
                     3
                   </span>
                 </Link>
 
                 <Link
                   href="/transaction"
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-green-50 hover:text-[#2D5016] active:scale-95 ${
-                    pathname === "/transaction"
-                      ? "bg-green-50 text-[#2D5016] scale-105"
-                      : "text-gray-600"
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
+                    pathname === "/transaction" ? "scale-105" : "text-gray-600"
                   }`}
+                  style={{
+                    backgroundColor:
+                      pathname === "/transaction"
+                        ? "rgba(163, 175, 135, 0.1)"
+                        : "transparent",
+                    color: pathname === "/transaction" ? "#A3AF87" : undefined,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (pathname !== "/transaction") {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(163, 175, 135, 0.1)";
+                      e.currentTarget.style.color = "#A3AF87";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (pathname !== "/transaction") {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "";
+                    }
+                  }}
                   title="Transaksi"
                 >
                   <svg
@@ -429,11 +582,12 @@ export function NavbarUser() {
                 <div className="relative" ref={mobileDropdownRef}>
                   <button
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white transition-all hover:shadow-lg active:scale-95 ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95 ${
                       pathname?.startsWith("/profile")
                         ? "shadow-xl scale-105 ring-2 ring-white"
                         : ""
                     }`}
+                    style={{ backgroundColor: "#A3AF87" }}
                     title="Profile"
                   >
                     <svg
@@ -455,8 +609,17 @@ export function NavbarUser() {
                   {showProfileDropdown && (
                     <div className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden z-50">
                       {/* User Info Header */}
-                      <div className="p-4 border-b-2 border-gray-100 bg-gradient-to-br from-green-50/50 to-white">
-                        <p className="font-bold text-base text-[#2D5016]">
+                      <div
+                        className="p-4 border-b-2 border-gray-100"
+                        style={{
+                          background:
+                            "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white)",
+                        }}
+                      >
+                        <p
+                          className="font-bold text-base"
+                          style={{ color: "#A3AF87" }}
+                        >
                           Budi Santoso
                         </p>
                         <p className="text-sm text-gray-500 mt-0.5">
@@ -471,12 +634,18 @@ export function NavbarUser() {
                           onClick={() => setShowProfileDropdown(false)}
                           className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all group"
                         >
-                          <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 transition-all">
+                          <div
+                            className="p-2 rounded-lg transition-all"
+                            style={{
+                              backgroundColor: "rgba(163, 175, 135, 0.1)",
+                            }}
+                          >
                             <svg
-                              className="h-5 w-5 text-[#2D5016]"
+                              className="h-5 w-5"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
+                              style={{ color: "#A3AF87" }}
                             >
                               <path
                                 strokeLinecap="round"
@@ -559,7 +728,13 @@ export function NavbarUser() {
           !pathname?.includes("/profile") && (
             <div className="mx-2 mb-3">
               <nav className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#2D5016]/10 via-transparent to-[#3d6b1e]/10 pointer-events-none"></div>
+                <div
+                  className="absolute inset-0 rounded-3xl pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(to right, rgba(163, 175, 135, 0.1), transparent, rgba(90, 108, 91, 0.1))",
+                  }}
+                ></div>
 
                 <div className="relative flex items-center justify-around">
                   {mobileNavItems.map((item, idx) => {
@@ -573,25 +748,34 @@ export function NavbarUser() {
                         className="flex flex-col items-center gap-1 py-1.5 px-3 transition-all relative group"
                       >
                         {isActive && (
-                          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] rounded-full"></div>
+                          <div
+                            className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full"
+                            style={{
+                              background:
+                                "linear-gradient(to right, #A3AF87, #5a6c5b)",
+                            }}
+                          ></div>
                         )}
 
                         <div
-                          className={`transition-all ${
-                            isActive
-                              ? "text-[#2D5016] scale-110"
-                              : "text-gray-500 group-hover:text-[#2D5016] group-hover:scale-105"
-                          }`}
+                          className="transition-all"
+                          style={
+                            {
+                              color: isActive ? "#A3AF87" : "rgb(107 114 128)",
+                              transform: isActive ? "scale(1.1)" : undefined,
+                            } as React.CSSProperties
+                          }
                         >
                           {item.icon}
                         </div>
 
                         <span
-                          className={`text-[10px] font-medium transition-all ${
-                            isActive
-                              ? "text-[#2D5016]"
-                              : "text-gray-500 group-hover:text-[#2D5016]"
-                          }`}
+                          className="text-[10px] font-medium transition-all"
+                          style={
+                            {
+                              color: isActive ? "#A3AF87" : "rgb(107 114 128)",
+                            } as React.CSSProperties
+                          }
                         >
                           {item.name}
                         </span>

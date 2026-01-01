@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import ProductCard, { Product } from "@/components/user/market/ProductCard";
 import FilterSidebar from "@/components/user/market/FilterSidebar";
 import MobileFilterPanel from "@/components/user/market/MobileFilterPanel";
@@ -348,7 +349,8 @@ export default function MarketProductsPage() {
             {/* Mobile Filter Button */}
             <button
               onClick={() => setIsFilterOpen(true)}
-              className="lg:hidden w-full mb-3 px-4 py-2.5 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform"
+              className="lg:hidden w-full mb-3 px-4 py-2.5 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform"
+              style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
             >
               <svg
                 className="h-5 w-5"
@@ -374,7 +376,10 @@ export default function MarketProductsPage() {
             {/* Results Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-sm">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] flex items-center justify-center">
+                <div
+                  className="h-8 w-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+                >
                   <svg
                     className="h-4 w-4 text-white"
                     fill="none"
@@ -391,20 +396,35 @@ export default function MarketProductsPage() {
                 </div>
                 <span className="text-gray-700">
                   Menampilkan{" "}
-                  <span className="font-bold text-[#2D5016]">
+                  <span
+                    className="font-bold"
+                    style={{ color: "#5a6c5b" } as React.CSSProperties}
+                  >
                     {filteredProducts.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-semibold text-[#2D5016]">
+                  <span
+                    className="font-semibold"
+                    style={{ color: "#5a6c5b" } as React.CSSProperties}
+                  >
                     {products.length}
                   </span>{" "}
-                  <span className="text-[#2D5016]/70">produk</span>
+                  <span
+                    style={{
+                      color: "rgba(90, 108, 91, 0.7)",
+                    }}
+                  >
+                    produk
+                  </span>
                 </span>
               </div>
 
               {/* Grid/List View Toggle */}
               <div className="flex gap-2">
-                <button className="p-2 bg-[#2D5016] text-white rounded-lg">
+                <button
+                  className="p-2 text-white rounded-lg"
+                  style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+                >
                   <svg
                     className="h-4 w-4"
                     fill="currentColor"
@@ -439,27 +459,162 @@ export default function MarketProductsPage() {
 
             {/* Empty State */}
             {filteredProducts.length === 0 && (
-              <div className="text-center py-16 bg-white rounded-2xl">
-                <svg
-                  className="mx-auto h-20 w-20 text-gray-300 mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-16 bg-white rounded-2xl"
+              >
+                {/* Animated Search Icon */}
+                <motion.div
+                  className="mx-auto mb-6 relative"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{
+                    delay: 0.2,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 10,
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  {/* Magnifying Glass */}
+                  <motion.svg
+                    className="mx-auto h-24 w-24"
+                    style={{ color: "rgba(163, 175, 135, 0.3)" }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    animate={{
+                      rotate: [0, -10, 10, -10, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                    }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </motion.svg>
+
+                  {/* Floating Question Marks */}
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute text-2xl"
+                      style={{
+                        color: "rgba(163, 175, 135, 0.4)",
+                        left: `${30 + i * 20}%`,
+                        top: `${20 + i * 10}%`,
+                      }}
+                      animate={{
+                        y: [0, -10, 0],
+                        opacity: [0.2, 0.6, 0.2],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: i * 0.3,
+                      }}
+                    >
+                      ?
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* Animated Title */}
+                <motion.h3
+                  className="text-lg font-semibold mb-2"
+                  style={{ color: "#303646" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
                   Produk tidak ditemukan
-                </h3>
-                <p className="text-gray-500 text-sm">
+                </motion.h3>
+
+                {/* Animated Description */}
+                <motion.p
+                  className="text-sm mb-6"
+                  style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
                   Coba ubah kata kunci pencarian atau filter
-                </p>
-              </div>
+                </motion.p>
+
+                {/* Animated Suggestions */}
+                <motion.div
+                  className="flex flex-wrap gap-2 justify-center max-w-md mx-auto"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  {["Hapus Filter", "Reset Pencarian", "Lihat Semua"].map(
+                    (text, i) => (
+                      <motion.button
+                        key={i}
+                        className="px-4 py-2 rounded-full text-xs font-semibold text-white transition-all"
+                        style={{ backgroundColor: "#A3AF87" }}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{
+                          delay: 0.7 + i * 0.1,
+                          type: "spring",
+                          stiffness: 200,
+                        }}
+                        whileHover={{
+                          scale: 1.1,
+                          boxShadow: "0 4px 12px rgba(163, 175, 135, 0.4)",
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          if (text === "Hapus Filter") {
+                            setSelectedCategories([]);
+                          } else if (text === "Reset Pencarian") {
+                            setSearchQuery("");
+                          } else {
+                            setSelectedCategories([]);
+                            setSearchQuery("");
+                            setMinPrice(0);
+                            setMaxPrice(200000);
+                          }
+                        }}
+                      >
+                        {text}
+                      </motion.button>
+                    )
+                  )}
+                </motion.div>
+
+                {/* Floating Dots Animation */}
+                <div className="relative mt-8 h-4">
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-2 h-2 rounded-full"
+                      style={{
+                        backgroundColor: "#A3AF87",
+                        left: `calc(50% - 20px + ${i * 20}px)`,
+                      }}
+                      animate={{
+                        y: [0, -15, 0],
+                        opacity: [0.3, 1, 0.3],
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        delay: i * 0.2,
+                      }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
             )}
 
             {/* Pagination */}

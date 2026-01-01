@@ -1,14 +1,22 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function TermsPage() {
+  const [kembaliHover, setKembaliHover] = useState(false);
+  const [registerHover, setRegisterHover] = useState(false);
+  const [hubungiHover, setHubungiHover] = useState(false);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] rounded-lg p-1.5 group-hover:scale-105 transition-transform duration-300 shadow-md">
+            <div
+              className="w-10 h-10 rounded-lg p-1.5 group-hover:scale-105 transition-transform duration-300 shadow-md"
+              style={{ backgroundColor: "#A3AF87" }}
+            >
               <Image
                 src="/icon.svg"
                 alt="EcoMaggie Logo"
@@ -17,13 +25,27 @@ export default function TermsPage() {
                 className="w-full h-full"
               />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold">
+            <span
+              className="text-xl font-bold poppins-bold"
+              style={{ color: "#A3AF87" }}
+            >
               EcoMaggie
             </span>
           </Link>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm bg-white border border-gray-200 rounded-lg hover:border-[#2D5016] hover:shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 transition-all duration-200 poppins-medium text-sm bg-white rounded-lg"
+            style={{
+              color: kembaliHover ? "#A3AF87" : "#4B5563",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: kembaliHover ? "#A3AF87" : "#E5E7EB",
+              boxShadow: kembaliHover
+                ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+                : "none",
+            }}
+            onMouseEnter={() => setKembaliHover(true)}
+            onMouseLeave={() => setKembaliHover(false)}
           >
             <svg
               className="w-4 h-4"
@@ -45,10 +67,16 @@ export default function TermsPage() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 border-t-4 border-t-[#2D5016]">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 border-t-4"
+          style={{ borderTopColor: "#A3AF87" }}
+        >
           {/* Title */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold mb-2">
+            <h1
+              className="text-3xl md:text-4xl font-bold poppins-bold mb-2"
+              style={{ color: "#A3AF87" }}
+            >
               Syarat dan Ketentuan
             </h1>
             <p className="text-gray-600 poppins-regular text-sm">
@@ -60,7 +88,10 @@ export default function TermsPage() {
           <div className="prose prose-sm md:prose-base max-w-none">
             {/* Introduction */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 1. Pendahuluan
               </h2>
               <p className="text-gray-700 poppins-regular leading-relaxed mb-3">
@@ -78,7 +109,10 @@ export default function TermsPage() {
 
             {/* User Registration */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 2. Pendaftaran Pengguna
               </h2>
               <div className="space-y-3 text-gray-700 poppins-regular leading-relaxed">
@@ -110,7 +144,10 @@ export default function TermsPage() {
 
             {/* Services */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 3. Layanan EcoMaggie
               </h2>
               <div className="space-y-4">
@@ -141,7 +178,10 @@ export default function TermsPage() {
 
             {/* User Responsibilities */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 4. Tanggung Jawab Pengguna
               </h2>
               <div className="space-y-3 text-gray-700 poppins-regular leading-relaxed">
@@ -172,7 +212,10 @@ export default function TermsPage() {
 
             {/* Waste Guidelines */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 5. Pedoman Sampah Organik
               </h2>
               <div className="space-y-4">
@@ -207,7 +250,10 @@ export default function TermsPage() {
 
             {/* Privacy */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 6. Privasi dan Data Pribadi
               </h2>
               <div className="space-y-3 text-gray-700 poppins-regular leading-relaxed">
@@ -237,7 +283,10 @@ export default function TermsPage() {
 
             {/* Rewards */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 7. Program Reward
               </h2>
               <div className="space-y-3 text-gray-700 poppins-regular leading-relaxed">
@@ -265,7 +314,10 @@ export default function TermsPage() {
 
             {/* Limitation */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 8. Batasan Tanggung Jawab
               </h2>
               <div className="space-y-3 text-gray-700 poppins-regular leading-relaxed">
@@ -283,7 +335,10 @@ export default function TermsPage() {
 
             {/* Changes */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 9. Perubahan Syarat dan Ketentuan
               </h2>
               <p className="text-gray-700 poppins-regular leading-relaxed">
@@ -296,7 +351,10 @@ export default function TermsPage() {
 
             {/* Termination */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 10. Penutupan Akun
               </h2>
               <div className="space-y-3 text-gray-700 poppins-regular leading-relaxed">
@@ -312,18 +370,30 @@ export default function TermsPage() {
 
             {/* Contact */}
             <section className="mb-8">
-              <h2 className="text-xl font-bold text-[#2D5016] poppins-bold mb-3">
+              <h2
+                className="text-xl font-bold poppins-bold mb-3"
+                style={{ color: "#A3AF87" }}
+              >
                 11. Hubungi Kami
               </h2>
               <p className="text-gray-700 poppins-regular leading-relaxed mb-3">
                 Jika Anda memiliki pertanyaan tentang Syarat dan Ketentuan ini,
                 silakan hubungi kami:
               </p>
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  backgroundColor: "rgba(163, 175, 135, 0.1)",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  borderColor: "rgba(163, 175, 135, 0.2)",
+                }}
+              >
                 <ul className="space-y-2 text-gray-700 poppins-regular">
                   <li className="flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-[#2D5016] flex-shrink-0"
+                      className="w-5 h-5 flex-shrink-0"
+                      style={{ color: "#A3AF87" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -339,7 +409,8 @@ export default function TermsPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-[#2D5016] flex-shrink-0"
+                      className="w-5 h-5 flex-shrink-0"
+                      style={{ color: "#A3AF87" }}
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -349,7 +420,8 @@ export default function TermsPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-[#2D5016] flex-shrink-0"
+                      className="w-5 h-5 flex-shrink-0"
+                      style={{ color: "#A3AF87" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -369,7 +441,15 @@ export default function TermsPage() {
 
             {/* Acceptance */}
             <section>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-[#2D5016] rounded-lg p-6">
+              <div
+                className="rounded-lg p-6"
+                style={{
+                  backgroundColor: "rgba(163, 175, 135, 0.1)",
+                  borderLeftWidth: "4px",
+                  borderLeftStyle: "solid",
+                  borderLeftColor: "#A3AF87",
+                }}
+              >
                 <p className="text-gray-900 poppins-semibold text-center">
                   Dengan menggunakan EcoMaggie, Anda menyatakan bahwa Anda telah
                   membaca, memahami, dan menyetujui Syarat dan Ketentuan ini.
@@ -382,7 +462,19 @@ export default function TermsPage() {
           <div className="mt-10 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 poppins-semibold"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 poppins-semibold"
+              style={
+                {
+                  backgroundColor: registerHover ? "#8c9a77" : "#A3AF87",
+                  boxShadow: registerHover
+                    ? "0 20px 25px -5px rgba(0, 0, 0, 0.1)"
+                    : "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                  transform: registerHover ? "scale(1.02)" : "scale(1)",
+                  "--tw-ring-color": "#A3AF87",
+                } as React.CSSProperties
+              }
+              onMouseEnter={() => setRegisterHover(true)}
+              onMouseLeave={() => setRegisterHover(false)}
             >
               <svg
                 className="w-5 h-5"
@@ -401,7 +493,16 @@ export default function TermsPage() {
             </Link>
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-[#2D5016] hover:text-[#2D5016] transition-all duration-200 poppins-medium"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 poppins-medium"
+              style={{
+                borderWidth: "2px",
+                borderStyle: "solid",
+                borderColor: hubungiHover ? "#A3AF87" : "#E5E7EB",
+                color: hubungiHover ? "#A3AF87" : "#374151",
+                backgroundColor: hubungiHover ? "#F9FAFB" : "transparent",
+              }}
+              onMouseEnter={() => setHubungiHover(true)}
+              onMouseLeave={() => setHubungiHover(false)}
             >
               Kembali ke Beranda
             </Link>

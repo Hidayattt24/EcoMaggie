@@ -21,17 +21,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background:
+          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+      }}
+    >
       <div className="w-full max-w-lg">
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-t-[#2D5016] relative overflow-hidden">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-8 relative overflow-hidden"
+          style={{ borderTop: "4px solid #A3AF87" }}
+        >
           {/* Decorative corner */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+          <div
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            style={{
+              background:
+                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.2), transparent)",
+            }}
+          ></div>
 
           {/* Logo & Title */}
           <div className="text-center mb-8 relative z-10">
             <Link href="/" className="inline-block">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg">
+              <div
+                className="w-16 h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
+                style={{ backgroundColor: "#A3AF87" }}
+              >
                 <Image
                   src="/icon.svg"
                   alt="EcoMaggie Logo"
@@ -41,7 +59,10 @@ export default function LoginPage() {
                 />
               </div>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold mt-4">
+            <h1
+              className="text-2xl font-bold poppins-bold mt-4"
+              style={{ color: "#A3AF87" }}
+            >
               Masuk ke Akun
             </h1>
             <p className="text-gray-600 mt-2 text-sm poppins-regular">
@@ -58,10 +79,11 @@ export default function LoginPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -83,7 +105,19 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm"
+                  className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !document.activeElement ||
+                    document.activeElement !== e.currentTarget
+                      ? (e.currentTarget.style.borderColor = "#d1d5db")
+                      : null
+                  }
                   placeholder="nama@email.com"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -111,10 +145,11 @@ export default function LoginPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -136,7 +171,19 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className="block w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm"
+                  className="block w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !document.activeElement ||
+                    document.activeElement !== e.currentTarget
+                      ? (e.currentTarget.style.borderColor = "#d1d5db")
+                      : null
+                  }
                   placeholder="••••••••"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -202,7 +249,10 @@ export default function LoginPage() {
             <div className="flex items-center justify-end">
               <Link
                 href="/forgot-password"
-                className="text-sm font-medium text-[#2D5016] hover:text-[#3d6b1e] transition-colors poppins-medium"
+                className="text-sm font-medium transition-colors poppins-medium"
+                style={{ color: "#A3AF87" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#5a6c5b")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#A3AF87")}
               >
                 Lupa kata sandi?
               </Link>
@@ -212,7 +262,24 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+              style={
+                {
+                  backgroundColor: "#A3AF87",
+                  "--tw-ring-color": "#A3AF87",
+                } as React.CSSProperties
+              }
+              onMouseEnter={(e) =>
+                !isLoading &&
+                ((e.currentTarget.style.transform = "scale(1.02)"),
+                (e.currentTarget.style.boxShadow =
+                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"))
+              }
+              onMouseLeave={(e) => (
+                (e.currentTarget.style.transform = "scale(1)"),
+                (e.currentTarget.style.boxShadow =
+                  "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)")
+              )}
             >
               {isLoading ? (
                 <>
@@ -260,7 +327,23 @@ export default function LoginPage() {
           <div className="text-center">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm bg-gradient-to-r from-green-50 to-emerald-50 text-[#2D5016] hover:from-green-100 hover:to-emerald-100 font-semibold rounded-lg border-2 border-[#2D5016] hover:shadow-md transition-all duration-200 poppins-semibold"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all duration-200 poppins-semibold"
+              style={{
+                backgroundColor: "rgba(163, 175, 135, 0.1)",
+                color: "#A3AF87",
+                borderColor: "#A3AF87",
+              }}
+              onMouseEnter={(e) => (
+                (e.currentTarget.style.backgroundColor =
+                  "rgba(163, 175, 135, 0.2)"),
+                (e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)")
+              )}
+              onMouseLeave={(e) => (
+                (e.currentTarget.style.backgroundColor =
+                  "rgba(163, 175, 135, 0.1)"),
+                (e.currentTarget.style.boxShadow = "")
+              )}
             >
               <svg
                 className="w-4 h-4"

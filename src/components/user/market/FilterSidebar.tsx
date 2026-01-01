@@ -22,10 +22,16 @@ export default function FilterSidebar({
   onSortChange,
 }: FilterSidebarProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-[#2D5016] scrollbar-track-gray-100">
+    <div
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-track-gray-100"
+      style={{ scrollbarColor: "#A3AF87 #f3f4f6" } as React.CSSProperties}
+    >
       {/* Filter Header */}
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] flex items-center justify-center">
+        <div
+          className="h-8 w-8 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+        >
           <svg
             className="h-4 w-4 text-white"
             fill="none"
@@ -40,14 +46,20 @@ export default function FilterSidebar({
             />
           </svg>
         </div>
-        <h2 className="font-bold text-base text-[#2D5016] flex-1 font-poppins">
+        <h2
+          className="font-bold text-base flex-1 font-poppins"
+          style={{ color: "#303646" } as React.CSSProperties}
+        >
           Filter Produk
         </h2>
       </div>
 
       {/* Jenis Category */}
       <div className="mb-4">
-        <button className="flex items-center gap-1.5 w-full text-xs font-semibold text-[#2D5016] mb-2">
+        <button
+          className="flex items-center gap-1.5 w-full text-xs font-semibold mb-2"
+          style={{ color: "#303646" } as React.CSSProperties}
+        >
           <svg
             className="h-3.5 w-3.5"
             fill="none"
@@ -80,20 +92,53 @@ export default function FilterSidebar({
           {categories.map((category) => (
             <label
               key={category}
-              className="flex items-center gap-1.5 cursor-pointer group px-2 py-1 rounded-md hover:bg-green-50 transition-colors"
+              className="flex items-center gap-1.5 cursor-pointer group px-2 py-1 rounded-md transition-colors"
+              style={
+                {
+                  "--hover-bg": "rgba(163, 175, 135, 0.1)",
+                } as React.CSSProperties
+              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(163, 175, 135, 0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
               <input
                 type="checkbox"
                 checked={selectedCategories.includes(category)}
                 onChange={() => onToggleCategory(category)}
-                className="w-3.5 h-3.5 rounded border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
+                className="w-3.5 h-3.5 rounded border-gray-300 transition-all appearance-none border"
+                style={
+                  {
+                    accentColor: "#A3AF87",
+                  } as React.CSSProperties
+                }
               />
+              <style jsx>{`
+                input[type="checkbox"]:checked {
+                  background-color: #a3af87;
+                  border-color: #a3af87;
+                }
+                input[type="checkbox"]:focus {
+                  outline: 2px solid rgba(163, 175, 135, 0.3);
+                }
+              `}</style>
               <span
                 className={`text-xs transition-colors ${
                   selectedCategories.includes(category)
-                    ? "text-[#2D5016] font-semibold"
-                    : "text-gray-700 group-hover:text-[#2D5016]"
+                    ? "font-semibold"
+                    : "text-gray-700"
                 }`}
+                style={
+                  {
+                    color: selectedCategories.includes(category)
+                      ? "#303646"
+                      : undefined,
+                  } as React.CSSProperties
+                }
               >
                 {category}
               </span>
@@ -104,7 +149,10 @@ export default function FilterSidebar({
 
       {/* Price Range */}
       <div className="mb-4">
-        <button className="flex items-center gap-1.5 w-full text-xs font-semibold text-[#2D5016] mb-2">
+        <button
+          className="flex items-center gap-1.5 w-full text-xs font-semibold mb-2"
+          style={{ color: "#303646" } as React.CSSProperties}
+        >
           <svg
             className="h-3.5 w-3.5"
             fill="none"
@@ -134,7 +182,10 @@ export default function FilterSidebar({
           </svg>
         </button>
         <div className="space-y-3">
-          <div className="flex justify-between text-[10px] text-[#2D5016] font-semibold">
+          <div
+            className="flex justify-between text-[10px] font-semibold"
+            style={{ color: "#303646" } as React.CSSProperties}
+          >
             <span>Rp {minPrice.toLocaleString("id-ID")}</span>
             <span>Rp {maxPrice.toLocaleString("id-ID")}</span>
           </div>
@@ -150,12 +201,15 @@ export default function FilterSidebar({
                   Math.min(parseInt(e.target.value), maxPrice - 5000)
                 )
               }
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-              style={{
-                background: `linear-gradient(to right, #2D5016 0%, #2D5016 ${
-                  (minPrice / 200000) * 100
-                }%, #e5e7eb ${(minPrice / 200000) * 100}%, #e5e7eb 100%)`,
-              }}
+              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              style={
+                {
+                  background: `linear-gradient(to right, #A3AF87 0%, #A3AF87 ${
+                    (minPrice / 200000) * 100
+                  }%, #e5e7eb ${(minPrice / 200000) * 100}%, #e5e7eb 100%)`,
+                  accentColor: "#A3AF87",
+                } as React.CSSProperties
+              }
             />
             <input
               type="range"
@@ -168,12 +222,15 @@ export default function FilterSidebar({
                   Math.max(parseInt(e.target.value), minPrice + 5000)
                 )
               }
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5016]"
-              style={{
-                background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
-                  (maxPrice / 200000) * 100
-                }%, #2D5016 ${(maxPrice / 200000) * 100}%, #2D5016 100%)`,
-              }}
+              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              style={
+                {
+                  background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
+                    (maxPrice / 200000) * 100
+                  }%, #A3AF87 ${(maxPrice / 200000) * 100}%, #A3AF87 100%)`,
+                  accentColor: "#A3AF87",
+                } as React.CSSProperties
+              }
             />
           </div>
         </div>
@@ -181,7 +238,10 @@ export default function FilterSidebar({
 
       {/* Sort Options */}
       <div>
-        <button className="flex items-center gap-1.5 w-full text-xs font-semibold text-[#2D5016] mb-2">
+        <button
+          className="flex items-center gap-1.5 w-full text-xs font-semibold mb-2"
+          style={{ color: "#303646" } as React.CSSProperties}
+        >
           <svg
             className="h-3.5 w-3.5"
             fill="none"
@@ -220,7 +280,14 @@ export default function FilterSidebar({
           ].map((option) => (
             <label
               key={option.value}
-              className="flex items-center gap-1.5 cursor-pointer group px-2 py-1 rounded-md hover:bg-green-50 transition-colors"
+              className="flex items-center gap-1.5 cursor-pointer group px-2 py-1 rounded-md transition-colors"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(163, 175, 135, 0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
               <input
                 type="radio"
@@ -228,14 +295,32 @@ export default function FilterSidebar({
                 value={option.value}
                 checked={sortBy === option.value}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="w-3.5 h-3.5 border-gray-300 text-[#2D5016] accent-[#2D5016] focus:ring-[#2D5016] focus:ring-offset-0"
+                className="w-3.5 h-3.5 border-gray-300 appearance-none border rounded-full"
+                style={
+                  {
+                    accentColor: "#A3AF87",
+                  } as React.CSSProperties
+                }
               />
+              <style jsx>{`
+                input[type="radio"]:checked {
+                  background-color: #a3af87;
+                  border-color: #a3af87;
+                  box-shadow: inset 0 0 0 3px white;
+                }
+                input[type="radio"]:focus {
+                  outline: 2px solid rgba(163, 175, 135, 0.3);
+                }
+              `}</style>
               <span
                 className={`text-xs transition-colors ${
-                  sortBy === option.value
-                    ? "text-[#2D5016] font-semibold"
-                    : "text-gray-700 group-hover:text-[#2D5016]"
+                  sortBy === option.value ? "font-semibold" : "text-gray-700"
                 }`}
+                style={
+                  {
+                    color: sortBy === option.value ? "#303646" : undefined,
+                  } as React.CSSProperties
+                }
               >
                 {option.label}
               </span>

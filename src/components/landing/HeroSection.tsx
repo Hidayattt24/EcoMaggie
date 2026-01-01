@@ -59,7 +59,7 @@ export default function HeroSection() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(156, 171, 132, 0.00) 0%, #16321A 100%)",
+              "linear-gradient(180deg, rgba(253, 248, 212, 0.00) 0%, rgba(163, 175, 135, 0.95) 100%)",
           }}
         />
       </div>
@@ -69,14 +69,24 @@ export default function HeroSection() {
         <div className="max-w-4xl text-left mx-auto lg:mx-0 lg:ml-[135px]">
           {/* Badge */}
           <div
-            className={`inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-md rounded-full mb-4 sm:mb-6 border border-white/20 transition-all duration-1000 ${
+            className={`inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-md rounded-full mb-4 sm:mb-6 transition-all duration-1000 ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
             }`}
+            style={{
+              background: "var(--brand-cream)",
+              border: "1px solid var(--brand-sage-light)",
+            }}
           >
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-white/90 text-[10px] sm:text-xs poppins-medium">
+            <div
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: "var(--accent-green-light)" }}
+            ></div>
+            <span
+              className="text-[10px] sm:text-xs poppins-medium"
+              style={{ color: "var(--text-primary)" }}
+            >
               Platform Digital Pengelolaan Sampah Organik
             </span>
           </div>
@@ -115,23 +125,40 @@ export default function HeroSection() {
                 : "opacity-0 translate-y-4"
             }`}
           >
-            <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm rounded-lg"
+              style={{
+                background: "var(--brand-cream)",
+                border: "1px solid var(--brand-sage-light)",
+              }}
+            >
               <svg
-                className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                className="w-4 h-4 sm:w-5 sm:h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
+                style={{ color: "var(--accent-green-light)" }}
               >
                 <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
               </svg>
-              <span className="text-white text-[10px] sm:text-xs poppins-medium">
+              <span
+                className="text-[10px] sm:text-xs poppins-medium"
+                style={{ color: "var(--text-primary)" }}
+              >
                 100+ Partner
               </span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm rounded-lg"
+              style={{
+                background: "var(--brand-cream)",
+                border: "1px solid var(--brand-sage-light)",
+              }}
+            >
               <svg
-                className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                className="w-4 h-4 sm:w-5 sm:h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
+                style={{ color: "var(--accent-green-light)" }}
               >
                 <path
                   fillRule="evenodd"
@@ -139,7 +166,10 @@ export default function HeroSection() {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-white text-[10px] sm:text-xs poppins-medium">
+              <span
+                className="text-[10px] sm:text-xs poppins-medium"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Tersedia 24/7
               </span>
             </div>
@@ -155,10 +185,17 @@ export default function HeroSection() {
           >
             <button
               onClick={scrollToNext}
-              className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-8 sm:py-3.5 bg-white text-[#16321A] poppins-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:scale-105 text-xs sm:text-sm"
+              className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-8 sm:py-3.5 poppins-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:scale-105 text-xs sm:text-sm"
+              style={{
+                background: "var(--brand-cream)",
+                color: "var(--text-primary)",
+              }}
             >
               <span>Jelajahi EcoMaggie</span>
-              <span className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-[#16321A] text-white rounded-full group-hover:translate-x-1 transition-transform duration-300">
+              <span
+                className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-white rounded-full group-hover:translate-x-1 transition-transform duration-300"
+                style={{ background: "var(--brand-sage)" }}
+              >
                 <svg
                   className="w-3 h-3"
                   fill="none"

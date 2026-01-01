@@ -326,14 +326,25 @@ export default function CheckoutPage() {
   const isBandaAceh = formData.city === "Banda Aceh";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-white to-green-50/30">
+    <div
+      className="min-h-screen"
+      style={{
+        background:
+          "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
+      }}
+    >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Back Button - Mobile Only */}
         <button
           onClick={() => router.back()}
-          className="lg:hidden flex items-center gap-2 mb-4 text-[#2D5016] hover:text-[#2D5016]/80 transition-colors"
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#5a6c5b] hover:text-[#5a6c5b]/80 transition-colors"
         >
-          <div className="p-2 bg-white border-2 border-[#2D5016]/20 rounded-lg hover:bg-green-50 transition-colors">
+          <div
+            className="p-2 bg-white border-2 rounded-lg transition-colors"
+            style={{
+              borderColor: "rgba(163, 175, 135, 0.2)",
+            }}
+          >
             <ArrowLeft className="h-5 w-5" />
           </div>
           <span className="font-semibold text-sm">Kembali</span>
@@ -343,13 +354,14 @@ export default function CheckoutPage() {
         <div className="mb-6 sm:mb-12">
           <Link
             href="/market/products"
-            className="hidden lg:inline-flex items-center gap-2 text-sm text-[#2D5016]/70 hover:text-[#2D5016] transition-colors mb-4 sm:mb-6 group"
+            className="hidden lg:inline-flex items-center gap-2 text-sm hover:text-[#5a6c5b] transition-colors mb-4 sm:mb-6 group"
+            style={{ color: "rgba(90, 108, 91, 0.7)" }}
           >
             <ChevronRight className="h-4 w-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Kembali ke Produk</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+            <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
               <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#2D5016]">
@@ -368,9 +380,18 @@ export default function CheckoutPage() {
                   <div
                     className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-sm font-bold transition-all ${
                       currentStep >= step.number
-                        ? "border-[#2D5016] bg-gradient-to-br from-[#2D5016] to-[#2D5016]/90 text-white shadow-lg shadow-[#2D5016]/20"
+                        ? "bg-[#A3AF87] text-white shadow-lg"
                         : "border-gray-200 bg-white text-gray-400 shadow-sm"
                     }`}
+                    style={
+                      currentStep >= step.number
+                        ? {
+                            borderColor: "#A3AF87",
+                            boxShadow:
+                              "0 10px 15px -3px rgba(163, 175, 135, 0.2)",
+                          }
+                        : {}
+                    }
                   >
                     {currentStep > step.number ? (
                       <Check className="h-6 w-6" strokeWidth={3} />
@@ -381,7 +402,7 @@ export default function CheckoutPage() {
                   <span
                     className={`text-xs mt-2.5 font-bold ${
                       currentStep >= step.number
-                        ? "text-[#2D5016]"
+                        ? "text-[#5a6c5b]"
                         : "text-gray-400"
                     }`}
                   >
@@ -393,7 +414,7 @@ export default function CheckoutPage() {
                     <div
                       className={`h-full transition-all rounded-full ${
                         currentStep > step.number
-                          ? "bg-gradient-to-r from-[#2D5016] to-[#2D5016]/80 shadow-sm"
+                          ? "bg-[#A3AF87] shadow-sm"
                           : "bg-gray-200"
                       }`}
                     ></div>
@@ -410,18 +431,31 @@ export default function CheckoutPage() {
                 key={step.number}
                 className={`flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all ${
                   currentStep === step.number
-                    ? "border-[#2D5016] bg-gradient-to-br from-[#2D5016] to-[#2D5016]/90 shadow-lg shadow-[#2D5016]/20"
+                    ? "bg-[#A3AF87] shadow-lg"
                     : currentStep > step.number
-                    ? "border-[#2D5016]/30 bg-green-50"
+                    ? "bg-white"
                     : "border-gray-200 bg-white"
                 }`}
+                style={
+                  currentStep === step.number
+                    ? {
+                        borderColor: "#A3AF87",
+                        boxShadow: "0 10px 15px -3px rgba(163, 175, 135, 0.2)",
+                      }
+                    : currentStep > step.number
+                    ? {
+                        borderColor: "rgba(163, 175, 135, 0.3)",
+                        background: "rgba(163, 175, 135, 0.1)",
+                      }
+                    : {}
+                }
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                     currentStep === step.number
-                      ? "bg-white text-[#2D5016]"
+                      ? "bg-white text-[#5a6c5b]"
                       : currentStep > step.number
-                      ? "bg-[#2D5016] text-white"
+                      ? "bg-[#A3AF87] text-white"
                       : "bg-gray-100 text-gray-400"
                   }`}
                 >
@@ -436,7 +470,7 @@ export default function CheckoutPage() {
                     currentStep === step.number
                       ? "text-white"
                       : currentStep > step.number
-                      ? "text-[#2D5016]"
+                      ? "text-[#5a6c5b]"
                       : "text-gray-400"
                   }`}
                 >
@@ -462,7 +496,7 @@ export default function CheckoutPage() {
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#2D5016] to-[#2D5016]/80 rounded-xl shadow-lg">
+                      <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
                         <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
                       <h2 className="text-xl sm:text-2xl font-bold text-[#2D5016]">
@@ -471,7 +505,10 @@ export default function CheckoutPage() {
                     </div>
                     <button
                       onClick={() => setShowAddressForm(!showAddressForm)}
-                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-[#2D5016] hover:text-white bg-white hover:bg-gradient-to-r hover:from-[#2D5016] hover:to-[#2D5016]/90 border-2 border-[#2D5016] rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-[#5a6c5b] hover:text-white bg-white border-2 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
+                      style={{
+                        borderColor: "#A3AF87",
+                      }}
                     >
                       {showAddressForm ? (
                         <Minus className="h-4 w-4" />
@@ -494,10 +531,24 @@ export default function CheckoutPage() {
                       >
                         <form
                           onSubmit={handleSaveAddress}
-                          className="border-2 border-[#2D5016]/20 bg-gradient-to-br from-white to-green-50/30 rounded-2xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 shadow-xl shadow-[#2D5016]/10"
+                          className="border-2 rounded-2xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 shadow-xl"
+                          style={{
+                            borderColor: "rgba(163, 175, 135, 0.2)",
+                            background:
+                              "linear-gradient(to bottom right, white, rgba(163, 175, 135, 0.05))",
+                            boxShadow:
+                              "0 20px 50px -12px rgba(163, 175, 135, 0.15)",
+                          }}
                         >
                           {isBandaAceh && (
-                            <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-green-50/50 border-2 border-[#2D5016]/30 rounded-xl">
+                            <div
+                              className="flex items-start gap-3 p-4 border-2 rounded-xl"
+                              style={{
+                                background:
+                                  "linear-gradient(to right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05))",
+                                borderColor: "rgba(163, 175, 135, 0.3)",
+                              }}
+                            >
                               <div className="p-1.5 bg-[#2D5016] rounded-full">
                                 <Check
                                   className="h-3.5 w-3.5 text-white"
@@ -505,10 +556,13 @@ export default function CheckoutPage() {
                                 />
                               </div>
                               <div>
-                                <p className="font-bold text-[#2D5016]">
+                                <p className="font-bold text-[#5a6c5b]">
                                   Lokasi: Banda Aceh
                                 </p>
-                                <p className="text-[#2D5016]/80 text-xs mt-1 font-medium">
+                                <p
+                                  className="text-xs mt-1 font-medium"
+                                  style={{ color: "rgba(90, 108, 91, 0.8)" }}
+                                >
                                   Tersedia pengiriman lokal dan ambil di toko
                                 </p>
                               </div>
@@ -517,7 +571,7 @@ export default function CheckoutPage() {
 
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-bold text-[#2D5016] mb-2">
+                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
                                 Label Alamat
                               </label>
                               <input
@@ -531,12 +585,23 @@ export default function CheckoutPage() {
                                     name: e.target.value,
                                   })
                                 }
-                                className="w-full px-4 py-3 border-2 border-[#2D5016]/20 rounded-xl text-sm text-[#2D5016] placeholder:text-[#2D5016]/40 font-medium focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/10 transition-all bg-white"
+                                className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white"
+                                style={{
+                                  borderColor: "rgba(163, 175, 135, 0.2)",
+                                  color: "#5a6c5b",
+                                }}
+                                onFocus={(e) =>
+                                  (e.target.style.borderColor = "#A3AF87")
+                                }
+                                onBlur={(e) =>
+                                  (e.target.style.borderColor =
+                                    "rgba(163, 175, 135, 0.2)")
+                                }
                               />
                             </div>
 
                             <div>
-                              <label className="block text-sm font-bold text-[#2D5016] mb-2">
+                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
                                 Nomor Telepon
                               </label>
                               <input
@@ -550,14 +615,25 @@ export default function CheckoutPage() {
                                     phone: e.target.value,
                                   })
                                 }
-                                className="w-full px-4 py-3 border-2 border-[#2D5016]/20 rounded-xl text-sm text-[#2D5016] placeholder:text-[#2D5016]/40 font-medium focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/10 transition-all bg-white"
+                                className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white"
+                                style={{
+                                  borderColor: "rgba(163, 175, 135, 0.2)",
+                                  color: "#5a6c5b",
+                                }}
+                                onFocus={(e) =>
+                                  (e.target.style.borderColor = "#A3AF87")
+                                }
+                                onBlur={(e) =>
+                                  (e.target.style.borderColor =
+                                    "rgba(163, 175, 135, 0.2)")
+                                }
                               />
                             </div>
                           </div>
 
                           <div className="grid md:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-sm font-bold text-[#2D5016] mb-2">
+                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
                                 Provinsi
                               </label>
                               <div className="relative">
@@ -567,7 +643,18 @@ export default function CheckoutPage() {
                                   onChange={(e) =>
                                     handleProvinceChange(e.target.value)
                                   }
-                                  className="w-full px-4 py-3 border-2 border-[#2D5016]/20 rounded-xl text-sm text-[#2D5016] font-medium focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/10 appearance-none bg-white pr-10 transition-all"
+                                  className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none appearance-none bg-white pr-10 transition-all"
+                                  style={{
+                                    borderColor: "rgba(163, 175, 135, 0.2)",
+                                    color: "#5a6c5b",
+                                  }}
+                                  onFocus={(e) =>
+                                    (e.target.style.borderColor = "#A3AF87")
+                                  }
+                                  onBlur={(e) =>
+                                    (e.target.style.borderColor =
+                                      "rgba(163, 175, 135, 0.2)")
+                                  }
                                 >
                                   <option value="">Pilih</option>
                                   {provinces.map((prov) => (
@@ -581,7 +668,7 @@ export default function CheckoutPage() {
                             </div>
 
                             <div>
-                              <label className="block text-sm font-bold text-[#2D5016] mb-2">
+                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
                                 Kota/Kabupaten
                               </label>
                               <div className="relative">
@@ -592,7 +679,22 @@ export default function CheckoutPage() {
                                     handleCityChange(e.target.value)
                                   }
                                   disabled={!selectedProvinceId}
-                                  className="w-full px-4 py-3 border-2 border-[#2D5016]/20 rounded-xl text-sm text-[#2D5016] font-medium focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/10 appearance-none bg-white pr-10 disabled:bg-green-50 disabled:border-[#2D5016]/10 disabled:text-[#2D5016]/50 transition-all"
+                                  className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none appearance-none bg-white pr-10 transition-all"
+                                  style={{
+                                    borderColor: "rgba(163, 175, 135, 0.2)",
+                                    color: "#5a6c5b",
+                                    backgroundColor: !selectedProvinceId
+                                      ? "rgba(163, 175, 135, 0.1)"
+                                      : "white",
+                                  }}
+                                  onFocus={(e) =>
+                                    !e.target.disabled &&
+                                    (e.target.style.borderColor = "#A3AF87")
+                                  }
+                                  onBlur={(e) =>
+                                    (e.target.style.borderColor =
+                                      "rgba(163, 175, 135, 0.2)")
+                                  }
                                 >
                                   <option value="">Pilih</option>
                                   {availableCities.map((city) => (
@@ -639,7 +741,7 @@ export default function CheckoutPage() {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-bold text-[#2D5016] mb-2">
+                            <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
                               Alamat Lengkap
                             </label>
                             <textarea
@@ -653,7 +755,18 @@ export default function CheckoutPage() {
                                   address: e.target.value,
                                 })
                               }
-                              className="w-full px-4 py-3 border-2 border-[#2D5016]/20 rounded-xl text-sm text-[#2D5016] placeholder:text-[#2D5016]/40 font-medium focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/10 resize-none transition-all bg-white"
+                              className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none resize-none transition-all bg-white"
+                              style={{
+                                borderColor: "rgba(163, 175, 135, 0.2)",
+                                color: "#5a6c5b",
+                              }}
+                              onFocus={(e) =>
+                                (e.target.style.borderColor = "#A3AF87")
+                              }
+                              onBlur={(e) =>
+                                (e.target.style.borderColor =
+                                  "rgba(163, 175, 135, 0.2)")
+                              }
                             />
                           </div>
 

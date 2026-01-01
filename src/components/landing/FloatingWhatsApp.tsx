@@ -29,10 +29,16 @@ export default function FloatingWhatsApp() {
         {/* Main Circle Button */}
         <div className="relative">
           {/* Pulse Animation */}
-          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75" />
+          <div
+            className="absolute inset-0 rounded-full animate-ping opacity-75"
+            style={{ backgroundColor: "#A3AF87" }}
+          />
 
           {/* Button */}
-          <div className="relative w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110">
+          <div
+            className="relative w-14 h-14 lg:w-16 lg:h-16 rounded-full shadow-lg hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ backgroundColor: "#A3AF87" }}
+          >
             {/* WhatsApp Icon */}
             <svg
               className="w-8 h-8 lg:w-9 lg:h-9 text-white"

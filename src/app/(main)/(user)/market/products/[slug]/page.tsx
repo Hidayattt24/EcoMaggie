@@ -121,7 +121,7 @@ export default function ProductDetailPage({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D5016] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
           <p className="text-gray-600">Memuat produk...</p>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           className="inline-flex items-center gap-2 mb-4 lg:mb-6 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
         >
           <svg
-            className="h-5 w-5 text-[#2D5016] group-hover:-translate-x-1 transition-transform"
+            className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -153,7 +153,7 @@ export default function ProductDetailPage({ params }: PageProps) {
               d="M15 19l-7-7 7-7"
             />
           </svg>
-          <span className="text-[#2D5016] font-semibold">
+          <span className="text-[#5a6c5b] font-semibold">
             Kembali ke Produk
           </span>
         </Link>
@@ -164,7 +164,13 @@ export default function ProductDetailPage({ params }: PageProps) {
           <div>
             {/* Main Image */}
             <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-3 lg:p-4 mb-3 lg:mb-4 border border-gray-100">
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-white shadow-inner">
+              <div
+                className="relative aspect-square rounded-xl overflow-hidden shadow-inner"
+                style={{
+                  background:
+                    "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05), white)",
+                }}
+              >
                 <img
                   src={product.images[selectedImage]}
                   alt={product.name}
@@ -215,7 +221,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                   onClick={() => setSelectedImage(index)}
                   className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                     selectedImage === index
-                      ? "border-[#2D5016] shadow-md"
+                      ? "border-[#A3AF87] shadow-md"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
@@ -234,7 +240,14 @@ export default function ProductDetailPage({ params }: PageProps) {
             <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-4 lg:p-6 lg:sticky lg:top-4 border border-gray-100">
               {/* Category Badge */}
               <div className="flex flex-wrap items-center gap-2 mb-3 lg:mb-4">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#2D5016]/10 to-emerald-100 text-[#2D5016] text-xs font-bold rounded-full border border-[#2D5016]/20">
+                <div
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border"
+                  style={{
+                    background: "rgba(163, 175, 135, 0.2)",
+                    color: "#5a6c5b",
+                    borderColor: "rgba(163, 175, 135, 0.3)",
+                  }}
+                >
                   <svg
                     className="h-3.5 w-3.5"
                     fill="currentColor"
@@ -248,7 +261,13 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </svg>
                   <span>{product.category}</span>
                 </div>
-                <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
+                <div
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full"
+                  style={{
+                    background: "rgba(163, 175, 135, 0.2)",
+                    color: "#5a6c5b",
+                  }}
+                >
                   <svg
                     className="h-3 w-3"
                     fill="currentColor"
@@ -265,7 +284,7 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Product Name */}
-              <h1 className="text-2xl lg:text-3xl font-bold text-[#2D5016] mb-3 lg:mb-4">
+              <h1 className="text-2xl lg:text-3xl font-bold text-[#5a6c5b] mb-3 lg:mb-4">
                 {product.name}
               </h1>
 
@@ -287,12 +306,12 @@ export default function ProductDetailPage({ params }: PageProps) {
                       </svg>
                     ))}
                   </div>
-                  <span className="text-lg font-bold text-[#2D5016]">
+                  <span className="text-lg font-bold text-[#5a6c5b]">
                     {product.rating}
                   </span>
                 </div>
                 <span className="text-gray-400">•</span>
-                <div className="flex items-center gap-1.5 text-gray-700">
+                <div className="flex items-center gap-1.5 text-[#5a6c5b] font-semibold">
                   <svg
                     className="h-4 w-4 text-blue-600"
                     fill="currentColor"
@@ -322,11 +341,18 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Price */}
-              <div className="mb-4 lg:mb-6 p-3 lg:p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border-2 border-emerald-200">
+              <div
+                className="mb-4 lg:mb-6 p-3 lg:p-4 rounded-xl border-2"
+                style={{
+                  background:
+                    "linear-gradient(to right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05))",
+                  borderColor: "rgba(163, 175, 135, 0.3)",
+                }}
+              >
                 {product.discount ? (
                   <div>
                     <div className="flex flex-wrap items-baseline gap-2 lg:gap-3 mb-2">
-                      <span className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-[#2D5016] to-emerald-700 bg-clip-text text-transparent">
+                      <span className="text-2xl lg:text-4xl font-bold text-[#5a6c5b]">
                         Rp {finalPrice.toLocaleString("id-ID")}
                       </span>
                       <span className="text-sm lg:text-lg text-gray-500 line-through">
@@ -353,7 +379,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </div>
                   </div>
                 ) : (
-                  <span className="text-2xl lg:text-4xl font-bold text-[#2D5016]">
+                  <span className="text-2xl lg:text-4xl font-bold text-[#5a6c5b]">
                     Rp {product.price.toLocaleString("id-ID")}
                   </span>
                 )}
@@ -368,7 +394,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                 <div className="flex items-center gap-2 lg:gap-3">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#2D5016] hover:bg-[#2D5016] hover:text-white transition-all flex items-center justify-center font-bold text-[#2D5016] hover:text-white text-sm lg:text-base"
+                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#A3AF87] hover:bg-[#A3AF87] hover:text-white transition-all flex items-center justify-center font-bold text-[#5a6c5b] hover:text-white text-sm lg:text-base"
                   >
                     -
                   </button>
@@ -378,20 +404,20 @@ export default function ProductDetailPage({ params }: PageProps) {
                     onChange={(e) =>
                       setQuantity(Math.max(1, parseInt(e.target.value) || 1))
                     }
-                    className="w-16 h-9 lg:w-20 lg:h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-[#2D5016] focus:outline-none text-[#2D5016] text-sm lg:text-base"
+                    className="w-16 h-9 lg:w-20 lg:h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-[#A3AF87] focus:outline-none text-[#5a6c5b] text-sm lg:text-base"
                   />
                   <button
                     onClick={() =>
                       setQuantity(Math.min(product.stock, quantity + 1))
                     }
-                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#2D5016] hover:bg-[#2D5016] hover:text-white transition-all flex items-center justify-center font-bold text-[#2D5016] hover:text-white text-sm lg:text-base"
+                    className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg border-2 border-gray-300 hover:border-[#A3AF87] hover:bg-[#A3AF87] hover:text-white transition-all flex items-center justify-center font-bold text-[#5a6c5b] hover:text-white text-sm lg:text-base"
                   >
                     +
                   </button>
                   <span className="text-gray-600 text-xs lg:text-base ml-1 lg:ml-2">
                     <span className="hidden lg:inline">Subtotal: </span>
                     <span className="lg:hidden block mt-2">Subtotal: </span>
-                    <span className="font-bold text-[#2D5016]">
+                    <span className="font-bold text-[#5a6c5b]">
                       Rp {(finalPrice * quantity).toLocaleString("id-ID")}
                     </span>
                   </span>
@@ -400,7 +426,12 @@ export default function ProductDetailPage({ params }: PageProps) {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:grid sm:grid-cols-2 gap-2 lg:gap-3 mb-4 lg:mb-6">
-                <button className="py-3 lg:py-3.5 px-4 bg-gradient-to-r from-[#2D5016] via-emerald-700 to-[#3d6b1e] text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:shadow-emerald-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-emerald-800 text-sm lg:text-base">
+                <button
+                  className="py-3 lg:py-3.5 px-4 bg-[#A3AF87] text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 border border-[#5a6c5b] text-sm lg:text-base"
+                  style={{
+                    boxShadow: "0 10px 25px -5px rgba(163, 175, 135, 0.3)",
+                  }}
+                >
                   <svg
                     className="h-5 w-5"
                     fill="none"
@@ -440,7 +471,7 @@ export default function ProductDetailPage({ params }: PageProps) {
               <div className="border-t-2 border-dashed border-gray-200 pt-4 lg:pt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <svg
-                    className="h-5 w-5 text-[#2D5016]"
+                    className="h-5 w-5 text-[#5a6c5b]"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -450,13 +481,26 @@ export default function ProductDetailPage({ params }: PageProps) {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <h3 className="font-bold text-[#2D5016] text-lg">
+                  <h3 className="font-bold text-[#5a6c5b] text-lg">
                     Informasi Penjual
                   </h3>
                 </div>
-                <div className="p-3 lg:p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg lg:rounded-xl border border-emerald-200 mb-3 lg:mb-4">
+                <div
+                  className="p-3 lg:p-4 rounded-lg lg:rounded-xl border mb-3 lg:mb-4"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05))",
+                    borderColor: "rgba(163, 175, 135, 0.3)",
+                  }}
+                >
                   <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
-                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-[#2D5016] via-emerald-600 to-[#3d6b1e] flex items-center justify-center shadow-lg border-2 border-white">
+                    <div
+                      className="w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                      style={{
+                        background:
+                          "linear-gradient(to bottom right, #A3AF87, #5a6c5b)",
+                      }}
+                    >
                       <svg
                         className="h-8 w-8 text-white"
                         fill="currentColor"
@@ -470,7 +514,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-[#2D5016] text-base lg:text-lg">
+                      <p className="font-bold text-[#5a6c5b] text-base lg:text-lg">
                         {product.seller.name}
                       </p>
                       <div className="flex items-center gap-1.5">
@@ -485,7 +529,10 @@ export default function ProductDetailPage({ params }: PageProps) {
                             {product.seller.rating}
                           </span>
                         </div>
-                        <span className="text-xs text-emerald-700 font-semibold">
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ color: "#5a6c5b" }}
+                        >
                           Penjual Terpercaya
                         </span>
                       </div>
@@ -493,7 +540,8 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <svg
-                      className="h-4 w-4 text-emerald-600"
+                      className="h-4 w-4"
+                      style={{ color: "#5a6c5b" }}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -503,12 +551,18 @@ export default function ProductDetailPage({ params }: PageProps) {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <p className="font-semibold text-[#2D5016]">
+                    <p className="font-semibold text-[#5a6c5b]">
                       {product.seller.location}
                     </p>
                   </div>
                 </div>
-                <button className="w-full py-3 lg:py-3.5 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:shadow-green-500/50 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 lg:gap-2.5 border border-green-700 text-sm lg:text-base">
+                <button
+                  className="w-full py-3 lg:py-3.5 bg-[#A3AF87] text-white rounded-lg lg:rounded-xl font-bold hover:shadow-xl hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2 lg:gap-2.5 border text-sm lg:text-base"
+                  style={{
+                    borderColor: "#5a6c5b",
+                    boxShadow: "0 10px 25px -5px rgba(163, 175, 135, 0.3)",
+                  }}
+                >
                   <svg
                     className="h-6 w-6"
                     fill="currentColor"
@@ -536,39 +590,39 @@ export default function ProductDetailPage({ params }: PageProps) {
               onClick={() => setActiveTab("description")}
               className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
                 activeTab === "description"
-                  ? "text-[#2D5016]"
+                  ? "text-[#5a6c5b]"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Deskripsi
               {activeTab === "description" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D5016]"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87]"></div>
               )}
             </button>
             <button
               onClick={() => setActiveTab("specifications")}
               className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
                 activeTab === "specifications"
-                  ? "text-[#2D5016]"
+                  ? "text-[#5a6c5b]"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Spesifikasi
               {activeTab === "specifications" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D5016]"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87]"></div>
               )}
             </button>
             <button
               onClick={() => setActiveTab("reviews")}
               className={`pb-3 lg:pb-4 px-2 font-semibold transition-all relative whitespace-nowrap text-sm lg:text-base ${
                 activeTab === "reviews"
-                  ? "text-[#2D5016]"
+                  ? "text-[#5a6c5b]"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Ulasan ({product.reviews})
               {activeTab === "reviews" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D5016]"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A3AF87]"></div>
               )}
             </button>
           </div>
@@ -580,7 +634,10 @@ export default function ProductDetailPage({ params }: PageProps) {
                 <p className="text-gray-700 leading-relaxed">
                   {product.description}
                 </p>
-                <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                <div
+                  className="mt-6 p-4 rounded-lg"
+                  style={{ background: "rgba(163, 175, 135, 0.15)" }}
+                >
                   <h4 className="font-bold text-[#2D5016] mb-2">
                     Keunggulan Produk:
                   </h4>
@@ -601,7 +658,8 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <svg
-                        className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
+                        className="h-5 w-5 flex-shrink-0 mt-0.5"
+                        style={{ color: "#5a6c5b" }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -615,7 +673,8 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <svg
-                        className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
+                        className="h-5 w-5 flex-shrink-0 mt-0.5"
+                        style={{ color: "#5a6c5b" }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -629,7 +688,8 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <svg
-                        className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
+                        className="h-5 w-5 flex-shrink-0 mt-0.5"
+                        style={{ color: "#5a6c5b" }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -656,7 +716,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                     <span className="font-medium text-gray-700">
                       {spec.label}
                     </span>
-                    <span className="font-bold text-[#2D5016]">
+                    <span className="font-bold text-[#5a6c5b]">
                       {spec.value}
                     </span>
                   </div>
@@ -667,7 +727,13 @@ export default function ProductDetailPage({ params }: PageProps) {
             {activeTab === "reviews" && (
               <div className="space-y-6">
                 {/* Rating Summary */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-8 p-4 lg:p-6 bg-gradient-to-br from-green-50 to-white rounded-xl">
+                <div
+                  className="flex flex-col sm:flex-row items-center gap-4 lg:gap-8 p-4 lg:p-6 rounded-xl"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white)",
+                  }}
+                >
                   <div className="text-center sm:text-left">
                     <div className="text-4xl lg:text-5xl font-bold text-[#2D5016] mb-2">
                       {product.rating}
@@ -764,11 +830,17 @@ export default function ProductDetailPage({ params }: PageProps) {
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] flex items-center justify-center text-white font-bold">
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                            style={{
+                              background:
+                                "linear-gradient(to bottom right, #A3AF87, #5a6c5b)",
+                            }}
+                          >
                             {review.author.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-semibold text-[#2D5016]">
+                            <p className="font-semibold text-[#5a6c5b]">
                               {review.author}
                             </p>
                             <p className="text-sm text-gray-600">

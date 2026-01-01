@@ -3,12 +3,42 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand Colors - EcoMaggie Solid Palette (No Gradients) */
+  --brand-cream: #fdf8d4;
+  --brand-sage: #a3af87;
+  --brand-charcoal: #303646;
+
+  /* Supporting Colors */
+  --sage-hover: #8a9670;
+  --cream-hover: #f5efc0;
+
+  /* Text Colors */
+  --text-primary: #303646;
+  --text-secondary: #5a6c5b;
+  --text-muted: #7a8c7b;
+
+  /* Background Variants */
+  --bg-cream-soft: #fffef5;
+  --bg-sage-soft: #f0f2ec;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
+
+  /* Custom Tailwind Colors - Solid Palette */
+  --color-brand-cream: var(--brand-cream);
+  --color-brand-sage: var(--brand-sage);
+  --color-brand-charcoal: var(--brand-charcoal);
+  --color-sage-hover: var(--sage-hover);
+  --color-cream-hover: var(--cream-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-bg-cream-soft: var(--bg-cream-soft);
+  --color-bg-sage-soft: var(--bg-sage-soft);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,19 +88,27 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #2d5016 0%, #3d6b1e 100%);
+  background: linear-gradient(
+    180deg,
+    var(--brand-sage) 0%,
+    var(--brand-sage-dark) 100%
+  );
   border-radius: 10px;
   border: 2px solid #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #3d6b1e 0%, #4a8022 100%);
+  background: linear-gradient(
+    180deg,
+    var(--brand-sage-dark) 0%,
+    var(--accent-green) 100%
+  );
 }
 
 /* Firefox Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2d5016 #f1f1f1;
+  scrollbar-color: var(--brand-sage) #f1f1f1;
 }
 
 /* Smooth Scrolling */

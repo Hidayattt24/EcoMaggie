@@ -5,6 +5,170 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Data provinsi dan kabupaten/kota di Indonesia (simplified)
+const PROVINSI_DATA = [
+  "Aceh",
+  "Sumatera Utara",
+  "Sumatera Barat",
+  "Riau",
+  "Jambi",
+  "Sumatera Selatan",
+  "Bengkulu",
+  "Lampung",
+  "Kepulauan Bangka Belitung",
+  "Kepulauan Riau",
+  "DKI Jakarta",
+  "Jawa Barat",
+  "Jawa Tengah",
+  "DI Yogyakarta",
+  "Jawa Timur",
+  "Banten",
+  "Bali",
+  "Nusa Tenggara Barat",
+  "Nusa Tenggara Timur",
+  "Kalimantan Barat",
+  "Kalimantan Tengah",
+  "Kalimantan Selatan",
+  "Kalimantan Timur",
+  "Kalimantan Utara",
+  "Sulawesi Utara",
+  "Sulawesi Tengah",
+  "Sulawesi Selatan",
+  "Sulawesi Tenggara",
+  "Gorontalo",
+  "Sulawesi Barat",
+  "Maluku",
+  "Maluku Utara",
+  "Papua",
+  "Papua Barat",
+  "Papua Tengah",
+  "Papua Pegunungan",
+  "Papua Selatan",
+  "Papua Barat Daya",
+];
+
+// Data kabupaten/kota berdasarkan provinsi
+const KABUPATEN_KOTA_DATA: Record<string, string[]> = {
+  Aceh: [
+    "Banda Aceh",
+    "Sabang",
+    "Langsa",
+    "Lhokseumawe",
+    "Subulussalam",
+    "Aceh Besar",
+    "Pidie",
+    "Pidie Jaya",
+    "Bireuen",
+    "Aceh Utara",
+    "Aceh Timur",
+    "Aceh Tamiang",
+    "Aceh Tengah",
+    "Bener Meriah",
+    "Aceh Barat",
+    "Aceh Jaya",
+    "Nagan Raya",
+    "Aceh Barat Daya",
+    "Aceh Selatan",
+    "Aceh Singkil",
+    "Simeulue",
+    "Gayo Lues",
+    "Aceh Tenggara",
+  ],
+  "Sumatera Utara": [
+    "Medan",
+    "Binjai",
+    "Tebing Tinggi",
+    "Pematangsiantar",
+    "Tanjungbalai",
+    "Sibolga",
+    "Padangsidimpuan",
+    "Gunungsitoli",
+  ],
+  "Sumatera Barat": [
+    "Padang",
+    "Bukittinggi",
+    "Payakumbuh",
+    "Solok",
+    "Pariaman",
+    "Sawahlunto",
+  ],
+  Riau: ["Pekanbaru", "Dumai"],
+  Jambi: ["Jambi", "Sungai Penuh"],
+  "Sumatera Selatan": ["Palembang", "Prabumulih", "Pagar Alam", "Lubuklinggau"],
+  Bengkulu: ["Bengkulu"],
+  Lampung: ["Bandar Lampung", "Metro"],
+  "Kepulauan Bangka Belitung": ["Pangkalpinang"],
+  "Kepulauan Riau": ["Tanjungpinang", "Batam"],
+  "DKI Jakarta": [
+    "Jakarta Pusat",
+    "Jakarta Utara",
+    "Jakarta Barat",
+    "Jakarta Selatan",
+    "Jakarta Timur",
+    "Kepulauan Seribu",
+  ],
+  "Jawa Barat": [
+    "Bandung",
+    "Bekasi",
+    "Bogor",
+    "Cirebon",
+    "Depok",
+    "Sukabumi",
+    "Cimahi",
+    "Tasikmalaya",
+    "Banjar",
+  ],
+  "Jawa Tengah": [
+    "Semarang",
+    "Solo",
+    "Salatiga",
+    "Pekalongan",
+    "Tegal",
+    "Magelang",
+  ],
+  "DI Yogyakarta": [
+    "Yogyakarta",
+    "Sleman",
+    "Bantul",
+    "Gunung Kidul",
+    "Kulon Progo",
+  ],
+  "Jawa Timur": [
+    "Surabaya",
+    "Malang",
+    "Batu",
+    "Kediri",
+    "Blitar",
+    "Mojokerto",
+    "Madiun",
+    "Probolinggo",
+    "Pasuruan",
+  ],
+  Banten: ["Serang", "Cilegon", "Tangerang", "Tangerang Selatan"],
+  Bali: ["Denpasar", "Badung", "Gianyar", "Tabanan", "Buleleng"],
+  "Nusa Tenggara Barat": ["Mataram", "Bima"],
+  "Nusa Tenggara Timur": ["Kupang"],
+  "Kalimantan Barat": ["Pontianak", "Singkawang"],
+  "Kalimantan Tengah": ["Palangkaraya"],
+  "Kalimantan Selatan": ["Banjarmasin", "Banjarbaru"],
+  "Kalimantan Timur": ["Samarinda", "Balikpapan", "Bontang"],
+  "Kalimantan Utara": ["Tarakan"],
+  "Sulawesi Utara": ["Manado", "Bitung", "Tomohon", "Kotamobagu"],
+  "Sulawesi Tengah": ["Palu"],
+  "Sulawesi Selatan": ["Makassar", "Parepare", "Palopo"],
+  "Sulawesi Tenggara": ["Kendari", "Baubau"],
+  Gorontalo: ["Gorontalo"],
+  "Sulawesi Barat": ["Mamuju"],
+  Maluku: ["Ambon", "Tual"],
+  "Maluku Utara": ["Ternate", "Tidore Kepulauan"],
+  Papua: ["Jayapura"],
+  "Papua Barat": ["Manokwari", "Sorong"],
+  "Papua Tengah": ["Nabire"],
+  "Papua Pegunungan": ["Wamena"],
+  "Papua Selatan": ["Merauke"],
+  "Papua Barat Daya": ["Sorong Selatan"],
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +181,10 @@ export default function RegisterPage() {
     confirmPassword: "",
     jenisPengguna: "",
     namaUsaha: "",
-    alamat: "",
+    provinsi: "",
+    kabupatenKota: "",
+    kodePos: "",
+    alamatLengkap: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,6 +223,14 @@ export default function RegisterPage() {
       newErrors.confirmPassword = "Kata sandi tidak cocok";
     }
 
+    if (!formData.provinsi) {
+      newErrors.provinsi = "Provinsi wajib dipilih";
+    }
+
+    if (!formData.kabupatenKota) {
+      newErrors.kabupatenKota = "Kabupaten/Kota wajib dipilih";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -71,6 +246,22 @@ export default function RegisterPage() {
     // TODO: Implement registration logic
     console.log("Register data:", formData);
 
+    // Save user location to localStorage for Supply Connect eligibility check
+    try {
+      const locationData = {
+        provinsi: formData.provinsi,
+        kabupatenKota: formData.kabupatenKota,
+        kodePos: formData.kodePos,
+        alamatLengkap: formData.alamatLengkap,
+      };
+      localStorage.setItem(
+        "ecomaggie_user_location",
+        JSON.stringify(locationData)
+      );
+    } catch (error) {
+      console.error("Error saving location data:", error);
+    }
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -80,17 +271,35 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4 py-12">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 py-12"
+      style={{
+        background:
+          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+      }}
+    >
       <div className="w-full max-w-2xl">
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-10 border-t-4 border-t-[#2D5016] relative overflow-hidden">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-10 relative overflow-hidden"
+          style={{ borderTop: "4px solid #A3AF87" }}
+        >
           {/* Decorative corner */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+          <div
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            style={{
+              background:
+                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.2), transparent)",
+            }}
+          ></div>
 
           {/* Logo & Title */}
           <div className="text-center mb-8 relative z-10">
             <Link href="/" className="inline-block">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg">
+              <div
+                className="w-16 h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
+                style={{ backgroundColor: "#A3AF87" }}
+              >
                 <Image
                   src="/icon.svg"
                   alt="EcoMaggie Logo"
@@ -100,7 +309,10 @@ export default function RegisterPage() {
                 />
               </div>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] bg-clip-text text-transparent poppins-bold mt-4">
+            <h1
+              className="text-2xl font-bold poppins-bold mt-4"
+              style={{ color: "#A3AF87" }}
+            >
               Daftar Akun
             </h1>
             <p className="text-gray-600 mt-2 text-sm poppins-regular">
@@ -117,10 +329,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -143,7 +356,17 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     errors.namaLengkap ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.namaLengkap &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="Masukkan nama lengkap"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,10 +410,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -214,7 +438,16 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.email && (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="nama@email.com"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -279,7 +512,17 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-4 py-3 border ${
                     errors.nomorWhatsapp ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.nomorWhatsapp &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="08123456789 atau +628123456789"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -331,10 +574,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -358,7 +602,16 @@ export default function RegisterPage() {
                   }
                   className={`block w-full pl-11 pr-12 py-3 border ${
                     errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.password && (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="Min. 8 karakter"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -443,10 +696,11 @@ export default function RegisterPage() {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
               >
                 <svg
-                  className="w-4 h-4 text-[#2D5016]"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -475,7 +729,17 @@ export default function RegisterPage() {
                     errors.confirmPassword
                       ? "border-red-500"
                       : "border-gray-300"
-                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm`}
+                  } rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm`}
+                  style={
+                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "#A3AF87")
+                  }
+                  onMouseLeave={(e) =>
+                    !errors.confirmPassword &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                   placeholder="Ulangi kata sandi"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -561,10 +825,11 @@ export default function RegisterPage() {
               <div className="relative flex justify-center">
                 <span className="px-4 bg-white text-gray-500 poppins-regular text-xs flex items-center gap-2">
                   <svg
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: "#A3AF87" }}
                   >
                     <path
                       strokeLinecap="round"
@@ -573,7 +838,13 @@ export default function RegisterPage() {
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xs poppins-medium">
+                  <span
+                    className="px-2 py-0.5 rounded-full text-xs poppins-medium"
+                    style={{
+                      backgroundColor: "rgba(163, 175, 135, 0.1)",
+                      color: "#5a6c5b",
+                    }}
+                  >
                     Opsional
                   </span>
                 </span>
@@ -584,10 +855,11 @@ export default function RegisterPage() {
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium">
                 <svg
-                  className="w-4 h-4 text-green-600"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -606,9 +878,25 @@ export default function RegisterPage() {
                 <label
                   className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     formData.jenisPengguna === "UMKM"
-                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                      ? "shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:shadow-md hover:scale-[1.01]"
                   }`}
+                  style={
+                    formData.jenisPengguna === "UMKM"
+                      ? {
+                          borderColor: "#A3AF87",
+                          backgroundColor: "rgba(163, 175, 135, 0.1)",
+                        }
+                      : {}
+                  }
+                  onMouseEnter={(e) =>
+                    formData.jenisPengguna !== "UMKM" &&
+                    (e.currentTarget.style.borderColor = "#5a6c5b")
+                  }
+                  onMouseLeave={(e) =>
+                    formData.jenisPengguna !== "UMKM" &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                 >
                   <input
                     type="radio"
@@ -624,21 +912,27 @@ export default function RegisterPage() {
                     className="sr-only"
                   />
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${
+                    className="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300"
+                    style={
                       formData.jenisPengguna === "UMKM"
-                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
-                        : "bg-gray-100 group-hover:bg-green-50"
-                    }`}
+                        ? {
+                            backgroundColor: "#A3AF87",
+                            boxShadow:
+                              "0 10px 15px -3px rgba(163, 175, 135, 0.3)",
+                          }
+                        : { backgroundColor: "#f3f4f6" }
+                    }
                   >
                     <svg
-                      className={`w-6 h-6 transition-colors duration-300 ${
-                        formData.jenisPengguna === "UMKM"
-                          ? "text-white"
-                          : "text-gray-400 group-hover:text-[#2D5016]"
-                      }`}
+                      className="w-6 h-6 transition-colors duration-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      style={
+                        formData.jenisPengguna === "UMKM"
+                          ? { color: "white" }
+                          : { color: "#9ca3af" }
+                      }
                     >
                       <path
                         strokeLinecap="round"
@@ -649,11 +943,12 @@ export default function RegisterPage() {
                     </svg>
                   </div>
                   <span
-                    className={`text-sm font-semibold poppins-semibold transition-colors duration-300 ${
+                    className="text-sm font-semibold poppins-semibold transition-colors duration-300"
+                    style={
                       formData.jenisPengguna === "UMKM"
-                        ? "text-[#2D5016]"
-                        : "text-gray-700 group-hover:text-[#2D5016]"
-                    }`}
+                        ? { color: "#A3AF87" }
+                        : { color: "#374151" }
+                    }
                   >
                     UMKM
                   </span>
@@ -661,7 +956,10 @@ export default function RegisterPage() {
                     Usaha Kecil
                   </span>
                   {formData.jenisPengguna === "UMKM" && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                    <div
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
                       <svg
                         className="w-4 h-4 text-white"
                         fill="none"
@@ -683,9 +981,25 @@ export default function RegisterPage() {
                 <label
                   className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                     formData.jenisPengguna === "Rumah Tangga"
-                      ? "border-[#2D5016] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 bg-white hover:border-[#3d6b1e] hover:shadow-md hover:scale-[1.01]"
+                      ? "shadow-lg scale-[1.02]"
+                      : "border-gray-200 bg-white hover:shadow-md hover:scale-[1.01]"
                   }`}
+                  style={
+                    formData.jenisPengguna === "Rumah Tangga"
+                      ? {
+                          borderColor: "#A3AF87",
+                          backgroundColor: "rgba(163, 175, 135, 0.1)",
+                        }
+                      : {}
+                  }
+                  onMouseEnter={(e) =>
+                    formData.jenisPengguna !== "Rumah Tangga" &&
+                    (e.currentTarget.style.borderColor = "#5a6c5b")
+                  }
+                  onMouseLeave={(e) =>
+                    formData.jenisPengguna !== "Rumah Tangga" &&
+                    (e.currentTarget.style.borderColor = "")
+                  }
                 >
                   <input
                     type="radio"
@@ -701,21 +1015,27 @@ export default function RegisterPage() {
                     className="sr-only"
                   />
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${
+                    className="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300"
+                    style={
                       formData.jenisPengguna === "Rumah Tangga"
-                        ? "bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] shadow-lg"
-                        : "bg-gray-100 group-hover:bg-green-50"
-                    }`}
+                        ? {
+                            backgroundColor: "#A3AF87",
+                            boxShadow:
+                              "0 10px 15px -3px rgba(163, 175, 135, 0.3)",
+                          }
+                        : { backgroundColor: "#f3f4f6" }
+                    }
                   >
                     <svg
-                      className={`w-6 h-6 transition-colors duration-300 ${
-                        formData.jenisPengguna === "Rumah Tangga"
-                          ? "text-white"
-                          : "text-gray-400 group-hover:text-[#2D5016]"
-                      }`}
+                      className="w-6 h-6 transition-colors duration-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      style={
+                        formData.jenisPengguna === "Rumah Tangga"
+                          ? { color: "white" }
+                          : { color: "#9ca3af" }
+                      }
                     >
                       <path
                         strokeLinecap="round"
@@ -726,11 +1046,12 @@ export default function RegisterPage() {
                     </svg>
                   </div>
                   <span
-                    className={`text-sm font-semibold poppins-semibold transition-colors duration-300 ${
+                    className="text-sm font-semibold poppins-semibold transition-colors duration-300"
+                    style={
                       formData.jenisPengguna === "Rumah Tangga"
-                        ? "text-[#2D5016]"
-                        : "text-gray-700 group-hover:text-[#2D5016]"
-                    }`}
+                        ? { color: "#A3AF87" }
+                        : { color: "#374151" }
+                    }
                   >
                     Rumah Tangga
                   </span>
@@ -738,7 +1059,10 @@ export default function RegisterPage() {
                     Keluarga
                   </span>
                   {formData.jenisPengguna === "Rumah Tangga" && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#2D5016] rounded-full flex items-center justify-center shadow-md">
+                    <div
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
                       <svg
                         className="w-4 h-4 text-white"
                         fill="none"
@@ -766,10 +1090,11 @@ export default function RegisterPage() {
                   className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
                 >
                   <svg
-                    className="w-4 h-4 text-green-600"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: "#A3AF87" }}
                   >
                     <path
                       strokeLinecap="round"
@@ -792,7 +1117,16 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, namaUsaha: e.target.value })
                     }
-                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular shadow-sm"
+                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                    style={
+                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    }
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#A3AF87")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "")
+                    }
                     placeholder="Contoh: Warung Makan Sederhana"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -814,17 +1148,15 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Alamat (Optional) */}
-            <div className="space-y-2">
-              <label
-                htmlFor="alamat"
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 poppins-medium"
-              >
+            {/* Alamat Section Header */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
                 <svg
-                  className="w-4 h-4 text-green-600"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "#A3AF87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -839,43 +1171,291 @@ export default function RegisterPage() {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                Alamat / Lokasi
-                <span className="text-gray-400 font-normal text-xs bg-gray-50 px-2 py-0.5 rounded-full">
-                  Opsional
-                </span>
-              </label>
-              <div className="relative">
-                <textarea
-                  id="alamat"
-                  name="alamat"
-                  rows={2}
-                  value={formData.alamat}
-                  onChange={(e) =>
-                    setFormData({ ...formData, alamat: e.target.value })
-                  }
-                  className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D5016] focus:border-transparent hover:border-[#2D5016] transition-all duration-200 poppins-regular resize-none text-sm shadow-sm"
-                  placeholder="Lokasi pengambilan sampah"
-                />
-                <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <h3 className="text-sm font-semibold text-gray-700 poppins-semibold">
+                  Alamat
+                </h3>
+              </div>
+
+              {/* Provinsi */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="provinsi"
+                  className="block text-sm font-medium text-gray-700 poppins-medium"
+                >
+                  Provinsi <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="provinsi"
+                    name="provinsi"
+                    value={formData.provinsi}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        provinsi: e.target.value,
+                        kabupatenKota: "", // Reset kabupaten/kota when province changes
+                      });
+                    }}
+                    className={`block w-full pl-11 pr-10 py-3 border rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none ${
+                      errors.provinsi ? "border-red-500" : "border-gray-300"
+                    }`}
+                    style={
+                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    }
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                    <option value="">Pilih Provinsi</option>
+                    {PROVINSI_DATA.map((prov) => (
+                      <option key={prov} value={prov}>
+                        {prov}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
+                      />
+                    </svg>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                {errors.provinsi && (
+                  <p className="text-red-500 text-xs poppins-regular">
+                    {errors.provinsi}
+                  </p>
+                )}
+              </div>
+
+              {/* Kabupaten/Kota */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="kabupatenKota"
+                  className="block text-sm font-medium text-gray-700 poppins-medium"
+                >
+                  Kabupaten/Kota <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="kabupatenKota"
+                    name="kabupatenKota"
+                    value={formData.kabupatenKota}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        kabupatenKota: e.target.value,
+                      })
+                    }
+                    disabled={!formData.provinsi}
+                    className={`block w-full pl-11 pr-10 py-3 border rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                      errors.kabupatenKota
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                    style={
+                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    }
+                  >
+                    <option value="">
+                      {formData.provinsi
+                        ? "Pilih Kabupaten/Kota"
+                        : "Pilih Provinsi terlebih dahulu"}
+                    </option>
+                    {formData.provinsi &&
+                      KABUPATEN_KOTA_DATA[formData.provinsi]?.map((kab) => (
+                        <option key={kab} value={kab}>
+                          {kab}
+                        </option>
+                      ))}
+                  </select>
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                {errors.kabupatenKota && (
+                  <p className="text-red-500 text-xs poppins-regular">
+                    {errors.kabupatenKota}
+                  </p>
+                )}
+                {formData.kabupatenKota === "Banda Aceh" && (
+                  <p
+                    className="text-xs poppins-regular flex items-center gap-1"
+                    style={{ color: "#A3AF87" }}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Layanan Supply Connect tersedia di wilayah Anda
+                  </p>
+                )}
+              </div>
+
+              {/* Kode Pos */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="kodePos"
+                  className="block text-sm font-medium text-gray-700 poppins-medium"
+                >
+                  Kode Pos
+                  <span className="text-gray-400 font-normal text-xs bg-gray-50 px-2 py-0.5 rounded-full ml-2">
+                    Opsional
+                  </span>
+                </label>
+                <div className="relative">
+                  <input
+                    id="kodePos"
+                    name="kodePos"
+                    type="text"
+                    maxLength={5}
+                    value={formData.kodePos}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      setFormData({ ...formData, kodePos: value });
+                    }}
+                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
+                    style={
+                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    }
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#A3AF87")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "")
+                    }
+                    placeholder="Contoh: 23111"
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alamat Lengkap */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="alamatLengkap"
+                  className="block text-sm font-medium text-gray-700 poppins-medium"
+                >
+                  Alamat Lengkap
+                  <span className="text-gray-400 font-normal text-xs bg-gray-50 px-2 py-0.5 rounded-full ml-2">
+                    Opsional
+                  </span>
+                </label>
+                <div className="relative">
+                  <textarea
+                    id="alamatLengkap"
+                    name="alamatLengkap"
+                    rows={2}
+                    value={formData.alamatLengkap}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        alamatLengkap: e.target.value,
+                      })
+                    }
+                    className="block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular resize-none text-sm shadow-sm"
+                    style={
+                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    }
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#A3AF87")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "")
+                    }
+                    placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan"
+                  />
+                  <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
@@ -885,7 +1465,21 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] hover:from-[#3d6b1e] hover:to-[#4a8022] hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D5016] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
+                style={
+                  {
+                    backgroundColor: "#A3AF87",
+                    "--tw-ring-color": "#A3AF87",
+                  } as React.CSSProperties
+                }
+                onMouseEnter={(e) =>
+                  !isLoading &&
+                  (e.currentTarget.style.backgroundColor = "#5a6c5b")
+                }
+                onMouseLeave={(e) =>
+                  !isLoading &&
+                  (e.currentTarget.style.backgroundColor = "#A3AF87")
+                }
               >
                 {isLoading ? (
                   <>
@@ -922,7 +1516,10 @@ export default function RegisterPage() {
               Dengan mendaftar, Anda menyetujui{" "}
               <Link
                 href="/terms"
-                className="text-[#2D5016] hover:text-[#3d6b1e] font-medium"
+                className="font-medium"
+                style={{ color: "#A3AF87" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#5a6c5b")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#A3AF87")}
               >
                 Syarat & Ketentuan
               </Link>
@@ -945,7 +1542,16 @@ export default function RegisterPage() {
           <div className="text-center">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border-2 border-[#2D5016] rounded-xl text-[#2D5016] hover:bg-gradient-to-r hover:from-[#2D5016] hover:to-[#3d6b1e] hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border-2 rounded-xl hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-sm bg-white"
+              style={{ borderColor: "#A3AF87", color: "#A3AF87" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#A3AF87";
+                e.currentTarget.style.color = "white";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "white";
+                e.currentTarget.style.color = "#A3AF87";
+              }}
             >
               <svg
                 className="w-4 h-4"
@@ -969,7 +1575,15 @@ export default function RegisterPage() {
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 hover:text-[#2D5016] transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-[#2D5016] hover:shadow-md"
+            className="inline-flex items-center gap-2 px-5 py-2 text-gray-600 transition-all duration-200 poppins-medium text-sm bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:shadow-md"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#A3AF87";
+              e.currentTarget.style.borderColor = "#A3AF87";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "";
+              e.currentTarget.style.borderColor = "";
+            }}
           >
             <svg
               className="w-4 h-4"

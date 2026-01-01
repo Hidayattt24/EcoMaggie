@@ -70,22 +70,36 @@ export default function FooterSection() {
   ];
 
   return (
-    <footer className="relative bg-gradient-to-br from-[#16321A] via-[#1a3d20] to-[#2D5016] text-white overflow-hidden">
+    <footer
+      className="relative overflow-hidden"
+      style={{
+        backgroundColor: "#FDF8D4",
+      }}
+    >
       {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-50"></div>
-      <div className="absolute top-20 left-10 w-64 h-64 bg-green-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+      <div
+        className="absolute top-0 left-0 w-full h-1 opacity-30"
+        style={{ backgroundColor: "#A3AF87" }}
+      ></div>
+      <div
+        className="absolute top-20 left-10 w-64 h-64 rounded-full blur-3xl"
+        style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+      ></div>
+      <div
+        className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl"
+        style={{ backgroundColor: "rgba(163, 175, 135, 0.08)" }}
+      ></div>
 
       {/* Leaf Pattern Background */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-20">
-          <Leaf className="w-32 h-32 rotate-45" />
+          <Leaf className="w-32 h-32 rotate-45" style={{ color: "#A3AF87" }} />
         </div>
         <div className="absolute top-40 right-32">
-          <Leaf className="w-24 h-24 -rotate-12" />
+          <Leaf className="w-24 h-24 -rotate-12" style={{ color: "#A3AF87" }} />
         </div>
         <div className="absolute bottom-20 left-1/3">
-          <Leaf className="w-40 h-40 rotate-90" />
+          <Leaf className="w-40 h-40 rotate-90" style={{ color: "#A3AF87" }} />
         </div>
       </div>
 
@@ -103,7 +117,10 @@ export default function FooterSection() {
                 className="w-40 h-40 transform group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
-            <p className="text-gray-300 text-sm leading-relaxed mb-6 poppins-regular">
+            <p
+              className="text-sm leading-relaxed mb-6 poppins-regular"
+              style={{ color: "#5a6c5b" }}
+            >
               Platform inovatif yang menghubungkan produsen sampah organik
               dengan peternak maggot untuk menciptakan ekonomi sirkular
               berkelanjutan.
@@ -117,7 +134,20 @@ export default function FooterSection() {
                   <a
                     key={social.name}
                     href={social.href}
-                    className={`w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all duration-300 hover:bg-white/20 hover:scale-110 ${social.color}`}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    style={{
+                      backgroundColor: "rgba(163, 175, 135, 0.2)",
+                      color: "#A3AF87",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#A3AF87";
+                      e.currentTarget.style.color = "#FDF8D4";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(163, 175, 135, 0.2)";
+                      e.currentTarget.style.color = "#A3AF87";
+                    }}
                     aria-label={social.name}
                   >
                     <Icon className="w-5 h-5" />
@@ -129,8 +159,14 @@ export default function FooterSection() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-6 poppins-bold flex items-center gap-2">
-              <span className="w-1 h-6 bg-green-400 rounded-full"></span>
+            <h3
+              className="text-lg font-bold mb-6 poppins-bold flex items-center gap-2"
+              style={{ color: "#303646" }}
+            >
+              <span
+                className="w-1 h-6 rounded-full"
+                style={{ backgroundColor: "#A3AF87" }}
+              ></span>
               Navigasi Cepat
             </h3>
             <ul className="space-y-3">
@@ -138,9 +174,19 @@ export default function FooterSection() {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-300 hover:text-green-400 transition-colors duration-300 poppins-regular text-sm flex items-center gap-2 group"
+                    className="transition-colors duration-300 poppins-regular text-sm flex items-center gap-2 group"
+                    style={{ color: "#5a6c5b" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "#A3AF87";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "#5a6c5b";
+                    }}
                   >
-                    <span className="w-0 h-0.5 bg-green-400 group-hover:w-4 transition-all duration-300"></span>
+                    <span
+                      className="w-0 h-0.5 transition-all duration-300 group-hover:w-4"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    ></span>
                     {link.name}
                   </a>
                 </li>
@@ -150,8 +196,14 @@ export default function FooterSection() {
 
           {/* Services */}
           <div>
-            <h3 className="text-lg font-bold mb-6 poppins-bold flex items-center gap-2">
-              <span className="w-1 h-6 bg-green-400 rounded-full"></span>
+            <h3
+              className="text-lg font-bold mb-6 poppins-bold flex items-center gap-2"
+              style={{ color: "#303646" }}
+            >
+              <span
+                className="w-1 h-6 rounded-full"
+                style={{ backgroundColor: "#A3AF87" }}
+              ></span>
               Layanan Kami
             </h3>
             <ul className="space-y-3">
@@ -159,9 +211,19 @@ export default function FooterSection() {
                 <li key={service.name}>
                   <a
                     href={service.href}
-                    className="text-gray-300 hover:text-green-400 transition-colors duration-300 poppins-regular text-sm flex items-center gap-2 group"
+                    className="transition-colors duration-300 poppins-regular text-sm flex items-center gap-2 group"
+                    style={{ color: "#5a6c5b" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "#A3AF87";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "#5a6c5b";
+                    }}
                   >
-                    <span className="w-0 h-0.5 bg-green-400 group-hover:w-4 transition-all duration-300"></span>
+                    <span
+                      className="w-0 h-0.5 transition-all duration-300 group-hover:w-4"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    ></span>
                     {service.name}
                   </a>
                 </li>
@@ -171,95 +233,135 @@ export default function FooterSection() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-bold mb-6 poppins-bold flex items-center gap-2">
-              <span className="w-1 h-6 bg-green-400 rounded-full"></span>
+            <h3
+              className="text-lg font-bold mb-6 poppins-bold flex items-center gap-2"
+              style={{ color: "#303646" }}
+            >
+              <span
+                className="w-1 h-6 rounded-full"
+                style={{ backgroundColor: "#A3AF87" }}
+              ></span>
               Hubungi Kami
             </h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-gray-300 text-sm poppins-regular">
-                <Mail className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+              <li
+                className="flex items-start gap-3 text-sm poppins-regular"
+                style={{ color: "#5a6c5b" }}
+              >
+                <Mail
+                  className="w-5 h-5 mt-0.5 flex-shrink-0"
+                  style={{ color: "#A3AF87" }}
+                />
                 <div>
-                  <p className="font-semibold text-white mb-1">Email</p>
+                  <p
+                    className="font-semibold mb-1"
+                    style={{ color: "#303646" }}
+                  >
+                    Email
+                  </p>
                   <a
                     href="mailto:info@ecomaggie.id"
-                    className="hover:text-green-400 transition-colors"
+                    className="transition-colors"
+                    style={{ color: "#5a6c5b" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "#A3AF87";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "#5a6c5b";
+                    }}
                   >
-                    info@ecomaggie.id
+                    cs@Ecomaggie.id
                   </a>
                 </div>
               </li>
-              <li className="flex items-start gap-3 text-gray-300 text-sm poppins-regular">
-                <Phone className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+              <li
+                className="flex items-start gap-3 text-sm poppins-regular"
+                style={{ color: "#5a6c5b" }}
+              >
+                <Phone
+                  className="w-5 h-5 mt-0.5 flex-shrink-0"
+                  style={{ color: "#A3AF87" }}
+                />
                 <div>
-                  <p className="font-semibold text-white mb-1">Telepon</p>
+                  <p
+                    className="font-semibold mb-1"
+                    style={{ color: "#303646" }}
+                  >
+                    Telepon
+                  </p>
                   <a
                     href="tel:+6281234567890"
-                    className="hover:text-green-400 transition-colors"
+                    className="transition-colors"
+                    style={{ color: "#5a6c5b" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "#A3AF87";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "#5a6c5b";
+                    }}
                   >
-                    +62 812-3456-7890
+                    +62 822-8895-3268
                   </a>
                 </div>
               </li>
-              <li className="flex items-start gap-3 text-gray-300 text-sm poppins-regular">
-                <MapPin className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+              <li
+                className="flex items-start gap-3 text-sm poppins-regular"
+                style={{ color: "#5a6c5b" }}
+              >
+                <MapPin
+                  className="w-5 h-5 mt-0.5 flex-shrink-0"
+                  style={{ color: "#A3AF87" }}
+                />
                 <div>
-                  <p className="font-semibold text-white mb-1">Alamat</p>
-                  <p>Jakarta, Indonesia</p>
+                  <p
+                    className="font-semibold mb-1"
+                    style={{ color: "#303646" }}
+                  >
+                    Alamat
+                  </p>
+                  <p>
+                    Jl.T. Batee Treun Gampong Ganoe Desa Lamdingin Kec. Kuta
+                    Alam Banda Aceh
+                  </p>
                 </div>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Newsletter Section */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div>
-              <h3 className="text-2xl font-bold mb-2 poppins-bold">
-                Dapatkan Update Terbaru
-              </h3>
-              <p className="text-gray-300 text-sm poppins-regular">
-                Berlangganan newsletter kami untuk mendapatkan tips, berita, dan
-                penawaran eksklusif.
-              </p>
-            </div>
-            <div>
-              <form className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Masukkan email Anda"
-                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-green-400 focus:bg-white/15 transition-all poppins-regular text-sm"
-                />
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/50 transform hover:scale-105 transition-all duration-300 poppins-semibold text-sm whitespace-nowrap"
-                >
-                  Berlangganan
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm poppins-regular text-center md:text-left">
-              © {new Date().getFullYear()} EcoMaggie. All rights reserved. Made
-              with{" "}
-              <Heart className="inline w-4 h-4 text-red-500 fill-red-500" /> for
-              a sustainable future.
+            <p
+              className="text-sm poppins-regular text-center md:text-left"
+              style={{ color: "#5a6c5b" }}
+            >
+              © {new Date().getFullYear()} EcoMaggie.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <a
                 href="#"
-                className="text-gray-400 hover:text-green-400 transition-colors poppins-regular"
+                className="transition-colors poppins-regular"
+                style={{ color: "#5a6c5b" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#A3AF87";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#5a6c5b";
+                }}
               >
                 Kebijakan Privasi
               </a>
               <a
                 href="#"
-                className="text-gray-400 hover:text-green-400 transition-colors poppins-regular"
+                className="transition-colors poppins-regular"
+                style={{ color: "#5a6c5b" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#A3AF87";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#5a6c5b";
+                }}
               >
                 Syarat & Ketentuan
               </a>
@@ -272,7 +374,11 @@ export default function FooterSection() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 left-6 w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-110 transition-all duration-300 z-40 group"
+          className="fixed bottom-6 left-6 w-12 h-12 rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-110 transition-all duration-300 z-40 group"
+          style={{
+            backgroundColor: "#A3AF87",
+            color: "#FDF8D4",
+          }}
           aria-label="Scroll to top"
         >
           <ArrowUp className="w-5 h-5 group-hover:-translate-y-1 transition-transform duration-300" />

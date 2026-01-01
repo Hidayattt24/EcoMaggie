@@ -234,7 +234,7 @@ export default function NavbarLandingPage() {
       {/* Desktop Navbar */}
       <nav className="hidden lg:block fixed top-4 left-1/2 -translate-x-1/2 z-50">
         <div
-          className="bg-white/90 shadow-lg backdrop-blur-md"
+          className="shadow-lg bg-white/90 backdrop-blur-md"
           style={{
             width: "1100px",
             height: "70px",
@@ -270,15 +270,15 @@ export default function NavbarLandingPage() {
                     className={cn(
                       "flex items-center gap-1.5 text-sm poppins-medium transition-all duration-300 relative py-2 px-2.5 rounded-lg cursor-pointer",
                       isActive
-                        ? "text-[#2D5016] font-semibold bg-green-50"
-                        : "text-gray-700 hover:text-[#2D5016] hover:bg-green-50"
+                        ? "text-white font-semibold"
+                        : "text-[#303646] hover:text-[#A3AF87]"
                     )}
+                    style={{
+                      backgroundColor: isActive ? "#A3AF87" : "transparent",
+                    }}
                   >
                     <Icon />
                     <span className="text-xs">{item.name}</span>
-                    {isActive && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D5016] rounded-full" />
-                    )}
                   </a>
                 );
               })}
@@ -288,25 +288,44 @@ export default function NavbarLandingPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="group relative px-5 py-2.5 text-sm text-[#2D5016] poppins-semibold rounded-full transition-all duration-300 border-2 border-[#2D5016] hover:bg-[#2D5016] hover:text-white overflow-hidden"
+                className="px-5 py-2.5 text-sm poppins-semibold rounded-full transition-all duration-300 border-2"
+                style={{
+                  color: "#A3AF87",
+                  borderColor: "#A3AF87",
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#A3AF87";
+                  e.currentTarget.style.color = "white";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "#A3AF87";
+                }}
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <LoginIcon />
                   Masuk
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
               </Link>
               <Link
                 href="/register"
-                className="group relative px-5 py-2.5 text-sm text-white poppins-semibold rounded-full transition-all duration-300 shadow-md hover:shadow-xl overflow-hidden"
+                className="px-5 py-2.5 text-sm poppins-semibold rounded-full transition-all duration-300 shadow-md hover:shadow-xl"
+                style={{
+                  backgroundColor: "#A3AF87",
+                  color: "white",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#8a9670";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#A3AF87";
+                }}
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-[#2D5016] via-[#3d6b1e] to-[#4a8022]" />
-                <span className="absolute inset-0 bg-gradient-to-r from-[#4a8022] via-[#3d6b1e] to-[#2D5016] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <UserAddIcon />
                   Daftar
                 </span>
-                <span className="absolute inset-0 ring-2 ring-[#2D5016] ring-offset-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Link>
             </div>
           </div>
@@ -315,8 +334,8 @@ export default function NavbarLandingPage() {
 
       {/* Mobile Navbar */}
       <nav className="lg:hidden fixed top-0 left-0 right-0 z-50">
-        {/* Navbar Container with Gradient */}
-        <div className="bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-lg shadow-lg border-b border-green-100">
+        {/* Navbar Container */}
+        <div className="bg-white/95 backdrop-blur-lg shadow-lg">
           <div className="flex items-center justify-between h-20 px-4">
             {/* Logo - Enlarged */}
             <Link href="/" className="flex items-center">
@@ -329,10 +348,11 @@ export default function NavbarLandingPage() {
               />
             </Link>
 
-            {/* Hamburger Button - Enhanced */}
+            {/* Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="relative p-3 rounded-2xl bg-gradient-to-br from-[#2D5016] to-[#3d6b1e] text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
+              className="relative p-3 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
+              style={{ backgroundColor: "#A3AF87" }}
               aria-label="Toggle menu"
             >
               <div className="w-6 h-6 flex flex-col justify-center items-center">

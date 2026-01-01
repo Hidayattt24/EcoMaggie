@@ -29,7 +29,7 @@ export default function SolusiSection() {
       id="solusi-section"
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center overflow-hidden py-20 lg:py-32"
-      style={{ background: "var(--brand-sage)" }}
+      style={{ background: "#A3AF87" }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">

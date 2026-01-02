@@ -26,6 +26,8 @@ import {
   TrendingUp,
   TrendingDown,
   SlidersHorizontal,
+  Sparkles,
+  Bell,
 } from "lucide-react";
 
 // ============================================
@@ -292,6 +294,7 @@ const mockOrders: Order[] = [
 // ============================================
 type TabFilter =
   | "all"
+  | "latest"
   | "needs_action"
   | "processing"
   | "shipped"
@@ -306,6 +309,7 @@ type ShippingFilter =
 
 const tabs: { id: TabFilter; label: string; statuses: OrderStatus[] }[] = [
   { id: "all", label: "Semua", statuses: [] },
+  { id: "latest", label: "Terbaru", statuses: [] },
   {
     id: "needs_action",
     label: "Perlu Tindakan",
@@ -342,7 +346,10 @@ export default function FarmerOrdersPage() {
     let result = [...mockOrders];
 
     // Filter by tab
-    if (activeTab !== "all") {
+    if (activeTab === "latest") {
+      // Show only newest 5 orders for 'Terbaru' tab
+      result = result.slice(0, 5);
+    } else if (activeTab !== "all") {
       const tab = tabs.find((t) => t.id === activeTab);
       if (tab) {
         result = result.filter((order) => tab.statuses.includes(order.status));
@@ -392,6 +399,7 @@ export default function FarmerOrdersPage() {
   const tabCounts = useMemo(() => {
     const counts: Record<TabFilter, number> = {
       all: mockOrders.length,
+      latest: Math.min(5, mockOrders.length),
       needs_action: 0,
       processing: 0,
       shipped: 0,

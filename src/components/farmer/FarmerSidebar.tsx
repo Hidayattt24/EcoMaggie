@@ -37,14 +37,9 @@ const farmerLinks = [
     href: "/farmer/supply-monitoring",
     icon: <Recycle className="h-5 w-5 shrink-0" />,
   },
-  {
-    label: "Profil",
-    href: "/farmer/profile",
-    icon: <User className="h-5 w-5 shrink-0" />,
-  },
 ];
 
-// Bottom navigation links for mobile (main 5 items)
+// Bottom navigation links for mobile (main 4 items)
 const mobileNavLinks = [
   {
     label: "Dashboard",
@@ -65,11 +60,6 @@ const mobileNavLinks = [
     label: "Supply",
     href: "/farmer/supply-monitoring",
     icon: <Recycle className="h-5 w-5" />,
-  },
-  {
-    label: "Profil",
-    href: "/farmer/profile",
-    icon: <User className="h-5 w-5" />,
   },
 ];
 
@@ -114,34 +104,8 @@ export default function FarmerSidebar({
               </div>
             </div>
 
-            {/* Bottom Section - User & Logout (Desktop) */}
+            {/* Bottom Section - Logout (Desktop) */}
             <div className="flex flex-col gap-2 mt-auto">
-              {/* User Profile */}
-              <div className="border-t border-gray-200 pt-4">
-                <Link
-                  href="/farmer/profile"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-[#A3AF87] flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                    P
-                  </div>
-                  <motion.div
-                    animate={{
-                      display: open ? "block" : "none",
-                      opacity: open ? 1 : 0,
-                    }}
-                    className="overflow-hidden flex-1 min-w-0"
-                  >
-                    <p className="text-sm font-medium text-[#303646] poppins-medium truncate">
-                      Petani Maggot
-                    </p>
-                    <p className="text-xs text-gray-500 poppins-regular truncate">
-                      petani@ecomaggie.id
-                    </p>
-                  </motion.div>
-                </Link>
-              </div>
-
               {/* Logout */}
               <div className="border-t border-gray-200 pt-3 pb-2">
                 <SidebarLink
@@ -205,23 +169,8 @@ export default function FarmerSidebar({
                   </svg>
                   {/* Badge Count */}
                   <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
-                    8
+                    3
                   </span>
-                </Link>
-
-                {/* Profile Button */}
-                <Link
-                  href="/farmer/profile"
-                  className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95",
-                    pathname?.startsWith("/farmer/profile")
-                      ? "shadow-xl scale-105 ring-2 ring-white"
-                      : ""
-                  )}
-                  style={{ backgroundColor: "#A3AF87" }}
-                  title="Profile"
-                >
-                  <User className="h-5 w-5" />
                 </Link>
               </div>
             </div>

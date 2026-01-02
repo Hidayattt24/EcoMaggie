@@ -462,20 +462,20 @@ export default function FarmerOrderDetailPage({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pb-8"
+      className="min-h-screen pb-8 pt-4 px-4 md:px-6 lg:px-0"
     >
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
+      <div className="mb-4 md:mb-6">
+        <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
           <button
             onClick={() => router.back()}
-            className="p-2.5 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 md:p-2.5 hover:bg-gray-100 rounded-lg md:rounded-xl transition-colors"
           >
-            <ArrowLeft className="h-5 w-5 text-[#303646]" />
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5 text-[#303646]" />
           </button>
           <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-[#303646] poppins-bold">
+            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+              <h1 className="text-lg md:text-2xl font-bold text-[#303646] poppins-bold">
                 Detail Pesanan
               </h1>
               <span
@@ -492,7 +492,7 @@ export default function FarmerOrderDetailPage({
       </div>
 
       {/* Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         {/* Customer Info */}
         <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 p-6">
           <h3 className="flex items-center gap-2 font-bold text-[#303646] mb-5">

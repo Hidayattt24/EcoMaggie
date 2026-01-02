@@ -23,6 +23,9 @@ import {
   Bike,
   Store,
   Box,
+  TrendingUp,
+  TrendingDown,
+  SlidersHorizontal,
 } from "lucide-react";
 
 // ============================================
@@ -432,69 +435,75 @@ export default function FarmerOrdersPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pb-8"
+      className="min-h-screen pb-8 pt-4 px-4 md:px-6 lg:px-0"
     >
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold text-[#303646] poppins-bold">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#303646] poppins-bold">
           Manajemen Pesanan
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-gray-500 text-xs md:text-sm mt-1">
           Kelola pesanan masuk dari customer
         </p>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-100 rounded-xl">
-              <AlertCircle className="h-5 w-5 text-amber-600" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+        <div className="bg-white rounded-xl border border-gray-100 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-2.5 bg-amber-100 rounded-lg md:rounded-xl">
+              <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#303646]">
+              <p className="text-xl md:text-2xl font-bold text-[#303646]">
                 {tabCounts.needs_action}
               </p>
-              <p className="text-xs text-gray-500">Perlu Tindakan</p>
+              <p className="text-[10px] md:text-xs text-gray-500">
+                Perlu Tindakan
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-purple-100 rounded-xl">
-              <Package className="h-5 w-5 text-purple-600" />
+        <div className="bg-white rounded-xl border border-gray-100 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-2.5 bg-purple-100 rounded-lg md:rounded-xl">
+              <Package className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#303646]">
+              <p className="text-xl md:text-2xl font-bold text-[#303646]">
                 {tabCounts.processing}
               </p>
-              <p className="text-xs text-gray-500">Sedang Dikemas</p>
+              <p className="text-[10px] md:text-xs text-gray-500">
+                Sedang Dikemas
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#A3AF87]/20 rounded-xl">
-              <Truck className="h-5 w-5 text-[#5a6c5b]" />
+        <div className="bg-white rounded-xl border border-gray-100 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-2.5 bg-[#A3AF87]/20 rounded-lg md:rounded-xl">
+              <Truck className="h-4 w-4 md:h-5 md:w-5 text-[#5a6c5b]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#303646]">
+              <p className="text-xl md:text-2xl font-bold text-[#303646]">
                 {tabCounts.shipped}
               </p>
-              <p className="text-xs text-gray-500">Dalam Pengiriman</p>
+              <p className="text-[10px] md:text-xs text-gray-500">
+                Dalam Pengiriman
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-green-100 rounded-xl">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+        <div className="bg-white rounded-xl border border-gray-100 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-2.5 bg-green-100 rounded-lg md:rounded-xl">
+              <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#303646]">
+              <p className="text-xl md:text-2xl font-bold text-[#303646]">
                 {tabCounts.completed}
               </p>
-              <p className="text-xs text-gray-500">Selesai</p>
+              <p className="text-[10px] md:text-xs text-gray-500">Selesai</p>
             </div>
           </div>
         </div>
@@ -551,38 +560,50 @@ export default function FarmerOrdersPage() {
 
           {/* Sort */}
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <div className="relative group">
+              <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10 pointer-events-none" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="appearance-none pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-[#303646] focus:outline-none focus:border-[#A3AF87] cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-3 bg-gradient-to-r from-[#A3AF87] to-[#8a9a6e] text-white border-0 rounded-xl text-sm font-semibold shadow-md shadow-[#A3AF87]/20 focus:outline-none focus:ring-2 focus:ring-[#A3AF87] focus:ring-offset-2 cursor-pointer hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all"
               >
-                <option value="newest">Terbaru</option>
-                <option value="oldest">Terlama</option>
-                <option value="highest">Harga Tertinggi</option>
-                <option value="lowest">Harga Terendah</option>
+                <option value="newest" className="bg-white text-[#303646] py-2">
+                  Terbaru
+                </option>
+                <option value="oldest" className="bg-white text-[#303646] py-2">
+                  Terlama
+                </option>
+                <option
+                  value="highest"
+                  className="bg-white text-[#303646] py-2"
+                >
+                  Harga Tertinggi
+                </option>
+                <option value="lowest" className="bg-white text-[#303646] py-2">
+                  Harga Terendah
+                </option>
               </select>
-              <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 h-4 w-4 text-white pointer-events-none" />
             </div>
 
             {/* View Toggle */}
-            <div className="hidden lg:flex items-center bg-gray-50 border border-gray-200 rounded-xl p-1">
+            <div className="hidden lg:flex items-center bg-gradient-to-br from-[#FDF8D4] to-[#f5eec4] border-2 border-[#A3AF87]/20 rounded-xl p-1 shadow-sm">
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2.5 rounded-lg transition-all duration-200 ${
                   viewMode === "list"
-                    ? "bg-white shadow-sm text-[#A3AF87]"
-                    : "text-gray-400"
+                    ? "bg-gradient-to-br from-[#A3AF87] to-[#8a9a6e] shadow-md shadow-[#A3AF87]/30 text-white scale-105"
+                    : "text-[#303646] hover:bg-white/60"
                 }`}
               >
                 <List className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2.5 rounded-lg transition-all duration-200 ${
                   viewMode === "grid"
-                    ? "bg-white shadow-sm text-[#A3AF87]"
-                    : "text-gray-400"
+                    ? "bg-gradient-to-br from-[#A3AF87] to-[#8a9a6e] shadow-md shadow-[#A3AF87]/30 text-white scale-105"
+                    : "text-[#303646] hover:bg-white/60"
                 }`}
               >
                 <LayoutGrid className="h-4 w-4" />

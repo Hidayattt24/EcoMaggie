@@ -222,7 +222,9 @@ export default function SupplyDetailPage({
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <Calendar className="h-4 w-4 text-[#A3AF87]" />
-                    <span className="text-xs text-gray-500">Tanggal Pickup</span>
+                    <span className="text-xs text-gray-500">
+                      Tanggal Pickup
+                    </span>
                   </div>
                   <p className="font-bold text-[#303646] text-lg">
                     {supplyDetail.pickupDate
@@ -436,7 +438,8 @@ export default function SupplyDetailPage({
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all"
                 style={{
-                  background: "linear-gradient(135deg, #A3AF87 0%, #8a9a6e 100%)",
+                  background:
+                    "linear-gradient(135deg, #A3AF87 0%, #8a9a6e 100%)",
                 }}
               >
                 <MessageCircle className="h-5 w-5" />

@@ -9,7 +9,6 @@ import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  BarChart3,
   ShoppingBag,
   Package,
   User,
@@ -22,11 +21,6 @@ const farmerLinks = [
     label: "Dashboard",
     href: "/farmer/dashboard",
     icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
-  },
-  {
-    label: "Analitik",
-    href: "/farmer/analytics",
-    icon: <BarChart3 className="h-5 w-5 shrink-0" />,
   },
   {
     label: "Pesanan",
@@ -108,7 +102,8 @@ export default function FarmerSidebar({
           <SidebarBody className="justify-between gap-10 border-r border-gray-200 h-screen">
             <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
               {open ? <Logo /> : <LogoIcon />}
-              <div className="mt-8 flex flex-col gap-1">
+
+              <div className="mt-6 flex flex-col gap-1">
                 {farmerLinks.map((link, idx) => (
                   <SidebarLink
                     key={idx}
@@ -187,19 +182,48 @@ export default function FarmerSidebar({
                 />
               </Link>
 
-              <Link
-                href="/farmer/profile"
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95",
-                  pathname?.startsWith("/farmer/profile")
-                    ? "shadow-xl scale-105 ring-2 ring-white"
-                    : ""
-                )}
-                style={{ backgroundColor: "#A3AF87" }}
-                title="Profile"
-              >
-                <User className="h-5 w-5" />
-              </Link>
+              <div className="flex items-center gap-3">
+                {/* Notification Badge */}
+                <Link
+                  href="/farmer/orders"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
+                  title="Notifikasi"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                  {/* Badge Count */}
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                    8
+                  </span>
+                </Link>
+
+                {/* Profile Button */}
+                <Link
+                  href="/farmer/profile"
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95",
+                    pathname?.startsWith("/farmer/profile")
+                      ? "shadow-xl scale-105 ring-2 ring-white"
+                      : ""
+                  )}
+                  style={{ backgroundColor: "#A3AF87" }}
+                  title="Profile"
+                >
+                  <User className="h-5 w-5" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -264,7 +288,7 @@ export default function FarmerSidebar({
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto md:h-screen">
-        <div className="pt-16 pb-20 md:pt-0 md:pb-0 p-4 md:p-6 lg:p-8">
+        <div className="pt-20 pb-24 md:pt-0 md:pb-0 p-4 md:p-6 lg:p-8">
           {children}
         </div>
       </main>

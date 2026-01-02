@@ -24,7 +24,7 @@ export default function AddProductPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category: "",
+    categories: [] as string[], // Changed to array for multi-select
     price: "",
     discount: "",
     unit: "kg",
@@ -36,6 +36,9 @@ export default function AddProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [categoryInput, setCategoryInput] = useState(""); // New state for input
+  const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
 
   // Calculated Final Price - Auto Discount Calculator
   const [finalPrice, setFinalPrice] = useState(0);
@@ -49,13 +52,16 @@ export default function AddProductPage() {
     setFinalPrice(Math.round(calculated));
   }, [formData.price, formData.discount]);
 
-  // Categories
+  // Categories - Kategori yang pernah digunakan
   const categories = [
     "Maggot Segar",
     "Maggot Kering",
     "Pupuk Organik",
     "Maggot Mix",
     "Pakan Ternak",
+    "Kompos Organik",
+    "Biogas",
+    "Larva BSF",
   ];
 
   const units = ["kg", "gram", "liter", "box", "pcs"];
@@ -68,9 +74,88 @@ export default function AddProductPage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  // Handle category input change
+  const handleCategoryInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setCategoryInput(value);
+
+    // Filter categories that are not already selected
+    const available = categories.filter(
+      (cat) => !formData.categories.includes(cat)
+    );
+    const filtered = available.filter((cat) =>
+      cat.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+    setShowCategoryDropdown(value.length > 0 && filtered.length > 0);
+
+    if (errors.categories) {
+      setErrors((prev) => ({ ...prev, categories: "" }));
+    }
+  };
+
+  // Add category from dropdown selection
+  const handleAddCategory = (category: string) => {
+    if (!formData.categories.includes(category)) {
+      setFormData((prev) => ({
+        ...prev,
+        categories: [...prev.categories, category],
+      }));
+      setCategoryInput("");
+      setShowCategoryDropdown(false);
+      if (errors.categories) {
+        setErrors((prev) => ({ ...prev, categories: "" }));
+      }
+    }
+  };
+
+  // Add new category on Enter key
+  const handleCategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && categoryInput.trim()) {
+      e.preventDefault();
+      const newCategory = categoryInput.trim();
+      if (!formData.categories.includes(newCategory)) {
+        setFormData((prev) => ({
+          ...prev,
+          categories: [...prev.categories, newCategory],
+        }));
+      }
+      setCategoryInput("");
+      setShowCategoryDropdown(false);
+    }
+  };
+
+  // Remove category
+  const handleRemoveCategory = (categoryToRemove: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((cat) => cat !== categoryToRemove),
+    }));
+  };
+
+  // Handle category input focus
+  const handleCategoryFocus = () => {
+    const available = categories.filter(
+      (cat) => !formData.categories.includes(cat)
+    );
+    if (categoryInput) {
+      const filtered = available.filter((cat) =>
+        cat.toLowerCase().includes(categoryInput.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+      setShowCategoryDropdown(filtered.length > 0);
+    } else {
+      setFilteredCategories(available);
+      setShowCategoryDropdown(available.length > 0);
     }
   };
 
@@ -101,7 +186,8 @@ export default function AddProductPage() {
     if (!formData.name.trim()) newErrors.name = "Nama produk wajib diisi";
     if (!formData.description.trim())
       newErrors.description = "Deskripsi wajib diisi";
-    if (!formData.category) newErrors.category = "Pilih kategori";
+    if (formData.categories.length === 0)
+      newErrors.categories = "Minimal pilih 1 kategori";
     if (!formData.price || parseFloat(formData.price) <= 0)
       newErrors.price = "Harga harus lebih dari 0";
     if (
@@ -234,29 +320,93 @@ export default function AddProductPage() {
                   )}
                 </div>
 
-                {/* Category */}
-                <div>
+                {/* Category Multi-Select with Tags */}
+                <div className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Kategori <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    placeholder="Contoh: Maggot Segar, Pupuk Organik, dll"
-                    className={`w-full px-4 py-3 bg-white border-2 ${
-                      errors.category ? "border-red-500" : "border-gray-200"
-                    } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
-                  />
-                  {errors.category && (
+
+                  {/* Selected Categories as Tags */}
+                  {formData.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {formData.categories.map((category, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.8, opacity: 0 }}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-lg text-sm font-medium shadow-sm"
+                        >
+                          <span>{category}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCategory(category)}
+                            className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input Field */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={categoryInput}
+                      onChange={handleCategoryInputChange}
+                      onKeyDown={handleCategoryKeyDown}
+                      onFocus={handleCategoryFocus}
+                      onBlur={() =>
+                        setTimeout(() => setShowCategoryDropdown(false), 200)
+                      }
+                      placeholder="Ketik kategori baru atau pilih dari dropdown..."
+                      className={`w-full px-4 py-3 bg-white border-2 ${
+                        errors.categories ? "border-red-500" : "border-gray-200"
+                      } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
+                      autoComplete="off"
+                    />
+
+                    {/* Dropdown Suggestions */}
+                    {showCategoryDropdown && filteredCategories.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 w-full mt-2 bg-white border-2 border-[#A3AF87]/30 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+                      >
+                        <div className="px-3 py-2 bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/5 border-b border-gray-100">
+                          <p className="text-xs font-semibold text-[#5a6c5b]">
+                            Pilih Kategori
+                          </p>
+                        </div>
+                        <div className="py-1">
+                          {filteredCategories.map((category, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => handleAddCategory(category)}
+                              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-[#A3AF87]/10 hover:text-[#303646] transition-colors flex items-center gap-2 group"
+                            >
+                              <div className="w-2 h-2 rounded-full bg-[#A3AF87] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              <span className="font-medium">{category}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {errors.categories && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {errors.category}
+                      {errors.categories}
                     </p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    Masukkan kategori produk secara manual
+                    💡 Pilih beberapa kategori atau tekan Enter untuk tambah
+                    kategori baru
                   </p>
                 </div>
               </div>

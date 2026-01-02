@@ -124,7 +124,7 @@ export default function TestimoniSection() {
               </span>
               <span
                 className="text-sm font-semibold poppins-semibold"
-                style={{ color: "var(--brand-sage)" }}
+                style={{ color: "#A3AF87" }}
               >
                 Testimoni Pengguna
               </span>

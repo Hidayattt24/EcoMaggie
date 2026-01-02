@@ -19,6 +19,7 @@ import {
   Fish,
   Trash2,
   ChevronRight,
+  ChevronLeft,
   Recycle,
   TreePine,
   Truck,
@@ -29,6 +30,9 @@ import {
   Loader2,
   MapPinOff,
   UserCircle,
+  Sunrise,
+  Sun,
+  Sunset,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 
@@ -68,9 +72,27 @@ const wasteTypes = [
 ];
 
 const timeSlots = [
-  { id: "pagi", label: "Pagi", time: "08:00 - 10:00", icon: "🌅" },
-  { id: "siang", label: "Siang", time: "12:00 - 14:00", icon: "☀️" },
-  { id: "sore", label: "Sore", time: "16:00 - 18:00", icon: "🌇" },
+  {
+    id: "pagi",
+    label: "Pagi",
+    time: "08:00 - 10:00",
+    icon: Sunrise,
+    color: "text-orange-500",
+  },
+  {
+    id: "siang",
+    label: "Siang",
+    time: "12:00 - 14:00",
+    icon: Sun,
+    color: "text-yellow-500",
+  },
+  {
+    id: "sore",
+    label: "Sore",
+    time: "16:00 - 18:00",
+    icon: Sunset,
+    color: "text-purple-500",
+  },
 ];
 
 const weightOptions = [
@@ -105,6 +127,60 @@ export default function SupplyInputPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Date picker helpers
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    return { daysInMonth, startingDayOfWeek };
+  };
+
+  const formatDateDisplay = (dateStr: string) => {
+    if (!dateStr) return "Pilih tanggal";
+    const date = new Date(dateStr);
+    const days = [
+      "Minggu",
+      "Senin",
+      "Selasa",
+      "Rabu",
+      "Kamis",
+      "Jumat",
+      "Sabtu",
+    ];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
+    return `${days[date.getDay()]}, ${date.getDate()} ${
+      months[date.getMonth()]
+    } ${date.getFullYear()}`;
+  };
+
+  const handleDateSelect = (day: number) => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const selectedDate = new Date(year, month, day);
+    const formattedDate = selectedDate.toISOString().split("T")[0];
+    setFormData({ ...formData, date: formattedDate });
+    setShowDatePicker(false);
+  };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -297,7 +373,8 @@ export default function SupplyInputPage() {
               Input Sampah Organik
             </h1>
             <p className="text-sm text-gray-500">
-              Langkah {step} dari 2 • {locationData.address}
+              Langkah {step} dari 2 •{" "}
+              {userLocation?.address || formData.address}
             </p>
           </div>
           <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl border border-green-200">
@@ -521,26 +598,179 @@ export default function SupplyInputPage() {
 
                     {/* Date & Time Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Date */}
+                      {/* Date Picker Custom */}
                       <div>
                         <label className="block text-base font-semibold text-gray-900 mb-4">
                           Tanggal Pickup
                         </label>
                         <div className="relative">
-                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          <input
-                            type="date"
-                            value={formData.date}
-                            onChange={(e) =>
-                              setFormData({ ...formData, date: e.target.value })
-                            }
-                            min={new Date().toISOString().split("T")[0]}
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all text-gray-900"
-                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowDatePicker(!showDatePicker)}
+                            className="w-full px-5 py-4 bg-gradient-to-r from-[#A3AF87]/5 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-2xl text-left hover:border-[#A3AF87] transition-all group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-[#A3AF87]/20 rounded-xl group-hover:bg-[#A3AF87]/30 transition-colors">
+                                <Calendar className="h-5 w-5 text-[#A3AF87]" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm text-gray-600 font-medium">
+                                  Pilih Tanggal
+                                </p>
+                                <p className="text-base font-semibold text-gray-900">
+                                  {formatDateDisplay(formData.date)}
+                                </p>
+                              </div>
+                              <ChevronRight
+                                className={`h-5 w-5 text-[#A3AF87] transition-transform ${
+                                  showDatePicker ? "rotate-90" : ""
+                                }`}
+                              />
+                            </div>
+                          </button>
+
+                          {/* Custom Date Picker Dropdown */}
+                          {showDatePicker && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="absolute z-50 mt-2 w-full bg-white border-2 border-[#A3AF87]/30 rounded-2xl shadow-2xl p-5"
+                            >
+                              {/* Month Navigator */}
+                              <div className="flex items-center justify-between mb-4">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setCurrentMonth(
+                                      new Date(
+                                        currentMonth.getFullYear(),
+                                        currentMonth.getMonth() - 1
+                                      )
+                                    )
+                                  }
+                                  className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                >
+                                  <ChevronLeft className="h-5 w-5 text-[#A3AF87]" />
+                                </button>
+                                <p className="font-bold text-gray-900">
+                                  {currentMonth.toLocaleDateString("id-ID", {
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setCurrentMonth(
+                                      new Date(
+                                        currentMonth.getFullYear(),
+                                        currentMonth.getMonth() + 1
+                                      )
+                                    )
+                                  }
+                                  className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                >
+                                  <ChevronRight className="h-5 w-5 text-[#A3AF87]" />
+                                </button>
+                              </div>
+
+                              {/* Days Header */}
+                              <div className="grid grid-cols-7 gap-1 mb-2">
+                                {[
+                                  "Min",
+                                  "Sen",
+                                  "Sel",
+                                  "Rab",
+                                  "Kam",
+                                  "Jum",
+                                  "Sab",
+                                ].map((day) => (
+                                  <div
+                                    key={day}
+                                    className="text-center text-xs font-semibold text-gray-500 py-2"
+                                  >
+                                    {day}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Calendar Days */}
+                              <div className="grid grid-cols-7 gap-1">
+                                {Array.from({
+                                  length:
+                                    getDaysInMonth(currentMonth)
+                                      .startingDayOfWeek,
+                                }).map((_, i) => (
+                                  <div
+                                    key={`empty-${i}`}
+                                    className="aspect-square"
+                                  />
+                                ))}
+                                {Array.from({
+                                  length:
+                                    getDaysInMonth(currentMonth).daysInMonth,
+                                }).map((_, i) => {
+                                  const day = i + 1;
+                                  const dateStr = new Date(
+                                    currentMonth.getFullYear(),
+                                    currentMonth.getMonth(),
+                                    day
+                                  )
+                                    .toISOString()
+                                    .split("T")[0];
+                                  const isSelected = formData.date === dateStr;
+                                  const isToday =
+                                    dateStr ===
+                                    new Date().toISOString().split("T")[0];
+                                  const isPast =
+                                    new Date(dateStr) <
+                                    new Date(
+                                      new Date().toISOString().split("T")[0]
+                                    );
+
+                                  return (
+                                    <button
+                                      key={day}
+                                      type="button"
+                                      onClick={() =>
+                                        !isPast && handleDateSelect(day)
+                                      }
+                                      disabled={isPast}
+                                      className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
+                                        isPast
+                                          ? "text-gray-300 cursor-not-allowed"
+                                          : isSelected
+                                          ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] text-white shadow-lg scale-105"
+                                          : isToday
+                                          ? "bg-[#A3AF87]/10 text-[#A3AF87] border-2 border-[#A3AF87]/30"
+                                          : "hover:bg-[#A3AF87]/5 text-gray-700"
+                                      }`}
+                                    >
+                                      {day}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Today Button */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const today = new Date();
+                                  setCurrentMonth(today);
+                                  handleDateSelect(today.getDate());
+                                }}
+                                className="w-full mt-4 py-2.5 bg-[#A3AF87]/10 text-[#A3AF87] font-semibold rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
+                              >
+                                Hari Ini
+                              </button>
+                            </motion.div>
+                          )}
                         </div>
                       </div>
 
-                      {/* Time Slot */}
+                      {/* Time Slot - Icon Based */}
                       <div>
                         <label className="block text-base font-semibold text-gray-900 mb-4">
                           Waktu Pickup
@@ -548,34 +778,50 @@ export default function SupplyInputPage() {
                         <div className="grid grid-cols-3 gap-3">
                           {timeSlots.map((slot) => {
                             const isSelected = formData.timeSlot === slot.id;
+                            const IconComponent = slot.icon;
                             return (
                               <motion.button
                                 key={slot.id}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                type="button"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() =>
                                   setFormData({
                                     ...formData,
                                     timeSlot: slot.id,
                                   })
                                 }
-                                className={`p-3 lg:p-4 rounded-xl text-center transition-all ${
+                                className={`p-4 rounded-2xl transition-all group ${
                                   isSelected
-                                    ? "bg-[#A3AF87] text-white shadow-lg"
-                                    : "bg-gray-50 text-gray-700 border border-gray-200 hover:border-gray-300"
+                                    ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-xl border-2 border-[#A3AF87]"
+                                    : "bg-white border-2 border-gray-200 hover:border-[#A3AF87]/50 hover:shadow-lg"
                                 }`}
                               >
-                                <span className="text-xl block mb-1">
-                                  {slot.icon}
-                                </span>
-                                <p className="font-semibold text-sm">
+                                <div
+                                  className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center transition-all ${
+                                    isSelected
+                                      ? "bg-white/20"
+                                      : "bg-gray-50 group-hover:bg-[#A3AF87]/10"
+                                  }`}
+                                >
+                                  <IconComponent
+                                    className={`h-6 w-6 ${
+                                      isSelected ? "text-white" : slot.color
+                                    }`}
+                                  />
+                                </div>
+                                <p
+                                  className={`font-bold text-sm ${
+                                    isSelected ? "text-white" : "text-gray-900"
+                                  }`}
+                                >
                                   {slot.label}
                                 </p>
                                 <p
-                                  className={`text-xs mt-0.5 ${
+                                  className={`text-xs mt-1 ${
                                     isSelected
                                       ? "text-white/80"
-                                      : "text-gray-400"
+                                      : "text-gray-500"
                                   }`}
                                 >
                                   {slot.time}

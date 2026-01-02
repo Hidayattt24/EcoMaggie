@@ -10,9 +10,9 @@ import {
   X,
   RefreshCw,
 } from "lucide-react";
-import { StatusTabs } from "@/components/transaction/StatusTabs";
-import { TransactionCard } from "@/components/transaction/TransactionCard";
-import { TrackingDetail } from "@/components/transaction/TrackingDetail";
+import { StatusTabs } from "@/components/user/transaction/StatusTabs";
+import { TransactionCard } from "@/components/user/transaction/TransactionCard";
+import { TrackingDetail } from "@/components/user/transaction/TrackingDetail";
 
 // Mock Data
 const mockTransactions = [

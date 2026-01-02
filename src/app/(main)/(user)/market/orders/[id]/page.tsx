@@ -19,8 +19,8 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
-import { StatusLabel } from "@/components/transaction/StatusLabel";
-import { TransactionDetailItem } from "@/components/transaction/TransactionDetailItem";
+import { StatusLabel } from "@/components/user/transaction/StatusLabel";
+import { TransactionDetailItem } from "@/components/user/transaction/TransactionDetailItem";
 import { generateInvoicePDF } from "@/utils/generateInvoicePDF";
 
 interface Product {

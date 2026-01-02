@@ -15,6 +15,8 @@ import {
   Copy,
   MessageCircle,
   Circle,
+  Recycle,
+  FileText,
 } from "lucide-react";
 
 // Dummy data detail supply
@@ -75,9 +77,9 @@ const statusConfig = {
   },
   completed: {
     label: "Selesai",
-    color: "bg-green-50 text-green-700 border-green-200",
-    iconBg: "bg-green-100",
-    iconColor: "text-green-600",
+    color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]",
+    iconBg: "bg-[#A3AF87]/20",
+    iconColor: "text-[#A3AF87]",
   },
 };
 
@@ -93,10 +95,57 @@ export default function SupplyDetailPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-lg mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#A3AF87]/5">
+      {/* Desktop Header Bar */}
+      <div className="hidden lg:block bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/supply/history"
+                className="p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600" />
+              </Link>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-[#303646] poppins-bold">
+                    Detail Supply
+                  </h1>
+                  <span className="text-lg text-gray-400">•</span>
+                  <span className="text-lg font-semibold text-[#A3AF87]">
+                    {supplyDetail.id}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(supplyDetail.id)}
+                    className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Salin ID"
+                  >
+                    <Copy className="h-4 w-4 text-gray-400" />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {new Date(supplyDetail.date).toLocaleDateString("id-ID", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+            <span
+              className={`px-4 py-2 rounded-full text-sm font-semibold border ${status.color}`}
+            >
+              {status.label}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Header */}
+      <div className="lg:hidden px-4 py-4">
+        <div className="flex items-center gap-4 mb-4">
           <Link
             href="/supply/history"
             className="p-2.5 bg-white rounded-xl shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors"
@@ -105,7 +154,7 @@ export default function SupplyDetailPage({
           </Link>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-[#303646] poppins-bold">
                 {supplyDetail.id}
               </h1>
               <button
@@ -123,197 +172,309 @@ export default function SupplyDetailPage({
             {status.label}
           </span>
         </div>
+      </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-4">
-          <div className="flex items-center gap-4 pb-4 border-b border-gray-100 mb-4">
-            <div className={`p-3 rounded-xl ${status.iconBg}`}>
-              <Package className={`h-7 w-7 ${status.iconColor}`} />
-            </div>
-            <div className="flex-1">
-              <h2 className="font-semibold text-gray-900 text-lg">
-                {supplyDetail.type}
-              </h2>
-              <p className="text-sm text-gray-500">
-                {new Date(supplyDetail.date).toLocaleDateString("id-ID", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Scale className="h-4 w-4 text-gray-400" />
-                <span className="text-xs text-gray-500">Berat</span>
-              </div>
-              <p className="font-semibold text-gray-900">
-                {supplyDetail.weight}
-              </p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Calendar className="h-4 w-4 text-gray-400" />
-                <span className="text-xs text-gray-500">Pickup</span>
-              </div>
-              <p className="font-semibold text-gray-900">
-                {supplyDetail.pickupDate
-                  ? new Date(supplyDetail.pickupDate).toLocaleDateString(
-                      "id-ID",
-                      { day: "numeric", month: "short" }
-                    )
-                  : "Menunggu"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Location & Time */}
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-4">
-          <h3 className="font-semibold text-gray-900 text-sm mb-4">
-            Informasi Pickup
-          </h3>
-
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-[#2D5016]/10 rounded-lg flex-shrink-0">
-                <MapPin className="h-4 w-4 text-[#2D5016]" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-0.5">Alamat</p>
-                <p className="text-sm text-gray-900">{supplyDetail.address}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-[#2D5016]/10 rounded-lg flex-shrink-0">
-                <Clock className="h-4 w-4 text-[#2D5016]" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-0.5">Waktu</p>
-                <p className="text-sm text-gray-900">
-                  {supplyDetail.pickupTime}
-                </p>
-              </div>
-            </div>
-
-            {supplyDetail.notes && (
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-[#2D5016]/10 rounded-lg flex-shrink-0">
-                  <MessageCircle className="h-4 w-4 text-[#2D5016]" />
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 pb-8 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Supply Info Card */}
+            <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-8 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-4 pb-5 border-b border-gray-100 mb-5">
+                <div
+                  className="p-3 lg:p-4 rounded-xl lg:rounded-2xl"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.15)" }}
+                >
+                  <Recycle className="h-7 w-7 lg:h-8 lg:w-8 text-[#A3AF87]" />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Catatan</p>
-                  <p className="text-sm text-gray-900">{supplyDetail.notes}</p>
+                <div className="flex-1">
+                  <h2 className="font-bold text-[#303646] text-lg lg:text-xl poppins-bold">
+                    {supplyDetail.type}
+                  </h2>
+                  <p className="text-sm lg:text-base text-gray-500">
+                    {new Date(supplyDetail.date).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div
+                  className="rounded-xl lg:rounded-2xl p-4"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Scale className="h-4 w-4 text-[#A3AF87]" />
+                    <span className="text-xs text-gray-500">Berat</span>
+                  </div>
+                  <p className="font-bold text-[#303646] text-lg">
+                    {supplyDetail.weight}
+                  </p>
+                </div>
+                <div
+                  className="rounded-xl lg:rounded-2xl p-4"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-4 w-4 text-[#A3AF87]" />
+                    <span className="text-xs text-gray-500">
+                      Tanggal Pickup
+                    </span>
+                  </div>
+                  <p className="font-bold text-[#303646] text-lg">
+                    {supplyDetail.pickupDate
+                      ? new Date(supplyDetail.pickupDate).toLocaleDateString(
+                          "id-ID",
+                          { day: "numeric", month: "short" }
+                        )
+                      : "Menunggu"}
+                  </p>
+                </div>
+                <div
+                  className="rounded-xl lg:rounded-2xl p-4"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-[#A3AF87]" />
+                    <span className="text-xs text-gray-500">Waktu</span>
+                  </div>
+                  <p className="font-bold text-[#303646] text-lg">
+                    {supplyDetail.pickupTime}
+                  </p>
+                </div>
+                <div
+                  className="rounded-xl lg:rounded-2xl p-4"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="h-4 w-4 text-[#A3AF87]" />
+                    <span className="text-xs text-gray-500">Status</span>
+                  </div>
+                  <p className="font-bold text-[#A3AF87] text-lg">
+                    {status.label}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Location & Notes Card */}
+            <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-8 border border-gray-100 shadow-sm">
+              <h3 className="font-bold text-[#303646] text-base lg:text-lg poppins-bold mb-5">
+                Informasi Pickup
+              </h3>
+
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div
+                    className="p-2.5 lg:p-3 rounded-xl flex-shrink-0"
+                    style={{ backgroundColor: "rgba(163, 175, 135, 0.15)" }}
+                  >
+                    <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Alamat Pickup</p>
+                    <p className="text-sm lg:text-base text-[#303646] font-medium">
+                      {supplyDetail.address}
+                    </p>
+                  </div>
+                </div>
+
+                {supplyDetail.notes && (
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-2.5 lg:p-3 rounded-xl flex-shrink-0"
+                      style={{ backgroundColor: "rgba(163, 175, 135, 0.15)" }}
+                    >
+                      <MessageCircle className="h-5 w-5 text-[#A3AF87]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Catatan</p>
+                      <p className="text-sm lg:text-base text-[#303646]">
+                        {supplyDetail.notes}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Courier Card */}
+            {supplyDetail.courier && (
+              <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-8 border border-gray-100 shadow-sm">
+                <h3 className="font-bold text-[#303646] text-base lg:text-lg poppins-bold mb-5">
+                  Kurir Pickup
+                </h3>
+
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #A3AF87 0%, #8a9a6e 100%)",
+                      }}
+                    >
+                      <User className="h-6 w-6 lg:h-7 lg:w-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[#303646] text-base lg:text-lg">
+                        {supplyDetail.courier.name}
+                      </p>
+                      <p className="text-sm text-gray-500">Kurir EcoMaggie</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={`tel:${supplyDetail.courier.phone}`}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                    >
+                      <Phone className="h-5 w-5 text-gray-600" />
+                      <span className="hidden sm:inline text-sm font-medium text-gray-700">
+                        Telepon
+                      </span>
+                    </a>
+                    <a
+                      href={`https://wa.me/62${supplyDetail.courier.phone.slice(
+                        1
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors"
+                      style={{ backgroundColor: "rgba(163, 175, 135, 0.2)" }}
+                    >
+                      <MessageCircle className="h-5 w-5 text-[#A3AF87]" />
+                      <span className="hidden sm:inline text-sm font-medium text-[#5a6c5b]">
+                        WhatsApp
+                      </span>
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Courier */}
-        {supplyDetail.courier && (
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-4">
-            <h3 className="font-semibold text-gray-900 text-sm mb-4">
-              Kurir Pickup
-            </h3>
+          {/* Right Column - Timeline & Actions */}
+          <div className="space-y-6">
+            {/* Timeline Card */}
+            <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-6 border border-gray-100 shadow-sm">
+              <h3 className="font-bold text-[#303646] text-base lg:text-lg poppins-bold mb-5">
+                Status Tracking
+              </h3>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-gradient-to-br from-[#2D5016] to-[#4a7c23] rounded-full flex items-center justify-center">
-                  <User className="h-5 w-5 text-white" />
+              <div className="space-y-0">
+                {supplyDetail.timeline.map((item, index) => (
+                  <div key={item.status} className="flex gap-4">
+                    {/* Timeline Line & Dot */}
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center ${
+                          item.completed ? "bg-[#A3AF87]" : "bg-gray-200"
+                        }`}
+                      >
+                        {item.completed && (
+                          <CheckCircle className="h-3 w-3 text-white" />
+                        )}
+                      </div>
+                      {index < supplyDetail.timeline.length - 1 && (
+                        <div
+                          className={`w-0.5 h-14 ${
+                            item.completed ? "bg-[#A3AF87]" : "bg-gray-200"
+                          }`}
+                        />
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="pb-5">
+                      <p
+                        className={`font-semibold text-sm ${
+                          item.completed ? "text-[#303646]" : "text-gray-400"
+                        }`}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        className={`text-xs mt-0.5 ${
+                          item.completed ? "text-gray-500" : "text-gray-300"
+                        }`}
+                      >
+                        {item.completed ? item.date : "Menunggu"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Help Card */}
+            <div
+              className="rounded-2xl lg:rounded-3xl p-5 lg:p-6 border border-[#A3AF87]/30"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(163, 175, 135, 0.1) 0%, rgba(163, 175, 135, 0.05) 100%)",
+              }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-[#A3AF87] rounded-xl">
+                  <MessageCircle className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">
-                    {supplyDetail.courier.name}
+                  <h4 className="font-bold text-[#303646] poppins-bold">
+                    Butuh Bantuan?
+                  </h4>
+                  <p className="text-xs text-gray-500">
+                    Tim kami siap membantu
                   </p>
-                  <p className="text-xs text-gray-500">Kurir EcoMaggie</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <a
-                  href={`tel:${supplyDetail.courier.phone}`}
-                  className="p-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+              <a
+                href="https://wa.me/6282288953268?text=Halo%20EcoMaggie,%20saya%20butuh%20bantuan%20terkait%20supply%20sampah%20organik"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #A3AF87 0%, #8a9a6e 100%)",
+                }}
+              >
+                <MessageCircle className="h-5 w-5" />
+                Hubungi via WhatsApp
+              </a>
+            </div>
+
+            {/* Quick Actions Card */}
+            <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-6 border border-gray-100 shadow-sm">
+              <h4 className="font-bold text-[#303646] text-sm poppins-bold mb-4">
+                Aksi Cepat
+              </h4>
+              <div className="space-y-3">
+                <Link
+                  href="/supply/history"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  <Phone className="h-5 w-5 text-gray-600" />
-                </a>
-                <a
-                  href={`https://wa.me/62${supplyDetail.courier.phone.slice(
-                    1
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2.5 bg-green-100 rounded-xl hover:bg-green-200 transition-colors"
+                  <FileText className="h-5 w-5 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Lihat Riwayat Supply
+                  </span>
+                </Link>
+                <Link
+                  href="/supply/input"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
                 >
-                  <MessageCircle className="h-5 w-5 text-green-600" />
-                </a>
+                  <Recycle className="h-5 w-5 text-[#A3AF87]" />
+                  <span className="text-sm font-medium text-[#5a6c5b]">
+                    Buat Supply Baru
+                  </span>
+                </Link>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Timeline */}
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <h3 className="font-semibold text-gray-900 text-sm mb-4">
-            Status Tracking
-          </h3>
-
-          <div className="space-y-0">
-            {supplyDetail.timeline.map((item, index) => (
-              <div key={item.status} className="flex gap-3">
-                {/* Timeline Line & Dot */}
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                      item.completed ? "bg-[#2D5016]" : "bg-gray-300"
-                    }`}
-                  />
-                  {index < supplyDetail.timeline.length - 1 && (
-                    <div
-                      className={`w-0.5 h-12 ${
-                        item.completed ? "bg-[#2D5016]" : "bg-gray-200"
-                      }`}
-                    />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="pb-4">
-                  <p
-                    className={`font-medium text-sm ${
-                      item.completed ? "text-gray-900" : "text-gray-400"
-                    }`}
-                  >
-                    {item.label}
-                  </p>
-                  <p
-                    className={`text-xs ${
-                      item.completed ? "text-gray-500" : "text-gray-300"
-                    }`}
-                  >
-                    {item.completed ? item.date : "Menunggu"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-6">
-          <a
-            href="https://wa.me/6282288953268?text=Halo%20EcoMaggie,%20saya%20butuh%20bantuan%20terkait%20supply%20sampah%20organik"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold bg-gradient-to-r from-[#2D5016] to-[#4a7c23] text-white shadow-lg hover:shadow-xl transition-all"
-          >
-            <MessageCircle className="h-5 w-5" />
-            Butuh Bantuan?
-          </a>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FarmerSidebar from "@/components/farmer/FarmerSidebar";
 
 export const metadata: Metadata = {
   title: "Dashboard Petani - EcoMaggie",
@@ -10,10 +11,5 @@ export default function FarmerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Sidebar & Header akan ditambahkan di sini */}
-      <main className="p-6">{children}</main>
-    </div>
-  );
+  return <FarmerSidebar>{children}</FarmerSidebar>;
 }

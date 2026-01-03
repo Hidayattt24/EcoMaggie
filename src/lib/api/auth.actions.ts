@@ -238,6 +238,12 @@ export async function loginUser(
     // Get user role from metadata or database
     const userRole = data.user?.user_metadata?.role || "USER";
 
+    // Determine redirect URL based on role
+    let redirectUrl = "/market/products"; // Default for USER
+    if (userRole === "FARMER") {
+      redirectUrl = "/farmer/dashboard";
+    }
+
     return {
       success: true,
       message: "Login berhasil!",
@@ -245,6 +251,7 @@ export async function loginUser(
         userId: data.user?.id,
         email: data.user?.email,
         role: userRole,
+        redirectUrl,
       },
     };
   } catch (error) {
@@ -589,5 +596,5 @@ export async function verifyResetSession(): Promise<AuthActionResponse> {
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect("/");
 }

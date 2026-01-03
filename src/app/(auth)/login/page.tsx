@@ -48,13 +48,10 @@ function LoginForm() {
         showConfirmButton: false,
       });
 
-      // Redirect based on user role
-      const userRole = result.data?.role as string;
-      if (userRole === "FARMER") {
-        router.push("/farmer/dashboard");
-      } else {
-        router.push("/market");
-      }
+      // Redirect based on redirectUrl from server
+      const redirectUrl =
+        (result.data?.redirectUrl as string) || "/market/products";
+      router.push(redirectUrl);
     } else {
       setError(result.message);
 

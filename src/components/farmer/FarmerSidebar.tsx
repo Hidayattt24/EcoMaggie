@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { LogoutButton } from "@/components/user/LogoutButton";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -69,6 +70,7 @@ export default function FarmerSidebar({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [showMobileLogout, setShowMobileLogout] = useState(false);
   const pathname = usePathname();
 
   // Check if current path matches the link
@@ -105,17 +107,62 @@ export default function FarmerSidebar({
             </div>
 
             {/* Bottom Section - Logout (Desktop) */}
-            <div className="flex flex-col gap-2 mt-auto">
-              {/* Logout */}
-              <div className="border-t border-gray-200 pt-3 pb-2">
-                <SidebarLink
-                  link={{
-                    label: "Keluar",
-                    href: "/login",
-                    icon: <LogOut className="h-5 w-5 shrink-0" />,
+            <div className="border-t border-gray-200 pt-4 pb-3">
+              <div className="flex justify-center">
+                <button
+                  onClick={async () => {
+                    const { signOut } = await import("@/lib/api/auth.actions");
+                    const Swal = (await import("sweetalert2")).default;
+
+                    const result = await Swal.fire({
+                      title: "Keluar dari Akun?",
+                      text: "Apakah Anda yakin ingin keluar?",
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonColor: "#A3AF87",
+                      cancelButtonColor: "#9CA3AF",
+                      confirmButtonText: "Ya, Keluar",
+                      cancelButtonText: "Batal",
+                      reverseButtons: true,
+                      customClass: {
+                        popup: "rounded-2xl",
+                        title: "text-xl font-bold poppins-bold",
+                        htmlContainer: "text-gray-600 poppins-regular",
+                        confirmButton:
+                          "rounded-xl px-6 py-3 font-medium shadow-lg poppins-semibold",
+                        cancelButton:
+                          "rounded-xl px-6 py-3 font-medium poppins-regular",
+                      },
+                    });
+
+                    if (result.isConfirmed) {
+                      try {
+                        await signOut();
+                      } catch (error) {
+                        const isRedirect =
+                          error &&
+                          typeof error === "object" &&
+                          "digest" in error &&
+                          typeof error.digest === "string" &&
+                          error.digest.startsWith("NEXT_REDIRECT");
+                        if (isRedirect) throw error;
+                      }
+                    }
                   }}
-                  className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                />
+                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all hover:scale-105"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.15)" }}
+                  title="Keluar dari Akun"
+                >
+                  <LogOut
+                    className="h-5 w-5 transition-transform group-hover:translate-x-0.5"
+                    style={{ color: "#A3AF87" }}
+                  />
+
+                  {/* Tooltip */}
+                  <div className="absolute left-full ml-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap poppins-medium">
+                    Keluar
+                  </div>
+                </button>
               </div>
             </div>
           </SidebarBody>
@@ -147,6 +194,16 @@ export default function FarmerSidebar({
               </Link>
 
               <div className="flex items-center gap-3">
+                {/* Logout Button Mobile */}
+                <button
+                  onClick={() => setShowMobileLogout(true)}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95"
+                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                  title="Keluar"
+                >
+                  <LogOut className="h-5 w-5" style={{ color: "#A3AF87" }} />
+                </button>
+
                 {/* Notification Badge */}
                 <Link
                   href="/farmer/orders"
@@ -231,6 +288,68 @@ export default function FarmerSidebar({
                 );
               })}
             </div>
+
+            {/* Mobile Logout Modal */}
+            <AnimatePresence>
+              {showMobileLogout && (
+                <>
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowMobileLogout(false)}
+                    className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+                  />
+
+                  {/* Modal */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="md:hidden fixed bottom-0 left-0 right-0 z-[70] pb-safe"
+                  >
+                    <div className="mx-3 mb-20">
+                      <div className="bg-white rounded-3xl shadow-2xl p-4 border border-gray-200">
+                        <div className="mb-3 pb-3 border-b border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-bold text-gray-900 poppins-semibold">
+                              Akun Anda
+                            </h3>
+                            <button
+                              onClick={() => setShowMobileLogout(false)}
+                              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                              <svg
+                                className="w-5 h-5 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-500 poppins-regular mt-1">
+                            egomaggie@gmail.com
+                          </p>
+                        </div>
+                        <LogoutButton
+                          onClose={() => setShowMobileLogout(false)}
+                          className="rounded-xl justify-center"
+                          hideText={true}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </nav>
         </div>
       </div>

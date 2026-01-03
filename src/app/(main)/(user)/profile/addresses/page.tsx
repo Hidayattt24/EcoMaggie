@@ -1,127 +1,265 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, ArrowLeft, MapPin, User, Phone, Check, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  ArrowLeft,
+  MapPin,
+  User,
+  Phone,
+  Check,
+  X,
+  Loader2,
+  AlertCircle,
+  Home,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface Address {
-  id: number;
-  label: string;
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  postalCode: string;
-  address: string;
-  isPrimary: boolean;
-}
+import {
+  getUserAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+  type Address,
+  type CreateAddressData,
+  type UpdateAddressData,
+} from "@/lib/api/address.actions";
+import {
+  getCurrentUserProfile,
+  type UserProfile,
+} from "@/lib/api/profile.actions";
+import Swal from "sweetalert2";
 
 export default function AddressesPage() {
   const router = useRouter();
 
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: 1,
-      label: "Rumah",
-      name: "Budi Santoso",
-      phone: "081234567890",
-      province: "Jawa Barat",
-      city: "Bandung",
-      postalCode: "40123",
-      address: "Jl. Merdeka No. 123, Kec. Cicendo",
-      isPrimary: true,
-    },
-    {
-      id: 2,
-      label: "Kantor",
-      name: "Budi Santoso",
-      phone: "081234567890",
-      province: "Jawa Barat",
-      city: "Bandung",
-      postalCode: "40191",
-      address: "Jl. Asia Afrika No. 8, Kec. Sumur Bandung",
-      isPrimary: false,
-    },
-  ]);
-
+  // States
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const [newAddress, setNewAddress] = useState<
-    Omit<Address, "id" | "isPrimary">
-  >({
+  const [newAddress, setNewAddress] = useState<CreateAddressData>({
     label: "",
-    name: "",
-    phone: "",
+    recipientName: "",
+    recipientPhone: "",
     province: "",
     city: "",
     postalCode: "",
-    address: "",
+    streetAddress: "",
   });
 
-  const handleAddAddress = (e: React.FormEvent) => {
+  // Fetch addresses and profile on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+
+    // Fetch addresses and profile in parallel
+    const [addressResult, profileResult] = await Promise.all([
+      getUserAddresses(),
+      getCurrentUserProfile(),
+    ]);
+
+    if (addressResult.success && addressResult.data) {
+      setAddresses(addressResult.data);
+    }
+
+    if (profileResult.success && profileResult.data) {
+      setUserProfile(profileResult.data);
+    }
+
+    setIsLoading(false);
+  };
+
+  const fetchAddresses = async () => {
+    const result = await getUserAddresses();
+    if (result.success && result.data) {
+      setAddresses(result.data);
+    }
+  };
+
+  // Handle Add/Edit Address
+  const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+
     if (editingAddress) {
       // Update existing address
-      setAddresses(
-        addresses.map((addr) =>
-          addr.id === editingAddress.id ? { ...addr, ...newAddress } : addr
-        )
-      );
+      const updateData: UpdateAddressData = {
+        label: newAddress.label,
+        recipientName: newAddress.recipientName,
+        recipientPhone: newAddress.recipientPhone,
+        province: newAddress.province,
+        city: newAddress.city,
+        postalCode: newAddress.postalCode,
+        streetAddress: newAddress.streetAddress,
+      };
+
+      const result = await updateAddress(editingAddress.id, updateData);
+
+      if (result.success) {
+        await Swal.fire({
+          title: "Berhasil!",
+          text: result.message,
+          icon: "success",
+          confirmButtonColor: "#A3AF87",
+          timer: 2000,
+        });
+        await fetchAddresses();
+        resetForm();
+      } else {
+        await Swal.fire({
+          title: "Gagal!",
+          text: result.message,
+          icon: "error",
+          confirmButtonColor: "#EF4444",
+        });
+      }
     } else {
       // Add new address
-      const newId = Math.max(...addresses.map((a) => a.id), 0) + 1;
-      setAddresses([
-        ...addresses,
-        { ...newAddress, id: newId, isPrimary: addresses.length === 0 },
-      ]);
+      const result = await createAddress(newAddress);
+
+      if (result.success) {
+        await Swal.fire({
+          title: "Berhasil!",
+          text: result.message,
+          icon: "success",
+          confirmButtonColor: "#A3AF87",
+          timer: 2000,
+        });
+        await fetchAddresses();
+        resetForm();
+      } else {
+        await Swal.fire({
+          title: "Gagal!",
+          text: result.message,
+          icon: "error",
+          confirmButtonColor: "#EF4444",
+        });
+      }
     }
+
+    setIsSaving(false);
+  };
+
+  // Handle Set Primary
+  const handleSetPrimary = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Jadikan Alamat Utama?",
+      text: "Alamat ini akan dijadikan alamat pengiriman default",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#A3AF87",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Ya, Jadikan Utama",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      const updateResult = await setDefaultAddress(id);
+
+      if (updateResult.success) {
+        await Swal.fire({
+          title: "Berhasil!",
+          text: updateResult.message,
+          icon: "success",
+          confirmButtonColor: "#A3AF87",
+          timer: 2000,
+        });
+        await fetchAddresses();
+      } else {
+        await Swal.fire({
+          title: "Gagal!",
+          text: updateResult.message,
+          icon: "error",
+          confirmButtonColor: "#EF4444",
+        });
+      }
+    }
+  };
+
+  // Handle Delete Address
+  const handleDeleteAddress = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Alamat?",
+      text: "Alamat yang dihapus tidak dapat dikembalikan",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      const deleteResult = await deleteAddress(id);
+
+      if (deleteResult.success) {
+        await Swal.fire({
+          title: "Terhapus!",
+          text: deleteResult.message,
+          icon: "success",
+          confirmButtonColor: "#A3AF87",
+          timer: 2000,
+        });
+        await fetchAddresses();
+      } else {
+        await Swal.fire({
+          title: "Gagal!",
+          text: deleteResult.message,
+          icon: "error",
+          confirmButtonColor: "#EF4444",
+        });
+      }
+    }
+  };
+
+  // Handle Edit Address
+  const handleEditAddress = (address: Address) => {
+    setEditingAddress(address);
+    setNewAddress({
+      label: address.label,
+      recipientName: address.recipientName,
+      recipientPhone: address.recipientPhone,
+      province: address.province,
+      city: address.city,
+      postalCode: address.postalCode,
+      streetAddress: address.streetAddress,
+    });
+    setShowAddForm(true);
+  };
+
+  // Reset Form
+  const resetForm = () => {
     setNewAddress({
       label: "",
-      name: "",
-      phone: "",
+      recipientName: "",
+      recipientPhone: "",
       province: "",
       city: "",
       postalCode: "",
-      address: "",
+      streetAddress: "",
     });
     setShowAddForm(false);
     setEditingAddress(null);
   };
 
-  const handleSetPrimary = (id: number) => {
-    setAddresses(
-      addresses.map((addr) => ({
-        ...addr,
-        isPrimary: addr.id === id,
-      }))
+  // Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-[#A3AF87] mx-auto" />
+          <p className="mt-4 text-gray-600">Memuat alamat...</p>
+        </div>
+      </div>
     );
-  };
-
-  const handleDeleteAddress = (id: number) => {
-    const updatedAddresses = addresses.filter((addr) => addr.id !== id);
-    if (
-      updatedAddresses.length > 0 &&
-      !updatedAddresses.some((a) => a.isPrimary)
-    ) {
-      updatedAddresses[0].isPrimary = true;
-    }
-    setAddresses(updatedAddresses);
-  };
-
-  const handleEditAddress = (address: Address) => {
-    setEditingAddress(address);
-    setNewAddress({
-      label: address.label,
-      name: address.name,
-      phone: address.phone,
-      province: address.province,
-      city: address.city,
-      postalCode: address.postalCode,
-      address: address.address,
-    });
-    setShowAddForm(true);
-  };
+  }
 
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-6">
@@ -132,19 +270,7 @@ export default function AddressesPage() {
             onClick={() => router.back()}
             className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
-            <svg
-              className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ArrowLeft className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform" />
             <span className="text-sm font-medium text-gray-700">Kembali</span>
           </button>
           <div className="flex items-center justify-between">
@@ -162,12 +288,12 @@ export default function AddressesPage() {
                 setEditingAddress(null);
                 setNewAddress({
                   label: "",
-                  name: "",
-                  phone: "",
+                  recipientName: "",
+                  recipientPhone: "",
                   province: "",
                   city: "",
                   postalCode: "",
-                  address: "",
+                  streetAddress: "",
                 });
               }}
               className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all shadow-sm active:scale-95"
@@ -199,19 +325,7 @@ export default function AddressesPage() {
                   </h3>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowAddForm(false);
-                      setEditingAddress(null);
-                      setNewAddress({
-                        label: "",
-                        name: "",
-                        phone: "",
-                        province: "",
-                        city: "",
-                        postalCode: "",
-                        address: "",
-                      });
-                    }}
+                    onClick={resetForm}
                     className="p-2 hover:bg-red-100 rounded-full transition-colors"
                   >
                     <X className="h-5 w-5 text-red-600" />
@@ -242,9 +356,12 @@ export default function AddressesPage() {
                     <input
                       type="text"
                       required
-                      value={newAddress.name}
+                      value={newAddress.recipientName}
                       onChange={(e) =>
-                        setNewAddress({ ...newAddress, name: e.target.value })
+                        setNewAddress({
+                          ...newAddress,
+                          recipientName: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="Nama lengkap"
@@ -258,13 +375,19 @@ export default function AddressesPage() {
                     <input
                       type="tel"
                       required
-                      value={newAddress.phone}
+                      value={newAddress.recipientPhone}
                       onChange={(e) =>
-                        setNewAddress({ ...newAddress, phone: e.target.value })
+                        setNewAddress({
+                          ...newAddress,
+                          recipientPhone: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="08xxxxxxxxxx"
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Format: 08xxx atau 62xxx atau +62xxx
+                    </p>
                   </div>
 
                   <div>
@@ -309,6 +432,8 @@ export default function AddressesPage() {
                     <input
                       type="text"
                       required
+                      pattern="[0-9]{5}"
+                      maxLength={5}
                       value={newAddress.postalCode}
                       onChange={(e) =>
                         setNewAddress({
@@ -319,6 +444,7 @@ export default function AddressesPage() {
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
                       placeholder="40123"
                     />
+                    <p className="mt-1 text-xs text-gray-500">5 digit angka</p>
                   </div>
 
                   <div className="sm:col-span-2">
@@ -327,11 +453,11 @@ export default function AddressesPage() {
                     </label>
                     <textarea
                       required
-                      value={newAddress.address}
+                      value={newAddress.streetAddress}
                       onChange={(e) =>
                         setNewAddress({
                           ...newAddress,
-                          address: e.target.value,
+                          streetAddress: e.target.value,
                         })
                       }
                       rows={3}
@@ -344,25 +470,24 @@ export default function AddressesPage() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all font-medium active:scale-95"
+                    disabled={isSaving}
+                    className="flex-1 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all font-medium active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {editingAddress ? "Simpan Perubahan" : "Simpan Alamat"}
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Menyimpan...
+                      </>
+                    ) : editingAddress ? (
+                      "Simpan Perubahan"
+                    ) : (
+                      "Simpan Alamat"
+                    )}
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowAddForm(false);
-                      setEditingAddress(null);
-                      setNewAddress({
-                        label: "",
-                        name: "",
-                        phone: "",
-                        province: "",
-                        city: "",
-                        postalCode: "",
-                        address: "",
-                      });
-                    }}
+                    onClick={resetForm}
+                    disabled={isSaving}
                     className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium"
                   >
                     Batal
@@ -373,8 +498,83 @@ export default function AddressesPage() {
           )}
         </AnimatePresence>
 
+        {/* Profile Address Card - Show when user has profile address but no saved addresses */}
+        {addresses.length === 0 &&
+          userProfile &&
+          (userProfile.province || userProfile.city) && (
+            <div className="mb-4">
+              <div className="bg-gradient-to-br from-amber-50 to-white rounded-2xl border-2 border-amber-200 p-4 sm:p-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-2 bg-amber-100 rounded-xl">
+                    <Home className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-gray-900 text-base sm:text-lg">
+                        Alamat Pendaftaran
+                      </h3>
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                        Dari Profil
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Alamat ini diambil dari data pendaftaran Anda. Tambahkan
+                      alamat baru untuk pengiriman.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm sm:text-base">
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <span>{userProfile.name || "-"}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <span>{userProfile.phone || "-"}</span>
+                  </div>
+                  <div className="flex items-start gap-3 text-gray-700">
+                    <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span>
+                      {[
+                        userProfile.fullAddress,
+                        userProfile.city,
+                        userProfile.province,
+                        userProfile.postalCode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "Alamat lengkap belum diisi"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-amber-200">
+                  <button
+                    onClick={() => {
+                      setShowAddForm(true);
+                      setNewAddress({
+                        label: "Rumah",
+                        recipientName: userProfile.name || "",
+                        recipientPhone: userProfile.phone || "",
+                        province: userProfile.province || "",
+                        city: userProfile.city || "",
+                        postalCode: userProfile.postalCode || "",
+                        streetAddress: userProfile.fullAddress || "",
+                      });
+                    }}
+                    className="w-full px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all font-medium flex items-center justify-center gap-2"
+                  >
+                    <Plus className="h-5 w-5" />
+                    Simpan Sebagai Alamat Pengiriman
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         {/* Address List */}
-        {addresses.length === 0 ? (
+        {addresses.length === 0 &&
+        (!userProfile || (!userProfile.province && !userProfile.city)) ? (
           <div className="text-center py-12">
             <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">Belum ada alamat tersimpan</p>
@@ -385,7 +585,7 @@ export default function AddressesPage() {
               Tambah Alamat Pertama
             </button>
           </div>
-        ) : (
+        ) : addresses.length > 0 ? (
           <div className="space-y-4">
             {addresses.map((address) => (
               <motion.div
@@ -405,7 +605,7 @@ export default function AddressesPage() {
                       <h3 className="font-bold text-gray-900 text-base sm:text-lg">
                         {address.label}
                       </h3>
-                      {address.isPrimary && (
+                      {address.isDefault && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white text-xs font-bold rounded-full mt-1">
                           <Check className="h-3 w-3" />
                           Utama
@@ -418,23 +618,23 @@ export default function AddressesPage() {
                 <div className="space-y-2 text-sm sm:text-base">
                   <div className="flex items-center gap-3 text-gray-700">
                     <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    <span>{address.name}</span>
+                    <span>{address.recipientName}</span>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
                     <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    <span>{address.phone}</span>
+                    <span>{address.recipientPhone}</span>
                   </div>
                   <div className="flex items-start gap-3 text-gray-700">
                     <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
                     <span>
-                      {address.address}, {address.city}, {address.province}{" "}
-                      {address.postalCode}
+                      {address.streetAddress}, {address.city},{" "}
+                      {address.province} {address.postalCode}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {!address.isPrimary && (
+                  {!address.isDefault && (
                     <button
                       onClick={() => handleSetPrimary(address.id)}
                       className="flex-1 sm:flex-none px-4 py-2 bg-[#A3AF87]/20 text-[#5a6c5b] rounded-xl hover:bg-[#A3AF87]/30 transition-all font-medium text-sm active:scale-95"
@@ -458,7 +658,7 @@ export default function AddressesPage() {
               </motion.div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

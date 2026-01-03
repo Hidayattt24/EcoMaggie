@@ -9,11 +9,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/user/LogoutButton";
+import { useProfile, formatPhoneNumber } from "@/hooks/useProfile";
 
 export function NavbarUser() {
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get user profile data
+  const { profile, loading: profileLoading } = useProfile();
 
   const navItems = [
     {
@@ -282,7 +286,7 @@ export function NavbarUser() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg hover:scale-105 ${
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg hover:scale-105 overflow-hidden ${
                   pathname?.startsWith("/profile")
                     ? "shadow-xl scale-110 ring-2 ring-offset-2"
                     : ""
@@ -297,19 +301,27 @@ export function NavbarUser() {
                 }
                 title="Profile"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                {profile?.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name || "User"}
+                    className="w-full h-full object-cover"
                   />
-                </svg>
+                ) : (
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                )}
               </button>
 
               {/* Dropdown Menu */}
@@ -327,10 +339,18 @@ export function NavbarUser() {
                       className="font-bold text-base"
                       style={{ color: "#A3AF87" }}
                     >
-                      Budi Santoso
+                      {profileLoading ? (
+                        <span className="inline-block w-32 h-5 bg-gray-200 animate-pulse rounded"></span>
+                      ) : (
+                        profile?.name || "User"
+                      )}
                     </p>
                     <p className="text-sm text-gray-500 mt-0.5">
-                      +62 812-3456-7890
+                      {profileLoading ? (
+                        <span className="inline-block w-40 h-4 bg-gray-200 animate-pulse rounded"></span>
+                      ) : (
+                        formatPhoneNumber(profile?.phone)
+                      )}
                     </p>
                   </div>
 
@@ -582,7 +602,7 @@ export function NavbarUser() {
                 <div className="relative" ref={mobileDropdownRef}>
                   <button
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95 ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95 overflow-hidden ${
                       pathname?.startsWith("/profile")
                         ? "shadow-xl scale-105 ring-2 ring-white"
                         : ""
@@ -590,19 +610,27 @@ export function NavbarUser() {
                     style={{ backgroundColor: "#A3AF87" }}
                     title="Profile"
                   >
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    {profile?.avatar ? (
+                      <img
+                        src={profile.avatar}
+                        alt={profile.name || "User"}
+                        className="w-full h-full object-cover"
                       />
-                    </svg>
+                    ) : (
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    )}
                   </button>
 
                   {/* Mobile Dropdown Menu */}
@@ -620,10 +648,18 @@ export function NavbarUser() {
                           className="font-bold text-base"
                           style={{ color: "#A3AF87" }}
                         >
-                          Budi Santoso
+                          {profileLoading ? (
+                            <span className="inline-block w-32 h-5 bg-gray-200 animate-pulse rounded"></span>
+                          ) : (
+                            profile?.name || "User"
+                          )}
                         </p>
                         <p className="text-sm text-gray-500 mt-0.5">
-                          +62 812-3456-7890
+                          {profileLoading ? (
+                            <span className="inline-block w-40 h-4 bg-gray-200 animate-pulse rounded"></span>
+                          ) : (
+                            formatPhoneNumber(profile?.phone)
+                          )}
                         </p>
                       </div>
 

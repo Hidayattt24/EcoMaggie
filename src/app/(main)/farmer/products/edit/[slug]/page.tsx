@@ -184,13 +184,31 @@ export default function EditProductPage({ params }: PageProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      Array.from(files).forEach((file) => {
+      const remainingSlots = 5 - images.length;
+      const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+      filesToProcess.forEach((file) => {
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          setErrors((prev) => ({
+            ...prev,
+            images: `File ${file.name} terlalu besar (max 5MB)`,
+          }));
+          return;
+        }
+
         const reader = new FileReader();
         reader.onloadend = () => {
-          setImages((prev) => [...prev, reader.result as string]);
+          setImages((prev) => {
+            if (prev.length >= 5) return prev;
+            return [...prev, reader.result as string];
+          });
         };
         reader.readAsDataURL(file);
       });
+
+      // Clear the input so same file can be selected again
+      e.target.value = "";
     }
   };
 
@@ -526,6 +544,25 @@ export default function EditProductPage({ params }: PageProps) {
               </h2>
 
               <div className="space-y-4">
+                {/* Price per unit info banner */}
+                <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Package className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-800">
+                      Harga per satuan:{" "}
+                      <span className="font-bold">
+                        /{formData.unit || "kg"}
+                      </span>
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      Contoh: Rp 30.000 / {formData.unit || "kg"} - Pastikan
+                      satuan sudah benar di bagian Manajemen Stok
+                    </p>
+                  </div>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -541,10 +578,13 @@ export default function EditProductPage({ params }: PageProps) {
                         placeholder="50000"
                         min="0"
                         step="1000"
-                        className={`w-full pl-10 pr-4 py-3 bg-white border-2 ${
+                        className={`w-full pl-10 pr-16 py-3 bg-white border-2 ${
                           errors.price ? "border-red-500" : "border-gray-200"
                         } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
                       />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">
+                        / {formData.unit || "kg"}
+                      </span>
                     </div>
                     {errors.price && (
                       <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -552,6 +592,9 @@ export default function EditProductPage({ params }: PageProps) {
                         {errors.price}
                       </p>
                     )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Harga untuk setiap 1 {formData.unit || "kg"} produk
+                    </p>
                   </div>
 
                   <div>
@@ -621,9 +664,14 @@ export default function EditProductPage({ params }: PageProps) {
                           <span className="text-sm font-bold text-gray-700">
                             Harga Final:
                           </span>
-                          <span className="text-xl font-bold text-[#A3AF87]">
-                            Rp {finalPrice.toLocaleString("id-ID")}
-                          </span>
+                          <div className="text-right">
+                            <span className="text-xl font-bold text-[#A3AF87]">
+                              Rp {finalPrice.toLocaleString("id-ID")}
+                            </span>
+                            <span className="text-sm text-gray-600 ml-1">
+                              / {formData.unit || "kg"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -853,25 +901,83 @@ export default function EditProductPage({ params }: PageProps) {
 
             {/* Product Images */}
             <div className="bg-white rounded-xl p-6 border-2 border-gray-100">
-              <h2 className="text-lg font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-[#A3AF87]" />
-                Foto Produk <span className="text-red-500 text-sm">*</span>
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[#303646] flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-[#A3AF87]" />
+                  Foto Produk <span className="text-red-500 text-sm">*</span>
+                </h2>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-sm font-medium ${
+                      images.length >= 5
+                        ? "text-red-500"
+                        : images.length >= 3
+                        ? "text-yellow-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {images.length}/5 foto
+                  </span>
+                </div>
+              </div>
 
+              {/* Info Banner */}
+              <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+                <div className="p-1.5 bg-amber-100 rounded-lg mt-0.5">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-amber-800">
+                    Tips Foto Produk
+                  </p>
+                  <ul className="text-xs text-amber-700 mt-1 space-y-0.5">
+                    <li>• Upload 1-5 foto dengan kualitas tinggi</li>
+                    <li>• Foto pertama akan menjadi foto utama</li>
+                    <li>• Gunakan pencahayaan yang baik</li>
+                    <li>• Tampilkan produk dari berbagai sudut</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Upload Area */}
               <div className="mb-4">
                 <label
                   htmlFor="image-upload"
-                  className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all"
+                  className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                    images.length >= 5
+                      ? "border-gray-200 bg-gray-50 cursor-not-allowed"
+                      : "border-gray-300 hover:border-[#A3AF87] hover:bg-[#A3AF87]/5"
+                  }`}
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                    <p className="mb-2 text-sm text-gray-600 font-medium">
-                      <span className="text-[#A3AF87]">Klik untuk upload</span>{" "}
-                      atau drag & drop
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      PNG, JPG, JPEG (Max 5MB per file)
-                    </p>
+                    <Upload
+                      className={`h-10 w-10 mb-2 ${
+                        images.length >= 5 ? "text-gray-300" : "text-gray-400"
+                      }`}
+                    />
+                    {images.length >= 5 ? (
+                      <>
+                        <p className="mb-2 text-sm text-gray-400 font-medium">
+                          Batas maksimal 5 foto tercapai
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Hapus foto lama untuk menambah yang baru
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mb-2 text-sm text-gray-600 font-medium">
+                          <span className="text-[#A3AF87]">
+                            Klik untuk upload
+                          </span>{" "}
+                          atau drag & drop
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, JPEG (Max 5MB per file) • Sisa{" "}
+                          {5 - images.length} foto
+                        </p>
+                      </>
+                    )}
                   </div>
                   <input
                     id="image-upload"
@@ -880,6 +986,7 @@ export default function EditProductPage({ params }: PageProps) {
                     multiple
                     onChange={handleImageUpload}
                     className="hidden"
+                    disabled={images.length >= 5}
                   />
                 </label>
                 {errors.images && (
@@ -890,32 +997,72 @@ export default function EditProductPage({ params }: PageProps) {
                 )}
               </div>
 
+              {/* Image Preview Grid */}
               {images.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {images.map((img, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group"
-                    >
-                      <img
-                        src={img}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                <div>
+                  <p className="text-xs text-gray-500 mb-2">
+                    💡 Klik dan tahan untuk menggeser urutan foto (drag & drop)
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    {images.map((img, index) => (
+                      <div
+                        key={index}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 group cursor-move ${
+                          index === 0
+                            ? "border-[#A3AF87] ring-2 ring-[#A3AF87]/30"
+                            : "border-gray-200"
+                        }`}
+                        draggable
+                        onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
+                          e.dataTransfer.setData(
+                            "imageIndex",
+                            index.toString()
+                          );
+                        }}
+                        onDragOver={(e: React.DragEvent<HTMLDivElement>) =>
+                          e.preventDefault()
+                        }
+                        onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+                          e.preventDefault();
+                          const fromIndex = parseInt(
+                            e.dataTransfer.getData("imageIndex")
+                          );
+                          if (fromIndex !== index) {
+                            const newImages = [...images];
+                            const [movedImage] = newImages.splice(fromIndex, 1);
+                            newImages.splice(index, 0, movedImage);
+                            setImages(newImages);
+                          }
+                        }}
                       >
-                        <X className="h-3 w-3" />
-                      </button>
-                      {index === 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-[#A3AF87] text-white text-[10px] font-bold text-center py-1">
-                          Foto Utama
+                        <img
+                          src={img}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Overlay with actions */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 transform hover:scale-110"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {/* Index badge */}
+                        <div className="absolute top-1.5 left-1.5 w-5 h-5 bg-black/60 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {index + 1}
+                        </div>
+                        {/* Main photo badge */}
+                        {index === 0 && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#A3AF87] to-[#A3AF87]/80 text-white text-[10px] font-bold text-center py-1.5">
+                            ⭐ Foto Utama
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

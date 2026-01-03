@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { registerUser, RegisterFormData } from "@/lib/api/auth.actions";
+import Swal from "sweetalert2";
 
 // Data provinsi dan kabupaten/kota di Indonesia (simplified)
 const PROVINSI_DATA = [
@@ -243,8 +245,6 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
-    // TODO: Implement registration logic
-    console.log("Register data:", formData);
 
     // Save user location to localStorage for Supply Connect eligibility check
     try {
@@ -262,12 +262,43 @@ export default function RegisterPage() {
       console.error("Error saving location data:", error);
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redirect to OTP page with phone number
-      router.push(`/otp?phone=${encodeURIComponent(formData.nomorWhatsapp)}`);
-    }, 2000);
+    // Call Supabase Auth register
+    const registerData: RegisterFormData = {
+      namaLengkap: formData.namaLengkap,
+      email: formData.email,
+      nomorWhatsapp: formData.nomorWhatsapp,
+      password: formData.password,
+      jenisPengguna: formData.jenisPengguna,
+      namaUsaha: formData.namaUsaha,
+      provinsi: formData.provinsi,
+      kabupatenKota: formData.kabupatenKota,
+      kodePos: formData.kodePos,
+      alamatLengkap: formData.alamatLengkap,
+    };
+
+    const result = await registerUser(registerData);
+
+    if (result.success) {
+      await Swal.fire({
+        icon: "success",
+        title: "Pendaftaran Berhasil!",
+        text: "Silakan cek email Anda untuk verifikasi akun.",
+        confirmButtonText: "Lanjutkan",
+        confirmButtonColor: "#A3AF87",
+      });
+      // Redirect to OTP page with email
+      router.push(`/otp?email=${encodeURIComponent(formData.email)}`);
+    } else {
+      await Swal.fire({
+        icon: "error",
+        title: "Pendaftaran Gagal",
+        text: result.message,
+        confirmButtonText: "Coba Lagi",
+        confirmButtonColor: "#A3AF87",
+      });
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -554,20 +585,6 @@ export default function RegisterPage() {
                   {errors.nomorWhatsapp}
                 </p>
               )}
-              <p className="text-xs text-gray-500 poppins-regular flex items-center gap-1">
-                <svg
-                  className="w-3 h-3"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Kode OTP akan dikirim ke nomor WhatsApp ini
-              </p>
             </div>
 
             {/* Password */}

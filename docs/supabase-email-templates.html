@@ -1,0 +1,1704 @@
+<!--
+==========================================================
+SUPABASE EMAIL TEMPLATES - ECOMAGGIE
+==========================================================
+Cara penggunaan:
+1. Buka Supabase Dashboard → Authentication → Email Templates
+2. Pilih template yang ingin di-custom
+3. Copy-paste HTML yang sesuai
+4. Ganti {{ .SiteURL }} dengan domain Anda jika perlu
+5. Save changes
+
+Variables yang tersedia:
+- {{ .ConfirmationURL }} - Link konfirmasi
+- {{ .Email }} - Email user
+- {{ .Token }} - Token OTP
+- {{ .TokenHash }} - Hash token
+- {{ .SiteURL }} - URL website
+==========================================================
+-->
+
+<!-- 
+==========================================================
+1. CONFIRM SIGN UP
+==========================================================
+-->
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #f8faf5; padding: 40px 0"
+>
+  <tr>
+    <td align="center">
+      <table
+        width="600"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+          background-color: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        "
+      >
+        <!-- Header with gradient -->
+        <tr>
+          <td
+            style="
+              background: linear-gradient(135deg, #a3af87 0%, #8a9a73 100%);
+              padding: 40px 40px 50px;
+              text-align: center;
+            "
+          >
+            <!-- Logo -->
+            <div
+              style="
+                background-color: rgba(255, 255, 255, 0.2);
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+                margin: 0 auto 20px;
+                display: inline-block;
+                padding: 12px;
+              "
+            >
+              <img
+                src="{{ .SiteURL }}/icon.svg"
+                alt="EcoMaggie"
+                width="46"
+                height="46"
+                style="display: block"
+              />
+            </div>
+            <h1
+              style="
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              "
+            >
+              Selamat Datang di EcoMaggie! 🌱
+            </h1>
+            <p
+              style="
+                color: rgba(255, 255, 255, 0.9);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                margin: 12px 0 0;
+              "
+            >
+              Langkah terakhir untuk bergabung dengan komunitas kami
+            </p>
+          </td>
+        </tr>
+
+        <!-- Main Content -->
+        <tr>
+          <td style="padding: 40px">
+            <!-- Welcome message -->
+            <p
+              style="
+                color: #374151;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 25px;
+              "
+            >
+              Halo! 👋<br /><br />
+              Terima kasih telah mendaftar di
+              <strong style="color: #a3af87">EcoMaggie</strong> - platform yang
+              menghubungkan Anda langsung dengan petani organik lokal.
+            </p>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 35px 0">
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="
+                  background: linear-gradient(135deg, #a3af87 0%, #8a9a73 100%);
+                  color: #ffffff;
+                  padding: 16px 48px;
+                  border-radius: 12px;
+                  text-decoration: none;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-weight: 600;
+                  font-size: 16px;
+                  display: inline-block;
+                  box-shadow: 0 4px 14px rgba(163, 175, 135, 0.4);
+                "
+              >
+                ✓ Konfirmasi Email Saya
+              </a>
+            </div>
+
+            <!-- Benefits Box -->
+            <div
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(163, 175, 135, 0.1) 0%,
+                  rgba(163, 175, 135, 0.05) 100%
+                );
+                border-radius: 16px;
+                padding: 25px;
+                margin: 30px 0;
+                border-left: 4px solid #a3af87;
+              "
+            >
+              <p
+                style="
+                  color: #303646;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 15px;
+                  font-weight: 600;
+                  margin: 0 0 15px;
+                "
+              >
+                🎁 Keuntungan Bergabung:
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 8px 0">
+                    <span style="color: #a3af87; font-size: 18px">🥬</span>
+                    <span
+                      style="
+                        color: #4b5563;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        margin-left: 10px;
+                      "
+                      >Sayur & buah organik segar langsung dari petani</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0">
+                    <span style="color: #a3af87; font-size: 18px">🚚</span>
+                    <span
+                      style="
+                        color: #4b5563;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        margin-left: 10px;
+                      "
+                      >Pengiriman cepat ke lokasi Anda</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0">
+                    <span style="color: #a3af87; font-size: 18px">💰</span>
+                    <span
+                      style="
+                        color: #4b5563;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        margin-left: 10px;
+                      "
+                      >Harga terjangkau tanpa perantara</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0">
+                    <span style="color: #a3af87; font-size: 18px">🌍</span>
+                    <span
+                      style="
+                        color: #4b5563;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        margin-left: 10px;
+                      "
+                      >Mendukung pertanian berkelanjutan Indonesia</span
+                    >
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Alternative link -->
+            <p
+              style="
+                color: #9ca3af;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 13px;
+                margin: 25px 0 0;
+                text-align: center;
+              "
+            >
+              Atau salin link berikut ke browser Anda:<br />
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="color: #a3af87; word-break: break-all"
+                >{{ .ConfirmationURL }}</a
+              >
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+            style="
+              background-color: #f9fafb;
+              padding: 30px 40px;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align: center">
+                  <p
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 13px;
+                      margin: 0 0 10px;
+                    "
+                  >
+                    Butuh bantuan? Hubungi kami di
+                    <a
+                      href="mailto:support@ecomaggie.com"
+                      style="color: #a3af87; text-decoration: none"
+                      >support@ecomaggie.com</a
+                    >
+                  </p>
+                  <p
+                    style="
+                      color: #9ca3af;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      margin: 0;
+                    "
+                  >
+                    © 2026 EcoMaggie - Pertanian Organik Indonesia 🇮🇩
+                  </p>
+                  <p
+                    style="
+                      color: #d1d5db;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 11px;
+                      margin: 15px 0 0;
+                    "
+                  >
+                    Jika Anda tidak mendaftar di EcoMaggie, abaikan email ini.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- 
+==========================================================
+2. INVITE USER
+==========================================================
+-->
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #f8faf5; padding: 40px 0"
+>
+  <tr>
+    <td align="center">
+      <table
+        width="600"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+          background-color: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        "
+      >
+        <!-- Header -->
+        <tr>
+          <td
+            style="
+              background: linear-gradient(135deg, #a3af87 0%, #8a9a73 100%);
+              padding: 40px 40px 50px;
+              text-align: center;
+            "
+          >
+            <div
+              style="
+                background-color: rgba(255, 255, 255, 0.2);
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+                margin: 0 auto 20px;
+                display: inline-block;
+                padding: 12px;
+              "
+            >
+              <img
+                src="{{ .SiteURL }}/icon.svg"
+                alt="EcoMaggie"
+                width="46"
+                height="46"
+                style="display: block"
+              />
+            </div>
+            <h1
+              style="
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+              "
+            >
+              Anda Diundang! 🎉
+            </h1>
+            <p
+              style="
+                color: rgba(255, 255, 255, 0.9);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                margin: 12px 0 0;
+              "
+            >
+              Bergabunglah dengan keluarga EcoMaggie
+            </p>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 40px">
+            <!-- Invitation Badge -->
+            <div style="text-align: center; margin-bottom: 30px">
+              <div
+                style="
+                  display: inline-block;
+                  background: linear-gradient(135deg, #fdf8d4 0%, #fef3c7 100%);
+                  border-radius: 50px;
+                  padding: 12px 24px;
+                  border: 2px solid #a3af87;
+                "
+              >
+                <span
+                  style="
+                    color: #a3af87;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 14px;
+                    font-weight: 600;
+                  "
+                >
+                  ⭐ UNDANGAN EKSKLUSIF
+                </span>
+              </div>
+            </div>
+
+            <p
+              style="
+                color: #374151;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 25px;
+                text-align: center;
+              "
+            >
+              Anda telah diundang untuk bergabung dengan
+              <strong style="color: #a3af87">EcoMaggie</strong>!<br />
+              Platform marketplace produk organik terpercaya di Indonesia.
+            </p>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin: 35px 0">
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="
+                  background: linear-gradient(135deg, #a3af87 0%, #8a9a73 100%);
+                  color: #ffffff;
+                  padding: 16px 48px;
+                  border-radius: 12px;
+                  text-decoration: none;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-weight: 600;
+                  font-size: 16px;
+                  display: inline-block;
+                  box-shadow: 0 4px 14px rgba(163, 175, 135, 0.4);
+                "
+              >
+                🚀 Terima Undangan & Daftar
+              </a>
+            </div>
+
+            <!-- Stats Box -->
+            <div
+              style="
+                background-color: #f9fafb;
+                border-radius: 16px;
+                padding: 25px;
+                margin: 30px 0;
+              "
+            >
+              <p
+                style="
+                  color: #303646;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 14px;
+                  font-weight: 600;
+                  margin: 0 0 20px;
+                  text-align: center;
+                "
+              >
+                Bergabung dengan ribuan pengguna yang sudah merasakan
+                manfaatnya:
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="text-align: center; padding: 15px">
+                    <p
+                      style="
+                        color: #a3af87;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 28px;
+                        font-weight: 700;
+                        margin: 0;
+                      "
+                    >
+                      500+
+                    </p>
+                    <p
+                      style="
+                        color: #6b7280;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 12px;
+                        margin: 5px 0 0;
+                      "
+                    >
+                      Petani Mitra
+                    </p>
+                  </td>
+                  <td
+                    style="
+                      text-align: center;
+                      padding: 15px;
+                      border-left: 1px solid #e5e7eb;
+                      border-right: 1px solid #e5e7eb;
+                    "
+                  >
+                    <p
+                      style="
+                        color: #a3af87;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 28px;
+                        font-weight: 700;
+                        margin: 0;
+                      "
+                    >
+                      10K+
+                    </p>
+                    <p
+                      style="
+                        color: #6b7280;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 12px;
+                        margin: 5px 0 0;
+                      "
+                    >
+                      Pelanggan Puas
+                    </p>
+                  </td>
+                  <td style="text-align: center; padding: 15px">
+                    <p
+                      style="
+                        color: #a3af87;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 28px;
+                        font-weight: 700;
+                        margin: 0;
+                      "
+                    >
+                      50+
+                    </p>
+                    <p
+                      style="
+                        color: #6b7280;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 12px;
+                        margin: 5px 0 0;
+                      "
+                    >
+                      Kota Terjangkau
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <p
+              style="
+                color: #9ca3af;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 13px;
+                margin: 25px 0 0;
+                text-align: center;
+              "
+            >
+              Link ini akan kadaluarsa dalam 24 jam
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+            style="
+              background-color: #f9fafb;
+              padding: 30px 40px;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align: center">
+                  <p
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 13px;
+                      margin: 0 0 10px;
+                    "
+                  >
+                    Butuh bantuan?
+                    <a
+                      href="mailto:support@ecomaggie.com"
+                      style="color: #a3af87; text-decoration: none"
+                      >support@ecomaggie.com</a
+                    >
+                  </p>
+                  <p
+                    style="
+                      color: #9ca3af;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      margin: 0;
+                    "
+                  >
+                    © 2026 EcoMaggie - Pertanian Organik Indonesia 🇮🇩
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- 
+==========================================================
+3. MAGIC LINK
+==========================================================
+-->
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #f8faf5; padding: 40px 0"
+>
+  <tr>
+    <td align="center">
+      <table
+        width="600"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+          background-color: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        "
+      >
+        <!-- Header -->
+        <tr>
+          <td
+            style="
+              background: linear-gradient(135deg, #303646 0%, #1f2937 100%);
+              padding: 40px 40px 50px;
+              text-align: center;
+            "
+          >
+            <div
+              style="
+                background-color: #a3af87;
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+                margin: 0 auto 20px;
+                display: inline-block;
+                padding: 12px;
+              "
+            >
+              <img
+                src="{{ .SiteURL }}/icon.svg"
+                alt="EcoMaggie"
+                width="46"
+                height="46"
+                style="display: block"
+              />
+            </div>
+            <h1
+              style="
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+              "
+            >
+              Link Login Ajaib ✨
+            </h1>
+            <p
+              style="
+                color: rgba(255, 255, 255, 0.8);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                margin: 12px 0 0;
+              "
+            >
+              Masuk tanpa password, cukup satu klik!
+            </p>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 40px">
+            <div style="text-align: center; margin-bottom: 30px">
+              <!-- Magic Icon -->
+              <div
+                style="
+                  display: inline-block;
+                  width: 80px;
+                  height: 80px;
+                  background: linear-gradient(
+                    135deg,
+                    rgba(163, 175, 135, 0.2) 0%,
+                    rgba(163, 175, 135, 0.1) 100%
+                  );
+                  border-radius: 50%;
+                  padding: 20px;
+                "
+              >
+                <span style="font-size: 40px">🔮</span>
+              </div>
+            </div>
+
+            <p
+              style="
+                color: #374151;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 25px;
+                text-align: center;
+              "
+            >
+              Anda meminta magic link untuk masuk ke akun EcoMaggie Anda.<br />
+              Klik tombol di bawah untuk login secara instan!
+            </p>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin: 35px 0">
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="
+                  background: linear-gradient(135deg, #a3af87 0%, #8a9a73 100%);
+                  color: #ffffff;
+                  padding: 16px 48px;
+                  border-radius: 12px;
+                  text-decoration: none;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-weight: 600;
+                  font-size: 16px;
+                  display: inline-block;
+                  box-shadow: 0 4px 14px rgba(163, 175, 135, 0.4);
+                "
+              >
+                🚀 Masuk Sekarang
+              </a>
+            </div>
+
+            <!-- Security Notice -->
+            <div
+              style="
+                background-color: #fef3c7;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 30px 0;
+                border-left: 4px solid #f59e0b;
+              "
+            >
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align: top; padding-right: 12px">
+                    <span style="font-size: 20px">🔒</span>
+                  </td>
+                  <td>
+                    <p
+                      style="
+                        color: #92400e;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        font-weight: 600;
+                        margin: 0 0 5px;
+                      "
+                    >
+                      Keamanan Akun Anda
+                    </p>
+                    <p
+                      style="
+                        color: #a16207;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 13px;
+                        margin: 0;
+                        line-height: 1.5;
+                      "
+                    >
+                      Link ini hanya berlaku sekali dan akan kadaluarsa dalam 1
+                      jam. Jangan bagikan link ini kepada siapapun.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <p
+              style="
+                color: #9ca3af;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 13px;
+                margin: 25px 0 0;
+                text-align: center;
+              "
+            >
+              Tidak meminta magic link? Abaikan email ini atau
+              <a href="mailto:support@ecomaggie.com" style="color: #a3af87"
+                >hubungi kami</a
+              >.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+            style="
+              background-color: #f9fafb;
+              padding: 30px 40px;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align: center">
+                  <p
+                    style="
+                      color: #9ca3af;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      margin: 0;
+                    "
+                  >
+                    © 2026 EcoMaggie - Pertanian Organik Indonesia 🇮🇩
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- 
+==========================================================
+4. CHANGE EMAIL ADDRESS
+==========================================================
+-->
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #f8faf5; padding: 40px 0"
+>
+  <tr>
+    <td align="center">
+      <table
+        width="600"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+          background-color: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        "
+      >
+        <!-- Header -->
+        <tr>
+          <td
+            style="
+              background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+              padding: 40px 40px 50px;
+              text-align: center;
+            "
+          >
+            <div
+              style="
+                background-color: rgba(255, 255, 255, 0.2);
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+                margin: 0 auto 20px;
+                display: inline-block;
+                padding: 12px;
+              "
+            >
+              <img
+                src="{{ .SiteURL }}/icon.svg"
+                alt="EcoMaggie"
+                width="46"
+                height="46"
+                style="display: block"
+              />
+            </div>
+            <h1
+              style="
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+              "
+            >
+              Konfirmasi Email Baru 📧
+            </h1>
+            <p
+              style="
+                color: rgba(255, 255, 255, 0.9);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                margin: 12px 0 0;
+              "
+            >
+              Verifikasi perubahan alamat email Anda
+            </p>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 40px">
+            <div style="text-align: center; margin-bottom: 25px">
+              <div
+                style="
+                  display: inline-block;
+                  width: 80px;
+                  height: 80px;
+                  background: linear-gradient(
+                    135deg,
+                    rgba(59, 130, 246, 0.2) 0%,
+                    rgba(59, 130, 246, 0.1) 100%
+                  );
+                  border-radius: 50%;
+                  padding: 20px;
+                "
+              >
+                <span style="font-size: 40px">✉️</span>
+              </div>
+            </div>
+
+            <p
+              style="
+                color: #374151;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 25px;
+                text-align: center;
+              "
+            >
+              Anda meminta untuk mengubah alamat email akun EcoMaggie Anda.<br />
+              Klik tombol di bawah untuk mengonfirmasi perubahan ini.
+            </p>
+
+            <!-- Email Change Info -->
+            <div
+              style="
+                background-color: #eff6ff;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 25px 0;
+                text-align: center;
+              "
+            >
+              <p
+                style="
+                  color: #6b7280;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 13px;
+                  margin: 0 0 8px;
+                "
+              >
+                Email baru Anda:
+              </p>
+              <p
+                style="
+                  color: #1d4ed8;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 16px;
+                  font-weight: 600;
+                  margin: 0;
+                "
+              >
+                {{ .Email }}
+              </p>
+            </div>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin: 35px 0">
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="
+                  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                  color: #ffffff;
+                  padding: 16px 48px;
+                  border-radius: 12px;
+                  text-decoration: none;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-weight: 600;
+                  font-size: 16px;
+                  display: inline-block;
+                  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+                "
+              >
+                ✓ Konfirmasi Perubahan Email
+              </a>
+            </div>
+
+            <!-- Warning -->
+            <div
+              style="
+                background-color: #fef2f2;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 30px 0;
+                border-left: 4px solid #ef4444;
+              "
+            >
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align: top; padding-right: 12px">
+                    <span style="font-size: 20px">⚠️</span>
+                  </td>
+                  <td>
+                    <p
+                      style="
+                        color: #991b1b;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        font-weight: 600;
+                        margin: 0 0 5px;
+                      "
+                    >
+                      Bukan Anda yang Meminta?
+                    </p>
+                    <p
+                      style="
+                        color: #b91c1c;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 13px;
+                        margin: 0;
+                        line-height: 1.5;
+                      "
+                    >
+                      Jika Anda tidak meminta perubahan ini, abaikan email ini
+                      dan segera ubah password akun Anda.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+            style="
+              background-color: #f9fafb;
+              padding: 30px 40px;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align: center">
+                  <p
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 13px;
+                      margin: 0 0 10px;
+                    "
+                  >
+                    Butuh bantuan?
+                    <a
+                      href="mailto:support@ecomaggie.com"
+                      style="color: #a3af87; text-decoration: none"
+                      >support@ecomaggie.com</a
+                    >
+                  </p>
+                  <p
+                    style="
+                      color: #9ca3af;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      margin: 0;
+                    "
+                  >
+                    © 2026 EcoMaggie - Pertanian Organik Indonesia 🇮🇩
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- 
+==========================================================
+5. RESET PASSWORD
+==========================================================
+-->
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #f8faf5; padding: 40px 0"
+>
+  <tr>
+    <td align="center">
+      <table
+        width="600"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+          background-color: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        "
+      >
+        <!-- Header -->
+        <tr>
+          <td
+            style="
+              background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+              padding: 40px 40px 50px;
+              text-align: center;
+            "
+          >
+            <div
+              style="
+                background-color: rgba(255, 255, 255, 0.2);
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+                margin: 0 auto 20px;
+                display: inline-block;
+                padding: 12px;
+              "
+            >
+              <img
+                src="{{ .SiteURL }}/icon.svg"
+                alt="EcoMaggie"
+                width="46"
+                height="46"
+                style="display: block"
+              />
+            </div>
+            <h1
+              style="
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+              "
+            >
+              Reset Password 🔐
+            </h1>
+            <p
+              style="
+                color: rgba(255, 255, 255, 0.9);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                margin: 12px 0 0;
+              "
+            >
+              Kami menerima permintaan reset password Anda
+            </p>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 40px">
+            <div style="text-align: center; margin-bottom: 25px">
+              <div
+                style="
+                  display: inline-block;
+                  width: 80px;
+                  height: 80px;
+                  background: linear-gradient(
+                    135deg,
+                    rgba(239, 68, 68, 0.2) 0%,
+                    rgba(239, 68, 68, 0.1) 100%
+                  );
+                  border-radius: 50%;
+                  padding: 20px;
+                "
+              >
+                <span style="font-size: 40px">🔑</span>
+              </div>
+            </div>
+
+            <p
+              style="
+                color: #374151;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 25px;
+                text-align: center;
+              "
+            >
+              Lupa password? Tidak masalah!<br />
+              Klik tombol di bawah untuk membuat password baru.
+            </p>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin: 35px 0">
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="
+                  background: linear-gradient(135deg, #a3af87 0%, #8a9a73 100%);
+                  color: #ffffff;
+                  padding: 16px 48px;
+                  border-radius: 12px;
+                  text-decoration: none;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-weight: 600;
+                  font-size: 16px;
+                  display: inline-block;
+                  box-shadow: 0 4px 14px rgba(163, 175, 135, 0.4);
+                "
+              >
+                🔄 Reset Password Sekarang
+              </a>
+            </div>
+
+            <!-- Tips Box -->
+            <div
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(163, 175, 135, 0.1) 0%,
+                  rgba(163, 175, 135, 0.05) 100%
+                );
+                border-radius: 12px;
+                padding: 20px;
+                margin: 30px 0;
+              "
+            >
+              <p
+                style="
+                  color: #303646;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 14px;
+                  font-weight: 600;
+                  margin: 0 0 12px;
+                "
+              >
+                💡 Tips membuat password yang kuat:
+              </p>
+              <ul
+                style="
+                  color: #6b7280;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 13px;
+                  margin: 0;
+                  padding-left: 20px;
+                  line-height: 1.8;
+                "
+              >
+                <li>Minimal 8 karakter</li>
+                <li>Kombinasi huruf besar dan kecil</li>
+                <li>Sertakan angka dan simbol</li>
+                <li>Hindari informasi pribadi</li>
+              </ul>
+            </div>
+
+            <!-- Security Info -->
+            <div
+              style="
+                background-color: #fef3c7;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 25px 0;
+                border-left: 4px solid #f59e0b;
+              "
+            >
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align: top; padding-right: 12px">
+                    <span style="font-size: 20px">⏰</span>
+                  </td>
+                  <td>
+                    <p
+                      style="
+                        color: #92400e;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 13px;
+                        margin: 0;
+                        line-height: 1.5;
+                      "
+                    >
+                      Link ini akan kadaluarsa dalam <strong>1 jam</strong>.
+                      Jika Anda tidak meminta reset password, abaikan email ini.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+            style="
+              background-color: #f9fafb;
+              padding: 30px 40px;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align: center">
+                  <p
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 13px;
+                      margin: 0 0 10px;
+                    "
+                  >
+                    Butuh bantuan?
+                    <a
+                      href="mailto:support@ecomaggie.com"
+                      style="color: #a3af87; text-decoration: none"
+                      >support@ecomaggie.com</a
+                    >
+                  </p>
+                  <p
+                    style="
+                      color: #9ca3af;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      margin: 0;
+                    "
+                  >
+                    © 2026 EcoMaggie - Pertanian Organik Indonesia 🇮🇩
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- 
+==========================================================
+6. REAUTHENTICATION
+==========================================================
+-->
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #f8faf5; padding: 40px 0"
+>
+  <tr>
+    <td align="center">
+      <table
+        width="600"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+          background-color: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        "
+      >
+        <!-- Header -->
+        <tr>
+          <td
+            style="
+              background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+              padding: 40px 40px 50px;
+              text-align: center;
+            "
+          >
+            <div
+              style="
+                background-color: rgba(255, 255, 255, 0.2);
+                width: 70px;
+                height: 70px;
+                border-radius: 16px;
+                margin: 0 auto 20px;
+                display: inline-block;
+                padding: 12px;
+              "
+            >
+              <img
+                src="{{ .SiteURL }}/icon.svg"
+                alt="EcoMaggie"
+                width="46"
+                height="46"
+                style="display: block"
+              />
+            </div>
+            <h1
+              style="
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+              "
+            >
+              Verifikasi Keamanan 🛡️
+            </h1>
+            <p
+              style="
+                color: rgba(255, 255, 255, 0.9);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                margin: 12px 0 0;
+              "
+            >
+              Konfirmasi identitas Anda untuk melanjutkan
+            </p>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 40px">
+            <div style="text-align: center; margin-bottom: 25px">
+              <div
+                style="
+                  display: inline-block;
+                  width: 80px;
+                  height: 80px;
+                  background: linear-gradient(
+                    135deg,
+                    rgba(139, 92, 246, 0.2) 0%,
+                    rgba(139, 92, 246, 0.1) 100%
+                  );
+                  border-radius: 50%;
+                  padding: 20px;
+                "
+              >
+                <span style="font-size: 40px">🔐</span>
+              </div>
+            </div>
+
+            <p
+              style="
+                color: #374151;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 25px;
+                text-align: center;
+              "
+            >
+              Anda sedang mencoba melakukan tindakan sensitif di akun EcoMaggie
+              Anda.<br />
+              Untuk keamanan, silakan konfirmasi identitas Anda.
+            </p>
+
+            <!-- Action Notice -->
+            <div
+              style="
+                background-color: #f3e8ff;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 25px 0;
+                text-align: center;
+                border: 1px solid #ddd6fe;
+              "
+            >
+              <p
+                style="
+                  color: #6b21a8;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 14px;
+                  font-weight: 600;
+                  margin: 0;
+                "
+              >
+                🔄 Tindakan sensitif terdeteksi pada akun Anda
+              </p>
+            </div>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin: 35px 0">
+              <a
+                href="{{ .ConfirmationURL }}"
+                style="
+                  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                  color: #ffffff;
+                  padding: 16px 48px;
+                  border-radius: 12px;
+                  text-decoration: none;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-weight: 600;
+                  font-size: 16px;
+                  display: inline-block;
+                  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+                "
+              >
+                ✓ Konfirmasi Identitas
+              </a>
+            </div>
+
+            <!-- Security Warning -->
+            <div
+              style="
+                background-color: #fef2f2;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 30px 0;
+                border-left: 4px solid #ef4444;
+              "
+            >
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align: top; padding-right: 12px">
+                    <span style="font-size: 20px">🚨</span>
+                  </td>
+                  <td>
+                    <p
+                      style="
+                        color: #991b1b;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 14px;
+                        font-weight: 600;
+                        margin: 0 0 5px;
+                      "
+                    >
+                      Penting!
+                    </p>
+                    <p
+                      style="
+                        color: #b91c1c;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-size: 13px;
+                        margin: 0;
+                        line-height: 1.5;
+                      "
+                    >
+                      Jika Anda tidak melakukan tindakan ini, akun Anda mungkin
+                      telah diakses oleh orang lain. Segera ubah password Anda
+                      dan hubungi tim support.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Device Info -->
+            <div
+              style="
+                background-color: #f9fafb;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 25px 0;
+              "
+            >
+              <p
+                style="
+                  color: #303646;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 13px;
+                  font-weight: 600;
+                  margin: 0 0 10px;
+                "
+              >
+                📍 Detail Aktivitas:
+              </p>
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      padding: 5px 0;
+                    "
+                  >
+                    Waktu:
+                  </td>
+                  <td
+                    style="
+                      color: #374151;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      padding: 5px 0;
+                      text-align: right;
+                    "
+                  >
+                    {{ .SentAt }}
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      padding: 5px 0;
+                    "
+                  >
+                    Email Akun:
+                  </td>
+                  <td
+                    style="
+                      color: #374151;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      padding: 5px 0;
+                      text-align: right;
+                    "
+                  >
+                    {{ .Email }}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+            style="
+              background-color: #f9fafb;
+              padding: 30px 40px;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align: center">
+                  <p
+                    style="
+                      color: #6b7280;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 13px;
+                      margin: 0 0 10px;
+                    "
+                  >
+                    Masalah keamanan? Hubungi
+                    <a
+                      href="mailto:security@ecomaggie.com"
+                      style="
+                        color: #ef4444;
+                        text-decoration: none;
+                        font-weight: 600;
+                      "
+                      >security@ecomaggie.com</a
+                    >
+                  </p>
+                  <p
+                    style="
+                      color: #9ca3af;
+                      font-family: 'Segoe UI', Arial, sans-serif;
+                      font-size: 12px;
+                      margin: 0;
+                    "
+                  >
+                    © 2026 EcoMaggie - Pertanian Organik Indonesia 🇮🇩
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!--
+==========================================================
+CATATAN PENTING:
+==========================================================
+
+1. SUBJECT LINE untuk masing-masing template:
+   - Confirm Sign Up: "🌱 Selamat Datang! Konfirmasi Email EcoMaggie Anda"
+   - Invite User: "🎉 Undangan Eksklusif untuk Bergabung dengan EcoMaggie"
+   - Magic Link: "✨ Link Login Ajaib EcoMaggie Anda"
+   - Change Email: "📧 Konfirmasi Perubahan Email EcoMaggie"
+   - Reset Password: "🔐 Reset Password Akun EcoMaggie Anda"
+   - Reauthentication: "🛡️ Verifikasi Keamanan EcoMaggie"
+
+2. GANTI {{ .SiteURL }} dengan domain Anda:
+   - Production: https://ecomaggie.com
+   - Development: http://localhost:3000
+
+3. UPLOAD LOGO:
+   - Pastikan /icon.svg tersedia di public folder
+   - Atau ganti dengan URL absolut gambar logo
+
+4. CUSTOMIZATION:
+   - Warna utama: #A3AF87 (Sage Green)
+   - Warna sekunder: #303646 (Charcoal)
+   - Warna aksen: #FDF8D4 (Cream)
+   
+5. TESTING:
+   - Gunakan tools seperti Litmus atau Email on Acid
+   - Test di berbagai email client (Gmail, Outlook, Yahoo)
+
+==========================================================
+-->

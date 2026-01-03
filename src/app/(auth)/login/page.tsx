@@ -2,22 +2,83 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { loginUser } from "@/lib/api/auth.actions";
+import Swal from "sweetalert2";
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user just verified their email
+  useEffect(() => {
+    const verified = searchParams.get("verified");
+    if (verified === "true") {
+      Swal.fire({
+        icon: "success",
+        title: "Email Terverifikasi!",
+        text: "Akun Anda berhasil diverifikasi. Silakan login.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#A3AF87",
+      });
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement login logic
-    console.log("Login data:", formData);
-    setTimeout(() => setIsLoading(false), 2000);
+    setError(null);
+
+    const result = await loginUser(formData.email, formData.password);
+
+    if (result.success) {
+      await Swal.fire({
+        icon: "success",
+        title: "Login Berhasil!",
+        text: "Selamat datang kembali di EcoMaggie",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      // Redirect based on user role
+      const userRole = result.data?.role as string;
+      if (userRole === "FARMER") {
+        router.push("/farmer/dashboard");
+      } else {
+        router.push("/market");
+      }
+    } else {
+      setError(result.message);
+
+      // If email not verified, offer to resend
+      if (result.error === "EMAIL_NOT_VERIFIED") {
+        const resendResult = await Swal.fire({
+          icon: "warning",
+          title: "Email Belum Diverifikasi",
+          text: result.message,
+          showCancelButton: true,
+          confirmButtonText: "Kirim Ulang Email",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#A3AF87",
+        });
+
+        if (resendResult.isConfirmed) {
+          router.push(
+            `/otp?email=${encodeURIComponent(formData.email)}&resend=true`
+          );
+        }
+      }
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -261,6 +322,24 @@ export default function LoginPage() {
               </Link>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                <svg
+                  className="w-5 h-5 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="poppins-regular">{error}</span>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -390,5 +469,41 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function LoginLoading() {
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
+      style={{
+        background:
+          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+      }}
+    >
+      <div className="w-full max-w-lg">
+        <div
+          className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
+          style={{ borderTop: "4px solid #A3AF87" }}
+        >
+          <div className="flex items-center justify-center py-12">
+            <div
+              className="animate-spin h-8 w-8 border-4 border-t-transparent rounded-full"
+              style={{ borderColor: "#A3AF87", borderTopColor: "transparent" }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main export with Suspense wrapper
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginForm />
+    </Suspense>
   );
 }

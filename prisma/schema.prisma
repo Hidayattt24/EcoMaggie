@@ -143,6 +143,7 @@ model Product {
   @@index([farmerId])
   @@index([category])
   @@index([isActive])
+  @@index([status])
   @@map("products")
 }
 

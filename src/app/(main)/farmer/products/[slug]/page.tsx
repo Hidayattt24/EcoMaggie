@@ -1,13 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
+
+/**
+ * Product Performance View Page (Integrated)
+ * ===========================================
+ * View product performance, analytics, and reviews
+ * Connected to product.actions.ts backend
+ */
+
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   TrendingUp,
   Package,
   DollarSign,
-  Eye,
   Heart,
   ShoppingCart,
   Star,
@@ -17,11 +25,17 @@ import {
   BarChart3,
   AlertCircle,
   MessageSquare,
+  ImageOff,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  useProduct,
+  useSalesTrend,
+  type Product,
+} from "@/hooks/farmer/useProducts";
 
 interface Review {
-  id: number;
+  id: string;
   author: string;
   rating: number;
   date: string;
@@ -34,154 +48,143 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Mock Product with Performance Data
-const mockProductData: Record<string, any> = {
-  "maggot-bsf-premium": {
-    id: 1,
-    slug: "maggot-bsf-premium",
-    name: "Maggot BSF Premium",
-    description:
-      "Maggot Black Soldier Fly berkualitas tinggi untuk pakan ternak.",
-    price: 50000,
-    discount: 10,
-    finalPrice: 45000,
-    unit: "kg",
-    stock: 150,
-    lowStockThreshold: 30,
-    category: "Maggot Segar",
-    images: ["/assets/dummy/magot.png"],
-    status: "active",
-    rating: 4.8,
-    totalReviews: 124,
-    totalSales: 450,
-    views: 3250,
-    wishlistCount: 87,
-    cartAdditions: 520,
-    conversionRate: 13.8, // (totalSales / views) * 100
-    revenue: 20250000, // totalSales * finalPrice
-    createdAt: "2024-01-15",
-    lastUpdated: "2024-12-20",
-    // Sales trend data (last 7 days)
-    salesTrend: [
-      { date: "14 Des", sales: 12 },
-      { date: "15 Des", sales: 18 },
-      { date: "16 Des", sales: 15 },
-      { date: "17 Des", sales: 22 },
-      { date: "18 Des", sales: 25 },
-      { date: "19 Des", sales: 20 },
-      { date: "20 Des", sales: 28 },
-    ],
-    // Rating distribution
-    ratingDistribution: [
-      { stars: 5, count: 80, percentage: 64.5 },
-      { stars: 4, count: 30, percentage: 24.2 },
-      { stars: 3, count: 10, percentage: 8.1 },
-      { stars: 2, count: 3, percentage: 2.4 },
-      { stars: 1, count: 1, percentage: 0.8 },
-    ],
-  },
-  "maggot-kering-organik": {
-    id: 2,
-    slug: "maggot-kering-organik",
-    name: "Maggot Kering Organik",
-    description: "Maggot kering berkualitas untuk pakan ikan dan unggas.",
-    price: 80000,
-    discount: 15,
-    finalPrice: 68000,
-    unit: "kg",
-    stock: 25,
-    lowStockThreshold: 30,
-    category: "Maggot Kering",
-    images: ["/assets/dummy/magot.png"],
-    status: "active",
-    rating: 4.7,
-    totalReviews: 89,
-    totalSales: 320,
-    views: 2180,
-    wishlistCount: 56,
-    cartAdditions: 380,
-    conversionRate: 14.7,
-    revenue: 21760000,
-    createdAt: "2024-01-20",
-    lastUpdated: "2024-12-19",
-    salesTrend: [
-      { date: "14 Des", sales: 10 },
-      { date: "15 Des", sales: 14 },
-      { date: "16 Des", sales: 12 },
-      { date: "17 Des", sales: 18 },
-      { date: "18 Des", sales: 16 },
-      { date: "19 Des", sales: 15 },
-      { date: "20 Des", sales: 20 },
-    ],
-    ratingDistribution: [
-      { stars: 5, count: 60, percentage: 67.4 },
-      { stars: 4, count: 20, percentage: 22.5 },
-      { stars: 3, count: 6, percentage: 6.7 },
-      { stars: 2, count: 2, percentage: 2.2 },
-      { stars: 1, count: 1, percentage: 1.1 },
-    ],
-  },
-};
+// ===========================================
+// LOADING SKELETON
+// ===========================================
+
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-4 px-4 md:px-6 lg:px-0 pb-8">
+      {/* Header Skeleton */}
+      <div className="mb-6 animate-pulse">
+        <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-xl bg-gray-200"></div>
+            <div>
+              <div className="h-8 w-48 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          <div className="h-10 w-32 bg-gray-200 rounded-lg"></div>
+        </div>
+      </div>
+
+      {/* Stats Grid Skeleton */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="bg-white rounded-xl p-5 border-2 border-gray-100 animate-pulse"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+            </div>
+            <div className="h-3 w-20 bg-gray-200 rounded mb-2"></div>
+            <div className="h-8 w-16 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts Skeleton */}
+      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2 bg-white rounded-xl p-6 border-2 border-gray-100 animate-pulse">
+          <div className="h-6 w-40 bg-gray-200 rounded mb-6"></div>
+          <div className="h-48 bg-gray-200 rounded"></div>
+        </div>
+        <div className="bg-white rounded-xl p-6 border-2 border-gray-100 animate-pulse">
+          <div className="h-6 w-40 bg-gray-200 rounded mb-6"></div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===========================================
+// NOT FOUND COMPONENT
+// ===========================================
+
+function ProductNotFound() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Package className="h-10 w-10 text-gray-400" />
+        </div>
+        <h2 className="text-2xl font-bold text-[#303646] mb-2">
+          Produk Tidak Ditemukan
+        </h2>
+        <p className="text-gray-600 mb-6">
+          Produk yang Anda cari tidak ditemukan atau telah dihapus.
+        </p>
+        <Link
+          href="/farmer/products"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#A3AF87] text-white rounded-lg font-medium hover:bg-[#95a17a] transition-all"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Kembali ke Daftar Produk
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ===========================================
+// MAIN COMPONENT
+// ===========================================
 
 export default function ProductPerformancePage({ params }: PageProps) {
   const router = useRouter();
-  const [slug, setSlug] = useState("");
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const resolvedParams = use(params);
+  const { product, loading, error } = useProduct(resolvedParams.slug);
+  const { salesTrend, loading: salesLoading } = useSalesTrend(product?.id);
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
+  // Fetch reviews when product is loaded
   useEffect(() => {
-    params.then((resolvedParams) => {
-      setSlug(resolvedParams.slug);
-      const productData = mockProductData[resolvedParams.slug];
+    if (product?.id) {
+      fetchReviews(product.id);
+    }
+  }, [product?.id]);
 
-      if (productData) {
-        setProduct(productData);
-      } else {
-        alert("Produk tidak ditemukan");
-        router.push("/farmer/products");
-      }
-
-      setLoading(false);
-
-      // Fetch real reviews from user-facing product page
-      if (productData) {
-        fetchReviews(productData.id);
-      }
-    });
-  }, [params, router]);
-
-  const fetchReviews = async (productId: number) => {
+  const fetchReviews = async (productId: string) => {
     setLoadingReviews(true);
     try {
-      // Fetch from user product page API or simulate
-      // In real scenario: const response = await fetch(`/api/products/${productId}/reviews`);
-      // For now, simulate with mock data from user page structure
+      // TODO: Implement actual reviews fetch from backend
+      // const response = await getProductReviews(productId);
+
+      // For now, simulate with mock data
+      // In production, replace with actual API call
       const mockReviews: Review[] = [
         {
-          id: 1,
+          id: "1",
           author: "Budi Santoso",
           rating: 5,
           date: "20 Des 2024",
           comment:
             "Kualitas maggot sangat bagus! Ikan saya jadi cepat besar. Pengiriman cepat dan aman.",
           verified: true,
-          images: ["/assets/dummy/magot.png"],
         },
         {
-          id: 2,
+          id: "2",
           author: "Siti Aminah",
           rating: 5,
           date: "18 Des 2024",
           comment:
             "Sudah order berkali-kali, selalu puas. Maggot fresh dan harga bersaing.",
           verified: true,
-          images: ["/assets/dummy/magot.png"],
         },
         {
-          id: 3,
+          id: "3",
           author: "Ahmad Rifai",
           rating: 4,
           date: "5 Des 2024",
@@ -189,47 +192,40 @@ export default function ProductPerformancePage({ params }: PageProps) {
             "Bagus, tapi pengiriman agak lama. Overall recommended untuk peternak.",
           verified: true,
         },
-        {
-          id: 4,
-          author: "Dewi Lestari",
-          rating: 5,
-          date: "1 Des 2024",
-          comment:
-            "Maggot berkualitas tinggi, ayam saya doyan banget. Terima kasih!",
-          verified: true,
-        },
-        {
-          id: 5,
-          author: "Andi Wijaya",
-          rating: 4,
-          date: "28 Nov 2024",
-          comment:
-            "Produk bagus, kemasan rapi. Harga sedikit mahal tapi sebanding dengan kualitas.",
-          verified: false,
-        },
       ];
-      setReviews(mockReviews);
-    } catch (error) {
-      console.error("Failed to fetch reviews:", error);
+
+      // Only show reviews if product has reviews
+      if (product && product.totalReviews > 0) {
+        setReviews(
+          mockReviews.slice(
+            0,
+            Math.min(mockReviews.length, product.totalReviews)
+          )
+        );
+      } else {
+        setReviews([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
     } finally {
       setLoadingReviews(false);
     }
   };
 
+  // Calculate derived values
+  const calculateRevenue = (p: Product) => p.totalSold * p.finalPrice;
+
+  // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#A3AF87] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-gray-600">Memuat performa produk...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
-  if (!product) return null;
+  // Error or not found state
+  if (error || !product) {
+    return <ProductNotFound />;
+  }
 
-  const maxSales = Math.max(...product.salesTrend.map((d: any) => d.sales));
+  const revenue = calculateRevenue(product);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-4 px-4 md:px-6 lg:px-0 pb-8">
@@ -249,12 +245,20 @@ export default function ProductPerformancePage({ params }: PageProps) {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 relative">
+              {product.images && product.images.length > 0 && !imageError ? (
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageOff className="h-6 w-6 text-gray-400" />
+                </div>
+              )}
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-[#303646]">
@@ -308,7 +312,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+        className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6"
       >
         {/* Total Sales */}
         <div className="bg-white rounded-xl p-5 border-2 border-gray-100 hover:shadow-lg transition-shadow">
@@ -316,11 +320,13 @@ export default function ProductPerformancePage({ params }: PageProps) {
             <div className="p-2.5 bg-[#A3AF87]/10 rounded-lg">
               <ShoppingCart className="h-5 w-5 text-[#A3AF87]" />
             </div>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            {product.totalSold > 0 && (
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            )}
           </div>
           <p className="text-xs text-gray-600 mb-1">Total Penjualan</p>
           <p className="text-2xl font-bold text-[#303646]">
-            {product.totalSales}
+            {product.totalSold}
           </p>
           <p className="text-xs text-gray-500 mt-1">{product.unit} terjual</p>
         </div>
@@ -331,7 +337,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
             <div className="p-2.5 bg-green-50 rounded-lg">
               <DollarSign className="h-5 w-5 text-green-600" />
             </div>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            {revenue > 0 && <TrendingUp className="h-4 w-4 text-green-600" />}
           </div>
           <p className="text-xs text-gray-600 mb-1">Total Pendapatan</p>
           <p className="text-xl font-bold text-[#303646]">
@@ -339,25 +345,9 @@ export default function ProductPerformancePage({ params }: PageProps) {
               style: "currency",
               currency: "IDR",
               minimumFractionDigits: 0,
-            }).format(product.revenue)}
+            }).format(revenue)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Dari semua penjualan</p>
-        </div>
-
-        {/* Wishlist */}
-        <div className="bg-white rounded-xl p-5 border-2 border-gray-100 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-red-50 rounded-lg">
-              <Heart className="h-5 w-5 text-red-600" />
-            </div>
-          </div>
-          <p className="text-xs text-gray-600 mb-1">Total Wishlist</p>
-          <p className="text-2xl font-bold text-[#303646]">
-            {product.wishlistCount.toLocaleString("id-ID")}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            Orang menyukai produk ini
-          </p>
         </div>
 
         {/* Rating */}
@@ -370,7 +360,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
           <p className="text-xs text-gray-600 mb-1">Rating Produk</p>
           <div className="flex items-baseline gap-2">
             <p className="text-2xl font-bold text-[#303646]">
-              {product.rating}
+              {product.rating > 0 ? product.rating.toFixed(1) : "-"}
             </p>
             <div className="flex">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -410,66 +400,122 @@ export default function ProductPerformancePage({ params }: PageProps) {
                 <p className="text-xs text-gray-500">7 hari terakhir</p>
               </div>
             </div>
+            {salesLoading && (
+              <div className="w-5 h-5 border-2 border-[#A3AF87] border-t-transparent rounded-full animate-spin"></div>
+            )}
           </div>
 
-          {/* Bar Chart */}
-          <div className="flex items-end justify-between gap-2 h-48">
-            {product.salesTrend.map((data: any, index: number) => {
-              const height = (data.sales / maxSales) * 100;
-              return (
-                <div
-                  key={index}
-                  className="flex-1 flex flex-col items-center gap-2"
-                >
-                  <div className="relative w-full flex items-end justify-center h-40">
+          {/* Bar Chart - Integrated with Database */}
+          {salesTrend.trend.length > 0 ? (
+            <>
+              <div className="flex items-end justify-between gap-2 h-48">
+                {salesTrend.trend.map((data, index) => {
+                  const height =
+                    salesTrend.maxSales > 0
+                      ? (data.quantitySold / salesTrend.maxSales) * 100
+                      : 0;
+                  const isEmpty = data.quantitySold === 0;
+
+                  return (
                     <div
-                      className="w-full bg-gradient-to-t from-[#A3AF87] to-[#95a17a] rounded-t-lg transition-all hover:shadow-lg group relative"
-                      style={{ height: `${height}%` }}
+                      key={index}
+                      className="flex-1 flex flex-col items-center gap-2"
                     >
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#303646] text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                        {data.sales} {product.unit}
+                      <div className="relative w-full flex items-end justify-center h-40">
+                        <div
+                          className={`w-full rounded-t-lg transition-all group relative ${
+                            isEmpty
+                              ? "bg-gray-200"
+                              : "bg-gradient-to-t from-[#A3AF87] to-[#95a17a] hover:shadow-lg"
+                          }`}
+                          style={{
+                            height: isEmpty ? "8px" : `${Math.max(height, 8)}%`,
+                          }}
+                        >
+                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#303646] text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {data.quantitySold} {product.unit}
+                          </div>
+                        </div>
                       </div>
+                      <p className="text-[10px] text-gray-600 font-medium">
+                        {data.dayName}
+                      </p>
                     </div>
-                  </div>
-                  <p className="text-[10px] text-gray-600 font-medium">
-                    {data.date}
+                  );
+                })}
+              </div>
+
+              {/* Stats Summary - Real Data */}
+              <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t-2 border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-600">Rata-rata/hari</p>
+                  <p className="text-lg font-bold text-[#303646]">
+                    {salesTrend.avgPerDay} {product.unit}
                   </p>
                 </div>
-              );
-            })}
-          </div>
+                <div>
+                  <p className="text-xs text-gray-600">Penjualan Tertinggi</p>
+                  <p
+                    className={`text-lg font-bold ${
+                      salesTrend.maxSales > 0
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {salesTrend.maxSales > 0
+                      ? `${salesTrend.maxSales} ${product.unit}`
+                      : "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Total 7 Hari</p>
+                  <p
+                    className={`text-lg font-bold ${
+                      salesTrend.totalSales > 0
+                        ? "text-[#A3AF87]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {salesTrend.totalSales > 0
+                      ? `${salesTrend.totalSales} ${product.unit}`
+                      : "-"}
+                  </p>
+                </div>
+              </div>
 
-          {/* Stats Summary */}
-          <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t-2 border-gray-100">
-            <div>
-              <p className="text-xs text-gray-600">Rata-rata/hari</p>
-              <p className="text-lg font-bold text-[#303646]">
-                {Math.round(
-                  product.salesTrend.reduce(
-                    (sum: number, d: any) => sum + d.sales,
-                    0
-                  ) / product.salesTrend.length
-                )}{" "}
-                {product.unit}
-              </p>
+              {/* Empty State Message */}
+              {!salesTrend.hasData && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-sm text-gray-600 text-center">
+                    📊 Belum ada data penjualan dalam 7 hari terakhir
+                  </p>
+                  <p className="text-xs text-gray-500 text-center mt-1">
+                    Data akan muncul setelah ada transaksi yang selesai
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Loading/Empty State for Chart */
+            <div className="h-48 flex items-center justify-center">
+              {salesLoading ? (
+                <div className="text-center">
+                  <div className="w-10 h-10 border-3 border-[#A3AF87] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-500">Memuat data...</p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">
+                    Belum ada data penjualan
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Data trend akan muncul setelah ada penjualan
+                  </p>
+                </div>
+              )}
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Penjualan Tertinggi</p>
-              <p className="text-lg font-bold text-green-600">
-                {maxSales} {product.unit}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600">Total 7 Hari</p>
-              <p className="text-lg font-bold text-[#A3AF87]">
-                {product.salesTrend.reduce(
-                  (sum: number, d: any) => sum + d.sales,
-                  0
-                )}{" "}
-                {product.unit}
-              </p>
-            </div>
-          </div>
+          )}
         </motion.div>
 
         {/* Reviews from Users */}
@@ -487,7 +533,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
               <div>
                 <h3 className="font-bold text-[#303646]">Ulasan Pelanggan</h3>
                 <p className="text-xs text-gray-500">
-                  {reviews.length} ulasan dari pembeli
+                  {product.totalReviews} ulasan dari pembeli
                 </p>
               </div>
             </div>
@@ -502,6 +548,9 @@ export default function ProductPerformancePage({ params }: PageProps) {
             <div className="text-center py-8">
               <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-2" />
               <p className="text-sm text-gray-500">Belum ada ulasan</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Ulasan akan muncul setelah pembeli memberikan feedback
+              </p>
             </div>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
@@ -560,12 +609,13 @@ export default function ProductPerformancePage({ params }: PageProps) {
                         {review.images.map((img, imgIndex) => (
                           <div
                             key={imgIndex}
-                            className="w-14 h-14 rounded-md overflow-hidden border border-gray-200"
+                            className="w-14 h-14 rounded-md overflow-hidden border border-gray-200 relative"
                           >
-                            <img
+                            <Image
                               src={img}
                               alt={`Review photo ${imgIndex + 1}`}
-                              className="w-full h-full object-cover"
+                              fill
+                              className="object-cover"
                             />
                           </div>
                         ))}
@@ -618,23 +668,13 @@ export default function ProductPerformancePage({ params }: PageProps) {
               <p className="text-xs text-gray-600 mt-1">Orang menyukai</p>
             </div>
 
-            {/* Cart Additions */}
-            <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-100">
-              <div className="flex items-center gap-2 mb-2">
-                <ShoppingCart className="h-4 w-4 text-blue-600" />
-                <p className="text-xs text-blue-700 font-semibold">Keranjang</p>
-              </div>
-              <p className="text-2xl font-bold text-blue-600">
-                {product.cartAdditions}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Kali ditambahkan</p>
-            </div>
-
             {/* Stock Status */}
             <div
-              className={`p-4 rounded-lg border-2 ${
+              className={`p-4 rounded-lg border-2 col-span-2 ${
                 product.stock <= product.lowStockThreshold
-                  ? "bg-orange-50 border-orange-100"
+                  ? product.stock === 0
+                    ? "bg-red-50 border-red-100"
+                    : "bg-orange-50 border-orange-100"
                   : "bg-emerald-50 border-emerald-100"
               }`}
             >
@@ -642,38 +682,56 @@ export default function ProductPerformancePage({ params }: PageProps) {
                 <Package
                   className={`h-4 w-4 ${
                     product.stock <= product.lowStockThreshold
-                      ? "text-orange-600"
+                      ? product.stock === 0
+                        ? "text-red-600"
+                        : "text-orange-600"
                       : "text-emerald-600"
                   }`}
                 />
                 <p
                   className={`text-xs font-semibold ${
                     product.stock <= product.lowStockThreshold
-                      ? "text-orange-700"
+                      ? product.stock === 0
+                        ? "text-red-700"
+                        : "text-orange-700"
                       : "text-emerald-700"
                   }`}
                 >
-                  Stok
+                  Status Stok
                 </p>
               </div>
-              <p
-                className={`text-2xl font-bold ${
-                  product.stock <= product.lowStockThreshold
-                    ? "text-orange-600"
-                    : "text-emerald-600"
-                }`}
-              >
-                {product.stock}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                {product.unit} tersedia
-              </p>
-              {product.stock <= product.lowStockThreshold && (
-                <div className="flex items-center gap-1 mt-2 text-orange-600">
-                  <AlertCircle className="h-3 w-3" />
-                  <p className="text-[10px] font-medium">Stok rendah!</p>
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <p
+                    className={`text-2xl font-bold ${
+                      product.stock <= product.lowStockThreshold
+                        ? product.stock === 0
+                          ? "text-red-600"
+                          : "text-orange-600"
+                        : "text-emerald-600"
+                    }`}
+                  >
+                    {product.stock}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {product.unit} tersedia
+                  </p>
                 </div>
-              )}
+                {product.stock <= product.lowStockThreshold && (
+                  <div
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full ${
+                      product.stock === 0
+                        ? "bg-red-100 text-red-600"
+                        : "bg-orange-100 text-orange-600"
+                    }`}
+                  >
+                    <AlertCircle className="h-3 w-3" />
+                    <p className="text-xs font-medium">
+                      {product.stock === 0 ? "Habis!" : "Stok rendah!"}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -697,7 +755,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
             <div className="p-4 bg-gradient-to-br from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-lg border-2 border-[#A3AF87]/20">
               <p className="text-xs text-gray-600 mb-2">Harga Saat Ini</p>
               <div className="flex items-baseline gap-2">
-                {product.discount > 0 && (
+                {product.discountPercent > 0 && (
                   <span className="text-sm text-gray-400 line-through">
                     Rp {product.price.toLocaleString("id-ID")}
                   </span>
@@ -707,9 +765,9 @@ export default function ProductPerformancePage({ params }: PageProps) {
                 </span>
                 <span className="text-xs text-gray-600">/ {product.unit}</span>
               </div>
-              {product.discount > 0 && (
+              {product.discountPercent > 0 && (
                 <span className="inline-block px-2 py-1 bg-red-500 text-white text-xs font-bold rounded mt-2">
-                  Diskon {product.discount}%
+                  Diskon {product.discountPercent}%
                 </span>
               )}
             </div>
@@ -736,7 +794,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
                   <p className="text-xs text-gray-600">Update Terakhir</p>
                 </div>
                 <p className="text-sm font-semibold text-gray-700">
-                  {new Date(product.lastUpdated).toLocaleDateString("id-ID", {
+                  {new Date(product.updatedAt).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
@@ -749,7 +807,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
             <div className="p-3 bg-gray-50 rounded-lg">
               <p className="text-xs text-gray-600 mb-1.5">Deskripsi</p>
               <p className="text-sm text-gray-700 leading-relaxed">
-                {product.description}
+                {product.description || "Tidak ada deskripsi"}
               </p>
             </div>
           </div>

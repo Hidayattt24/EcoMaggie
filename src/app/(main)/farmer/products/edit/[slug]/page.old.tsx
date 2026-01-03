@@ -14,22 +14,48 @@ import {
   Save,
   Eye,
   AlertCircle,
-  Loader2,
   Trash2,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import Swal from "sweetalert2";
-import {
-  getProductBySlug,
-  updateProduct,
-  deleteProduct,
-  type ProductFormData,
-  type ProductStatus,
-} from "@/lib/api/product.actions";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+// Mock data produk (sesuai dengan data di products/page.tsx)
+const mockProductData: Record<string, any> = {
+  "maggot-bsf-premium": {
+    id: 1,
+    slug: "maggot-bsf-premium",
+    name: "Maggot BSF Premium",
+    description:
+      "Maggot Black Soldier Fly berkualitas tinggi untuk pakan ternak. Dipelihara dengan standar kebersihan tinggi dan pakan organik pilihan.",
+    price: 50000,
+    discount: 10,
+    finalPrice: 45000,
+    unit: "kg",
+    stock: 150,
+    lowStockThreshold: 30,
+    category: "Maggot Segar",
+    images: ["/assets/dummy/magot.png"],
+    status: "active",
+  },
+  "maggot-kering-organik": {
+    id: 2,
+    slug: "maggot-kering-organik",
+    name: "Maggot Kering Organik",
+    description: "Maggot kering berkualitas untuk pakan ikan dan unggas.",
+    price: 80000,
+    discount: 15,
+    finalPrice: 68000,
+    unit: "kg",
+    stock: 25,
+    lowStockThreshold: 30,
+    category: "Maggot Kering",
+    images: ["/assets/dummy/magot.png"],
+    status: "active",
+  },
+};
 
 export default function EditProductPage({ params }: PageProps) {
   const router = useRouter();
@@ -40,19 +66,18 @@ export default function EditProductPage({ params }: PageProps) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category: "",
+    categories: [] as string[],
     price: "",
     discount: "",
     unit: "kg",
     stock: "",
     lowStockThreshold: "",
-    status: "active" as ProductStatus,
+    status: "active" as "active" | "inactive" | "draft",
   });
 
   const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categoryInput, setCategoryInput] = useState("");
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
@@ -60,36 +85,26 @@ export default function EditProductPage({ params }: PageProps) {
   // Calculated Final Price
   const [finalPrice, setFinalPrice] = useState(0);
 
-  // Fetch product data on mount
   useEffect(() => {
-    params.then(async (resolvedParams) => {
+    params.then((resolvedParams) => {
       setSlug(resolvedParams.slug);
+      const productData = mockProductData[resolvedParams.slug];
 
-      const result = await getProductBySlug(resolvedParams.slug);
-
-      if (result.success && result.data) {
-        const product = result.data;
-        const categoryValue = product.category || "";
+      if (productData) {
         setFormData({
-          name: product.name,
-          description: product.description || "",
-          category: categoryValue,
-          price: product.price.toString(),
-          discount: product.discountPercent.toString(),
-          unit: product.unit,
-          stock: product.stock.toString(),
-          lowStockThreshold: product.lowStockThreshold.toString(),
-          status: product.status,
+          name: productData.name,
+          description: productData.description,
+          categories: productData.category ? [productData.category] : [],
+          price: productData.price.toString(),
+          discount: productData.discount.toString(),
+          unit: productData.unit,
+          stock: productData.stock.toString(),
+          lowStockThreshold: productData.lowStockThreshold.toString(),
+          status: productData.status,
         });
-        setCategoryInput(categoryValue);
-        setImages(product.images);
+        setImages(productData.images);
       } else {
-        Swal.fire({
-          title: "Error!",
-          text: result.message || "Produk tidak ditemukan",
-          icon: "error",
-          confirmButtonColor: "#EF4444",
-        });
+        alert("Produk tidak ditemukan");
         router.push("/farmer/products");
       }
 
@@ -130,53 +145,80 @@ export default function EditProductPage({ params }: PageProps) {
     }
   };
 
+  // Handle category input change
   const handleCategoryInputChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
     setCategoryInput(value);
-    setFormData((prev) => ({ ...prev, category: value }));
 
-    const filtered = categories.filter((cat) =>
+    const available = categories.filter(
+      (cat) => !formData.categories.includes(cat)
+    );
+    const filtered = available.filter((cat) =>
       cat.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredCategories(filtered);
     setShowCategoryDropdown(value.length > 0 && filtered.length > 0);
 
-    if (errors.category) {
-      setErrors((prev) => ({ ...prev, category: "" }));
+    if (errors.categories) {
+      setErrors((prev) => ({ ...prev, categories: "" }));
     }
   };
 
+  // Add category from dropdown selection
   const handleAddCategory = (category: string) => {
-    setFormData((prev) => ({ ...prev, category }));
-    setCategoryInput(category);
-    setShowCategoryDropdown(false);
-    if (errors.category) {
-      setErrors((prev) => ({ ...prev, category: "" }));
+    if (!formData.categories.includes(category)) {
+      setFormData((prev) => ({
+        ...prev,
+        categories: [...prev.categories, category],
+      }));
+      setCategoryInput("");
+      setShowCategoryDropdown(false);
+      if (errors.categories) {
+        setErrors((prev) => ({ ...prev, categories: "" }));
+      }
     }
   };
 
+  // Add new category on Enter key
   const handleCategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && categoryInput.trim()) {
       e.preventDefault();
       const newCategory = categoryInput.trim();
-      setFormData((prev) => ({ ...prev, category: newCategory }));
-      setCategoryInput(newCategory);
+      if (!formData.categories.includes(newCategory)) {
+        setFormData((prev) => ({
+          ...prev,
+          categories: [...prev.categories, newCategory],
+        }));
+      }
+      setCategoryInput("");
       setShowCategoryDropdown(false);
     }
   };
 
+  // Remove category
+  const handleRemoveCategory = (categoryToRemove: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((cat) => cat !== categoryToRemove),
+    }));
+  };
+
+  // Handle category input focus
   const handleCategoryFocus = () => {
+    const available = categories.filter(
+      (cat) => !formData.categories.includes(cat)
+    );
     if (categoryInput) {
-      const filtered = categories.filter((cat) =>
+      const filtered = available.filter((cat) =>
         cat.toLowerCase().includes(categoryInput.toLowerCase())
       );
       setFilteredCategories(filtered);
       setShowCategoryDropdown(filtered.length > 0);
     } else {
-      setFilteredCategories(categories);
-      setShowCategoryDropdown(categories.length > 0);
+      setFilteredCategories(available);
+      setShowCategoryDropdown(available.length > 0);
     }
   };
 
@@ -203,7 +245,8 @@ export default function EditProductPage({ params }: PageProps) {
     if (!formData.name.trim()) newErrors.name = "Nama produk wajib diisi";
     if (!formData.description.trim())
       newErrors.description = "Deskripsi wajib diisi";
-    if (!formData.category.trim()) newErrors.category = "Kategori wajib diisi";
+    if (formData.categories.length === 0)
+      newErrors.categories = "Minimal pilih 1 kategori";
     if (!formData.price || parseFloat(formData.price) <= 0)
       newErrors.price = "Harga harus lebih dari 0";
     if (
@@ -221,7 +264,6 @@ export default function EditProductPage({ params }: PageProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit handler - Integrated with Server Action
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -231,110 +273,27 @@ export default function EditProductPage({ params }: PageProps) {
 
     setIsSubmitting(true);
 
-    try {
-      const productData: Partial<ProductFormData> = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        categories: [formData.category],
-        price: parseFloat(formData.price),
-        discountPercent: parseFloat(formData.discount) || 0,
-        unit: formData.unit,
-        stock: parseInt(formData.stock),
-        lowStockThreshold: parseInt(formData.lowStockThreshold),
-        status: formData.status,
-        images: images,
-      };
-
-      const result = await updateProduct(slug, productData);
-
-      if (result.success) {
-        await Swal.fire({
-          title: "Berhasil!",
-          text: result.message,
-          icon: "success",
-          confirmButtonColor: "#A3AF87",
-          customClass: { popup: "rounded-xl" },
-        });
-        router.push("/farmer/products");
-      } else {
-        Swal.fire({
-          title: "Gagal!",
-          text: result.message,
-          icon: "error",
-          confirmButtonColor: "#EF4444",
-          customClass: { popup: "rounded-xl" },
-        });
-      }
-    } catch (error) {
-      console.error("Submit error:", error);
-      Swal.fire({
-        title: "Error!",
-        text: "Terjadi kesalahan saat menyimpan produk",
-        icon: "error",
-        confirmButtonColor: "#EF4444",
-        customClass: { popup: "rounded-xl" },
+    setTimeout(() => {
+      console.log("Updated Product Data:", {
+        slug,
+        ...formData,
+        finalPrice,
+        images,
       });
-    } finally {
-      setIsSubmitting(false);
-    }
+      alert("Produk berhasil diperbarui!");
+      router.push("/farmer/products");
+    }, 1500);
   };
 
-  // Delete handler
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: "Hapus Produk?",
-      html: `
-        <div class="text-left">
-          <p class="text-gray-600">Anda yakin ingin menghapus produk:</p>
-          <p class="font-bold text-gray-900 mt-2">"${formData.name}"</p>
-          <p class="text-sm text-red-500 mt-3">⚠️ Tindakan ini tidak dapat dibatalkan</p>
-        </div>
-      `,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#EF4444",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-      customClass: { popup: "rounded-xl" },
-    });
-
-    if (result.isConfirmed) {
-      setIsDeleting(true);
-
-      try {
-        const deleteResult = await deleteProduct(slug);
-
-        if (deleteResult.success) {
-          await Swal.fire({
-            title: "Berhasil!",
-            text: deleteResult.message,
-            icon: "success",
-            confirmButtonColor: "#A3AF87",
-            customClass: { popup: "rounded-xl" },
-          });
-          router.push("/farmer/products");
-        } else {
-          Swal.fire({
-            title: "Gagal!",
-            text: deleteResult.message,
-            icon: "error",
-            confirmButtonColor: "#EF4444",
-            customClass: { popup: "rounded-xl" },
-          });
-        }
-      } catch (error) {
-        console.error("Delete error:", error);
-        Swal.fire({
-          title: "Error!",
-          text: "Terjadi kesalahan saat menghapus produk",
-          icon: "error",
-          confirmButtonColor: "#EF4444",
-          customClass: { popup: "rounded-xl" },
-        });
-      } finally {
-        setIsDeleting(false);
-      }
+  const handleDelete = () => {
+    if (
+      confirm(
+        `Apakah Anda yakin ingin menghapus produk "${formData.name}"? Tindakan ini tidak dapat dibatalkan.`
+      )
+    ) {
+      console.log("Delete product:", slug);
+      alert("Produk berhasil dihapus!");
+      router.push("/farmer/products");
     }
   };
 
@@ -342,7 +301,7 @@ export default function EditProductPage({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 text-[#A3AF87] animate-spin mx-auto mb-4" />
+          <div className="w-12 h-12 border-4 border-[#A3AF87] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
           <p className="text-gray-600">Memuat data produk...</p>
         </div>
       </div>
@@ -379,15 +338,11 @@ export default function EditProductPage({ params }: PageProps) {
             </div>
           </div>
           <button
+            type="button"
             onClick={handleDelete}
-            disabled={isDeleting}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all hover:shadow-lg"
           >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
+            <Trash2 className="h-4 w-4" />
             Hapus
           </button>
         </div>
@@ -410,7 +365,6 @@ export default function EditProductPage({ params }: PageProps) {
               </h2>
 
               <div className="space-y-4">
-                {/* Product Name */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Nama Produk <span className="text-red-500">*</span>
@@ -433,7 +387,6 @@ export default function EditProductPage({ params }: PageProps) {
                   )}
                 </div>
 
-                {/* Description */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Deskripsi Produk <span className="text-red-500">*</span>
@@ -442,7 +395,7 @@ export default function EditProductPage({ params }: PageProps) {
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    placeholder="Jelaskan detail produk, keunggulan, dan manfaatnya..."
+                    placeholder="Jelaskan detail produk..."
                     rows={5}
                     className={`w-full px-4 py-3 bg-white border-2 ${
                       errors.description ? "border-red-500" : "border-gray-200"
@@ -456,12 +409,37 @@ export default function EditProductPage({ params }: PageProps) {
                   )}
                 </div>
 
-                {/* Category */}
+                {/* Category Multi-Select with Tags */}
                 <div className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Kategori <span className="text-red-500">*</span>
                   </label>
 
+                  {/* Selected Categories as Tags */}
+                  {formData.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {formData.categories.map((category, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.8, opacity: 0 }}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-lg text-sm font-medium shadow-sm"
+                        >
+                          <span>{category}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCategory(category)}
+                            className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input Field */}
                   <div className="relative">
                     <input
                       type="text"
@@ -474,15 +452,17 @@ export default function EditProductPage({ params }: PageProps) {
                       }
                       placeholder="Ketik kategori baru atau pilih dari dropdown..."
                       className={`w-full px-4 py-3 bg-white border-2 ${
-                        errors.category ? "border-red-500" : "border-gray-200"
+                        errors.categories ? "border-red-500" : "border-gray-200"
                       } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
                       autoComplete="off"
                     />
 
+                    {/* Dropdown Suggestions */}
                     {showCategoryDropdown && filteredCategories.length > 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
                         className="absolute z-50 w-full mt-2 bg-white border-2 border-[#A3AF87]/30 rounded-lg shadow-xl max-h-60 overflow-y-auto"
                       >
                         <div className="px-3 py-2 bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/5 border-b border-gray-100">
@@ -507,12 +487,16 @@ export default function EditProductPage({ params }: PageProps) {
                     )}
                   </div>
 
-                  {errors.category && (
+                  {errors.categories && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {errors.category}
+                      {errors.categories}
                     </p>
                   )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Pilih beberapa kategori atau tekan Enter untuk tambah
+                    kategori baru
+                  </p>
                 </div>
               </div>
             </div>
@@ -582,7 +566,7 @@ export default function EditProductPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                {/* Calculator Display */}
+                {/* Calculator */}
                 <div className="bg-gradient-to-br from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-lg p-4 border-2 border-[#A3AF87]/20">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-[#A3AF87] rounded-lg">
@@ -629,7 +613,6 @@ export default function EditProductPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                {/* Unit */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Satuan <span className="text-red-500">*</span>
@@ -641,7 +624,7 @@ export default function EditProductPage({ params }: PageProps) {
                     className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all appearance-none cursor-pointer text-gray-900"
                   >
                     {units.map((unit) => (
-                      <option key={unit} value={unit}>
+                      <option key={unit} value={unit} className="text-gray-900">
                         {unit}
                       </option>
                     ))}
@@ -704,6 +687,9 @@ export default function EditProductPage({ params }: PageProps) {
                       {errors.lowStockThreshold}
                     </p>
                   )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Peringatan muncul jika stok mencapai batas ini
+                  </p>
                 </div>
               </div>
             </div>
@@ -727,7 +713,7 @@ export default function EditProductPage({ params }: PageProps) {
                       atau drag & drop
                     </p>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, JPEG (Max 5MB per file)
+                      PNG, JPG, JPEG (Max 5MB)
                     </p>
                   </div>
                   <input
@@ -786,25 +772,27 @@ export default function EditProductPage({ params }: PageProps) {
             className="lg:col-span-1"
           >
             <div className="sticky top-24 space-y-4">
-              {/* Product Status */}
               <div className="bg-white rounded-xl p-5 border-2 border-gray-100">
                 <h3 className="font-bold text-[#303646] mb-3">Status Produk</h3>
                 <div className="space-y-2">
                   {[
                     {
-                      value: "active" as ProductStatus,
+                      value: "active",
                       label: "Aktif",
                       desc: "Produk ditampilkan",
+                      color: "green",
                     },
                     {
-                      value: "draft" as ProductStatus,
+                      value: "draft",
                       label: "Draft",
                       desc: "Simpan sebagai draft",
+                      color: "yellow",
                     },
                     {
-                      value: "inactive" as ProductStatus,
+                      value: "inactive",
                       label: "Nonaktif",
                       desc: "Produk disembunyikan",
+                      color: "gray",
                     },
                   ].map((option) => (
                     <label
@@ -815,14 +803,19 @@ export default function EditProductPage({ params }: PageProps) {
                           : "border-gray-200 hover:border-[#A3AF87]/50"
                       }`}
                     >
-                      <input
-                        type="radio"
-                        name="status"
-                        value={option.value}
-                        checked={formData.status === option.value}
-                        onChange={handleChange}
-                        className="w-5 h-5 text-[#A3AF87] focus:ring-[#A3AF87] focus:ring-offset-0 accent-[#A3AF87] cursor-pointer"
-                      />
+                      <div className="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          name="status"
+                          value={option.value}
+                          checked={formData.status === option.value}
+                          onChange={handleChange}
+                          className="w-5 h-5 rounded border-2 border-gray-300 text-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87] checked:bg-[#A3AF87] checked:border-[#A3AF87] cursor-pointer"
+                          style={{
+                            accentColor: "#A3AF87",
+                          }}
+                        />
+                      </div>
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-gray-900">
                           {option.label}
@@ -834,7 +827,6 @@ export default function EditProductPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Preview Card */}
               <div className="bg-white rounded-xl p-5 border-2 border-gray-100">
                 <div className="flex items-center gap-2 mb-3">
                   <Eye className="h-4 w-4 text-[#A3AF87]" />
@@ -857,8 +849,7 @@ export default function EditProductPage({ params }: PageProps) {
                   {formData.name || "Nama Produk"}
                 </h4>
                 <p className="text-xs text-gray-500 mb-2 line-clamp-2">
-                  {formData.description ||
-                    "Deskripsi produk akan muncul di sini"}
+                  {formData.description || "Deskripsi produk"}
                 </p>
                 <div className="flex items-baseline gap-2 mb-2">
                   {formData.discount && parseFloat(formData.discount) > 0 && (
@@ -880,24 +871,14 @@ export default function EditProductPage({ params }: PageProps) {
                 )}
               </div>
 
-              {/* Action Buttons */}
               <div className="space-y-2">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[#A3AF87] text-white rounded-lg font-bold hover:bg-[#95a17a] transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[#A3AF87] text-white rounded-lg font-bold hover:bg-[#95a17a] transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-5 w-5" />
-                      Simpan Perubahan
-                    </>
-                  )}
+                  <Save className="h-5 w-5" />
+                  {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
                 <Link
                   href="/farmer/products"

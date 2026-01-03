@@ -86,6 +86,51 @@ WHERE au.email = 'egomaggie@gmail.com';
 
 
 -- ===========================================
+-- STEP 3: INSERT FARMER RECORD (PENTING!)
+-- ===========================================
+-- User dengan role FARMER harus punya record di tabel farmers
+-- Ini dibutuhkan untuk product management
+
+INSERT INTO public.farmers (
+    user_id,
+    farm_name,
+    description,
+    location,
+    rating,
+    is_verified,
+    created_at,
+    updated_at
+)
+SELECT 
+    u.id,
+    COALESCE(u.business_name, 'Egomaggie Farm'),
+    'Farm resmi Egomaggie - Produsen maggot BSF berkualitas tinggi',
+    'Indonesia',
+    0,
+    true,
+    NOW(),
+    NOW()
+FROM public.users u
+WHERE u.email = 'egomaggie@gmail.com'
+  AND u.role = 'FARMER'
+  AND NOT EXISTS (
+      SELECT 1 FROM public.farmers f WHERE f.user_id = u.id
+  );
+
+-- Verify farmer record
+SELECT 
+    f.id as farmer_id,
+    f.user_id,
+    f.farm_name,
+    f.is_verified,
+    u.email,
+    u.name
+FROM public.farmers f
+JOIN public.users u ON f.user_id = u.id
+WHERE u.email = 'egomaggie@gmail.com';
+
+
+-- ===========================================
 -- CATATAN PENTING
 -- ===========================================
 /*

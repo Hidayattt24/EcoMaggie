@@ -14,8 +14,15 @@ import {
   Save,
   Eye,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Swal from "sweetalert2";
+import {
+  createProduct,
+  type ProductFormData,
+  type ProductStatus,
+} from "@/lib/api/product.actions";
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -24,20 +31,20 @@ export default function AddProductPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    categories: [] as string[], // Changed to array for multi-select
+    category: "",
     price: "",
     discount: "",
     unit: "kg",
     stock: "",
     lowStockThreshold: "",
-    status: "active" as "active" | "inactive" | "draft",
+    status: "active" as ProductStatus,
   });
 
   const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [categoryInput, setCategoryInput] = useState(""); // New state for input
+  const [categoryInput, setCategoryInput] = useState("");
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
 
   // Calculated Final Price - Auto Discount Calculator
@@ -46,13 +53,11 @@ export default function AddProductPage() {
   useEffect(() => {
     const price = parseFloat(formData.price) || 0;
     const discount = parseFloat(formData.discount) || 0;
-
-    // Formula: Final Price = Base Price × (1 - Discount%)
     const calculated = price * (1 - discount / 100);
     setFinalPrice(Math.round(calculated));
   }, [formData.price, formData.discount]);
 
-  // Categories - Kategori yang pernah digunakan
+  // Categories
   const categories = [
     "Maggot Segar",
     "Maggot Kering",
@@ -75,7 +80,6 @@ export default function AddProductPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -87,34 +91,26 @@ export default function AddProductPage() {
   ) => {
     const value = e.target.value;
     setCategoryInput(value);
+    setFormData((prev) => ({ ...prev, category: value }));
 
-    // Filter categories that are not already selected
-    const available = categories.filter(
-      (cat) => !formData.categories.includes(cat)
-    );
-    const filtered = available.filter((cat) =>
+    const filtered = categories.filter((cat) =>
       cat.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredCategories(filtered);
     setShowCategoryDropdown(value.length > 0 && filtered.length > 0);
 
-    if (errors.categories) {
-      setErrors((prev) => ({ ...prev, categories: "" }));
+    if (errors.category) {
+      setErrors((prev) => ({ ...prev, category: "" }));
     }
   };
 
   // Add category from dropdown selection
   const handleAddCategory = (category: string) => {
-    if (!formData.categories.includes(category)) {
-      setFormData((prev) => ({
-        ...prev,
-        categories: [...prev.categories, category],
-      }));
-      setCategoryInput("");
-      setShowCategoryDropdown(false);
-      if (errors.categories) {
-        setErrors((prev) => ({ ...prev, categories: "" }));
-      }
+    setFormData((prev) => ({ ...prev, category }));
+    setCategoryInput(category);
+    setShowCategoryDropdown(false);
+    if (errors.category) {
+      setErrors((prev) => ({ ...prev, category: "" }));
     }
   };
 
@@ -123,47 +119,30 @@ export default function AddProductPage() {
     if (e.key === "Enter" && categoryInput.trim()) {
       e.preventDefault();
       const newCategory = categoryInput.trim();
-      if (!formData.categories.includes(newCategory)) {
-        setFormData((prev) => ({
-          ...prev,
-          categories: [...prev.categories, newCategory],
-        }));
-      }
-      setCategoryInput("");
+      setFormData((prev) => ({ ...prev, category: newCategory }));
+      setCategoryInput(newCategory);
       setShowCategoryDropdown(false);
     }
   };
 
-  // Remove category
-  const handleRemoveCategory = (categoryToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      categories: prev.categories.filter((cat) => cat !== categoryToRemove),
-    }));
-  };
-
   // Handle category input focus
   const handleCategoryFocus = () => {
-    const available = categories.filter(
-      (cat) => !formData.categories.includes(cat)
-    );
     if (categoryInput) {
-      const filtered = available.filter((cat) =>
+      const filtered = categories.filter((cat) =>
         cat.toLowerCase().includes(categoryInput.toLowerCase())
       );
       setFilteredCategories(filtered);
       setShowCategoryDropdown(filtered.length > 0);
     } else {
-      setFilteredCategories(available);
-      setShowCategoryDropdown(available.length > 0);
+      setFilteredCategories(categories);
+      setShowCategoryDropdown(categories.length > 0);
     }
   };
 
-  // Handle image upload (mock)
+  // Handle image upload (mock - in production, upload to storage first)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // Mock: convert to data URLs
       Array.from(files).forEach((file) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -186,8 +165,7 @@ export default function AddProductPage() {
     if (!formData.name.trim()) newErrors.name = "Nama produk wajib diisi";
     if (!formData.description.trim())
       newErrors.description = "Deskripsi wajib diisi";
-    if (formData.categories.length === 0)
-      newErrors.categories = "Minimal pilih 1 kategori";
+    if (!formData.category.trim()) newErrors.category = "Kategori wajib diisi";
     if (!formData.price || parseFloat(formData.price) <= 0)
       newErrors.price = "Harga harus lebih dari 0";
     if (
@@ -205,7 +183,7 @@ export default function AddProductPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit handler
+  // Submit handler - Integrated with Server Action
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -215,16 +193,53 @@ export default function AddProductPage() {
 
     setIsSubmitting(true);
 
-    // Mock API call
-    setTimeout(() => {
-      console.log("Product Data:", {
-        ...formData,
-        finalPrice,
-        images,
+    try {
+      // Prepare form data for server action
+      const productData: ProductFormData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        categories: [formData.category],
+        price: parseFloat(formData.price),
+        discountPercent: parseFloat(formData.discount) || 0,
+        unit: formData.unit,
+        stock: parseInt(formData.stock),
+        lowStockThreshold: parseInt(formData.lowStockThreshold),
+        status: formData.status,
+        images: images, // In production: upload to Supabase Storage first, then pass URLs
+      };
+
+      const result = await createProduct(productData);
+
+      if (result.success) {
+        await Swal.fire({
+          title: "Berhasil!",
+          text: result.message,
+          icon: "success",
+          confirmButtonColor: "#A3AF87",
+          customClass: { popup: "rounded-xl" },
+        });
+        router.push("/farmer/products");
+      } else {
+        Swal.fire({
+          title: "Gagal!",
+          text: result.message,
+          icon: "error",
+          confirmButtonColor: "#EF4444",
+          customClass: { popup: "rounded-xl" },
+        });
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Terjadi kesalahan saat menyimpan produk",
+        icon: "error",
+        confirmButtonColor: "#EF4444",
+        customClass: { popup: "rounded-xl" },
       });
-      alert("Produk berhasil ditambahkan!");
-      router.push("/farmer/products");
-    }, 1500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -326,30 +341,6 @@ export default function AddProductPage() {
                     Kategori <span className="text-red-500">*</span>
                   </label>
 
-                  {/* Selected Categories as Tags */}
-                  {formData.categories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {formData.categories.map((category, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.8, opacity: 0 }}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-lg text-sm font-medium shadow-sm"
-                        >
-                          <span>{category}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveCategory(category)}
-                            className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-
                   {/* Input Field */}
                   <div className="relative">
                     <input
@@ -363,7 +354,7 @@ export default function AddProductPage() {
                       }
                       placeholder="Ketik kategori baru atau pilih dari dropdown..."
                       className={`w-full px-4 py-3 bg-white border-2 ${
-                        errors.categories ? "border-red-500" : "border-gray-200"
+                        errors.category ? "border-red-500" : "border-gray-200"
                       } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
                       autoComplete="off"
                     />
@@ -373,7 +364,6 @@ export default function AddProductPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
                         className="absolute z-50 w-full mt-2 bg-white border-2 border-[#A3AF87]/30 rounded-lg shadow-xl max-h-60 overflow-y-auto"
                       >
                         <div className="px-3 py-2 bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/5 border-b border-gray-100">
@@ -398,15 +388,14 @@ export default function AddProductPage() {
                     )}
                   </div>
 
-                  {errors.categories && (
+                  {errors.category && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {errors.categories}
+                      {errors.category}
                     </p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    💡 Pilih beberapa kategori atau tekan Enter untuk tambah
-                    kategori baru
+                    💡 Ketik kategori baru atau pilih dari dropdown
                   </p>
                 </div>
               </div>
@@ -697,19 +686,19 @@ export default function AddProductPage() {
                 <div className="space-y-2">
                   {[
                     {
-                      value: "active",
+                      value: "active" as ProductStatus,
                       label: "Aktif",
                       desc: "Produk langsung ditampilkan",
                       color: "green",
                     },
                     {
-                      value: "draft",
+                      value: "draft" as ProductStatus,
                       label: "Draft",
                       desc: "Simpan sebagai draft",
                       color: "yellow",
                     },
                     {
-                      value: "inactive",
+                      value: "inactive" as ProductStatus,
                       label: "Nonaktif",
                       desc: "Produk disembunyikan",
                       color: "gray",
@@ -723,19 +712,14 @@ export default function AddProductPage() {
                           : "border-gray-200 hover:border-[#A3AF87]/50"
                       }`}
                     >
-                      <div className="relative flex items-center">
-                        <input
-                          type="checkbox"
-                          name="status"
-                          value={option.value}
-                          checked={formData.status === option.value}
-                          onChange={handleChange}
-                          className="w-5 h-5 rounded border-2 border-gray-300 text-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87] checked:bg-[#A3AF87] checked:border-[#A3AF87] cursor-pointer"
-                          style={{
-                            accentColor: "#A3AF87",
-                          }}
-                        />
-                      </div>
+                      <input
+                        type="radio"
+                        name="status"
+                        value={option.value}
+                        checked={formData.status === option.value}
+                        onChange={handleChange}
+                        className="w-5 h-5 text-[#A3AF87] focus:ring-[#A3AF87] focus:ring-offset-0 accent-[#A3AF87] cursor-pointer"
+                      />
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-gray-900">
                           {option.label}
@@ -798,10 +782,19 @@ export default function AddProductPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[#A3AF87] text-white rounded-lg font-bold hover:bg-[#95a17a] transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[#A3AF87] text-white rounded-lg font-bold hover:bg-[#95a17a] transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
-                  <Save className="h-5 w-5" />
-                  {isSubmitting ? "Menyimpan..." : "Simpan Produk"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-5 w-5" />
+                      Simpan Produk
+                    </>
+                  )}
                 </button>
                 <Link
                   href="/farmer/products"

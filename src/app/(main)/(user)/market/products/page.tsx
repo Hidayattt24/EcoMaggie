@@ -1,255 +1,166 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import ProductCard, { Product } from "@/components/user/market/ProductCard";
 import FilterSidebar from "@/components/user/market/FilterSidebar";
 import MobileFilterPanel from "@/components/user/market/MobileFilterPanel";
 import ProductsHeader from "@/components/user/market/ProductsHeader";
 import Pagination from "@/components/user/market/Pagination";
+import {
+  getMarketProducts,
+  getProductCategories,
+  MarketProduct,
+  MarketProductFilters,
+  CategoryCount,
+} from "@/lib/api/product.actions";
 
-// Dummy data produk maggot
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Maggot BSF Premium",
-    description:
-      "Maggot Black Soldier Fly berkualitas tinggi untuk pakan ternak",
-    price: 45000,
-    unit: "kg",
-    rating: 4.8,
-    reviews: 124,
-    stock: 150,
-    image: "/assets/dummy/magot.png",
-    category: "Premium",
-    discount: 15,
-  },
-  {
-    id: 2,
-    name: "Maggot BSF Organik",
-    description: "100% organik tanpa bahan kimia, cocok untuk budidaya lele",
-    price: 38000,
-    unit: "kg",
-    rating: 4.9,
-    reviews: 89,
-    stock: 200,
-    image: "/assets/dummy/magot.png",
-    category: "Organik",
-  },
-  {
-    id: 3,
-    name: "Maggot BSF Kering",
-    description: "Maggot kering dengan nutrisi lengkap, tahan lama",
-    price: 65000,
-    unit: "kg",
-    rating: 4.7,
-    reviews: 56,
-    stock: 80,
-    image: "/assets/dummy/magot.png",
-    category: "Kering",
-    discount: 20,
-  },
-  {
-    id: 4,
-    name: "Maggot BSF Fresh",
-    description: "Maggot segar langsung dari budidaya, protein tinggi",
-    price: 42000,
-    unit: "kg",
-    rating: 4.9,
-    reviews: 178,
-    stock: 120,
-    image: "/assets/dummy/magot.png",
-    category: "Fresh",
-  },
-  {
-    id: 5,
-    name: "Maggot BSF Jumbo",
-    description: "Ukuran jumbo ideal untuk pakan ikan besar",
-    price: 52000,
-    unit: "kg",
-    rating: 4.6,
-    reviews: 92,
-    stock: 95,
-    image: "/assets/dummy/magot.png",
-    category: "Premium",
-  },
-  {
-    id: 6,
-    name: "Maggot BSF Starter Pack",
-    description: "Paket hemat untuk pemula, 5kg dengan panduan budidaya",
-    price: 36000,
-    unit: "kg",
-    rating: 4.8,
-    reviews: 145,
-    stock: 50,
-    image: "/assets/dummy/magot.png",
-    category: "Paket",
-    discount: 25,
-  },
-  {
-    id: 7,
-    name: "Maggot BSF Super Premium",
-    description: "Kualitas terbaik untuk pakan ternak unggulan",
-    price: 58000,
-    unit: "kg",
-    rating: 4.9,
-    reviews: 210,
-    stock: 100,
-    image: "/assets/dummy/magot.png",
-    category: "Premium",
-    discount: 10,
-  },
-  {
-    id: 8,
-    name: "Maggot BSF Organik Plus",
-    description: "100% organik dengan nutrisi tambahan",
-    price: 48000,
-    unit: "kg",
-    rating: 4.7,
-    reviews: 165,
-    stock: 120,
-    image: "/assets/dummy/magot.png",
-    category: "Organik",
-  },
-  {
-    id: 9,
-    name: "Maggot BSF Kering Premium",
-    description: "Maggot kering grade A, cocok untuk export",
-    price: 75000,
-    unit: "kg",
-    rating: 4.8,
-    reviews: 98,
-    stock: 60,
-    image: "/assets/dummy/magot.png",
-    category: "Kering",
-    discount: 15,
-  },
-  {
-    id: 10,
-    name: "Maggot BSF Fresh Daily",
-    description: "Dipanen setiap hari, kesegaran terjamin",
-    price: 44000,
-    unit: "kg",
-    rating: 4.9,
-    reviews: 187,
-    stock: 150,
-    image: "/assets/dummy/magot.png",
-    category: "Fresh",
-  },
-  {
-    id: 11,
-    name: "Maggot BSF Jumbo XL",
-    description: "Ukuran extra jumbo untuk ikan predator",
-    price: 62000,
-    unit: "kg",
-    rating: 4.7,
-    reviews: 134,
-    stock: 75,
-    image: "/assets/dummy/magot.png",
-    category: "Premium",
-    discount: 12,
-  },
-  {
-    id: 12,
-    name: "Maggot BSF Family Pack",
-    description: "Paket ekonomis untuk keluarga peternak",
-    price: 35000,
-    unit: "kg",
-    rating: 4.6,
-    reviews: 201,
-    stock: 180,
-    image: "/assets/dummy/magot.png",
-    category: "Paket",
-    discount: 20,
-  },
-  {
-    id: 13,
-    name: "Maggot BSF Organic Pro",
-    description: "Sertifikat organik internasional",
-    price: 55000,
-    unit: "kg",
-    rating: 4.9,
-    reviews: 156,
-    stock: 90,
-    image: "/assets/dummy/magot.png",
-    category: "Organik",
-  },
-  {
-    id: 14,
-    name: "Maggot BSF Kering Express",
-    description: "Proses pengeringan cepat, nutrisi terjaga",
-    price: 68000,
-    unit: "kg",
-    rating: 4.8,
-    reviews: 112,
-    stock: 85,
-    image: "/assets/dummy/magot.png",
-    category: "Kering",
-  },
-  {
-    id: 15,
-    name: "Maggot BSF Fresh Extra",
-    description: "Segar dengan kandungan protein tinggi",
-    price: 46000,
-    unit: "kg",
-    rating: 4.7,
-    reviews: 143,
-    stock: 130,
-    image: "/assets/dummy/magot.png",
-    category: "Fresh",
-    discount: 8,
-  },
-  {
-    id: 16,
-    name: "Maggot BSF Mix Premium",
-    description: "Campuran berbagai ukuran premium",
-    price: 51000,
-    unit: "kg",
-    rating: 4.6,
-    reviews: 128,
-    stock: 110,
-    image: "/assets/dummy/magot.png",
-    category: "Premium",
-  },
-  {
-    id: 17,
-    name: "Maggot BSF Complete Pack",
-    description: "Paket lengkap dengan feeding guide",
-    price: 39000,
-    unit: "kg",
-    rating: 4.8,
-    reviews: 176,
-    stock: 95,
-    image: "/assets/dummy/magot.png",
-    category: "Paket",
-    discount: 18,
-  },
-  {
-    id: 18,
-    name: "Maggot BSF Organic Select",
-    description: "Pilihan terbaik organik bersertifikat",
-    price: 52000,
-    unit: "kg",
-    rating: 4.9,
-    reviews: 192,
-    stock: 105,
-    image: "/assets/dummy/magot.png",
-    category: "Organik",
-    discount: 10,
-  },
-];
+// Category mapping for display names
+const categoryDisplayNames: Record<string, string> = {
+  VEGETABLES: "Sayuran",
+  FRUITS: "Buah-buahan",
+  GRAINS: "Biji-bijian",
+  DAIRY: "Produk Susu",
+  MEAT: "Daging",
+  ORGANIC: "Organik",
+  OTHER: "Lainnya",
+};
 
-const categories = ["Premium", "Organik", "Kering", "Fresh", "Paket"];
+// Transform MarketProduct to Product interface for ProductCard
+function transformToCardProduct(product: MarketProduct): Product {
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description || "",
+    price: product.price,
+    unit: product.unit,
+    rating: product.rating,
+    reviews: product.totalReviews,
+    stock: product.stock,
+    image: product.images[0] || "/assets/dummy/magot.png",
+    images: product.images,
+    category: categoryDisplayNames[product.category] || product.category,
+    discount: product.discountPercent,
+    discountPercent: product.discountPercent,
+    finalPrice: product.finalPrice,
+    slug: product.slug,
+    totalSold: product.totalSold,
+    farmer: product.farmer,
+  };
+}
 
 export default function MarketProductsPage() {
+  // State for products data
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(200000);
+  const [maxPrice, setMaxPrice] = useState(500000);
   const [sortBy, setSortBy] = useState("newest");
-  const [wishlist, setWishlist] = useState<number[]>([]);
+  const [wishlist, setWishlist] = useState<(number | string)[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
+
+  // Map sort options to API format
+  const sortMapping: Record<string, MarketProductFilters["sortBy"]> = {
+    newest: "newest",
+    "price-low": "price_low",
+    "price-high": "price_high",
+    rating: "rating",
+    popular: "best_seller",
+  };
+
+  // Fetch categories on mount
+  useEffect(() => {
+    async function fetchCategories() {
+      const result = await getProductCategories();
+      if (result.success && result.data) {
+        const categoryNames = result.data.map((c: CategoryCount) => c.category);
+        setCategories(categoryNames);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  // Fetch products when filters change
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const filters: MarketProductFilters = {
+        page: currentPage,
+        limit: itemsPerPage,
+        sortBy: sortMapping[sortBy] || "newest",
+      };
+
+      // Apply category filter (only first selected category for now)
+      if (selectedCategories.length > 0) {
+        filters.category = selectedCategories[0];
+      }
+
+      // Apply price filters
+      if (minPrice > 0) {
+        filters.minPrice = minPrice;
+      }
+      if (maxPrice < 500000) {
+        filters.maxPrice = maxPrice;
+      }
+
+      // Apply search
+      if (searchQuery.trim()) {
+        filters.search = searchQuery.trim();
+      }
+
+      const result = await getMarketProducts(filters);
+
+      if (result.success && result.data) {
+        const transformedProducts = result.data.products.map(
+          transformToCardProduct
+        );
+        setProducts(transformedProducts);
+        setTotalProducts(result.data.total);
+      } else {
+        setError(result.message || "Gagal mengambil data produk");
+        setProducts([]);
+        setTotalProducts(0);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Terjadi kesalahan saat mengambil data produk");
+      setProducts([]);
+      setTotalProducts(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    currentPage,
+    sortBy,
+    selectedCategories,
+    minPrice,
+    maxPrice,
+    searchQuery,
+  ]);
+
+  // Debounce search to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [fetchProducts]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategories, minPrice, maxPrice, searchQuery, sortBy]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -259,7 +170,7 @@ export default function MarketProductsPage() {
     );
   };
 
-  const toggleWishlist = (productId: number) => {
+  const toggleWishlist = (productId: number | string) => {
     setWishlist((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
@@ -267,42 +178,13 @@ export default function MarketProductsPage() {
     );
   };
 
-  const filteredProducts = products
-    .filter((product) => {
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        selectedCategories.length === 0 ||
-        selectedCategories.includes(product.category);
-      const matchesMinPrice = product.price >= minPrice;
-      const matchesMaxPrice = product.price <= maxPrice;
-      return (
-        matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice
-      );
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price;
-        case "price-high":
-          return b.price - a.price;
-        case "rating":
-          return b.rating - a.rating;
-        case "popular":
-          return b.reviews - a.reviews;
-        case "name-az":
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
-      }
-    });
+  // Calculate pagination
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+  // Get display categories with proper names
+  const displayCategories = categories.map(
+    (cat) => categoryDisplayNames[cat] || cat
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -310,9 +192,18 @@ export default function MarketProductsPage() {
       <MobileFilterPanel
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
-        categories={categories}
-        selectedCategories={selectedCategories}
-        onToggleCategory={toggleCategory}
+        categories={displayCategories}
+        selectedCategories={selectedCategories.map(
+          (cat) => categoryDisplayNames[cat] || cat
+        )}
+        onToggleCategory={(displayName) => {
+          // Find original category key
+          const originalKey =
+            Object.entries(categoryDisplayNames).find(
+              ([, v]) => v === displayName
+            )?.[0] || displayName;
+          toggleCategory(originalKey);
+        }}
         minPrice={minPrice}
         maxPrice={maxPrice}
         onMinPriceChange={setMinPrice}
@@ -332,9 +223,17 @@ export default function MarketProductsPage() {
           {/* Left Sidebar - Filter */}
           <div className="w-56 flex-shrink-0 hidden lg:block">
             <FilterSidebar
-              categories={categories}
-              selectedCategories={selectedCategories}
-              onToggleCategory={toggleCategory}
+              categories={displayCategories}
+              selectedCategories={selectedCategories.map(
+                (cat) => categoryDisplayNames[cat] || cat
+              )}
+              onToggleCategory={(displayName) => {
+                const originalKey =
+                  Object.entries(categoryDisplayNames).find(
+                    ([, v]) => v === displayName
+                  )?.[0] || displayName;
+                toggleCategory(originalKey);
+              }}
               minPrice={minPrice}
               maxPrice={maxPrice}
               onMinPriceChange={setMinPrice}
@@ -395,27 +294,33 @@ export default function MarketProductsPage() {
                   </svg>
                 </div>
                 <span className="text-gray-700">
-                  Menampilkan{" "}
-                  <span
-                    className="font-bold"
-                    style={{ color: "#5a6c5b" } as React.CSSProperties}
-                  >
-                    {filteredProducts.length}
-                  </span>{" "}
-                  dari{" "}
-                  <span
-                    className="font-semibold"
-                    style={{ color: "#5a6c5b" } as React.CSSProperties}
-                  >
-                    {products.length}
-                  </span>{" "}
-                  <span
-                    style={{
-                      color: "rgba(90, 108, 91, 0.7)",
-                    }}
-                  >
-                    produk
-                  </span>
+                  {isLoading ? (
+                    "Memuat..."
+                  ) : (
+                    <>
+                      Menampilkan{" "}
+                      <span
+                        className="font-bold"
+                        style={{ color: "#5a6c5b" } as React.CSSProperties}
+                      >
+                        {products.length}
+                      </span>{" "}
+                      dari{" "}
+                      <span
+                        className="font-semibold"
+                        style={{ color: "#5a6c5b" } as React.CSSProperties}
+                      >
+                        {totalProducts}
+                      </span>{" "}
+                      <span
+                        style={{
+                          color: "rgba(90, 108, 91, 0.7)",
+                        }}
+                      >
+                        produk
+                      </span>
+                    </>
+                  )}
                 </span>
               </div>
 
@@ -445,20 +350,73 @@ export default function MarketProductsPage() {
               </div>
             </div>
 
+            {/* Loading State */}
+            {isLoading && (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse"
+                  >
+                    <div className="aspect-square bg-gray-200" />
+                    <div className="p-3 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      <div className="h-5 bg-gray-200 rounded w-2/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <div className="text-center py-16 bg-white rounded-2xl">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-red-100 flex items-center justify-center">
+                  <svg
+                    className="h-8 w-8 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Terjadi Kesalahan
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">{error}</p>
+                <button
+                  onClick={() => fetchProducts()}
+                  className="px-4 py-2 text-white rounded-lg font-semibold text-sm"
+                  style={{ backgroundColor: "#A3AF87" }}
+                >
+                  Coba Lagi
+                </button>
+              </div>
+            )}
+
             {/* Products Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {paginatedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  wishlist={wishlist}
-                  onToggleWishlist={toggleWishlist}
-                />
-              ))}
-            </div>
+            {!isLoading && !error && products.length > 0 && (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    wishlist={wishlist}
+                    onToggleWishlist={toggleWishlist}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Empty State */}
-            {filteredProducts.length === 0 && (
+            {!isLoading && !error && products.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -582,7 +540,7 @@ export default function MarketProductsPage() {
                             setSelectedCategories([]);
                             setSearchQuery("");
                             setMinPrice(0);
-                            setMaxPrice(200000);
+                            setMaxPrice(500000);
                           }
                         }}
                       >
@@ -618,7 +576,7 @@ export default function MarketProductsPage() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > itemsPerPage && (
+            {!isLoading && !error && totalProducts > itemsPerPage && (
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

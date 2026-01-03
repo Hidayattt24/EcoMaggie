@@ -1245,3 +1245,509 @@ export async function recordProductSale(
     };
   }
 }
+
+// ===========================================
+// USER/MARKETPLACE PRODUCT TYPES
+// ===========================================
+
+export type MarketProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  discountPercent: number;
+  finalPrice: number;
+  stock: number;
+  unit: string;
+  category: string;
+  images: string[];
+  rating: number;
+  totalSold: number;
+  totalReviews: number;
+  wishlistCount: number;
+  farmer: {
+    id: string;
+    farmName: string;
+    location: string | null;
+    rating: number;
+    isVerified: boolean;
+  };
+  createdAt: string;
+};
+
+export type MarketProductFilters = {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  search?: string;
+  sortBy?: "newest" | "price_low" | "price_high" | "best_seller" | "rating";
+  page?: number;
+  limit?: number;
+};
+
+export type MarketProductsResponse = {
+  products: MarketProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+// ===========================================
+// TRANSFORM MARKET PRODUCT HELPER
+// ===========================================
+
+function transformMarketProduct(
+  dbProduct: Record<string, unknown>
+): MarketProduct {
+  const price = Number(dbProduct.price) || 0;
+  const discountPercent = Number(dbProduct.discount_percent) || 0;
+  const finalPrice = Math.round(price * (1 - discountPercent / 100));
+
+  // Handle aggregated counts
+  const reviewCount = Array.isArray(dbProduct.reviews)
+    ? (dbProduct.reviews[0] as { count?: number })?.count || 0
+    : 0;
+  const wishlistCount = Array.isArray(dbProduct.wishlists)
+    ? (dbProduct.wishlists[0] as { count?: number })?.count || 0
+    : 0;
+
+  // Handle farmer data from join
+  const farmerData = dbProduct.farmers as Record<string, unknown> | null;
+
+  return {
+    id: dbProduct.id as string,
+    name: dbProduct.name as string,
+    slug: dbProduct.slug as string,
+    description: (dbProduct.description as string) || null,
+    price,
+    discountPercent,
+    finalPrice,
+    stock: (dbProduct.stock as number) || 0,
+    unit: (dbProduct.unit as string) || "kg",
+    category: (dbProduct.category as string) || "OTHER",
+    images: (dbProduct.images as string[]) || [],
+    rating: Number(dbProduct.rating) || 0,
+    totalSold: (dbProduct.total_sold as number) || 0,
+    totalReviews: reviewCount,
+    wishlistCount,
+    farmer: {
+      id: (farmerData?.id as string) || "",
+      farmName: (farmerData?.farm_name as string) || "Unknown Farm",
+      location: (farmerData?.location as string) || null,
+      rating: Number(farmerData?.rating) || 0,
+      isVerified: (farmerData?.is_verified as boolean) ?? false,
+    },
+    createdAt: dbProduct.created_at as string,
+  };
+}
+
+// ===========================================
+// GET ALL MARKET PRODUCTS (USER SIDE)
+// ===========================================
+
+export async function getMarketProducts(
+  filters: MarketProductFilters = {}
+): Promise<ActionResponse<MarketProductsResponse>> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      category,
+      minPrice,
+      maxPrice,
+      search,
+      sortBy = "newest",
+      page = 1,
+      limit = 12,
+    } = filters;
+
+    // Calculate offset
+    const offset = (page - 1) * limit;
+
+    // Build base query
+    let query = supabase
+      .from("products")
+      .select(
+        `
+        *,
+        farmers!inner(id, farm_name, location, rating, is_verified),
+        reviews:reviews(count),
+        wishlists:wishlists(count)
+      `,
+        { count: "exact" }
+      )
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .gt("stock", 0);
+
+    // Apply category filter
+    if (category && category !== "all") {
+      query = query.eq("category", category);
+    }
+
+    // Apply price filters
+    if (minPrice !== undefined && minPrice > 0) {
+      query = query.gte("price", minPrice);
+    }
+    if (maxPrice !== undefined && maxPrice > 0) {
+      query = query.lte("price", maxPrice);
+    }
+
+    // Apply search filter
+    if (search && search.trim()) {
+      query = query.or(
+        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`
+      );
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "price_low":
+        query = query.order("price", { ascending: true });
+        break;
+      case "price_high":
+        query = query.order("price", { ascending: false });
+        break;
+      case "best_seller":
+        query = query.order("total_sold", { ascending: false });
+        break;
+      case "rating":
+        query = query.order("rating", { ascending: false });
+        break;
+      case "newest":
+      default:
+        query = query.order("created_at", { ascending: false });
+        break;
+    }
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    // Execute query
+    const { data: products, error, count } = await query;
+
+    if (error) {
+      console.error("Get market products error:", error);
+      return {
+        success: false,
+        message: `Gagal mengambil data produk: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    const transformedProducts = (products || []).map((p) =>
+      transformMarketProduct(p as Record<string, unknown>)
+    );
+
+    const total = count || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      success: true,
+      message: "Berhasil mengambil data produk",
+      data: {
+        products: transformedProducts,
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
+  } catch (error) {
+    console.error("Get market products exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data produk",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// GET SINGLE PRODUCT FOR MARKETPLACE (USER SIDE)
+// ===========================================
+
+export async function getMarketProductBySlug(
+  slug: string
+): Promise<ActionResponse<MarketProduct>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: product, error } = await supabase
+      .from("products")
+      .select(
+        `
+        *,
+        farmers!inner(id, farm_name, location, rating, is_verified),
+        reviews:reviews(count),
+        wishlists:wishlists(count)
+      `
+      )
+      .eq("slug", slug)
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .single();
+
+    if (error || !product) {
+      return {
+        success: false,
+        message: "Produk tidak ditemukan",
+        error: "NOT_FOUND",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Berhasil mengambil data produk",
+      data: transformMarketProduct(product as Record<string, unknown>),
+    };
+  } catch (error) {
+    console.error("Get market product by slug exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data produk",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// GET PRODUCTS BY CATEGORY (USER SIDE)
+// ===========================================
+
+export async function getProductsByCategory(
+  category: string,
+  limit: number = 8
+): Promise<ActionResponse<MarketProduct[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: products, error } = await supabase
+      .from("products")
+      .select(
+        `
+        *,
+        farmers!inner(id, farm_name, location, rating, is_verified),
+        reviews:reviews(count),
+        wishlists:wishlists(count)
+      `
+      )
+      .eq("category", category)
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .gt("stock", 0)
+      .order("total_sold", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Get products by category error:", error);
+      return {
+        success: false,
+        message: `Gagal mengambil data produk: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    const transformedProducts = (products || []).map((p) =>
+      transformMarketProduct(p as Record<string, unknown>)
+    );
+
+    return {
+      success: true,
+      message: "Berhasil mengambil data produk",
+      data: transformedProducts,
+    };
+  } catch (error) {
+    console.error("Get products by category exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data produk",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// GET FEATURED/BEST SELLING PRODUCTS (USER SIDE)
+// ===========================================
+
+export async function getFeaturedProducts(
+  limit: number = 8
+): Promise<ActionResponse<MarketProduct[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: products, error } = await supabase
+      .from("products")
+      .select(
+        `
+        *,
+        farmers!inner(id, farm_name, location, rating, is_verified),
+        reviews:reviews(count),
+        wishlists:wishlists(count)
+      `
+      )
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .gt("stock", 0)
+      .order("total_sold", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Get featured products error:", error);
+      return {
+        success: false,
+        message: `Gagal mengambil data produk: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    const transformedProducts = (products || []).map((p) =>
+      transformMarketProduct(p as Record<string, unknown>)
+    );
+
+    return {
+      success: true,
+      message: "Berhasil mengambil data produk",
+      data: transformedProducts,
+    };
+  } catch (error) {
+    console.error("Get featured products exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data produk",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// SEARCH PRODUCTS (USER SIDE)
+// ===========================================
+
+export async function searchProducts(
+  query: string,
+  limit: number = 20
+): Promise<ActionResponse<MarketProduct[]>> {
+  try {
+    const supabase = await createClient();
+
+    if (!query || !query.trim()) {
+      return {
+        success: false,
+        message: "Kata kunci pencarian diperlukan",
+        error: "QUERY_REQUIRED",
+      };
+    }
+
+    const searchTerm = query.trim();
+
+    const { data: products, error } = await supabase
+      .from("products")
+      .select(
+        `
+        *,
+        farmers!inner(id, farm_name, location, rating, is_verified),
+        reviews:reviews(count),
+        wishlists:wishlists(count)
+      `
+      )
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .gt("stock", 0)
+      .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
+      .order("total_sold", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Search products error:", error);
+      return {
+        success: false,
+        message: `Gagal mencari produk: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    const transformedProducts = (products || []).map((p) =>
+      transformMarketProduct(p as Record<string, unknown>)
+    );
+
+    return {
+      success: true,
+      message: `Ditemukan ${transformedProducts.length} produk`,
+      data: transformedProducts,
+    };
+  } catch (error) {
+    console.error("Search products exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mencari produk",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// GET PRODUCT CATEGORIES WITH COUNT (USER SIDE)
+// ===========================================
+
+export type CategoryCount = {
+  category: string;
+  count: number;
+};
+
+export async function getProductCategories(): Promise<
+  ActionResponse<CategoryCount[]>
+> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("category")
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .gt("stock", 0);
+
+    if (error) {
+      console.error("Get categories error:", error);
+      return {
+        success: false,
+        message: `Gagal mengambil kategori: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    // Count products per category
+    const categoryMap = new Map<string, number>();
+    (data || []).forEach((item) => {
+      const cat = item.category || "OTHER";
+      categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
+    });
+
+    const categories: CategoryCount[] = Array.from(categoryMap.entries())
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return {
+      success: true,
+      message: "Berhasil mengambil kategori",
+      data: categories,
+    };
+  } catch (error) {
+    console.error("Get categories exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil kategori",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+// Legacy Product interface for backward compatibility
 export interface Product {
-  id: number;
+  id: number | string;
   name: string;
   description: string;
   price: number;
@@ -12,14 +13,26 @@ export interface Product {
   reviews: number;
   stock: number;
   image: string;
+  images?: string[];
   category: string;
   discount?: number;
+  discountPercent?: number;
+  finalPrice?: number;
+  slug?: string;
+  totalSold?: number;
+  farmer?: {
+    id: string;
+    farmName: string;
+    location: string | null;
+    rating: number;
+    isVerified: boolean;
+  };
 }
 
 interface ProductCardProps {
   product: Product;
-  wishlist: number[];
-  onToggleWishlist: (id: number) => void;
+  wishlist: (number | string)[];
+  onToggleWishlist: (id: number | string) => void;
 }
 
 export default function ProductCard({
@@ -31,6 +44,13 @@ export default function ProductCard({
   const [showParticles, setShowParticles] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isWishlistAnimating, setIsWishlistAnimating] = useState(false);
+
+  // Handle both legacy and new data formats
+  const productImage =
+    product.images?.[0] || product.image || "/assets/dummy/magot.png";
+  const discount = product.discountPercent || product.discount || 0;
+  const productSlug = product.slug || product.id.toString();
+  const reviews = product.reviews || 0;
 
   const handleAddToCart = () => {
     setIsAdding(true);
@@ -187,9 +207,9 @@ export default function ProductCard({
           } as React.CSSProperties
         }
       >
-        <Link href={`/market/products/${product.id}`}>
+        <Link href={`/market/products/${productSlug}`}>
           <img
-            src={product.image}
+            src={productImage}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
           />
@@ -279,9 +299,9 @@ export default function ProductCard({
         </div>
 
         {/* Discount Badge */}
-        {product.discount && (
+        {discount > 0 && (
           <div className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[9px] font-bold rounded-full shadow-lg animate-pulse pointer-events-none">
-            🔥 DISKON {product.discount}%
+            🔥 DISKON {discount}%
           </div>
         )}
       </div>
@@ -313,16 +333,16 @@ export default function ProductCard({
             <span className="text-[10px] font-semibold text-gray-800">
               {product.rating}
             </span>
-            <span className="text-[9px] text-gray-500">
-              ({product.reviews})
-            </span>
+            <span className="text-[9px] text-gray-500">({reviews})</span>
           </div>
-          <span className="text-[9px] text-gray-500">{product.stock} kg</span>
+          <span className="text-[9px] text-gray-500">
+            {product.stock} {product.unit}
+          </span>
         </div>
 
         {/* Price */}
         <div className="mb-1.5">
-          {product.discount ? (
+          {discount > 0 ? (
             <div className="space-y-0.5">
               <div className="flex items-baseline gap-1">
                 <span
@@ -330,8 +350,9 @@ export default function ProductCard({
                   style={{ color: "#303646" } as React.CSSProperties}
                 >
                   Rp{" "}
-                  {Math.round(
-                    product.price * (1 - product.discount / 100)
+                  {(
+                    product.finalPrice ||
+                    Math.round(product.price * (1 - discount / 100))
                   ).toLocaleString("id-ID")}
                 </span>
                 <span className="text-[9px] text-gray-500">
@@ -343,7 +364,7 @@ export default function ProductCard({
                   Rp {product.price.toLocaleString("id-ID")}
                 </span>
                 <span className="text-[8px] px-1 py-0.5 bg-red-100 text-red-600 font-bold rounded">
-                  -{product.discount}%
+                  -{discount}%
                 </span>
               </div>
             </div>
@@ -519,7 +540,7 @@ export default function ProductCard({
           </motion.button>
 
           <Link
-            href={`/market/products/${product.id}`}
+            href={`/market/products/${productSlug}`}
             className="px-2 py-1.5 bg-gray-100 text-gray-700 rounded-md font-semibold text-[10px] hover:bg-gray-200 hover:scale-105 transition-all active:scale-95 flex items-center justify-center"
           >
             <svg

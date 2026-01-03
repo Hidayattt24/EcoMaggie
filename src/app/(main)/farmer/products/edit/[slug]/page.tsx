@@ -54,6 +54,7 @@ export default function EditProductPage({ params }: PageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showUnitDropdown, setShowUnitDropdown] = useState(false);
   const [categoryInput, setCategoryInput] = useState("");
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
 
@@ -628,25 +629,6 @@ export default function EditProductPage({ params }: PageProps) {
                     </div>
                   </div>
                 </div>
-
-                {/* Unit */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Satuan <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="unit"
-                    value={formData.unit}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all appearance-none cursor-pointer text-gray-900"
-                  >
-                    {units.map((unit) => (
-                      <option key={unit} value={unit}>
-                        {unit}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
 
@@ -657,53 +639,214 @@ export default function EditProductPage({ params }: PageProps) {
                 Manajemen Stok
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
+              <div className="space-y-4">
+                {/* Unit Selection - Modern Dropdown like Category */}
+                <div className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Jumlah Stok <span className="text-red-500">*</span>
+                    Satuan Produk <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleChange}
-                    placeholder="100"
-                    min="0"
-                    className={`w-full px-4 py-3 bg-white border-2 ${
-                      errors.stock ? "border-red-500" : "border-gray-200"
-                    } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
-                  />
-                  {errors.stock && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.stock}
-                    </p>
-                  )}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowUnitDropdown(!showUnitDropdown)}
+                      onBlur={() =>
+                        setTimeout(() => setShowUnitDropdown(false), 200)
+                      }
+                      className={`w-full px-4 py-3 bg-white border-2 ${
+                        showUnitDropdown
+                          ? "border-[#A3AF87]"
+                          : "border-[#A3AF87]/40"
+                      } rounded-xl focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-left flex items-center justify-between hover:border-[#A3AF87] hover:shadow-md shadow-sm`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 bg-[#A3AF87]/10 rounded-lg">
+                          <Package className="h-4 w-4 text-[#A3AF87]" />
+                        </div>
+                        <span className="font-semibold text-gray-900">
+                          {formData.unit === "kg"
+                            ? "Kilogram (kg)"
+                            : formData.unit === "gram"
+                            ? "Gram (g)"
+                            : formData.unit === "liter"
+                            ? "Liter (L)"
+                            : formData.unit === "box"
+                            ? "Box"
+                            : "Pieces (pcs)"}
+                        </span>
+                      </div>
+                      <svg
+                        className={`h-5 w-5 text-[#A3AF87] transition-transform duration-200 ${
+                          showUnitDropdown ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m19 9-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+
+                    {/* Unit Dropdown */}
+                    {showUnitDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute z-50 w-full mt-2 bg-white border-2 border-[#A3AF87]/30 rounded-xl shadow-xl overflow-hidden"
+                      >
+                        <div className="px-3 py-2 bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/5 border-b border-gray-100">
+                          <p className="text-xs font-semibold text-[#5a6c5b]">
+                            Pilih Satuan Produk
+                          </p>
+                        </div>
+                        <div className="py-1">
+                          {[
+                            {
+                              value: "kg",
+                              label: "Kilogram (kg)",
+                              desc: "Untuk produk berat besar",
+                            },
+                            {
+                              value: "gram",
+                              label: "Gram (g)",
+                              desc: "Untuk produk berat kecil",
+                            },
+                            {
+                              value: "liter",
+                              label: "Liter (L)",
+                              desc: "Untuk produk cair",
+                            },
+                            {
+                              value: "box",
+                              label: "Box",
+                              desc: "Untuk produk kemasan",
+                            },
+                            {
+                              value: "pcs",
+                              label: "Pieces (pcs)",
+                              desc: "Untuk produk satuan",
+                            },
+                          ].map((unit) => (
+                            <button
+                              key={unit.value}
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  unit: unit.value,
+                                }));
+                                setShowUnitDropdown(false);
+                              }}
+                              className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 group ${
+                                formData.unit === unit.value
+                                  ? "bg-[#A3AF87]/15 border-l-4 border-[#A3AF87]"
+                                  : "hover:bg-[#A3AF87]/10"
+                              }`}
+                            >
+                              <div
+                                className={`p-1.5 rounded-lg ${
+                                  formData.unit === unit.value
+                                    ? "bg-[#A3AF87]"
+                                    : "bg-gray-100 group-hover:bg-[#A3AF87]/20"
+                                }`}
+                              >
+                                <Package
+                                  className={`h-4 w-4 ${
+                                    formData.unit === unit.value
+                                      ? "text-white"
+                                      : "text-gray-500 group-hover:text-[#A3AF87]"
+                                  }`}
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <p
+                                  className={`text-sm font-semibold ${
+                                    formData.unit === unit.value
+                                      ? "text-[#303646]"
+                                      : "text-gray-700"
+                                  }`}
+                                >
+                                  {unit.label}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {unit.desc}
+                                </p>
+                              </div>
+                              {formData.unit === unit.value && (
+                                <div className="w-2 h-2 rounded-full bg-[#A3AF87]"></div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Pilih satuan yang sesuai dengan produk Anda
+                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ambang Batas Stok <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="lowStockThreshold"
-                    value={formData.lowStockThreshold}
-                    onChange={handleChange}
-                    placeholder="20"
-                    min="0"
-                    className={`w-full px-4 py-3 bg-white border-2 ${
-                      errors.lowStockThreshold
-                        ? "border-red-500"
-                        : "border-gray-200"
-                    } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
-                  />
-                  {errors.lowStockThreshold && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.lowStockThreshold}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Jumlah Stok <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="stock"
+                      value={formData.stock}
+                      onChange={handleChange}
+                      placeholder={`Contoh: 100 ${formData.unit || "satuan"}`}
+                      min="0"
+                      step="0.01"
+                      className={`w-full px-4 py-3 bg-white border-2 ${
+                        errors.stock ? "border-red-500" : "border-gray-200"
+                      } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
+                    />
+                    {errors.stock && (
+                      <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.stock}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Total stok tersedia dalam {formData.unit || "satuan"}
                     </p>
-                  )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Ambang Batas Stok <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="lowStockThreshold"
+                      value={formData.lowStockThreshold}
+                      onChange={handleChange}
+                      placeholder={`Contoh: 20 ${formData.unit || "satuan"}`}
+                      min="0"
+                      step="0.01"
+                      className={`w-full px-4 py-3 bg-white border-2 ${
+                        errors.lowStockThreshold
+                          ? "border-red-500"
+                          : "border-gray-200"
+                      } rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-gray-900`}
+                    />
+                    {errors.lowStockThreshold && (
+                      <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.lowStockThreshold}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      ⚠️ Peringatan muncul jika stok ≤ nilai ini (
+                      {formData.unit || "satuan"})
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

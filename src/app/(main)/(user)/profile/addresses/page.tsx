@@ -29,6 +29,7 @@ import {
   getCurrentUserProfile,
   type UserProfile,
 } from "@/lib/api/profile.actions";
+import AddressFormWithAPI from "@/components/user/AddressFormWithAPI";
 import Swal from "sweetalert2";
 
 export default function AddressesPage() {
@@ -47,9 +48,19 @@ export default function AddressesPage() {
     recipientPhone: "",
     province: "",
     city: "",
+    district: "",
+    village: "",
     postalCode: "",
     streetAddress: "",
   });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [resetTrigger, setResetTrigger] = useState(0);
+
+  // Debug: Log newAddress changes
+  useEffect(() => {
+    console.log("📝 newAddress state changed:", newAddress);
+    console.log("  - postalCode:", newAddress.postalCode);
+  }, [newAddress]);
 
   // Fetch addresses and profile on mount
   useEffect(() => {
@@ -70,6 +81,24 @@ export default function AddressesPage() {
     }
 
     if (profileResult.success && profileResult.data) {
+      console.log("📦 User Profile Data:", profileResult.data);
+      console.log("📍 Province:", profileResult.data.province);
+      console.log("🏙️ City:", profileResult.data.city);
+      console.log("🏘️ District:", profileResult.data.district);
+      console.log("🏡 Village:", profileResult.data.village);
+      console.log("📮 Postal Code:", profileResult.data.postalCode);
+      console.log("🏠 Full Address:", profileResult.data.fullAddress);
+      
+      // Check if village is empty
+      if (!profileResult.data.village || profileResult.data.village.trim() === "") {
+        console.warn("⚠️ WARNING: Village data is empty!");
+        console.warn("   This means the user did not fill in the village/kelurahan field during registration,");
+        console.warn("   OR the data was not saved to the database.");
+        console.warn("   Please check:");
+        console.warn("   1. Did the user fill in the Kelurahan/Desa field during registration?");
+        console.warn("   2. Check the database directly to see if the 'village' column has data");
+      }
+      
       setUserProfile(profileResult.data);
     }
 
@@ -86,6 +115,58 @@ export default function AddressesPage() {
   // Handle Add/Edit Address
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const errors: Record<string, string> = {};
+    
+    if (!newAddress.label.trim()) {
+      errors.label = "Label alamat wajib diisi";
+    }
+    
+    if (!newAddress.recipientName.trim()) {
+      errors.recipientName = "Nama penerima wajib diisi";
+    }
+    
+    if (!newAddress.recipientPhone.trim()) {
+      errors.recipientPhone = "Nomor telepon wajib diisi";
+    } else if (!/^(\+62|62|0)[0-9]{9,12}$/.test(newAddress.recipientPhone.replace(/[\s-]/g, ""))) {
+      errors.recipientPhone = "Format nomor telepon tidak valid";
+    }
+    
+    if (!newAddress.province.trim()) {
+      errors.province = "Provinsi wajib dipilih";
+    }
+    
+    if (!newAddress.city.trim()) {
+      errors.city = "Kota/Kabupaten wajib dipilih";
+    }
+    
+    if (!newAddress.district || !newAddress.district.trim()) {
+      errors.district = "Kecamatan wajib diisi";
+    }
+    
+    if (!newAddress.village || !newAddress.village.trim()) {
+      errors.village = "Kelurahan/Desa wajib diisi";
+    }
+    
+    if (!newAddress.postalCode.trim()) {
+      errors.postalCode = "Kode pos wajib diisi";
+    } else if (!/^\d{5}$/.test(newAddress.postalCode)) {
+      errors.postalCode = "Kode pos harus 5 digit angka";
+    }
+    
+    if (!newAddress.streetAddress.trim()) {
+      errors.streetAddress = "Alamat lengkap wajib diisi";
+    } else if (newAddress.streetAddress.trim().length < 10) {
+      errors.streetAddress = "Alamat lengkap minimal 10 karakter";
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    
+    setFormErrors({});
     setIsSaving(true);
 
     if (editingAddress) {
@@ -228,10 +309,14 @@ export default function AddressesPage() {
       recipientPhone: address.recipientPhone,
       province: address.province,
       city: address.city,
+      district: address.district || "",
+      village: address.village || "",
       postalCode: address.postalCode,
       streetAddress: address.streetAddress,
     });
     setShowAddForm(true);
+    // Trigger reset to allow auto-select
+    setResetTrigger((prev) => prev + 1);
   };
 
   // Reset Form
@@ -242,9 +327,12 @@ export default function AddressesPage() {
       recipientPhone: "",
       province: "",
       city: "",
+      district: "",
+      village: "",
       postalCode: "",
       streetAddress: "",
     });
+    setFormErrors({});
     setShowAddForm(false);
     setEditingAddress(null);
   };
@@ -292,6 +380,8 @@ export default function AddressesPage() {
                   recipientPhone: "",
                   province: "",
                   city: "",
+                  district: "",
+                  village: "",
                   postalCode: "",
                   streetAddress: "",
                 });
@@ -344,9 +434,17 @@ export default function AddressesPage() {
                       onChange={(e) =>
                         setNewAddress({ ...newAddress, label: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
+                      className={`w-full px-4 py-3 border-2 ${
+                        formErrors.label ? "border-red-500" : "border-gray-200"
+                      } rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium`}
                       placeholder="Rumah, Kantor, dll"
                     />
+                    {formErrors.label && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.label}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -363,9 +461,17 @@ export default function AddressesPage() {
                           recipientName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
+                      className={`w-full px-4 py-3 border-2 ${
+                        formErrors.recipientName ? "border-red-500" : "border-gray-200"
+                      } rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium`}
                       placeholder="Nama lengkap"
                     />
+                    {formErrors.recipientName && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.recipientName}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -382,89 +488,42 @@ export default function AddressesPage() {
                           recipientPhone: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
+                      className={`w-full px-4 py-3 border-2 ${
+                        formErrors.recipientPhone ? "border-red-500" : "border-gray-200"
+                      } rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium`}
                       placeholder="08xxxxxxxxxx"
                     />
+                    {formErrors.recipientPhone && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.recipientPhone}
+                      </p>
+                    )}
                     <p className="mt-1 text-xs text-gray-500">
                       Format: 08xxx atau 62xxx atau +62xxx
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Provinsi
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.province}
-                      onChange={(e) =>
-                        setNewAddress({
-                          ...newAddress,
-                          province: e.target.value,
-                        })
+                  {/* Address Form with API */}
+                  <AddressFormWithAPI
+                    formData={{
+                      province: newAddress.province,
+                      city: newAddress.city,
+                      district: newAddress.district,
+                      village: newAddress.village,
+                      postalCode: newAddress.postalCode,
+                      streetAddress: newAddress.streetAddress,
+                    }}
+                    errors={formErrors}
+                    onChange={(field, value) => {
+                      setNewAddress({ ...newAddress, [field]: value });
+                      // Clear error when user starts typing
+                      if (formErrors[field]) {
+                        setFormErrors({ ...formErrors, [field]: "" });
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
-                      placeholder="Jawa Barat"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kota/Kabupaten
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.city}
-                      onChange={(e) =>
-                        setNewAddress({ ...newAddress, city: e.target.value })
-                      }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
-                      placeholder="Bandung"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kode Pos
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      pattern="[0-9]{5}"
-                      maxLength={5}
-                      value={newAddress.postalCode}
-                      onChange={(e) =>
-                        setNewAddress({
-                          ...newAddress,
-                          postalCode: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium"
-                      placeholder="40123"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">5 digit angka</p>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Alamat Lengkap
-                    </label>
-                    <textarea
-                      required
-                      value={newAddress.streetAddress}
-                      onChange={(e) =>
-                        setNewAddress({
-                          ...newAddress,
-                          streetAddress: e.target.value,
-                        })
-                      }
-                      rows={3}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all resize-none text-[#5a6c5b] font-medium"
-                      placeholder="Jalan, nomor, RT/RW, Kecamatan, dll"
-                    />
-                  </div>
+                    }}
+                    resetTrigger={resetTrigger}
+                  />
                 </div>
 
                 <div className="flex gap-3 mt-6">
@@ -520,6 +579,11 @@ export default function AddressesPage() {
                     <p className="text-xs text-gray-500">
                       Alamat ini diambil dari data pendaftaran Anda. Tambahkan
                       alamat baru untuk pengiriman.
+                      {(!userProfile.village || userProfile.village.trim() === "") && (
+                        <span className="block mt-1 text-amber-600 font-medium">
+                          ⚠️ Data kelurahan/desa belum lengkap. Silakan lengkapi saat menyimpan alamat.
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -535,32 +599,55 @@ export default function AddressesPage() {
                   </div>
                   <div className="flex items-start gap-3 text-gray-700">
                     <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span>
-                      {[
-                        userProfile.fullAddress,
-                        userProfile.city,
-                        userProfile.province,
-                        userProfile.postalCode,
-                      ]
-                        .filter(Boolean)
-                        .join(", ") || "Alamat lengkap belum diisi"}
-                    </span>
+                    <div className="flex-1">
+                      <div className="space-y-1">
+                        {userProfile.fullAddress && (
+                          <div>{userProfile.fullAddress}</div>
+                        )}
+                        <div className="text-sm text-gray-600">
+                          {[
+                            userProfile.village,
+                            userProfile.district,
+                            userProfile.city,
+                            userProfile.province,
+                            userProfile.postalCode,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "Data wilayah belum lengkap"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-amber-200">
                   <button
                     onClick={() => {
+                      console.log("🔄 Loading address from profile...");
+                      console.log("Profile data:", userProfile);
+                      console.log("  - userProfile.village:", userProfile.village);
+                      console.log("  - typeof userProfile.village:", typeof userProfile.village);
+                      console.log("  - userProfile.village || '':", userProfile.village || "");
+                      
                       setShowAddForm(true);
-                      setNewAddress({
+                      const addressData = {
                         label: "Rumah",
                         recipientName: userProfile.name || "",
                         recipientPhone: userProfile.phone || "",
                         province: userProfile.province || "",
                         city: userProfile.city || "",
+                        district: userProfile.district || "",
+                        village: userProfile.village || "",
                         postalCode: userProfile.postalCode || "",
                         streetAddress: userProfile.fullAddress || "",
-                      });
+                      };
+                      
+                      console.log("📝 Setting address data:", addressData);
+                      console.log("  - addressData.village:", addressData.village);
+                      setNewAddress(addressData);
+                      
+                      // Trigger reset to allow auto-select
+                      setResetTrigger((prev) => prev + 1);
                     }}
                     className="w-full px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all font-medium flex items-center justify-center gap-2"
                   >
@@ -626,10 +713,24 @@ export default function AddressesPage() {
                   </div>
                   <div className="flex items-start gap-3 text-gray-700">
                     <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span>
-                      {address.streetAddress}, {address.city},{" "}
-                      {address.province} {address.postalCode}
-                    </span>
+                    <div className="flex-1">
+                      <div className="space-y-1">
+                        {/* Alamat Lengkap */}
+                        <div className="font-medium">{address.streetAddress}</div>
+                        {/* Detail Wilayah */}
+                        <div className="text-sm text-gray-600">
+                          {[
+                            address.village,
+                            address.district,
+                            address.city,
+                            address.province,
+                            address.postalCode,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

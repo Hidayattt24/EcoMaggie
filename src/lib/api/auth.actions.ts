@@ -26,10 +26,12 @@ export type RegisterFormData = {
   password: string;
   jenisPengguna: string;
   namaUsaha?: string;
-  provinsi: string;
-  kabupatenKota: string;
-  kodePos?: string;
-  alamatLengkap?: string;
+  province: string;
+  city: string;
+  district: string;
+  village: string;
+  postalCode: string;
+  fullAddress: string;
 };
 
 /**
@@ -91,10 +93,12 @@ export async function registerUser(
       role: role,
       jenisPengguna: formData.jenisPengguna || "",
       namaUsaha: formData.namaUsaha || "",
-      provinsi: formData.provinsi || "",
-      kabupatenKota: formData.kabupatenKota || "",
-      kodePos: formData.kodePos || "",
-      alamatLengkap: formData.alamatLengkap || "",
+      provinsi: formData.province || "",
+      kabupatenKota: formData.city || "",
+      kecamatan: formData.district || "",
+      kelurahan: formData.village || "",
+      kodePos: formData.postalCode || "",
+      alamatLengkap: formData.fullAddress || "",
     };
 
     console.log(

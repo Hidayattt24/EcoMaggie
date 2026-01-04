@@ -26,6 +26,8 @@ export interface UserProfile {
   role: "USER" | "FARMER" | "ADMIN";
   province: string | null;
   city: string | null;
+  district: string | null;
+  village: string | null;
   postalCode: string | null;
   fullAddress: string | null;
   businessName: string | null;
@@ -89,6 +91,8 @@ export async function getCurrentUserProfile(): Promise<
         role,
         province,
         city,
+        district,
+        village,
         postal_code,
         full_address,
         business_name,
@@ -116,6 +120,14 @@ export async function getCurrentUserProfile(): Promise<
       };
     }
 
+    // Debug: Log raw profile data from database
+    console.log("🔍 [getCurrentUserProfile] Raw profile from database:", profile);
+    console.log("  - province:", profile.province);
+    console.log("  - city:", profile.city);
+    console.log("  - district:", profile.district);
+    console.log("  - village:", profile.village);
+    console.log("  - postal_code:", profile.postal_code);
+
     // Transform to UserProfile type
     const userProfile: UserProfile = {
       id: profile.id,
@@ -126,6 +138,8 @@ export async function getCurrentUserProfile(): Promise<
       role: profile.role as "USER" | "FARMER" | "ADMIN",
       province: profile.province,
       city: profile.city,
+      district: profile.district,
+      village: profile.village,
       postalCode: profile.postal_code,
       fullAddress: profile.full_address,
       businessName: profile.business_name,
@@ -134,6 +148,10 @@ export async function getCurrentUserProfile(): Promise<
       createdAt: profile.created_at,
       updatedAt: profile.updated_at,
     };
+
+    // Debug: Log transformed profile
+    console.log("✅ [getCurrentUserProfile] Transformed userProfile:", userProfile);
+    console.log("  - village after transform:", userProfile.village);
 
     return {
       success: true,
@@ -233,6 +251,8 @@ export async function updateUserProfile(
       role: updatedProfile.role,
       province: updatedProfile.province,
       city: updatedProfile.city,
+      district: updatedProfile.district,
+      village: updatedProfile.village,
       postalCode: updatedProfile.postal_code,
       fullAddress: updatedProfile.full_address,
       businessName: updatedProfile.business_name,

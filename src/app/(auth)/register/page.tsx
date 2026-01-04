@@ -5,171 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser, RegisterFormData } from "@/lib/api/auth.actions";
+import AddressFormFields from "@/components/auth/AddressFormFields";
 import Swal from "sweetalert2";
-
-// Data provinsi dan kabupaten/kota di Indonesia (simplified)
-const PROVINSI_DATA = [
-  "Aceh",
-  "Sumatera Utara",
-  "Sumatera Barat",
-  "Riau",
-  "Jambi",
-  "Sumatera Selatan",
-  "Bengkulu",
-  "Lampung",
-  "Kepulauan Bangka Belitung",
-  "Kepulauan Riau",
-  "DKI Jakarta",
-  "Jawa Barat",
-  "Jawa Tengah",
-  "DI Yogyakarta",
-  "Jawa Timur",
-  "Banten",
-  "Bali",
-  "Nusa Tenggara Barat",
-  "Nusa Tenggara Timur",
-  "Kalimantan Barat",
-  "Kalimantan Tengah",
-  "Kalimantan Selatan",
-  "Kalimantan Timur",
-  "Kalimantan Utara",
-  "Sulawesi Utara",
-  "Sulawesi Tengah",
-  "Sulawesi Selatan",
-  "Sulawesi Tenggara",
-  "Gorontalo",
-  "Sulawesi Barat",
-  "Maluku",
-  "Maluku Utara",
-  "Papua",
-  "Papua Barat",
-  "Papua Tengah",
-  "Papua Pegunungan",
-  "Papua Selatan",
-  "Papua Barat Daya",
-];
-
-// Data kabupaten/kota berdasarkan provinsi
-const KABUPATEN_KOTA_DATA: Record<string, string[]> = {
-  Aceh: [
-    "Banda Aceh",
-    "Sabang",
-    "Langsa",
-    "Lhokseumawe",
-    "Subulussalam",
-    "Aceh Besar",
-    "Pidie",
-    "Pidie Jaya",
-    "Bireuen",
-    "Aceh Utara",
-    "Aceh Timur",
-    "Aceh Tamiang",
-    "Aceh Tengah",
-    "Bener Meriah",
-    "Aceh Barat",
-    "Aceh Jaya",
-    "Nagan Raya",
-    "Aceh Barat Daya",
-    "Aceh Selatan",
-    "Aceh Singkil",
-    "Simeulue",
-    "Gayo Lues",
-    "Aceh Tenggara",
-  ],
-  "Sumatera Utara": [
-    "Medan",
-    "Binjai",
-    "Tebing Tinggi",
-    "Pematangsiantar",
-    "Tanjungbalai",
-    "Sibolga",
-    "Padangsidimpuan",
-    "Gunungsitoli",
-  ],
-  "Sumatera Barat": [
-    "Padang",
-    "Bukittinggi",
-    "Payakumbuh",
-    "Solok",
-    "Pariaman",
-    "Sawahlunto",
-  ],
-  Riau: ["Pekanbaru", "Dumai"],
-  Jambi: ["Jambi", "Sungai Penuh"],
-  "Sumatera Selatan": ["Palembang", "Prabumulih", "Pagar Alam", "Lubuklinggau"],
-  Bengkulu: ["Bengkulu"],
-  Lampung: ["Bandar Lampung", "Metro"],
-  "Kepulauan Bangka Belitung": ["Pangkalpinang"],
-  "Kepulauan Riau": ["Tanjungpinang", "Batam"],
-  "DKI Jakarta": [
-    "Jakarta Pusat",
-    "Jakarta Utara",
-    "Jakarta Barat",
-    "Jakarta Selatan",
-    "Jakarta Timur",
-    "Kepulauan Seribu",
-  ],
-  "Jawa Barat": [
-    "Bandung",
-    "Bekasi",
-    "Bogor",
-    "Cirebon",
-    "Depok",
-    "Sukabumi",
-    "Cimahi",
-    "Tasikmalaya",
-    "Banjar",
-  ],
-  "Jawa Tengah": [
-    "Semarang",
-    "Solo",
-    "Salatiga",
-    "Pekalongan",
-    "Tegal",
-    "Magelang",
-  ],
-  "DI Yogyakarta": [
-    "Yogyakarta",
-    "Sleman",
-    "Bantul",
-    "Gunung Kidul",
-    "Kulon Progo",
-  ],
-  "Jawa Timur": [
-    "Surabaya",
-    "Malang",
-    "Batu",
-    "Kediri",
-    "Blitar",
-    "Mojokerto",
-    "Madiun",
-    "Probolinggo",
-    "Pasuruan",
-  ],
-  Banten: ["Serang", "Cilegon", "Tangerang", "Tangerang Selatan"],
-  Bali: ["Denpasar", "Badung", "Gianyar", "Tabanan", "Buleleng"],
-  "Nusa Tenggara Barat": ["Mataram", "Bima"],
-  "Nusa Tenggara Timur": ["Kupang"],
-  "Kalimantan Barat": ["Pontianak", "Singkawang"],
-  "Kalimantan Tengah": ["Palangkaraya"],
-  "Kalimantan Selatan": ["Banjarmasin", "Banjarbaru"],
-  "Kalimantan Timur": ["Samarinda", "Balikpapan", "Bontang"],
-  "Kalimantan Utara": ["Tarakan"],
-  "Sulawesi Utara": ["Manado", "Bitung", "Tomohon", "Kotamobagu"],
-  "Sulawesi Tengah": ["Palu"],
-  "Sulawesi Selatan": ["Makassar", "Parepare", "Palopo"],
-  "Sulawesi Tenggara": ["Kendari", "Baubau"],
-  Gorontalo: ["Gorontalo"],
-  "Sulawesi Barat": ["Mamuju"],
-  Maluku: ["Ambon", "Tual"],
-  "Maluku Utara": ["Ternate", "Tidore Kepulauan"],
-  Papua: ["Jayapura"],
-  "Papua Barat": ["Manokwari", "Sorong"],
-  "Papua Tengah": ["Nabire"],
-  "Papua Pegunungan": ["Wamena"],
-  "Papua Selatan": ["Merauke"],
-  "Papua Barat Daya": ["Sorong Selatan"],
-};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -183,13 +20,22 @@ export default function RegisterPage() {
     confirmPassword: "",
     jenisPengguna: "",
     namaUsaha: "",
-    provinsi: "",
-    kabupatenKota: "",
-    kodePos: "",
-    alamatLengkap: "",
+    province: "",
+    city: "",
+    district: "",
+    village: "",
+    postalCode: "",
+    fullAddress: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleAddressFieldChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -225,12 +71,32 @@ export default function RegisterPage() {
       newErrors.confirmPassword = "Kata sandi tidak cocok";
     }
 
-    if (!formData.provinsi) {
-      newErrors.provinsi = "Provinsi wajib dipilih";
+    if (!formData.province) {
+      newErrors.province = "Provinsi wajib dipilih";
     }
 
-    if (!formData.kabupatenKota) {
-      newErrors.kabupatenKota = "Kabupaten/Kota wajib dipilih";
+    if (!formData.city) {
+      newErrors.city = "Kabupaten/Kota wajib dipilih";
+    }
+
+    if (!formData.district || !formData.district.trim()) {
+      newErrors.district = "Kecamatan wajib diisi";
+    }
+
+    if (!formData.village || !formData.village.trim()) {
+      newErrors.village = "Kelurahan/Desa wajib diisi";
+    }
+
+    if (!formData.postalCode || !formData.postalCode.trim()) {
+      newErrors.postalCode = "Kode pos wajib diisi";
+    } else if (!/^\d{5}$/.test(formData.postalCode)) {
+      newErrors.postalCode = "Kode pos harus 5 digit angka";
+    }
+
+    if (!formData.fullAddress || !formData.fullAddress.trim()) {
+      newErrors.fullAddress = "Alamat lengkap wajib diisi";
+    } else if (formData.fullAddress.trim().length < 10) {
+      newErrors.fullAddress = "Alamat lengkap minimal 10 karakter";
     }
 
     setErrors(newErrors);
@@ -249,10 +115,12 @@ export default function RegisterPage() {
     // Save user location to localStorage for Supply Connect eligibility check
     try {
       const locationData = {
-        provinsi: formData.provinsi,
-        kabupatenKota: formData.kabupatenKota,
-        kodePos: formData.kodePos,
-        alamatLengkap: formData.alamatLengkap,
+        province: formData.province,
+        city: formData.city,
+        district: formData.district,
+        village: formData.village,
+        postalCode: formData.postalCode,
+        fullAddress: formData.fullAddress,
       };
       localStorage.setItem(
         "ecomaggie_user_location",
@@ -270,10 +138,12 @@ export default function RegisterPage() {
       password: formData.password,
       jenisPengguna: formData.jenisPengguna,
       namaUsaha: formData.namaUsaha,
-      provinsi: formData.provinsi,
-      kabupatenKota: formData.kabupatenKota,
-      kodePos: formData.kodePos,
-      alamatLengkap: formData.alamatLengkap,
+      province: formData.province,
+      city: formData.city,
+      district: formData.district,
+      village: formData.village,
+      postalCode: formData.postalCode,
+      fullAddress: formData.fullAddress,
     };
 
     const result = await registerUser(registerData);
@@ -1216,288 +1086,44 @@ export default function RegisterPage() {
                 </h3>
               </div>
 
-              {/* Provinsi */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="provinsi"
-                  className="block text-sm font-medium text-gray-700 poppins-medium"
-                >
-                  Provinsi <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    id="provinsi"
-                    name="provinsi"
-                    value={formData.provinsi}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        provinsi: e.target.value,
-                        kabupatenKota: "", // Reset kabupaten/kota when province changes
-                      });
-                    }}
-                    className={`block w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none ${
-                      errors.provinsi ? "border-red-500" : "border-gray-300"
-                    }`}
-                    style={
-                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
-                    }
-                  >
-                    <option value="">Pilih Provinsi</option>
-                    {PROVINSI_DATA.map((prov) => (
-                      <option key={prov} value={prov}>
-                        {prov}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {errors.provinsi && (
-                  <p className="text-red-500 text-xs poppins-regular">
-                    {errors.provinsi}
-                  </p>
-                )}
-              </div>
+              {/* Address Form Fields with Biteship API Integration */}
+              <AddressFormFields
+                formData={{
+                  provinsi: formData.provinsi,
+                  kabupatenKota: formData.kabupatenKota,
+                  kecamatan: formData.kecamatan,
+                  kodePos: formData.kodePos,
+                  alamatLengkap: formData.alamatLengkap,
+                }}
+                errors={errors}
+                onChange={handleAddressFieldChange}
+              />
 
-              {/* Kabupaten/Kota */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="kabupatenKota"
-                  className="block text-sm font-medium text-gray-700 poppins-medium"
+              {/* Supply Connect Availability Notice */}
+              {formData.kabupatenKota === "Banda Aceh" && (
+                <p
+                  className="text-xs poppins-regular flex items-center gap-1 p-3 rounded-lg"
+                  style={{ 
+                    color: "#A3AF87",
+                    backgroundColor: "rgba(163, 175, 135, 0.1)"
+                  }}
                 >
-                  Kabupaten/Kota <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    id="kabupatenKota"
-                    name="kabupatenKota"
-                    value={formData.kabupatenKota}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        kabupatenKota: e.target.value,
-                      })
-                    }
-                    disabled={!formData.provinsi}
-                    className={`block w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                      errors.kabupatenKota
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                    style={
-                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
-                    }
+                  <svg
+                    className="w-4 h-4 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <option value="">
-                      {formData.provinsi
-                        ? "Pilih Kabupaten/Kota"
-                        : "Pilih Provinsi terlebih dahulu"}
-                    </option>
-                    {formData.provinsi &&
-                      KABUPATEN_KOTA_DATA[formData.provinsi]?.map((kab) => (
-                        <option key={kab} value={kab}>
-                          {kab}
-                        </option>
-                      ))}
-                  </select>
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {errors.kabupatenKota && (
-                  <p className="text-red-500 text-xs poppins-regular">
-                    {errors.kabupatenKota}
-                  </p>
-                )}
-                {formData.kabupatenKota === "Banda Aceh" && (
-                  <p
-                    className="text-xs poppins-regular flex items-center gap-1"
-                    style={{ color: "#A3AF87" }}
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    Layanan Supply Connect tersedia di wilayah Anda
-                  </p>
-                )}
-              </div>
-
-              {/* Kode Pos */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="kodePos"
-                  className="block text-sm font-medium text-gray-700 poppins-medium"
-                >
-                  Kode Pos
-                  <span className="text-gray-400 font-normal text-xs bg-gray-50 px-2 py-0.5 rounded-full ml-2">
-                    Opsional
-                  </span>
-                </label>
-                <div className="relative">
-                  <input
-                    id="kodePos"
-                    name="kodePos"
-                    type="text"
-                    maxLength={5}
-                    value={formData.kodePos}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      setFormData({ ...formData, kodePos: value });
-                    }}
-                    className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
-                    style={
-                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
-                    }
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.borderColor = "#A3AF87")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.borderColor = "")
-                    }
-                    placeholder="Contoh: 23111"
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Alamat Lengkap */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="alamatLengkap"
-                  className="block text-sm font-medium text-gray-700 poppins-medium"
-                >
-                  Alamat Lengkap
-                  <span className="text-gray-400 font-normal text-xs bg-gray-50 px-2 py-0.5 rounded-full ml-2">
-                    Opsional
-                  </span>
-                </label>
-                <div className="relative">
-                  <textarea
-                    id="alamatLengkap"
-                    name="alamatLengkap"
-                    rows={2}
-                    value={formData.alamatLengkap}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        alamatLengkap: e.target.value,
-                      })
-                    }
-                    className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular resize-none shadow-sm"
-                    style={
-                      { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
-                    }
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.borderColor = "#A3AF87")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.borderColor = "")
-                    }
-                    placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan"
-                  />
-                  <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Layanan Supply Connect tersedia di wilayah Anda
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}

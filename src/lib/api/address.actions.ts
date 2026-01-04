@@ -28,6 +28,8 @@ export interface Address {
   streetAddress: string; // full_address
   city: string;
   province: string;
+  district?: string; // kecamatan
+  village?: string; // kelurahan/desa
   postalCode: string;
   isDefault: boolean; // is_main
   latitude: number | null;
@@ -43,6 +45,8 @@ export interface CreateAddressData {
   streetAddress: string;
   city: string;
   province: string;
+  district?: string;
+  village?: string;
   postalCode: string;
   latitude?: number;
   longitude?: number;
@@ -55,6 +59,8 @@ export interface UpdateAddressData {
   streetAddress?: string;
   city?: string;
   province?: string;
+  district?: string;
+  village?: string;
   postalCode?: string;
   latitude?: number;
   longitude?: number;
@@ -114,6 +120,8 @@ export async function getUserAddresses(): Promise<ActionResponse<Address[]>> {
       streetAddress: addr.street,
       city: addr.city,
       province: addr.province,
+      district: addr.district,
+      village: addr.village,
       postalCode: addr.postal_code,
       isDefault: addr.is_default,
       latitude: addr.latitude,
@@ -281,6 +289,8 @@ export async function createAddress(
       street: addressData.streetAddress.trim(),
       city: addressData.city.trim(),
       province: addressData.province.trim(),
+      district: addressData.district?.trim() || null,
+      village: addressData.village?.trim() || null,
       postal_code: addressData.postalCode.trim(),
       is_default: isFirstAddress,
       latitude: addressData.latitude || null,
@@ -312,6 +322,8 @@ export async function createAddress(
       streetAddress: newAddress.street,
       city: newAddress.city,
       province: newAddress.province,
+      district: newAddress.district,
+      village: newAddress.village,
       postalCode: newAddress.postal_code,
       isDefault: newAddress.is_default,
       latitude: newAddress.latitude,
@@ -401,6 +413,10 @@ export async function updateAddress(
     if (updateData.city !== undefined) updates.city = updateData.city.trim();
     if (updateData.province !== undefined)
       updates.province = updateData.province.trim();
+    if (updateData.district !== undefined)
+      updates.district = updateData.district?.trim() || null;
+    if (updateData.village !== undefined)
+      updates.village = updateData.village?.trim() || null;
     if (updateData.postalCode !== undefined) {
       // Validate postal code
       if (!/^[0-9]{5}$/.test(updateData.postalCode)) {

@@ -35,12 +35,16 @@ interface ProductCardProps {
   product: Product;
   wishlist: (number | string)[];
   onToggleWishlist: (id: number | string) => void;
+  isInCart?: boolean;
+  onAddToCart?: () => void;
 }
 
 export default function ProductCard({
   product,
   wishlist,
   onToggleWishlist,
+  isInCart = false,
+  onAddToCart,
 }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
@@ -66,6 +70,11 @@ export default function ProductCard({
         setTimeout(() => {
           setShowSuccess(false);
         }, 2000);
+        
+        // Call the callback to refresh cart product IDs
+        if (onAddToCart) {
+          onAddToCart();
+        }
       } else {
         // Hide particles on error
         setShowParticles(false);
@@ -367,6 +376,32 @@ export default function ProductCard({
             🔥 DISKON {discount}%
           </div>
         )}
+
+        {/* In Cart Badge */}
+        {isInCart && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+            className="absolute bottom-1.5 right-1.5 px-2 py-0.5 text-white text-[9px] font-bold rounded-full shadow-lg pointer-events-none flex items-center gap-0.5"
+            style={{ backgroundColor: "#A3AF87" }}
+          >
+            <svg
+              className="h-2.5 w-2.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth={3}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span>Di Keranjang</span>
+          </motion.div>
+        )}
       </div>
 
       {/* Product Info */}
@@ -449,7 +484,9 @@ export default function ProductCard({
           <motion.button
             onClick={handleAddToCart}
             disabled={isAdding}
-            className="flex-1 text-white py-1.5 rounded-md font-semibold text-[10px] transition-all relative overflow-hidden disabled:opacity-70"
+            className={`flex-1 text-white py-1.5 rounded-md font-semibold text-[10px] transition-all relative overflow-hidden disabled:opacity-70 ${
+              isInCart ? "ring-2 ring-[#A3AF87] ring-offset-1" : ""
+            }`}
             style={
               {
                 backgroundColor: "#A3AF87",
@@ -544,19 +581,35 @@ export default function ProductCard({
                   ease: "easeInOut",
                 }}
               >
-                <svg
-                  className="h-3 w-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
+                {isInCart && !isAdding ? (
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                )}
               </motion.div>
 
               <motion.span
@@ -569,7 +622,11 @@ export default function ProductCard({
                 }
                 transition={{ duration: 0.5, repeat: isAdding ? Infinity : 0 }}
               >
-                {isAdding ? "Ditambah!" : "Keranjang"}
+                {isAdding
+                  ? "Ditambah!"
+                  : isInCart
+                  ? "Tambah Lagi"
+                  : "Keranjang"}
               </motion.span>
             </motion.div>
 

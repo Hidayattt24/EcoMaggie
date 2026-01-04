@@ -725,3 +725,73 @@ export async function getCartItemCount(): Promise<number> {
     return 0;
   }
 }
+
+/**
+ * Get product IDs that are in user's cart
+ * Used to show "Already in Cart" indicators on product listings
+ */
+export async function getCartProductIds(): Promise<ActionResponse<string[]>> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: true,
+        message: "No user logged in",
+        data: [],
+      };
+    }
+
+    const { data: cart, error: cartError } = await supabase
+      .from("carts")
+      .select(
+        `
+        cart_items (
+          product_id
+        )
+      `
+      )
+      .eq("user_id", user.id)
+      .single();
+
+    // No cart exists yet
+    if (cartError?.code === "PGRST116") {
+      return {
+        success: true,
+        message: "Cart is empty",
+        data: [],
+      };
+    }
+
+    // Other errors
+    if (cartError || !cart) {
+      console.error("🛒 [getCartProductIds] Error:", cartError);
+      return {
+        success: false,
+        message: "Failed to get cart products",
+        data: [],
+        error: cartError?.message || "Unknown error",
+      };
+    }
+
+    const productIds = cart.cart_items.map((item: any) => item.product_id);
+
+    return {
+      success: true,
+      message: "Cart product IDs retrieved",
+      data: productIds,
+    };
+  } catch (error) {
+    console.error("Get cart product IDs error:", error);
+    return {
+      success: false,
+      message: "System error",
+      data: [],
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}

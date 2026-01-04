@@ -15,6 +15,7 @@ import {
   MarketProductFilters,
   CategoryCount,
 } from "@/lib/api/product.actions";
+import { getCartProductIds } from "@/lib/api/cart.actions";
 import Swal from "sweetalert2";
 
 // Category mapping for display names
@@ -66,6 +67,7 @@ export default function MarketProductsPage() {
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sortBy, setSortBy] = useState("newest");
   const [wishlist, setWishlist] = useState<string[]>([]);
+  const [cartProductIds, setCartProductIds] = useState<string[]>([]);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState<string | null>(
     null
   );
@@ -103,6 +105,17 @@ export default function MarketProductsPage() {
       }
     }
     fetchWishlist();
+  }, []);
+
+  // Fetch user's cart product IDs on mount
+  useEffect(() => {
+    async function fetchCartProductIds() {
+      const result = await getCartProductIds();
+      if (result.success && result.data) {
+        setCartProductIds(result.data);
+      }
+    }
+    fetchCartProductIds();
   }, []);
 
   // Fetch products when filters change
@@ -462,6 +475,15 @@ export default function MarketProductsPage() {
                     product={product}
                     wishlist={wishlist}
                     onToggleWishlist={handleToggleWishlist}
+                    isInCart={cartProductIds.includes(product.id.toString())}
+                    onAddToCart={() => {
+                      // Refresh cart product IDs after adding to cart
+                      getCartProductIds().then((result) => {
+                        if (result.success && result.data) {
+                          setCartProductIds(result.data);
+                        }
+                      });
+                    }}
                   />
                 ))}
               </div>

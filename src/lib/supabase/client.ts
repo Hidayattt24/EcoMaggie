@@ -1,8 +1,6 @@
 /**
- * Supabase Browser Client
- * ===========================================
- * Digunakan untuk akses dari browser/client-side
- * Menggunakan ANON_KEY (public, dengan RLS)
+ * Supabase Client for Client Components
+ * Use this in client components (components with "use client")
  */
 
 import { createBrowserClient } from "@supabase/ssr";

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Scale,
@@ -18,6 +17,7 @@ import {
   FileText,
   Loader2,
   AlertCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import { getSupplyById, type UserSupply } from "@/lib/api/supply.actions";
 
@@ -80,7 +80,7 @@ const getStatusConfig = (dbStatus: string) => {
   };
 };
 
-// Build timeline from status history
+// Build timeline from status history - 5 steps consistent with farmer view
 const buildTimeline = (supply: UserSupply) => {
   const timeline = [
     {
@@ -89,81 +89,32 @@ const buildTimeline = (supply: UserSupply) => {
       date: supply.createdAt,
       completed: true,
     },
-  ];
-
-  // Add status history items
-  if (supply.statusHistory && supply.statusHistory.length > 0) {
-    supply.statusHistory.forEach((history) => {
-      if (history.status === "SCHEDULED") {
-        timeline.push({
-          status: "SCHEDULED",
-          label: "Pickup Dikonfirmasi",
-          date: history.timestamp,
-          completed: true,
-        });
-      } else if (history.status === "ON_THE_WAY") {
-        timeline.push({
-          status: "ON_THE_WAY",
-          label: "Kurir Dalam Perjalanan",
-          date: history.timestamp,
-          completed: true,
-        });
-      } else if (history.status === "PICKED_UP") {
-        timeline.push({
-          status: "PICKED_UP",
-          label: "Sampah Diambil",
-          date: history.timestamp,
-          completed: true,
-        });
-      } else if (history.status === "COMPLETED") {
-        timeline.push({
-          status: "COMPLETED",
-          label: "Selesai Diproses",
-          date: history.timestamp,
-          completed: true,
-        });
-      } else if (history.status === "CANCELLED") {
-        timeline.push({
-          status: "CANCELLED",
-          label: "Dibatalkan",
-          date: history.timestamp,
-          completed: true,
-        });
-      }
-    });
-  }
-
-  // Add pending steps based on current status
-  const currentStatus = supply.status;
-  if (currentStatus === "PENDING") {
-    timeline.push({
+    {
       status: "SCHEDULED",
-      label: "Pickup Dikonfirmasi",
-      date: "",
-      completed: false,
-    });
-  }
-  if (
-    currentStatus === "PENDING" ||
-    currentStatus === "SCHEDULED" ||
-    currentStatus === "ON_THE_WAY"
-  ) {
-    timeline.push({
+      label: "Pickup Dijadwalkan",
+      date: supply.statusHistory?.find((h: any) => h.status === "SCHEDULED")?.timestamp || null,
+      completed: ["SCHEDULED", "ON_THE_WAY", "PICKED_UP", "COMPLETED"].includes(supply.status),
+    },
+    {
+      status: "ON_THE_WAY",
+      label: "Driver Menuju Lokasi",
+      date: supply.statusHistory?.find((h: any) => h.status === "ON_THE_WAY")?.timestamp || null,
+      completed: ["ON_THE_WAY", "PICKED_UP", "COMPLETED"].includes(supply.status),
+    },
+    {
       status: "PICKED_UP",
       label: "Sampah Diambil",
-      date: "",
-      completed: false,
-    });
-  }
-  if (currentStatus !== "COMPLETED" && currentStatus !== "CANCELLED") {
-    timeline.push({
+      date: supply.pickedUpAt || supply.statusHistory?.find((h: any) => h.status === "PICKED_UP")?.timestamp || null,
+      completed: ["PICKED_UP", "COMPLETED"].includes(supply.status),
+    },
+    {
       status: "COMPLETED",
-      label: "Selesai Diproses",
-      date: "",
-      completed: false,
-    });
-  }
-
+      label: "Sampah Diterima",
+      date: supply.completedAt || supply.statusHistory?.find((h: any) => h.status === "COMPLETED")?.timestamp || null,
+      completed: supply.status === "COMPLETED",
+    },
+  ];
+  
   return timeline;
 };
 
@@ -172,7 +123,6 @@ export default function SupplyDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const router = useRouter();
   const [supply, setSupply] = useState<UserSupply | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -462,6 +412,40 @@ export default function SupplyDetailPage({
                       <p className="text-sm lg:text-base text-[#303646]">
                         {supply.notes}
                       </p>
+                    </div>
+                  </div>
+                )}
+
+                {supply.photoUrl && (
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-2.5 lg:p-3 rounded-xl flex-shrink-0"
+                      style={{ backgroundColor: "rgba(163, 175, 135, 0.15)" }}
+                    >
+                      <ImageIcon className="h-5 w-5 text-[#A3AF87]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-2">Foto/Video Sampah</p>
+                      <div className="relative w-full max-w-md">
+                        {supply.photoUrl.endsWith('.mp4') || 
+                         supply.photoUrl.endsWith('.mov') || 
+                         supply.photoUrl.endsWith('.avi') ||
+                         supply.photoUrl.includes('/videos/') ? (
+                          <video
+                            src={supply.photoUrl}
+                            controls
+                            className="w-full h-48 lg:h-64 object-cover rounded-xl border-2 border-gray-200"
+                          >
+                            Browser Anda tidak mendukung video.
+                          </video>
+                        ) : (
+                          <img
+                            src={supply.photoUrl}
+                            alt="Waste photo"
+                            className="w-full h-48 lg:h-64 object-cover rounded-xl border-2 border-gray-200"
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

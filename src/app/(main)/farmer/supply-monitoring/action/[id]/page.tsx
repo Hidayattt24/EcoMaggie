@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -18,7 +18,16 @@ import {
   Scale,
   FileText,
   Phone,
+  Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
+import {
+  getFarmerSupplyById,
+  updateSupplyStatus,
+  type SupplyWithUser,
+} from "@/lib/api/farmer-supply.actions";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/ui/Toast";
 
 interface SupplyActionPageProps {
   params: Promise<{
@@ -26,74 +35,112 @@ interface SupplyActionPageProps {
   }>;
 }
 
-// Mock supply data
-const getSupplyData = (id: string) => ({
-  id: id,
-  supplierId: "USR-123",
-  supplierName: "Ahmad Yani",
-  supplierPhone: "082288953268",
-  wasteType: "Sisa Makanan",
-  weight: "3-5 kg",
-  estimatedWeight: 4,
-  address: "Jl. T. Nyak Arief No. 12, Lamnyong, Banda Aceh",
-  pickupDate: "2026-01-04",
-  pickupTime: "08:00 - 10:00",
-  status: "waiting",
-  submittedAt: "2026-01-03T14:30:00",
-  driver: null,
-  driverPhone: null,
-  estimatedArrival: null,
-  actualWeight: null,
-  condition: null,
-  notes: "Sampah di depan pagar, kantong hitam",
-});
-
 const statusConfig = {
-  waiting: {
+  PENDING: {
     label: "Menunggu Penjadwalan",
     color: "bg-amber-50 text-amber-700 border-amber-200",
     dotColor: "bg-amber-500",
     actions: ["schedule"],
   },
-  scheduled: {
+  SCHEDULED: {
     label: "Terjadwal",
     color: "bg-blue-50 text-blue-700 border-blue-200",
     dotColor: "bg-blue-500",
     actions: ["pickup"],
   },
-  on_route: {
+  ON_THE_WAY: {
     label: "Dalam Perjalanan",
     color: "bg-purple-50 text-purple-700 border-purple-200",
     dotColor: "bg-purple-500",
+    actions: ["picked_up"],
+  },
+  PICKED_UP: {
+    label: "Sudah Diambil",
+    color: "bg-green-50 text-green-700 border-green-200",
+    dotColor: "bg-green-500",
     actions: ["complete"],
   },
-  completed: {
+  COMPLETED: {
     label: "Selesai Diproses",
     color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]",
     dotColor: "bg-[#A3AF87]",
     actions: [],
   },
+  CANCELLED: {
+    label: "Dibatalkan",
+    color: "bg-red-50 text-red-700 border-red-200",
+    dotColor: "bg-red-500",
+    actions: [],
+  },
+};
+
+// Map waste type to display label
+const wasteTypeLabels: Record<string, string> = {
+  sisa_makanan: "Sisa Makanan",
+  sayuran_buah: "Sayuran & Buah",
+  sisa_dapur: "Sisa Dapur",
+  campuran: "Campuran Organik",
+};
+
+// Map weight to display label
+const weightLabels: Record<string, string> = {
+  "1": "< 1 kg",
+  "3": "1-3 kg",
+  "5": "3-5 kg",
+  "10": "5-10 kg",
+  "15": "10-15 kg",
 };
 
 export default function SupplyActionPage({ params }: SupplyActionPageProps) {
   const router = useRouter();
   const { id } = use(params);
-  const supply = getSupplyData(id);
-
-  const [currentStatus, setCurrentStatus] = useState(supply.status);
+  const { toast, success, error, warning, hideToast } = useToast();
+  
+  const [supply, setSupply] = useState<SupplyWithUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<string>("");
   const [formData, setFormData] = useState({
-    driver: supply.driver || "",
-    driverPhone: supply.driverPhone || "",
-    estimatedArrival: supply.estimatedArrival || "",
-    actualWeight: supply.actualWeight || "",
-    condition: supply.condition || "",
+    driver: "",
+    driverPhone: "",
+    estimatedArrival: "",
+    actualWeight: "",
+    condition: "",
     internalNotes: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  const status = statusConfig[currentStatus as keyof typeof statusConfig];
+  // Fetch supply data
+  useEffect(() => {
+    async function fetchSupply() {
+      setIsLoading(true);
+      setErrorMsg(null);
+      try {
+        const response = await getFarmerSupplyById(id);
+        if (response.success && response.data) {
+          setSupply(response.data);
+          setCurrentStatus(response.data.status);
+          setFormData({
+            driver: response.data.courierName || "",
+            driverPhone: response.data.courierPhone || "",
+            estimatedArrival: response.data.estimatedArrival || "",
+            actualWeight: response.data.actualWeight?.toString() || "",
+            condition: response.data.wasteCondition || "",
+            internalNotes: response.data.internalNotes || "",
+          });
+        } else {
+          setErrorMsg(response.message || "Gagal memuat data supply");
+        }
+      } catch (err) {
+        console.error("Error fetching supply:", err);
+        setErrorMsg("Terjadi kesalahan saat memuat data");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchSupply();
+  }, [id]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -105,52 +152,157 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
   };
 
   const handleStatusChange = async (newStatus: string) => {
+    if (!supply) return;
+
     // Validate required fields based on status
-    if (newStatus === "scheduled") {
+    if (newStatus === "SCHEDULED") {
       if (!formData.driver || !formData.driverPhone) {
-        alert("Harap isi nama driver dan nomor telepon untuk menjadwalkan!");
+        warning(
+          "Data Tidak Lengkap",
+          "Harap isi nama driver dan nomor telepon untuk menjadwalkan!"
+        );
         return;
       }
     }
 
-    if (newStatus === "completed") {
+    if (newStatus === "COMPLETED") {
       if (!formData.actualWeight) {
-        alert("Harap isi berat aktual sampah untuk menyelesaikan!");
+        warning(
+          "Berat Belum Diisi",
+          "Harap isi berat aktual sampah untuk menyelesaikan!"
+        );
         return;
       }
     }
 
     setIsSaving(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setCurrentStatus(newStatus);
-      setIsSaving(false);
-      setShowSuccess(true);
+    try {
+      const response = await updateSupplyStatus({
+        supplyId: supply.id,
+        status: newStatus as any,
+        courierName: formData.driver || undefined,
+        courierPhone: formData.driverPhone || undefined,
+        estimatedArrival: formData.estimatedArrival || undefined,
+        actualWeight: formData.actualWeight ? parseFloat(formData.actualWeight) : undefined,
+        wasteCondition: formData.condition || undefined,
+        internalNotes: formData.internalNotes || undefined,
+      });
 
-      setTimeout(() => {
-        setShowSuccess(false);
-        // Redirect back to detail page
-        router.push(`/farmer/supply-monitoring/${id}`);
-      }, 2000);
-    }, 1000);
+      if (response.success) {
+        setCurrentStatus(newStatus);
+        success(
+          "Status Berhasil Diupdate!",
+          `Supply telah diupdate ke status: ${statusConfig[newStatus as keyof typeof statusConfig].label}`
+        );
+
+        setTimeout(() => {
+          router.push(`/farmer/supply-monitoring/${id}`);
+        }, 2000);
+      } else {
+        error(
+          "Update Gagal",
+          response.message || "Gagal update status"
+        );
+      }
+    } catch (err) {
+      console.error("Error updating status:", err);
+      error(
+        "Terjadi Kesalahan",
+        "Terjadi kesalahan saat update status"
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSaveInfo = async () => {
+    if (!supply) return;
+
     setIsSaving(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await updateSupplyStatus({
+        supplyId: supply.id,
+        status: currentStatus as any,
+        courierName: formData.driver || undefined,
+        courierPhone: formData.driverPhone || undefined,
+        estimatedArrival: formData.estimatedArrival || undefined,
+        actualWeight: formData.actualWeight ? parseFloat(formData.actualWeight) : undefined,
+        wasteCondition: formData.condition || undefined,
+        internalNotes: formData.internalNotes || undefined,
+      });
+
+      if (response.success) {
+        success(
+          "Informasi Tersimpan!",
+          "Data verifikasi sampah berhasil disimpan"
+        );
+      } else {
+        error(
+          "Gagal Menyimpan",
+          response.message || "Gagal menyimpan informasi"
+        );
+      }
+    } catch (err) {
+      console.error("Error saving info:", err);
+      error(
+        "Terjadi Kesalahan",
+        "Terjadi kesalahan saat menyimpan informasi"
+      );
+    } finally {
       setIsSaving(false);
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 2000);
-    }, 800);
+    }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
+          <p className="text-gray-600">Memuat data supply...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (errorMsg || !supply) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-[#303646] mb-2">
+            Gagal Memuat Data
+          </h2>
+          <p className="text-gray-600 mb-6">{errorMsg || "Supply tidak ditemukan"}</p>
+          <Link
+            href="/farmer/supply-monitoring"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#95a17a] transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali ke Monitoring
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const status = statusConfig[currentStatus as keyof typeof statusConfig];
+
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      {/* Toast Notification */}
+      <Toast
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+      
+      <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -171,7 +323,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
               <h1 className="text-3xl font-bold text-[#303646] mb-2">
                 Action Center
               </h1>
-              <p className="text-gray-600">Supply ID: {supply.id}</p>
+              <p className="text-gray-600">Supply ID: {supply.supplyNumber}</p>
             </div>
 
             <div
@@ -184,20 +336,6 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             </div>
           </div>
         </motion.div>
-
-        {/* Success Message */}
-        {showSuccess && (
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="mb-6 p-4 bg-[#A3AF87]/10 border-2 border-[#A3AF87] rounded-xl flex items-center gap-3"
-          >
-            <CheckCircle className="h-5 w-5 text-[#A3AF87]" />
-            <p className="text-[#5a6c5b] font-semibold">
-              Perubahan berhasil disimpan!
-            </p>
-          </motion.div>
-        )}
 
         <div className="grid lg:grid-cols-12 gap-4 lg:gap-6">
           {/* Left Column - Supply Info (Read Only) */}
@@ -217,7 +355,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 <div>
                   <p className="text-sm text-gray-600">Nama</p>
                   <p className="font-semibold text-[#303646]">
-                    {supply.supplierName}
+                    {supply.userName}
                   </p>
                 </div>
                 <div>
@@ -225,10 +363,10 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-gray-400" />
                     <a
-                      href={`tel:${supply.supplierPhone}`}
+                      href={`tel:${supply.userPhone}`}
                       className="font-semibold text-[#303646] hover:text-[#A3AF87]"
                     >
-                      {supply.supplierPhone}
+                      {supply.userPhone}
                     </a>
                   </div>
                 </div>
@@ -245,7 +383,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 <div>
                   <p className="text-sm text-gray-600">Jenis</p>
                   <p className="font-semibold text-[#303646]">
-                    {supply.wasteType}
+                    {wasteTypeLabels[supply.wasteType] || supply.wasteType}
                   </p>
                 </div>
                 <div>
@@ -253,7 +391,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                   <div className="flex items-center gap-2">
                     <Scale className="h-4 w-4 text-gray-400" />
                     <p className="font-semibold text-[#303646]">
-                      {supply.weight} (~{supply.estimatedWeight} kg)
+                      {weightLabels[supply.estimatedWeight] || `${supply.estimatedWeight} kg`}
                     </p>
                   </div>
                 </div>
@@ -263,6 +401,39 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                     <p className="text-sm text-[#303646] italic">
                       {supply.notes}
                     </p>
+                  </div>
+                )}
+                {supply.photoUrl && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      Foto/Video
+                    </p>
+                    <div className="relative w-full">
+                      {supply.photoUrl.endsWith('.mp4') || 
+                       supply.photoUrl.endsWith('.mov') || 
+                       supply.photoUrl.endsWith('.avi') ||
+                       supply.photoUrl.endsWith('.webm') ||
+                       supply.photoUrl.includes('/videos/') ? (
+                        <video
+                          src={supply.photoUrl}
+                          controls
+                          className="w-full h-40 object-cover rounded-lg border border-gray-300 bg-gray-100"
+                        >
+                          Browser Anda tidak mendukung video.
+                        </video>
+                      ) : (
+                        <img
+                          src={supply.photoUrl}
+                          alt="Waste photo"
+                          onError={(e) => {
+                            console.error("Error loading image:", supply.photoUrl);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -277,7 +448,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-600">Alamat</p>
-                  <p className="text-sm text-[#303646]">{supply.address}</p>
+                  <p className="text-sm text-[#303646]">{supply.pickupAddress}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 flex items-center gap-2">
@@ -298,7 +469,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                     Waktu
                   </p>
                   <p className="font-semibold text-[#303646]">
-                    {supply.pickupTime}
+                    {supply.pickupTimeRange || supply.pickupTimeSlot}
                   </p>
                 </div>
               </div>
@@ -313,7 +484,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             className="lg:col-span-8 space-y-4 lg:space-y-6"
           >
             {/* Driver Assignment Form */}
-            {(currentStatus === "waiting" || currentStatus === "scheduled") && (
+            {(currentStatus === "PENDING" || currentStatus === "SCHEDULED") && (
               <div className="bg-white rounded-2xl border-2 border-gray-100 p-6">
                 <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
                   <Truck className="h-5 w-5 text-[#A3AF87]" />
@@ -377,42 +548,74 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             )}
 
             {/* Completion Form */}
-            {currentStatus === "on_route" && (
+            {(currentStatus === "ON_THE_WAY" || currentStatus === "PICKED_UP") && (
               <div className="bg-white rounded-2xl border-2 border-gray-100 p-6">
                 <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
                   <Scale className="h-5 w-5 text-[#A3AF87]" />
                   Verifikasi Sampah
                 </h3>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#303646] mb-2">
-                      Berat Aktual (kg) <span className="text-red-500">*</span>
+                <div className="space-y-6">
+                  {/* Actual Weight Input - Enhanced */}
+                  <div className="p-5 bg-gradient-to-br from-[#A3AF87]/5 to-blue-50/50 rounded-2xl border-2 border-[#A3AF87]/20">
+                    <label className="block text-base font-bold text-[#303646] mb-3 flex items-center gap-2">
+                      <Scale className="h-5 w-5 text-[#A3AF87]" />
+                      Berat Aktual Sampah <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="number"
-                      name="actualWeight"
-                      value={formData.actualWeight}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan berat sebenarnya"
-                      step="0.1"
-                      min="0"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Estimasi: {supply.estimatedWeight} kg
-                    </p>
+                    
+                    <div className="relative">
+                      <input
+                        type="number"
+                        name="actualWeight"
+                        value={formData.actualWeight}
+                        onChange={handleInputChange}
+                        placeholder="0.0"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        className="w-full px-6 py-4 pr-16 text-2xl font-bold rounded-xl border-2 border-[#A3AF87]/30 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-300 bg-white"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xl font-bold text-[#A3AF87]">
+                        kg
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 flex items-center justify-between text-sm">
+                      <p className="text-gray-600">
+                        Estimasi: <span className="font-semibold text-[#303646]">
+                          {weightLabels[supply.estimatedWeight] || `${supply.estimatedWeight} kg`}
+                        </span>
+                      </p>
+                      {formData.actualWeight && (
+                        <p className="text-[#A3AF87] font-semibold">
+                          ✓ Berat tercatat
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Weight Guide */}
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                      <p className="text-xs text-blue-800 flex items-start gap-2">
+                        <svg className="h-4 w-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                        <span>
+                          <strong>Panduan:</strong> Timbang sampah dengan timbangan digital untuk hasil akurat. Masukkan berat dalam kilogram (kg).
+                        </span>
+                      </p>
+                    </div>
                   </div>
 
+                  {/* Condition Description */}
                   <div>
                     <label className="block text-sm font-semibold text-[#303646] mb-2">
-                      Kondisi Sampah
+                      Deskripsi Kondisi Sampah
                     </label>
                     <textarea
                       name="condition"
                       value={formData.condition}
                       onChange={handleInputChange}
-                      placeholder="Contoh: Kondisi baik, sesuai deskripsi"
+                      placeholder="Contoh: Kondisi baik, sesuai deskripsi, tidak ada kontaminasi"
                       rows={3}
                       className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors resize-none text-[#303646] placeholder:text-gray-400"
                     />
@@ -453,7 +656,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             </div>
 
             {/* Status Change Actions */}
-            {currentStatus !== "completed" && (
+            {currentStatus !== "COMPLETED" && currentStatus !== "CANCELLED" && (
               <div className="bg-gradient-to-br from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-2xl border-2 border-[#A3AF87]/20 p-6">
                 <div className="flex items-start gap-3 mb-4">
                   <AlertCircle className="h-5 w-5 text-[#A3AF87] mt-0.5" />
@@ -468,9 +671,9 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 </div>
 
                 <div className="space-y-3">
-                  {currentStatus === "waiting" && (
+                  {currentStatus === "PENDING" && (
                     <button
-                      onClick={() => handleStatusChange("scheduled")}
+                      onClick={() => handleStatusChange("SCHEDULED")}
                       disabled={isSaving}
                       className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 disabled:opacity-50"
                     >
@@ -479,9 +682,9 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                     </button>
                   )}
 
-                  {currentStatus === "scheduled" && (
+                  {currentStatus === "SCHEDULED" && (
                     <button
-                      onClick={() => handleStatusChange("on_route")}
+                      onClick={() => handleStatusChange("ON_THE_WAY")}
                       disabled={isSaving}
                       className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 disabled:opacity-50"
                     >
@@ -490,9 +693,20 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                     </button>
                   )}
 
-                  {currentStatus === "on_route" && (
+                  {currentStatus === "ON_THE_WAY" && (
                     <button
-                      onClick={() => handleStatusChange("completed")}
+                      onClick={() => handleStatusChange("PICKED_UP")}
+                      disabled={isSaving}
+                      className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 disabled:opacity-50"
+                    >
+                      <CheckCircle className="h-5 w-5" />
+                      {isSaving ? "Memproses..." : "Sampah Sudah Diambil"}
+                    </button>
+                  )}
+
+                  {currentStatus === "PICKED_UP" && (
+                    <button
+                      onClick={() => handleStatusChange("COMPLETED")}
                       disabled={isSaving}
                       className="w-full px-6 py-4 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] hover:from-[#95a17a] hover:to-[#8a9471] text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 disabled:opacity-50"
                     >
@@ -505,7 +719,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             )}
 
             {/* Completed State */}
-            {currentStatus === "completed" && (
+            {(currentStatus === "COMPLETED" || currentStatus === "CANCELLED") && (
               <div className="bg-[#A3AF87]/10 rounded-2xl border-2 border-[#A3AF87] p-8 text-center">
                 <CheckCircle className="h-16 w-16 text-[#A3AF87] mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-[#303646] mb-2">
@@ -519,6 +733,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
           </motion.div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

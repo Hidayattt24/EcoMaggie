@@ -8,37 +8,25 @@ import {
   X,
   Check,
   AlertCircle,
-  Film,
   ImageIcon,
-  MapPin,
-  Info,
-  Clock,
 } from "lucide-react";
 
 interface MediaUploaderProps {
   onPhotoChange: (file: File | null, previewUrl: string | null) => void;
-  onVideoChange: (file: File | null, previewUrl: string | null, duration: number) => void;
   photoPreview: string | null;
-  videoPreview: string | null;
   className?: string;
 }
 
 export default function MediaUploader({
   onPhotoChange,
-  onVideoChange,
   photoPreview,
-  videoPreview,
   className = "",
 }: MediaUploaderProps) {
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"photo" | "video">("photo");
-  const [videoError, setVideoError] = useState<string | null>(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -121,136 +109,52 @@ export default function MediaUploader({
     }
   };
 
-  // Handle video upload
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setVideoError(null);
-
-    // Check file size (max 5MB for consistency)
-    if (file.size > 5 * 1024 * 1024) {
-      setVideoError("Ukuran video maksimal 5MB");
-      return;
-    }
-
-    // Create video element to check duration
-    const video = document.createElement("video");
-    video.preload = "metadata";
-
-    video.onloadedmetadata = () => {
-      window.URL.revokeObjectURL(video.src);
-      
-      // Check duration (max 60 seconds)
-      if (video.duration > 60) {
-        setVideoError("Durasi video maksimal 60 detik");
-        return;
-      }
-
-      // All checks passed
-      const previewUrl = URL.createObjectURL(file);
-      onVideoChange(file, previewUrl, Math.floor(video.duration));
-      setShowModal(false);
-    };
-
-    video.src = URL.createObjectURL(file);
-  };
-
   // Remove photo
   const removePhoto = () => {
     onPhotoChange(null, null);
     if (photoInputRef.current) photoInputRef.current.value = "";
   };
 
-  // Remove video
-  const removeVideo = () => {
-    onVideoChange(null, null, 0);
-    if (videoInputRef.current) videoInputRef.current.value = "";
-    setVideoError(null);
-  };
-
-  // Open modal for photo
-  const openPhotoModal = () => {
-    setModalType("photo");
-    setShowModal(true);
-  };
-
-  // Open modal for video
-  const openVideoModal = () => {
-    setModalType("video");
-    setShowModal(true);
-  };
-
   return (
     <div className={className}>
       {/* Preview Section */}
-      {(photoPreview || videoPreview) && (
+      {photoPreview && (
         <div className="mb-4">
           <div className="relative w-full aspect-video rounded-2xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-lg bg-black">
-            {photoPreview && (
-              <img
-                src={photoPreview}
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-            )}
-            {videoPreview && (
-              <video
-                ref={videoRef}
-                src={videoPreview}
-                controls
-                className="w-full h-full object-contain"
-              />
-            )}
+            <img
+              src={photoPreview}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
             <button
               type="button"
-              onClick={() => {
-                if (photoPreview) removePhoto();
-                if (videoPreview) removeVideo();
-              }}
+              onClick={removePhoto}
               className="absolute top-3 right-3 p-2 bg-red-500/90 backdrop-blur-sm text-white rounded-full hover:bg-red-600 transition-colors shadow-lg z-10"
             >
               <X className="h-4 w-4" />
             </button>
             <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-[#A3AF87]/90 backdrop-blur-sm text-white rounded-full text-xs font-medium flex items-center gap-1.5 z-10">
               <Check className="h-3.5 w-3.5" />
-              {photoPreview ? "Foto" : "Video"} Tersimpan
+              Foto Tersimpan
             </div>
           </div>
         </div>
       )}
 
-      {/* Upload Buttons Grid */}
-      {!photoPreview && !videoPreview && (
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          {/* Photo Button */}
-          <button
-            type="button"
-            onClick={openPhotoModal}
-            className="relative overflow-hidden p-6 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl hover:shadow-xl transition-all group"
-          >
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <ImageIcon className="h-10 w-10 mb-3 group-hover:scale-110 transition-transform relative z-10" />
-            <p className="font-bold text-base relative z-10">Foto</p>
-            <p className="text-xs text-white/80 mt-1 relative z-10">
-              Ambil atau upload
-            </p>
-          </button>
-
-          {/* Video Button */}
-          <button
-            type="button"
-            onClick={openVideoModal}
-            className="relative overflow-hidden p-6 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl hover:shadow-xl transition-all group"
-          >
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <Film className="h-10 w-10 mb-3 group-hover:scale-110 transition-transform relative z-10" />
-            <p className="font-bold text-base relative z-10">Video</p>
-            <p className="text-xs text-white/80 mt-1 relative z-10">
-              Max 60 detik
-            </p>
-          </button>
-        </div>
+      {/* Upload Button */}
+      {!photoPreview && (
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="w-full mb-4 relative overflow-hidden p-8 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl hover:shadow-xl transition-all group"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <ImageIcon className="h-12 w-12 mx-auto mb-3 group-hover:scale-110 transition-transform relative z-10" />
+          <p className="font-bold text-lg relative z-10">Upload Foto Sampah</p>
+          <p className="text-sm text-white/80 mt-1 relative z-10">
+            Ambil foto atau pilih dari galeri
+          </p>
+        </button>
       )}
 
       {/* Modern Info Box */}
@@ -265,20 +169,16 @@ export default function MediaUploader({
               <div className="flex items-center gap-2 mb-1.5">
                 <Camera className="h-4 w-4 text-amber-700" />
                 <h4 className="font-bold text-amber-900 text-sm">
-                  Wajib Upload Foto atau Video!
+                  Wajib Upload Foto!
                 </h4>
               </div>
               <p className="text-xs text-amber-800 leading-relaxed mb-3">
-                Tolong foto/video sampah di lokasi yang akan di-pickup. Ini membantu kurir menemukan sampah Anda dengan mudah.
+                Tolong foto sampah di lokasi yang akan di-pickup. Ini membantu kurir menemukan sampah Anda dengan mudah.
               </p>
               <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
                 <span className="px-2.5 py-1.5 bg-white/70 text-amber-800 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
                   <ImageIcon className="h-3 w-3" />
                   Foto max 5MB
-                </span>
-                <span className="px-2.5 py-1.5 bg-white/70 text-amber-800 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
-                  <Clock className="h-3 w-3" />
-                  Video max 60 detik
                 </span>
               </div>
             </div>
@@ -286,27 +186,12 @@ export default function MediaUploader({
         </div>
       </div>
 
-      {/* Video Error */}
-      {videoError && (
-        <div className="mt-3 p-3 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-2">
-          <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-red-800 font-medium">{videoError}</p>
-        </div>
-      )}
-
-      {/* Hidden Inputs */}
+      {/* Hidden Input */}
       <input
         ref={photoInputRef}
         type="file"
         accept="image/*"
         onChange={handlePhotoUpload}
-        className="hidden"
-      />
-      <input
-        ref={videoInputRef}
-        type="file"
-        accept="video/*"
-        onChange={handleVideoUpload}
         className="hidden"
       />
 
@@ -333,7 +218,7 @@ export default function MediaUploader({
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">
-                  {modalType === "photo" ? "Pilih Sumber Foto" : "Upload Video"}
+                  Pilih Sumber Foto
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
@@ -343,59 +228,43 @@ export default function MediaUploader({
                 </button>
               </div>
 
-              {modalType === "photo" ? (
-                <div className="space-y-3">
-                  {/* Camera Option */}
-                  <button
-                    type="button"
-                    onClick={openCamera}
-                    className="w-full p-5 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl hover:shadow-lg transition-all group flex items-center gap-4"
-                  >
-                    <div className="p-3 bg-white/20 rounded-xl">
-                      <Camera className="h-7 w-7" />
-                    </div>
-                    <div className="text-left flex-1">
-                      <p className="font-bold text-base">Buka Kamera</p>
-                      <p className="text-xs text-white/80 mt-0.5">
-                        Ambil foto langsung
-                      </p>
-                    </div>
-                  </button>
-
-                  {/* Gallery Option */}
-                  <button
-                    type="button"
-                    onClick={() => photoInputRef.current?.click()}
-                    className="w-full p-5 bg-white border-2 border-[#A3AF87]/30 rounded-2xl hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all group flex items-center gap-4"
-                  >
-                    <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                      <Upload className="h-7 w-7 text-[#A3AF87]" />
-                    </div>
-                    <div className="text-left flex-1">
-                      <p className="font-bold text-base text-gray-900">
-                        Upload dari Galeri
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Pilih foto yang sudah ada
-                      </p>
-                    </div>
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => videoInputRef.current?.click()}
-                    className="w-full p-6 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl hover:shadow-lg transition-all group"
-                  >
-                    <Film className="h-12 w-12 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                    <p className="font-bold text-lg">Pilih Video</p>
-                    <p className="text-sm text-white/80 mt-2">
-                      MP4, MOV • Max 5MB • Max 60 detik
+              <div className="space-y-3">
+                {/* Camera Option */}
+                <button
+                  type="button"
+                  onClick={openCamera}
+                  className="w-full p-5 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl hover:shadow-lg transition-all group flex items-center gap-4"
+                >
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Camera className="h-7 w-7" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-base">Buka Kamera</p>
+                    <p className="text-xs text-white/80 mt-0.5">
+                      Ambil foto langsung
                     </p>
-                  </button>
-                </div>
-              )}
+                  </div>
+                </button>
+
+                {/* Gallery Option */}
+                <button
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                  className="w-full p-5 bg-white border-2 border-[#A3AF87]/30 rounded-2xl hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all group flex items-center gap-4"
+                >
+                  <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
+                    <Upload className="h-7 w-7 text-[#A3AF87]" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-base text-gray-900">
+                      Upload dari Galeri
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Pilih foto yang sudah ada
+                    </p>
+                  </div>
+                </button>
+              </div>
 
               <button
                 onClick={() => setShowModal(false)}

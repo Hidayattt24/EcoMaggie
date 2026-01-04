@@ -21,7 +21,13 @@ import {
   ChevronLeft,
   ChevronRight,
   PackageX,
+  Loader2,
 } from "lucide-react";
+import {
+  getFarmerSupplyOrders,
+  getSupplyDailyTrend,
+  type SupplyWithUser,
+} from "@/lib/api/farmer-supply.actions";
 
 // Mock data - Real-time supply dari masyarakat
 const mockSupplyData = [
@@ -308,7 +314,8 @@ const statusConfig = {
 };
 
 export default function SupplyMonitoringPage() {
-  const [supplies, setSupplies] = useState(mockSupplyData);
+  const [supplies, setSupplies] = useState<SupplyWithUser[]>([]);
+  const [isLoadingSupplies, setIsLoadingSupplies] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(0); // Default 7 days
@@ -318,7 +325,47 @@ export default function SupplyMonitoringPage() {
     null
   );
   const [mounted, setMounted] = useState(false);
+  const [trendData, setTrendData] = useState<any[]>([]);
+  const [isLoadingTrend, setIsLoadingTrend] = useState(true);
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch supplies data
+  useEffect(() => {
+    async function fetchSupplies() {
+      setIsLoadingSupplies(true);
+      try {
+        const response = await getFarmerSupplyOrders();
+        if (response.success && response.data) {
+          setSupplies(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching supplies:", error);
+      } finally {
+        setIsLoadingSupplies(false);
+      }
+    }
+    fetchSupplies();
+  }, []);
+
+  // Fetch trend data
+  useEffect(() => {
+    async function fetchTrend() {
+      setIsLoadingTrend(true);
+      try {
+        const response = await getSupplyDailyTrend();
+        if (response.success && response.data) {
+          setTrendData(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching trend:", error);
+      } finally {
+        setIsLoadingTrend(false);
+      }
+    }
+    fetchTrend();
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -353,8 +400,26 @@ export default function SupplyMonitoringPage() {
   }, [selectedPreset, customRange, useCustomRange, mounted]);
 
   const weeklyTrendData = useMemo(() => {
-    return generateSupplyTrendData(dateRange.start, dateRange.end);
-  }, [dateRange]);
+    if (isLoadingTrend || trendData.length === 0) {
+      return [];
+    }
+    
+    // Filter trend data based on date range
+    const filtered = trendData.filter((item) => {
+      const itemDate = new Date(item.date);
+      return itemDate >= dateRange.start && itemDate <= dateRange.end;
+    });
+    
+    // Transform to chart format
+    return filtered.map((item) => ({
+      date: new Date(item.date).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      }),
+      fullDate: item.date,
+      volume: item.totalWeightKg,
+    }));
+  }, [dateRange, trendData, isLoadingTrend]);
 
   const handlePresetClick = (index: number) => {
     setSelectedPreset(index);
@@ -408,23 +473,46 @@ export default function SupplyMonitoringPage() {
   const todaySupplies = supplies.filter(
     (s) =>
       s.pickupDate === new Date().toISOString().split("T")[0] ||
-      s.status === "waiting" ||
-      s.status === "scheduled"
+      s.status === "PENDING" ||
+      s.status === "SCHEDULED"
   );
-  const totalWeight = todaySupplies.reduce(
-    (sum, s) => sum + s.estimatedWeight,
-    0
-  );
+  
+  const totalWeight = todaySupplies.reduce((sum, s) => {
+    const weight = parseInt(s.estimatedWeight);
+    return sum + (isNaN(weight) ? 0 : weight);
+  }, 0);
+  
   const activePickupPoints = todaySupplies.filter(
     (s) =>
-      s.status === "waiting" ||
-      s.status === "scheduled" ||
-      s.status === "on_route"
+      s.status === "PENDING" ||
+      s.status === "SCHEDULED" ||
+      s.status === "ON_THE_WAY"
   ).length;
 
-  // Filter supplies
-  const filteredSupplies =
-    filter === "all" ? supplies : supplies.filter((s) => s.status === filter);
+  // Filter supplies - map database status to display status
+  const mapStatus = (dbStatus: string) => {
+    if (dbStatus === "PENDING") return "waiting";
+    if (dbStatus === "SCHEDULED") return "scheduled";
+    if (dbStatus === "ON_THE_WAY") return "on_route";
+    if (dbStatus === "PICKED_UP" || dbStatus === "COMPLETED") return "completed";
+    return "waiting";
+  };
+  
+  const filteredSupplies = filter === "all" 
+    ? supplies 
+    : supplies.filter((s) => mapStatus(s.status) === filter);
+
+  // Show loading state
+  if (isLoadingSupplies) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
+          <p className="text-gray-600">Memuat data supply monitoring...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -512,7 +600,7 @@ export default function SupplyMonitoringPage() {
                     Menunggu
                   </p>
                   <p className="text-2xl font-bold text-amber-600">
-                    {supplies.filter((s) => s.status === "waiting").length}
+                    {supplies.filter((s) => s.status === "PENDING").length}
                   </p>
                 </div>
                 <div className="p-3 bg-purple-50 rounded-xl">
@@ -520,7 +608,7 @@ export default function SupplyMonitoringPage() {
                     Dalam Perjalanan
                   </p>
                   <p className="text-2xl font-bold text-purple-600">
-                    {supplies.filter((s) => s.status === "on_route").length}
+                    {supplies.filter((s) => s.status === "ON_THE_WAY").length}
                   </p>
                 </div>
               </div>
@@ -717,7 +805,30 @@ export default function SupplyMonitoringPage() {
             {/* Bar Chart or Empty State */}
             {weeklyTrendData.length > 0 ? (
               <>
-                <div className="overflow-x-auto pb-2">
+                <div className="overflow-x-auto pb-2 relative">
+                  {/* Floating Tooltip */}
+                  {hoveredBar !== null && weeklyTrendData[hoveredBar] && (
+                    <div
+                      className="fixed bg-[#303646] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl z-[9999] pointer-events-none"
+                      style={{
+                        left: `${mousePosition.x + 15}px`,
+                        top: `${mousePosition.y + 15}px`,
+                      }}
+                    >
+                      <div className="text-center">
+                        <div className="text-[#A3AF87] text-[10px] font-semibold mb-1">
+                          {weeklyTrendData[hoveredBar].date}
+                        </div>
+                        <div className="font-bold text-base">
+                          {weeklyTrendData[hoveredBar].volume} kg
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-1">
+                          Sampah Organik
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div
                     className="flex items-end justify-between gap-2 sm:gap-3 h-64 px-2 sm:px-4"
                     style={{
@@ -732,10 +843,20 @@ export default function SupplyMonitoringPage() {
                         ...weeklyTrendData.map((d) => d.volume)
                       );
                       const height = (data.volume / maxVolume) * 100;
+                      const isHovered = hoveredBar === index;
+                      
                       return (
                         <div
                           key={index}
                           className="flex-1 flex flex-col items-center gap-3"
+                          onMouseEnter={(e) => {
+                            setHoveredBar(index);
+                            setMousePosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseMove={(e) => {
+                            setMousePosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setHoveredBar(null)}
                         >
                           <div className="relative w-full flex items-end justify-center h-52">
                             <motion.div
@@ -745,14 +866,16 @@ export default function SupplyMonitoringPage() {
                                 delay: 0.3 + index * 0.1,
                                 duration: 0.5,
                               }}
-                              className="w-full bg-gradient-to-t from-[#A3AF87] to-[#A3AF87]/60 rounded-t-xl transition-all hover:shadow-lg group relative"
-                            >
-                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#303646] text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                {data.volume} kg
-                              </div>
-                            </motion.div>
+                              className={`w-full rounded-t-xl transition-all cursor-pointer ${
+                                isHovered
+                                  ? "bg-gradient-to-t from-[#8a9a6e] to-[#A3AF87] shadow-lg scale-105"
+                                  : "bg-gradient-to-t from-[#A3AF87] to-[#A3AF87]/60"
+                              }`}
+                            />
                           </div>
-                          <p className="text-sm font-semibold text-gray-600">
+                          <p className={`text-sm font-semibold transition-colors ${
+                            isHovered ? "text-[#A3AF87]" : "text-gray-600"
+                          }`}>
                             {data.date}
                           </p>
                         </div>
@@ -885,9 +1008,10 @@ export default function SupplyMonitoringPage() {
               </thead>
               <tbody>
                 {filteredSupplies.map((supply, index) => {
+                  const mappedStatus = mapStatus(supply.status);
                   const status =
-                    statusConfig[supply.status as keyof typeof statusConfig];
-                  const isNewData = isNew(supply.submittedAt);
+                    statusConfig[mappedStatus as keyof typeof statusConfig];
+                  const isNewData = isNew(supply.createdAt);
 
                   return (
                     <motion.tr
@@ -902,10 +1026,10 @@ export default function SupplyMonitoringPage() {
                         <div className="flex items-center gap-2">
                           <div>
                             <p className="font-semibold text-[#303646]">
-                              {supply.id}
+                              {supply.supplyNumber}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {new Date(supply.submittedAt).toLocaleString(
+                              {new Date(supply.createdAt).toLocaleString(
                                 "id-ID",
                                 {
                                   day: "numeric",
@@ -936,10 +1060,10 @@ export default function SupplyMonitoringPage() {
                           </div>
                           <div>
                             <p className="font-semibold text-[#303646]">
-                              {supply.supplierName}
+                              {supply.userName}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {supply.supplierPhone}
+                              {supply.userPhone}
                             </p>
                           </div>
                         </div>
@@ -949,12 +1073,21 @@ export default function SupplyMonitoringPage() {
                       <td className="py-4 px-4">
                         <div>
                           <p className="font-medium text-[#303646]">
-                            {supply.wasteType}
+                            {supply.wasteType === "sisa_makanan" ? "Sisa Makanan" :
+                             supply.wasteType === "sayuran_buah" ? "Sayuran & Buah" :
+                             supply.wasteType === "sisa_dapur" ? "Sisa Dapur" :
+                             supply.wasteType === "campuran" ? "Campuran Organik" :
+                             supply.wasteType}
                           </p>
                           <div className="flex items-center gap-1 mt-1">
                             <Scale className="h-3 w-3 text-gray-400" />
                             <p className="text-sm text-gray-600">
-                              {supply.weight} (~{supply.estimatedWeight} kg)
+                              {supply.estimatedWeight === "1" ? "1 kg" :
+                               supply.estimatedWeight === "3" ? "1-3 kg" :
+                               supply.estimatedWeight === "5" ? "3-5 kg" :
+                               supply.estimatedWeight === "10" ? "5-10 kg" :
+                               supply.estimatedWeight === "15" ? "10-15 kg" :
+                               `${supply.estimatedWeight} kg`}
                             </p>
                           </div>
                         </div>
@@ -965,7 +1098,7 @@ export default function SupplyMonitoringPage() {
                         <div className="flex items-start gap-2 max-w-xs">
                           <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                           <p className="text-sm text-gray-600 line-clamp-2">
-                            {supply.address}
+                            {supply.pickupAddress}
                           </p>
                         </div>
                       </td>
@@ -986,12 +1119,12 @@ export default function SupplyMonitoringPage() {
                             <div className="flex items-center gap-1 mt-1">
                               <Clock className="h-3 w-3 text-gray-400" />
                               <p className="text-xs text-gray-600">
-                                {supply.pickupTime}
+                                {supply.pickupTimeRange || supply.pickupTimeSlot}
                               </p>
                             </div>
-                            {supply.driver && (
+                            {supply.courierName && (
                               <p className="text-xs text-gray-500 mt-1">
-                                Driver: {supply.driver}
+                                Driver: {supply.courierName}
                               </p>
                             )}
                           </div>
@@ -1025,7 +1158,7 @@ export default function SupplyMonitoringPage() {
                           >
                             <Eye className="h-4 w-4 text-gray-600 group-hover/btn:text-gray-900" />
                           </Link>
-                          {supply.status !== "completed" && (
+                          {supply.status !== "COMPLETED" && supply.status !== "CANCELLED" && (
                             <Link
                               href={`/farmer/supply-monitoring/action/${supply.id}`}
                               className="p-2 bg-[#A3AF87] rounded-lg hover:bg-[#95a17a] transition-colors group/btn"

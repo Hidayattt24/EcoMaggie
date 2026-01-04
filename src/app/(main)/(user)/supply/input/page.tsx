@@ -133,14 +133,11 @@ export default function SupplyInputPage() {
     timeSlot: "",
     notes: "",
     photo: null as File | null,
-    video: null as File | null,
-    videoDuration: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [successData, setSuccessData] = useState<any>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [useCustomAddress, setUseCustomAddress] = useState(false);
@@ -214,25 +211,35 @@ export default function SupplyInputPage() {
     setPreviewUrl(preview);
   };
 
-  const handleVideoChange = (file: File | null, preview: string | null, duration: number) => {
-    setFormData({ ...formData, video: file, videoDuration: duration });
-    setVideoPreviewUrl(preview);
-  };
-
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
     try {
-      // Import the action
-      const { createSupply } = await import("@/lib/api/supply.actions");
+      // Import the actions
+      const { createSupply, uploadSupplyMedia } = await import("@/lib/api/supply.actions");
+      
+      let uploadedPhotoUrl: string | undefined;
+
+      // Upload photo if exists
+      if (formData.photo) {
+        console.log("Uploading photo...");
+        const photoResult = await uploadSupplyMedia(formData.photo, "user");
+        if (photoResult.success && photoResult.url) {
+          uploadedPhotoUrl = photoResult.url;
+          console.log("Photo uploaded:", uploadedPhotoUrl);
+        } else {
+          console.error("Photo upload failed:", photoResult.error);
+          alert("Gagal mengupload foto: " + photoResult.error);
+          setIsSubmitting(false);
+          return;
+        }
+      }
       
       // Prepare data
       const supplyData = {
         wasteType: formData.wasteType,
         estimatedWeight: formData.weight,
-        photoUrl: previewUrl || undefined,
-        videoUrl: videoPreviewUrl || undefined,
-        videoDuration: formData.videoDuration || undefined,
+        photoUrl: uploadedPhotoUrl,
         pickupAddress: useCustomAddress ? customAddress : defaultAddress,
         pickupAddressId: (useCustomAddress ? undefined : defaultAddressId) || undefined,
         pickupDate: formData.date,
@@ -260,7 +267,7 @@ export default function SupplyInputPage() {
     }
   };
 
-  const canProceedStep1 = formData.wasteType && formData.weight && (formData.photo || formData.video);
+  const canProceedStep1 = formData.wasteType && formData.weight && formData.photo;
   const canProceedStep2 = formData.date && formData.timeSlot;
 
   // Loading state
@@ -656,14 +663,12 @@ export default function SupplyInputPage() {
                     {/* Photo/Video Upload */}
                     <div>
                       <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Foto / Video Sampah{" "}
+                        Foto Sampah{" "}
                         <span className="text-red-500">*</span>
                       </label>
                       <MediaUploader
                         onPhotoChange={handlePhotoChange}
-                        onVideoChange={handleVideoChange}
                         photoPreview={previewUrl}
-                        videoPreview={videoPreviewUrl}
                       />
                     </div>
 

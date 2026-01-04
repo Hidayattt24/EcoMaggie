@@ -59,9 +59,8 @@ export interface StatusHistoryItem {
 export interface CreateSupplyData {
   wasteType: string;
   estimatedWeight: string;
-  photoUrl?: string; // Can be base64 data URL or storage URL
-  videoUrl?: string; // Can be blob URL or storage URL
-  videoDuration?: number;
+  photoFile?: File; // Actual file object for upload
+  photoUrl?: string; // Fallback if already uploaded
   pickupAddress: string;
   pickupAddressId?: string;
   pickupDate: string;
@@ -84,6 +83,123 @@ interface ActionResponse<T = any> {
   message: string;
   data?: T;
   error?: string;
+}
+
+// ==========================================
+// HELPER: Upload file to Supabase Storage (Client-side version)
+// ==========================================
+
+export async function uploadSupplyMediaClient(
+  file: File,
+  userId: string
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    // Import client-side supabase
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+
+    // Debug: Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log("Upload - User ID:", user?.id);
+    console.log("Upload - Auth Error:", authError);
+    
+    if (!user) {
+      return {
+        success: false,
+        error: "User not authenticated"
+      };
+    }
+
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    
+    console.log("Upload - File name:", fileName);
+    console.log("Upload - Bucket:", "supply-media");
+    
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('supply-media')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Upload error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+
+    console.log("Upload - Success:", data);
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('supply-media')
+      .getPublicUrl(data.path);
+
+    return {
+      success: true,
+      url: publicUrl
+    };
+  } catch (error) {
+    console.error('Upload media error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// ==========================================
+// HELPER: Upload file to Supabase Storage (Server-side version)
+// ==========================================
+
+export async function uploadSupplyMedia(
+  file: File,
+  userId: string
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const supabase = await createClient();
+
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('supply-media')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Upload error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('supply-media')
+      .getPublicUrl(data.path);
+
+    return {
+      success: true,
+      url: publicUrl
+    };
+  } catch (error) {
+    console.error('Upload media error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
 }
 
 // ==========================================
@@ -157,13 +273,6 @@ export async function createSupply(
       waste_type: supplyData.wasteType,
       estimated_weight: supplyData.estimatedWeight,
       photo_url: supplyData.photoUrl || null,
-      video_url: supplyData.videoUrl || null,
-      media_type: supplyData.photoUrl && supplyData.videoUrl 
-        ? "both" 
-        : supplyData.videoUrl 
-        ? "video" 
-        : "photo",
-      video_duration: supplyData.videoDuration || null,
       pickup_address: supplyData.pickupAddress,
       pickup_address_id: supplyData.pickupAddressId || null,
       pickup_date: supplyData.pickupDate,

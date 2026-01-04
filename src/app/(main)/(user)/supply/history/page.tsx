@@ -677,6 +677,36 @@ export default function SupplyHistoryPage() {
                       </div>
                     </div>
 
+                    {/* Photo/Video */}
+                    {selectedItem.photo && (
+                      <div className="border border-gray-100 rounded-xl p-4">
+                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4 text-[#A3AF87]" />
+                          Foto/Video Sampah
+                        </h3>
+                        <div className="relative w-full">
+                          {selectedItem.photo.endsWith('.mp4') || 
+                           selectedItem.photo.endsWith('.mov') || 
+                           selectedItem.photo.endsWith('.avi') ||
+                           selectedItem.photo.includes('/videos/') ? (
+                            <video
+                              src={selectedItem.photo}
+                              controls
+                              className="w-full h-64 object-cover rounded-lg border border-gray-200"
+                            >
+                              Browser Anda tidak mendukung video.
+                            </video>
+                          ) : (
+                            <img
+                              src={selectedItem.photo}
+                              alt="Waste photo"
+                              className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Courier Info */}
                     <div className="border border-gray-100 rounded-xl p-4">
                       <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -780,29 +810,34 @@ export default function SupplyHistoryPage() {
                       <div className="space-y-4">
                         {[
                           {
-                            status: "Input Diterima",
+                            status: "Permintaan Diterima",
                             date: selectedItem.date,
                             completed: true,
                           },
                           {
-                            status: "Menunggu Pickup",
+                            status: "Pickup Dijadwalkan",
                             date:
                               selectedItem.status !== "waiting"
                                 ? selectedItem.date
                                 : null,
                             completed: selectedItem.status !== "waiting",
-                            active: selectedItem.status === "waiting",
                           },
                           {
-                            status: "Dijemput Kurir",
+                            status: "Driver Menuju Lokasi",
                             date: selectedItem.pickupDate,
                             completed:
                               selectedItem.status === "picked_up" ||
                               selectedItem.status === "completed",
-                            active: selectedItem.status === "picked_up",
                           },
                           {
-                            status: "Selesai Disalurkan",
+                            status: "Sampah Diambil",
+                            date: selectedItem.pickupDate,
+                            completed:
+                              selectedItem.status === "picked_up" ||
+                              selectedItem.status === "completed",
+                          },
+                          {
+                            status: "Sampah Diterima",
                             date:
                               selectedItem.status === "completed"
                                 ? selectedItem.pickupDate
@@ -815,17 +850,15 @@ export default function SupplyHistoryPage() {
                               <div
                                 className={`w-3 h-3 rounded-full mt-1.5 ${
                                   step.completed
-                                    ? "bg-green-500"
-                                    : step.active
-                                    ? "bg-blue-500 animate-pulse"
+                                    ? "bg-[#A3AF87]"
                                     : "bg-gray-200"
                                 }`}
                               />
-                              {index < 3 && (
+                              {index < 4 && (
                                 <div
                                   className={`absolute top-4 left-1/2 -translate-x-1/2 w-0.5 h-8 ${
                                     step.completed
-                                      ? "bg-green-200"
+                                      ? "bg-[#A3AF87]/30"
                                       : "bg-gray-100"
                                   }`}
                                 />
@@ -834,7 +867,7 @@ export default function SupplyHistoryPage() {
                             <div className="flex-1 pb-4">
                               <p
                                 className={`font-medium text-sm ${
-                                  step.completed || step.active
+                                  step.completed
                                     ? "text-gray-900"
                                     : "text-gray-400"
                                 }`}

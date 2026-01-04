@@ -6,6 +6,8 @@ import {
   getMarketProductDetail,
   getProductReviews,
   submitProductReview,
+  checkWishlistStatus,
+  toggleWishlist,
   type MarketProductDetail,
   type ProductReview,
   type ProductReviewsResponse,
@@ -77,6 +79,10 @@ export default function ProductDetailPage({ params }: PageProps) {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Wishlist states
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+
   // Fetch product data
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -132,6 +138,68 @@ export default function ProductDetailPage({ params }: PageProps) {
       fetchReviews();
     }
   }, [activeTab, product?.id, reviewsData, fetchReviews]);
+
+  // Check wishlist status when product is loaded
+  useEffect(() => {
+    async function checkWishlist() {
+      if (!product?.id) return;
+
+      const result = await checkWishlistStatus(product.id);
+      if (result.success && result.data) {
+        setIsWishlisted(result.data.isWishlisted);
+      }
+    }
+    checkWishlist();
+  }, [product?.id]);
+
+  // Handle wishlist toggle
+  const handleToggleWishlist = async () => {
+    if (!product?.id) return;
+
+    setIsTogglingWishlist(true);
+    try {
+      const result = await toggleWishlist(product.id);
+
+      if (result.success && result.data) {
+        setIsWishlisted(result.data.isWishlisted);
+        Swal.fire({
+          icon: "success",
+          title: result.data.isWishlisted
+            ? "Ditambahkan ke Wishlist"
+            : "Dihapus dari Wishlist",
+          text: result.message,
+          timer: 1500,
+          showConfirmButton: false,
+          toast: true,
+          position: "top-end",
+        });
+      } else if (result.error === "UNAUTHORIZED") {
+        Swal.fire({
+          icon: "warning",
+          title: "Login Diperlukan",
+          text: "Silakan login untuk menambahkan ke wishlist",
+          confirmButtonColor: "#A3AF87",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: result.message,
+          confirmButtonColor: "#A3AF87",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan",
+        text: "Gagal memproses wishlist",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsTogglingWishlist(false);
+    }
+  };
 
   // Handle image upload for review
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -368,10 +436,18 @@ export default function ProductDetailPage({ params }: PageProps) {
                     -{product.discountPercent}%
                   </div>
                 )}
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-all">
+                <button
+                  onClick={handleToggleWishlist}
+                  disabled={isTogglingWishlist}
+                  className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
                   <svg
-                    className="h-4 w-4 text-gray-500 hover:text-red-500"
-                    fill="none"
+                    className={`h-4 w-4 transition-all ${
+                      isWishlisted
+                        ? "text-red-500 fill-red-500"
+                        : "text-gray-500 group-hover:text-red-500"
+                    }`}
+                    fill={isWishlisted ? "currentColor" : "none"}
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                     strokeWidth={2}

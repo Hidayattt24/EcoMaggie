@@ -2141,3 +2141,490 @@ export async function getMarketProductDetail(
     };
   }
 }
+
+// ===========================================
+// WISHLIST TYPES
+// ===========================================
+
+export type WishlistItem = {
+  id: string;
+  productId: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  price: number;
+  discountPercent: number;
+  finalPrice: number;
+  unit: string;
+  rating: number;
+  totalReviews: number;
+  stock: number;
+  images: string[];
+  category: string;
+  farmer: {
+    id: string;
+    farmName: string;
+    location: string | null;
+    isVerified: boolean;
+  };
+  addedAt: string;
+};
+
+export type WishlistResponse = {
+  items: WishlistItem[];
+  total: number;
+};
+
+// ===========================================
+// WISHLIST SERVER ACTIONS
+// ===========================================
+
+/**
+ * Get current user's wishlist
+ */
+export async function getUserWishlist(): Promise<
+  ActionResponse<WishlistResponse>
+> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Silakan login untuk melihat wishlist",
+        error: "UNAUTHORIZED",
+      };
+    }
+
+    // Get wishlist items with product details
+    const { data: wishlistData, error } = await supabase
+      .from("wishlists")
+      .select(
+        `
+        id,
+        created_at,
+        products!inner(
+          id,
+          slug,
+          name,
+          description,
+          price,
+          discount_percent,
+          unit,
+          rating,
+          stock,
+          images,
+          category,
+          is_active,
+          status,
+          deleted_at,
+          farmers!inner(id, farm_name, location, is_verified),
+          reviews:reviews(count)
+        )
+      `
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Get wishlist error:", error);
+      return {
+        success: false,
+        message: "Gagal mengambil data wishlist",
+        error: error.message,
+      };
+    }
+
+    // Transform wishlist items
+    const items: WishlistItem[] = (wishlistData || [])
+      .filter((w) => {
+        // Products is returned as array from Supabase relation
+        const products = w.products as unknown as Record<string, unknown>[];
+        const product = products?.[0];
+        return (
+          product &&
+          product.is_active === true &&
+          product.status === "active" &&
+          product.deleted_at === null
+        );
+      })
+      .map((w) => {
+        // Products is returned as array from Supabase relation
+        const products = w.products as unknown as Record<string, unknown>[];
+        const product = products?.[0];
+        if (!product) {
+          throw new Error("Product data is missing");
+        }
+        const farmers = product.farmers as Record<string, unknown>[];
+        const farmer = farmers?.[0];
+        const reviews = product.reviews as { count: number }[];
+        const price = Number(product.price) || 0;
+        const discountPercent = Number(product.discount_percent) || 0;
+        const finalPrice = Math.round(price * (1 - discountPercent / 100));
+
+        return {
+          id: w.id,
+          productId: product.id as string,
+          slug: product.slug as string,
+          name: product.name as string,
+          description: product.description as string | null,
+          price,
+          discountPercent,
+          finalPrice,
+          unit: (product.unit as string) || "kg",
+          rating: Number(product.rating) || 0,
+          totalReviews: reviews?.[0]?.count || 0,
+          stock: Number(product.stock) || 0,
+          images: (product.images as string[]) || [],
+          category: (product.category as string) || "OTHER",
+          farmer: {
+            id: farmer.id as string,
+            farmName: farmer.farm_name as string,
+            location: farmer.location as string | null,
+            isVerified: farmer.is_verified as boolean,
+          },
+          addedAt: w.created_at,
+        };
+      });
+
+    return {
+      success: true,
+      message: "Berhasil mengambil wishlist",
+      data: {
+        items,
+        total: items.length,
+      },
+    };
+  } catch (error) {
+    console.error("Get wishlist exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil wishlist",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+/**
+ * Add product to wishlist
+ */
+export async function addToWishlist(
+  productId: string
+): Promise<ActionResponse<{ id: string }>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Silakan login untuk menambahkan ke wishlist",
+        error: "UNAUTHORIZED",
+      };
+    }
+
+    // Check if product exists and is active
+    const { data: product, error: productError } = await supabase
+      .from("products")
+      .select("id, name")
+      .eq("id", productId)
+      .eq("is_active", true)
+      .eq("status", "active")
+      .is("deleted_at", null)
+      .single();
+
+    if (productError || !product) {
+      return {
+        success: false,
+        message: "Produk tidak ditemukan",
+        error: "NOT_FOUND",
+      };
+    }
+
+    // Check if already in wishlist
+    const { data: existing } = await supabase
+      .from("wishlists")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", productId)
+      .single();
+
+    if (existing) {
+      return {
+        success: false,
+        message: "Produk sudah ada di wishlist",
+        error: "ALREADY_EXISTS",
+      };
+    }
+
+    // Add to wishlist
+    const { data: wishlist, error } = await supabase
+      .from("wishlists")
+      .insert({
+        user_id: user.id,
+        product_id: productId,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("Add to wishlist error:", error);
+      return {
+        success: false,
+        message: "Gagal menambahkan ke wishlist",
+        error: error.message,
+      };
+    }
+
+    revalidatePath("/wishlist");
+    revalidatePath("/market/products");
+
+    return {
+      success: true,
+      message: `${product.name} ditambahkan ke wishlist`,
+      data: { id: wishlist.id },
+    };
+  } catch (error) {
+    console.error("Add to wishlist exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+/**
+ * Remove product from wishlist
+ */
+export async function removeFromWishlist(
+  productId: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Silakan login terlebih dahulu",
+        error: "UNAUTHORIZED",
+      };
+    }
+
+    // Remove from wishlist
+    const { error } = await supabase
+      .from("wishlists")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("product_id", productId);
+
+    if (error) {
+      console.error("Remove from wishlist error:", error);
+      return {
+        success: false,
+        message: "Gagal menghapus dari wishlist",
+        error: error.message,
+      };
+    }
+
+    revalidatePath("/wishlist");
+    revalidatePath("/market/products");
+
+    return {
+      success: true,
+      message: "Produk dihapus dari wishlist",
+    };
+  } catch (error) {
+    console.error("Remove from wishlist exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+/**
+ * Toggle product in wishlist (add if not exists, remove if exists)
+ */
+export async function toggleWishlist(
+  productId: string
+): Promise<ActionResponse<{ isWishlisted: boolean }>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Silakan login terlebih dahulu",
+        error: "UNAUTHORIZED",
+      };
+    }
+
+    // Check if already in wishlist
+    const { data: existing } = await supabase
+      .from("wishlists")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", productId)
+      .single();
+
+    if (existing) {
+      // Remove from wishlist
+      await supabase
+        .from("wishlists")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("product_id", productId);
+
+      revalidatePath("/wishlist");
+      revalidatePath("/market/products");
+
+      return {
+        success: true,
+        message: "Produk dihapus dari wishlist",
+        data: { isWishlisted: false },
+      };
+    } else {
+      // Add to wishlist
+      await supabase.from("wishlists").insert({
+        user_id: user.id,
+        product_id: productId,
+      });
+
+      revalidatePath("/wishlist");
+      revalidatePath("/market/products");
+
+      return {
+        success: true,
+        message: "Produk ditambahkan ke wishlist",
+        data: { isWishlisted: true },
+      };
+    }
+  } catch (error) {
+    console.error("Toggle wishlist exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+/**
+ * Check if product is in user's wishlist
+ */
+export async function checkWishlistStatus(
+  productId: string
+): Promise<ActionResponse<{ isWishlisted: boolean }>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: true,
+        message: "User tidak login",
+        data: { isWishlisted: false },
+      };
+    }
+
+    // Check if in wishlist
+    const { data: existing } = await supabase
+      .from("wishlists")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", productId)
+      .single();
+
+    return {
+      success: true,
+      message: "Status wishlist",
+      data: { isWishlisted: !!existing },
+    };
+  } catch (error) {
+    console.error("Check wishlist status exception:", error);
+    return {
+      success: true,
+      message: "Status wishlist",
+      data: { isWishlisted: false },
+    };
+  }
+}
+
+/**
+ * Get user's wishlisted product IDs (for bulk checking)
+ */
+export async function getUserWishlistIds(): Promise<
+  ActionResponse<{ productIds: string[] }>
+> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: true,
+        message: "User tidak login",
+        data: { productIds: [] },
+      };
+    }
+
+    // Get all wishlisted product IDs
+    const { data, error } = await supabase
+      .from("wishlists")
+      .select("product_id")
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Get wishlist IDs error:", error);
+      return {
+        success: false,
+        message: "Gagal mengambil data wishlist",
+        error: error.message,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Berhasil",
+      data: {
+        productIds: (data || []).map((w) => w.product_id),
+      },
+    };
+  } catch (error) {
+    console.error("Get wishlist IDs exception:", error);
+    return {
+      success: true,
+      message: "Error",
+      data: { productIds: [] },
+    };
+  }
+}

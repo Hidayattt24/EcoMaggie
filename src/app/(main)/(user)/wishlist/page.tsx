@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
@@ -9,100 +9,123 @@ import {
   Package,
   Star,
   TrendingUp,
-  AlertCircle,
   ArrowLeft,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  getUserWishlist,
+  removeFromWishlist,
+  type WishlistItem,
+} from "@/lib/api/product.actions";
+import Swal from "sweetalert2";
 
-interface WishlistItem {
-  id: number;
-  slug: string;
-  name: string;
-  description: string;
-  price: number;
-  unit: string;
-  rating: number;
-  reviews: number;
-  stock: number;
-  image: string;
-  category: string;
-  discount?: number;
-}
+// Category display names mapping
+const categoryDisplayNames: Record<string, string> = {
+  VEGETABLES: "Sayuran",
+  FRUITS: "Buah-buahan",
+  GRAINS: "Biji-bijian",
+  DAIRY: "Produk Susu",
+  MEAT: "Daging",
+  ORGANIC: "Organik",
+  OTHER: "Lainnya",
+};
 
 export default function WishlistPage() {
   const router = useRouter();
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([
-    {
-      id: 1,
-      slug: "maggot-bsf-premium",
-      name: "Maggot BSF Premium",
-      description:
-        "Maggot Black Soldier Fly berkualitas tinggi untuk pakan ternak",
-      price: 45000,
-      unit: "kg",
-      rating: 4.8,
-      reviews: 124,
-      stock: 150,
-      image: "/assets/dummy/magot.png",
-      category: "Premium",
-      discount: 15,
-    },
-    {
-      id: 2,
-      slug: "maggot-bsf-organik",
-      name: "Maggot BSF Organik",
-      description: "100% organik tanpa bahan kimia, cocok untuk budidaya lele",
-      price: 38000,
-      unit: "kg",
-      rating: 4.9,
-      reviews: 89,
-      stock: 200,
-      image: "/assets/dummy/magot.png",
-      category: "Organik",
-    },
-    {
-      id: 3,
-      slug: "maggot-bsf-kering",
-      name: "Maggot BSF Kering",
-      description: "Maggot kering dengan nutrisi lengkap, tahan lama",
-      price: 65000,
-      unit: "kg",
-      rating: 4.7,
-      reviews: 56,
-      stock: 80,
-      image: "/assets/dummy/magot.png",
-      category: "Kering",
-      discount: 20,
-    },
-    {
-      id: 4,
-      slug: "maggot-bsf-fresh",
-      name: "Maggot BSF Fresh",
-      description: "Maggot segar langsung dari budidaya, protein tinggi",
-      price: 42000,
-      unit: "kg",
-      rating: 4.9,
-      reviews: 178,
-      stock: 120,
-      image: "/assets/dummy/magot.png",
-      category: "Fresh",
-    },
-  ]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  // Fetch wishlist data
+  const fetchWishlist = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result = await getUserWishlist();
+      if (result.success && result.data) {
+        setWishlistItems(result.data.items);
+      } else if (result.error === "UNAUTHORIZED") {
+        Swal.fire({
+          icon: "warning",
+          title: "Login Diperlukan",
+          text: "Silakan login untuk melihat wishlist Anda",
+          confirmButtonColor: "#A3AF87",
+          confirmButtonText: "Login",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/login");
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router]);
 
-  const removeFromWishlist = (id: number) => {
-    setWishlistItems(wishlistItems.filter((item) => item.id !== id));
-    setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  const handleRemoveFromWishlist = async (productId: string) => {
+    const item = wishlistItems.find((i) => i.productId === productId);
+
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Hapus dari Wishlist?",
+      text: `Hapus ${item?.name || "produk ini"} dari wishlist?`,
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setRemovingId(productId);
+    try {
+      const response = await removeFromWishlist(productId);
+      if (response.success) {
+        setWishlistItems((prev) =>
+          prev.filter((i) => i.productId !== productId)
+        );
+        setSelectedItems((prev) => prev.filter((id) => id !== productId));
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Produk dihapus dari wishlist",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: response.message,
+          confirmButtonColor: "#A3AF87",
+        });
+      }
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Terjadi kesalahan",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setRemovingId(null);
+    }
   };
 
-  const toggleSelectItem = (id: number) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+  const toggleSelectItem = (productId: string) => {
+    if (selectedItems.includes(productId)) {
+      setSelectedItems(selectedItems.filter((id) => id !== productId));
     } else {
-      setSelectedItems([...selectedItems, id]);
+      setSelectedItems([...selectedItems, productId]);
     }
   };
 
@@ -110,60 +133,73 @@ export default function WishlistPage() {
     if (selectedItems.length === wishlistItems.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(wishlistItems.map((item) => item.id));
+      setSelectedItems(wishlistItems.map((item) => item.productId));
     }
   };
 
   const addSelectedToCart = () => {
     const selectedProducts = wishlistItems.filter((item) =>
-      selectedItems.includes(item.id)
+      selectedItems.includes(item.productId)
     );
     if (selectedProducts.length === 0) {
-      alert("Pilih produk terlebih dahulu!");
+      Swal.fire({
+        icon: "warning",
+        title: "Pilih Produk",
+        text: "Pilih produk terlebih dahulu!",
+        confirmButtonColor: "#A3AF87",
+      });
       return;
     }
-    alert(
-      `${
-        selectedProducts.length
-      } produk ditambahkan ke keranjang:\n${selectedProducts
-        .map((p) => p.name)
-        .join("\n")}`
-    );
+    // TODO: Implement add to cart functionality
+    Swal.fire({
+      icon: "info",
+      title: "Coming Soon",
+      text: `${selectedProducts.length} produk akan ditambahkan ke keranjang`,
+      confirmButtonColor: "#A3AF87",
+    });
   };
 
   const checkoutSelected = () => {
     const selectedProducts = wishlistItems.filter((item) =>
-      selectedItems.includes(item.id)
+      selectedItems.includes(item.productId)
     );
     if (selectedProducts.length === 0) {
-      alert("Pilih produk terlebih dahulu!");
+      Swal.fire({
+        icon: "warning",
+        title: "Pilih Produk",
+        text: "Pilih produk terlebih dahulu!",
+        confirmButtonColor: "#A3AF87",
+      });
       return;
     }
-    alert(
-      `Checkout ${selectedProducts.length} produk:\n${selectedProducts
-        .map((p) => p.name)
-        .join("\n")}`
-    );
-    // TODO: Redirect to checkout page
+    // TODO: Redirect to checkout page with selected products
+    router.push("/market/checkout");
   };
 
-  const totalValue = wishlistItems.reduce((sum, item) => {
-    const finalPrice = item.discount
-      ? Math.round(item.price * (1 - item.discount / 100))
-      : item.price;
-    return sum + finalPrice;
-  }, 0);
+  const totalValue = wishlistItems.reduce(
+    (sum, item) => sum + item.finalPrice,
+    0
+  );
 
   const selectedTotalValue = wishlistItems
-    .filter((item) => selectedItems.includes(item.id))
-    .reduce((sum, item) => {
-      const finalPrice = item.discount
-        ? Math.round(item.price * (1 - item.discount / 100))
-        : item.price;
-      return sum + finalPrice;
-    }, 0);
+    .filter((item) => selectedItems.includes(item.productId))
+    .reduce((sum, item) => sum + item.finalPrice, 0);
 
   const inStockCount = wishlistItems.filter((item) => item.stock > 0).length;
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/20 via-white to-[#A3AF87]/10 pb-6 lg:pb-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mb-4"></div>
+            <p className="text-gray-600">Memuat wishlist...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/20 via-white to-[#A3AF87]/10 pb-6 lg:pb-0">
@@ -351,12 +387,12 @@ export default function WishlistPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.05 }}
                   className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border-2 ${
-                    selectedItems.includes(item.id)
+                    selectedItems.includes(item.productId)
                       ? "border-[#A3AF87] shadow-md shadow-[#A3AF87]/20"
                       : "border-gray-100"
-                  }`}
+                  } ${removingId === item.productId ? "opacity-50" : ""}`}
                 >
                   {/* Product Image */}
                   <div className="relative aspect-square bg-gradient-to-br from-[#A3AF87]/10 to-white overflow-hidden">
@@ -365,8 +401,8 @@ export default function WishlistPage() {
                       <label className="cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedItems.includes(item.id)}
-                          onChange={() => toggleSelectItem(item.id)}
+                          checked={selectedItems.includes(item.productId)}
+                          onChange={() => toggleSelectItem(item.productId)}
                           onClick={(e) => e.stopPropagation()}
                           className="peer w-5 h-5 rounded-md border-2 border-white checked:bg-[#A3AF87] checked:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/50 cursor-pointer transition-all shadow-lg appearance-none bg-white/95 hover:scale-110"
                         />
@@ -388,7 +424,7 @@ export default function WishlistPage() {
 
                     <Link href={`/market/products/${item.slug}`}>
                       <img
-                        src={item.image}
+                        src={item.images[0] || "/assets/dummy/magot.png"}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                       />
@@ -396,13 +432,13 @@ export default function WishlistPage() {
 
                     {/* Category Badge */}
                     <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-[#A3AF87] text-white text-[9px] font-semibold rounded-full pointer-events-none">
-                      {item.category}
+                      {categoryDisplayNames[item.category] || item.category}
                     </div>
 
                     {/* Discount Badge */}
-                    {item.discount && (
+                    {item.discountPercent > 0 && (
                       <div className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[9px] font-bold rounded-full shadow-lg animate-pulse pointer-events-none">
-                        🔥 DISKON {item.discount}%
+                        🔥 DISKON {item.discountPercent}%
                       </div>
                     )}
 
@@ -415,8 +451,9 @@ export default function WishlistPage() {
 
                     {/* Remove Button - Bottom Right */}
                     <button
-                      onClick={() => removeFromWishlist(item.id)}
-                      className="absolute bottom-1.5 right-1.5 w-6 h-6 bg-white/95 hover:bg-red-500 text-red-500 hover:text-white rounded-full flex items-center justify-center transition-all shadow-md hover:shadow-lg z-10"
+                      onClick={() => handleRemoveFromWishlist(item.productId)}
+                      disabled={removingId === item.productId}
+                      className="absolute bottom-1.5 right-1.5 w-6 h-6 bg-white/95 hover:bg-red-500 text-red-500 hover:text-white rounded-full flex items-center justify-center transition-all shadow-md hover:shadow-lg z-10 disabled:opacity-50"
                       title="Hapus dari wishlist"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -430,9 +467,12 @@ export default function WishlistPage() {
                       {item.name}
                     </h3>
 
-                    {/* Description */}
+                    {/* Farmer Name */}
                     <p className="text-[9px] text-[#5a6c5b]/70 mb-1.5 line-clamp-1">
-                      {item.description}
+                      {item.farmer.farmName}
+                      {item.farmer.isVerified && (
+                        <span className="ml-1 text-blue-500">✓</span>
+                      )}
                     </p>
 
                     {/* Rating & Stock */}
@@ -440,10 +480,10 @@ export default function WishlistPage() {
                       <div className="flex items-center gap-0.5">
                         <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
                         <span className="text-[10px] font-semibold text-gray-800">
-                          {item.rating}
+                          {item.rating.toFixed(1)}
                         </span>
                         <span className="text-[9px] text-gray-500">
-                          ({item.reviews})
+                          ({item.totalReviews})
                         </span>
                       </div>
                       <span className="text-[9px] text-gray-500">
@@ -453,14 +493,11 @@ export default function WishlistPage() {
 
                     {/* Price */}
                     <div className="mb-1.5">
-                      {item.discount ? (
+                      {item.discountPercent > 0 ? (
                         <div className="space-y-0.5">
                           <div className="flex items-baseline gap-1">
                             <span className="text-sm font-bold text-[#5a6c5b]">
-                              Rp{" "}
-                              {Math.round(
-                                item.price * (1 - item.discount / 100)
-                              ).toLocaleString("id-ID")}
+                              Rp {item.finalPrice.toLocaleString("id-ID")}
                             </span>
                             <span className="text-[9px] text-gray-500">
                               /{item.unit}
@@ -471,7 +508,7 @@ export default function WishlistPage() {
                               Rp {item.price.toLocaleString("id-ID")}
                             </span>
                             <span className="text-[8px] px-1 py-0.5 bg-red-100 text-red-600 font-bold rounded">
-                              -{item.discount}%
+                              -{item.discountPercent}%
                             </span>
                           </div>
                         </div>
@@ -487,11 +524,11 @@ export default function WishlistPage() {
                       )}
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Action Button */}
                     <div className="flex gap-1">
                       <Link
                         href={`/market/products/${item.slug}`}
-                        className="px-2 py-1.5 bg-gray-100 text-gray-700 rounded-md font-semibold text-[10px] hover:bg-gray-200 hover:scale-105 transition-all active:scale-95 flex items-center justify-center"
+                        className="flex-1 px-2 py-1.5 bg-gray-100 text-gray-700 rounded-md font-semibold text-[10px] hover:bg-gray-200 hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-1"
                       >
                         <svg
                           className="h-3 w-3"
@@ -512,6 +549,7 @@ export default function WishlistPage() {
                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                           />
                         </svg>
+                        Lihat
                       </Link>
                     </div>
                   </div>

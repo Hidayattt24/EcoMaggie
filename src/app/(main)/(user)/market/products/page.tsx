@@ -9,10 +9,13 @@ import Pagination from "@/components/user/market/Pagination";
 import {
   getMarketProducts,
   getProductCategories,
+  getUserWishlistIds,
+  toggleWishlist,
   MarketProduct,
   MarketProductFilters,
   CategoryCount,
 } from "@/lib/api/product.actions";
+import Swal from "sweetalert2";
 
 // Category mapping for display names
 const categoryDisplayNames: Record<string, string> = {
@@ -62,7 +65,10 @@ export default function MarketProductsPage() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sortBy, setSortBy] = useState("newest");
-  const [wishlist, setWishlist] = useState<(number | string)[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState<string | null>(
+    null
+  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
@@ -86,6 +92,17 @@ export default function MarketProductsPage() {
       }
     }
     fetchCategories();
+  }, []);
+
+  // Fetch user's wishlist on mount
+  useEffect(() => {
+    async function fetchWishlist() {
+      const result = await getUserWishlistIds();
+      if (result.success && result.data) {
+        setWishlist(result.data.productIds);
+      }
+    }
+    fetchWishlist();
   }, []);
 
   // Fetch products when filters change
@@ -170,12 +187,63 @@ export default function MarketProductsPage() {
     );
   };
 
-  const toggleWishlist = (productId: number | string) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+  const handleToggleWishlist = async (productId: number | string) => {
+    const productIdStr = productId.toString();
+    setIsTogglingWishlist(productIdStr);
+
+    try {
+      const result = await toggleWishlist(productIdStr);
+
+      if (result.success && result.data) {
+        if (result.data.isWishlisted) {
+          setWishlist((prev) => [...prev, productIdStr]);
+          Swal.fire({
+            icon: "success",
+            title: "Ditambahkan ke Wishlist",
+            text: result.message,
+            timer: 1500,
+            showConfirmButton: false,
+            toast: true,
+            position: "top-end",
+          });
+        } else {
+          setWishlist((prev) => prev.filter((id) => id !== productIdStr));
+          Swal.fire({
+            icon: "info",
+            title: "Dihapus dari Wishlist",
+            text: result.message,
+            timer: 1500,
+            showConfirmButton: false,
+            toast: true,
+            position: "top-end",
+          });
+        }
+      } else if (result.error === "UNAUTHORIZED") {
+        Swal.fire({
+          icon: "warning",
+          title: "Login Diperlukan",
+          text: "Silakan login untuk menambahkan ke wishlist",
+          confirmButtonColor: "#A3AF87",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: result.message,
+          confirmButtonColor: "#A3AF87",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan",
+        text: "Gagal memproses wishlist",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsTogglingWishlist(null);
+    }
   };
 
   // Calculate pagination
@@ -409,7 +477,7 @@ export default function MarketProductsPage() {
                     key={product.id}
                     product={product}
                     wishlist={wishlist}
-                    onToggleWishlist={toggleWishlist}
+                    onToggleWishlist={handleToggleWishlist}
                   />
                 ))}
               </div>

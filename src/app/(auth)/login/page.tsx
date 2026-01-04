@@ -28,6 +28,19 @@ function LoginForm() {
         text: "Akun Anda berhasil diverifikasi. Silakan login.",
         confirmButtonText: "OK",
         confirmButtonColor: "#A3AF87",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl border border-gray-100",
+          title: "text-xl font-bold text-[#5a6c5b]",
+          htmlContainer: "text-gray-600",
+          confirmButton:
+            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        },
+        showClass: {
+          popup: "animate__animated animate__zoomIn animate__faster",
+        },
+        hideClass: {
+          popup: "animate__animated animate__zoomOut animate__faster",
+        },
       });
     }
   }, [searchParams]);
@@ -44,8 +57,25 @@ function LoginForm() {
         icon: "success",
         title: "Login Berhasil!",
         text: "Selamat datang kembali di EcoMaggie",
-        timer: 1500,
+        timer: 3000,
+        timerProgressBar: true,
         showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+        customClass: {
+          popup: "rounded-2xl shadow-xl border-2 border-[#A3AF87]",
+          title: "text-base font-bold text-[#A3AF87]",
+          htmlContainer: "text-sm text-gray-600",
+        },
+        background: "#ffffff",
+        iconColor: "#A3AF87",
+        didOpen: (toast) => {
+          toast.style.animation =
+            "slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        },
+        willClose: (toast) => {
+          toast.style.animation = "fadeOutRight 0.4s ease-in-out";
+        },
       });
 
       // Redirect based on redirectUrl from server

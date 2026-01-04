@@ -285,6 +285,16 @@ export default function RegisterPage() {
         text: "Silakan cek email Anda untuk verifikasi akun.",
         confirmButtonText: "Lanjutkan",
         confirmButtonColor: "#A3AF87",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl border border-gray-100",
+          title: "text-xl font-bold text-[#5a6c5b]",
+          htmlContainer: "text-gray-600",
+          confirmButton:
+            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        },
+        showClass: {
+          popup: "animate__animated animate__bounceIn",
+        },
       });
       // Redirect to OTP page with email
       router.push(`/otp?email=${encodeURIComponent(formData.email)}`);
@@ -295,6 +305,16 @@ export default function RegisterPage() {
         text: result.message,
         confirmButtonText: "Coba Lagi",
         confirmButtonColor: "#A3AF87",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl border border-gray-100",
+          title: "text-xl font-bold text-[#5a6c5b]",
+          htmlContainer: "text-gray-600",
+          confirmButton:
+            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        },
+        showClass: {
+          popup: "animate__animated animate__shakeX",
+        },
       });
     }
 

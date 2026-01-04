@@ -76,6 +76,16 @@ export default function ProductCard({
             title: "Login Diperlukan",
             text: "Silakan login untuk menambahkan produk ke keranjang",
             confirmButtonColor: "#A3AF87",
+            customClass: {
+              popup: "rounded-3xl shadow-2xl border border-gray-100",
+              title: "text-lg font-bold text-[#5a6c5b]",
+              htmlContainer: "text-gray-600",
+              confirmButton:
+                "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+            },
+            showClass: {
+              popup: "animate__animated animate__headShake",
+            },
           });
         } else {
           Swal.fire({
@@ -83,6 +93,16 @@ export default function ProductCard({
             title: "Gagal",
             text: result.message || "Gagal menambahkan ke keranjang",
             confirmButtonColor: "#A3AF87",
+            customClass: {
+              popup: "rounded-3xl shadow-2xl border border-gray-100",
+              title: "text-lg font-bold text-[#5a6c5b]",
+              htmlContainer: "text-gray-600",
+              confirmButton:
+                "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+            },
+            showClass: {
+              popup: "animate__animated animate__shakeX",
+            },
           });
         }
       }
@@ -94,6 +114,16 @@ export default function ProductCard({
         title: "Terjadi Kesalahan",
         text: "Gagal menambahkan produk ke keranjang",
         confirmButtonColor: "#A3AF87",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl border border-gray-100",
+          title: "text-lg font-bold text-[#5a6c5b]",
+          htmlContainer: "text-gray-600",
+          confirmButton:
+            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        },
+        showClass: {
+          popup: "animate__animated animate__shakeX",
+        },
       });
     } finally {
       setIsAdding(false);

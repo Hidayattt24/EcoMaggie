@@ -166,17 +166,7 @@ export default function ProductDetailPage({ params }: PageProps) {
 
       if (result.success && result.data) {
         setIsWishlisted(result.data.isWishlisted);
-        Swal.fire({
-          icon: "success",
-          title: result.data.isWishlisted
-            ? "Ditambahkan ke Wishlist"
-            : "Dihapus dari Wishlist",
-          text: result.message,
-          timer: 1500,
-          showConfirmButton: false,
-          toast: true,
-          position: "top-end",
-        });
+        // Removed toast notification for wishlist
       } else if (result.error === "UNAUTHORIZED") {
         Swal.fire({
           icon: "warning",
@@ -218,10 +208,25 @@ export default function ProductDetailPage({ params }: PageProps) {
           icon: "success",
           title: "Berhasil!",
           text: result.message,
-          timer: 1500,
+          timer: 3000,
+          timerProgressBar: true,
           showConfirmButton: false,
           toast: true,
           position: "top-end",
+          customClass: {
+            popup: "rounded-2xl shadow-xl border-2 border-[#A3AF87]",
+            title: "text-base font-bold text-[#A3AF87]",
+            htmlContainer: "text-sm text-gray-600",
+          },
+          background: "#ffffff",
+          iconColor: "#A3AF87",
+          didOpen: (toast) => {
+            toast.style.animation =
+              "slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
+          },
+          willClose: (toast) => {
+            toast.style.animation = "fadeOutRight 0.4s ease-in-out";
+          },
         });
         // Reset quantity after adding to cart
         setQuantity(1);
@@ -231,6 +236,16 @@ export default function ProductDetailPage({ params }: PageProps) {
           title: "Login Diperlukan",
           text: "Silakan login untuk menambahkan ke keranjang",
           confirmButtonColor: "#A3AF87",
+          customClass: {
+            popup: "rounded-3xl shadow-2xl border border-gray-100",
+            title: "text-lg font-bold text-[#5a6c5b]",
+            htmlContainer: "text-gray-600",
+            confirmButton:
+              "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+          },
+          showClass: {
+            popup: "animate__animated animate__headShake",
+          },
         });
       } else {
         Swal.fire({
@@ -238,6 +253,16 @@ export default function ProductDetailPage({ params }: PageProps) {
           title: "Gagal",
           text: result.message,
           confirmButtonColor: "#A3AF87",
+          customClass: {
+            popup: "rounded-3xl shadow-2xl border border-gray-100",
+            title: "text-lg font-bold text-[#5a6c5b]",
+            htmlContainer: "text-gray-600",
+            confirmButton:
+              "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+          },
+          showClass: {
+            popup: "animate__animated animate__shakeX",
+          },
         });
       }
     } catch (error) {
@@ -247,6 +272,16 @@ export default function ProductDetailPage({ params }: PageProps) {
         title: "Terjadi Kesalahan",
         text: "Gagal menambahkan ke keranjang",
         confirmButtonColor: "#A3AF87",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl border border-gray-100",
+          title: "text-lg font-bold text-[#5a6c5b]",
+          htmlContainer: "text-gray-600",
+          confirmButton:
+            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        },
+        showClass: {
+          popup: "animate__animated animate__shakeX",
+        },
       });
     } finally {
       setIsAddingToCart(false);
@@ -266,6 +301,11 @@ export default function ProductDetailPage({ params }: PageProps) {
             title: "Ukuran file terlalu besar",
             text: "Maksimal ukuran file adalah 5MB",
             confirmButtonColor: "#A3AF87",
+            customClass: {
+              popup: "rounded-2xl shadow-2xl",
+              title: "text-lg font-bold",
+              confirmButton: "rounded-xl px-6 py-2.5 shadow-lg",
+            },
           });
           return;
         }
@@ -662,7 +702,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                           )
                         )
                       }
-                      className="w-12 h-8 text-center text-sm font-medium border-x border-gray-200 focus:outline-none"
+                      className="w-12 h-8 text-center text-sm font-medium border-x border-gray-200 focus:outline-none text-[#A3AF87]"
                       disabled={product.stock === 0}
                     />
                     <button

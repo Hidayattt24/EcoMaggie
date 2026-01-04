@@ -78,9 +78,21 @@ export default function WishlistPage() {
       text: `Hapus ${item?.name || "produk ini"} dari wishlist?`,
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
+      cancelButtonColor: "#9CA3AF",
       confirmButtonText: "Ya, Hapus",
       cancelButtonText: "Batal",
+      customClass: {
+        popup: "rounded-3xl shadow-2xl border border-gray-100",
+        title: "text-xl font-bold text-[#5a6c5b]",
+        htmlContainer: "text-gray-600",
+        confirmButton:
+          "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        cancelButton:
+          "rounded-xl px-8 py-3 font-medium hover:bg-gray-100 transition-all",
+      },
+      showClass: {
+        popup: "animate__animated animate__fadeInDown animate__faster",
+      },
     });
 
     if (!result.isConfirmed) return;
@@ -97,8 +109,25 @@ export default function WishlistPage() {
           icon: "success",
           title: "Berhasil",
           text: "Produk dihapus dari wishlist",
-          timer: 1500,
+          timer: 3000,
+          timerProgressBar: true,
           showConfirmButton: false,
+          toast: true,
+          position: "top-end",
+          customClass: {
+            popup: "rounded-2xl shadow-xl border-2 border-[#A3AF87]",
+            title: "text-base font-bold text-[#A3AF87]",
+            htmlContainer: "text-sm text-gray-600",
+          },
+          background: "#ffffff",
+          iconColor: "#A3AF87",
+          didOpen: (toast) => {
+            toast.style.animation =
+              "slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
+          },
+          willClose: (toast) => {
+            toast.style.animation = "fadeOutRight 0.4s ease-in-out";
+          },
         });
       } else {
         Swal.fire({
@@ -106,6 +135,16 @@ export default function WishlistPage() {
           title: "Gagal",
           text: response.message,
           confirmButtonColor: "#A3AF87",
+          customClass: {
+            popup: "rounded-3xl shadow-2xl border border-gray-100",
+            title: "text-lg font-bold text-[#5a6c5b]",
+            htmlContainer: "text-gray-600",
+            confirmButton:
+              "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+          },
+          showClass: {
+            popup: "animate__animated animate__shakeX",
+          },
         });
       }
     } catch (error) {
@@ -115,6 +154,16 @@ export default function WishlistPage() {
         title: "Error",
         text: "Terjadi kesalahan",
         confirmButtonColor: "#A3AF87",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl border border-gray-100",
+          title: "text-lg font-bold text-[#5a6c5b]",
+          htmlContainer: "text-gray-600",
+          confirmButton:
+            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        },
+        showClass: {
+          popup: "animate__animated animate__shakeX",
+        },
       });
     } finally {
       setRemovingId(null);

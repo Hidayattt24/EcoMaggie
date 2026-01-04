@@ -197,26 +197,10 @@ export default function MarketProductsPage() {
       if (result.success && result.data) {
         if (result.data.isWishlisted) {
           setWishlist((prev) => [...prev, productIdStr]);
-          Swal.fire({
-            icon: "success",
-            title: "Ditambahkan ke Wishlist",
-            text: result.message,
-            timer: 1500,
-            showConfirmButton: false,
-            toast: true,
-            position: "top-end",
-          });
+          // Removed toast notification for wishlist
         } else {
           setWishlist((prev) => prev.filter((id) => id !== productIdStr));
-          Swal.fire({
-            icon: "info",
-            title: "Dihapus dari Wishlist",
-            text: result.message,
-            timer: 1500,
-            showConfirmButton: false,
-            toast: true,
-            position: "top-end",
-          });
+          // Removed toast notification for wishlist
         }
       } else if (result.error === "UNAUTHORIZED") {
         Swal.fire({

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import "./toast-animations.css";
 import StructuredData from "@/components/StructuredData";
 
 const poppins = Poppins({

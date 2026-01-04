@@ -30,23 +30,49 @@ export function LogoutButton({
       cancelButtonText: "Batal",
       reverseButtons: true,
       customClass: {
-        popup: "rounded-2xl",
-        title: "text-xl font-bold poppins-bold",
-        htmlContainer: "text-gray-600 poppins-regular",
+        popup: "rounded-3xl shadow-2xl border border-gray-100",
+        title: "text-xl font-bold text-[#5a6c5b]",
+        htmlContainer: "text-gray-600",
         confirmButton:
-          "rounded-xl px-6 py-3 font-medium shadow-lg poppins-semibold",
-        cancelButton: "rounded-xl px-6 py-3 font-medium poppins-regular",
+          "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        cancelButton:
+          "rounded-xl px-8 py-3 font-medium hover:bg-gray-100 transition-all",
       },
       buttonsStyling: true,
       showClass: {
-        popup: "animate-fade-in",
+        popup: "animate__animated animate__fadeInDown animate__faster",
       },
       hideClass: {
-        popup: "animate-fade-out",
+        popup: "animate__animated animate__fadeOutUp animate__faster",
       },
     });
 
     if (result.isConfirmed) {
+      // Show logout success toast
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil Logout",
+        text: "Sampai jumpa lagi!",
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+        customClass: {
+          popup: "rounded-2xl shadow-xl border-2 border-[#A3AF87]",
+          title: "text-base font-bold text-[#A3AF87]",
+          htmlContainer: "text-sm text-gray-600",
+        },
+        background: "#ffffff",
+        iconColor: "#A3AF87",
+        didOpen: (toast) => {
+          toast.style.animation =
+            "slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        },
+        willClose: (toast) => {
+          toast.style.animation = "fadeOutRight 0.4s ease-in-out";
+        },
+      });
       // Close dropdown if callback provided
       if (onClose) {
         onClose();
@@ -80,10 +106,14 @@ export function LogoutButton({
           confirmButtonColor: "#A3AF87",
           confirmButtonText: "OK",
           customClass: {
-            popup: "rounded-2xl",
-            title: "text-xl font-bold poppins-bold",
-            htmlContainer: "text-gray-600 poppins-regular",
-            confirmButton: "rounded-xl px-6 py-3 font-medium poppins-semibold",
+            popup: "rounded-3xl shadow-2xl border border-gray-100",
+            title: "text-xl font-bold text-[#5a6c5b]",
+            htmlContainer: "text-gray-600",
+            confirmButton:
+              "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+          },
+          showClass: {
+            popup: "animate__animated animate__shakeX",
           },
         });
       }

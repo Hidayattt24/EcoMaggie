@@ -33,29 +33,31 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 type LocationStatus = "loading" | "allowed" | "not_allowed" | "not_registered";
 
 export default function SupplyPage() {
-  const { userLocation, isSupplyConnectAvailable, isLoading } =
+  const { userLocation, isSupplyConnectAvailable, isLoading, hasAddress } =
     useUserLocation();
   const [locationStatus, setLocationStatus] =
     useState<LocationStatus>("loading");
 
-  // Determine location status based on user registration data
+  // Determine location status based on user address data from database
   useEffect(() => {
     if (isLoading) {
       setLocationStatus("loading");
       return;
     }
 
-    if (!userLocation) {
+    // User belum set alamat di database
+    if (!hasAddress || !userLocation) {
       setLocationStatus("not_registered");
       return;
     }
 
+    // User sudah set alamat, cek apakah di wilayah layanan
     if (isSupplyConnectAvailable) {
       setLocationStatus("allowed");
     } else {
       setLocationStatus("not_allowed");
     }
-  }, [userLocation, isSupplyConnectAvailable, isLoading]);
+  }, [userLocation, isSupplyConnectAvailable, isLoading, hasAddress]);
 
   const isLocationAllowed = locationStatus === "allowed";
 
@@ -221,11 +223,12 @@ export default function SupplyPage() {
                       <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm text-amber-800 font-medium">
-                          Data Alamat Tidak Ditemukan
+                          Alamat Belum Terdaftar
                         </p>
                         <p className="text-xs text-amber-600 mt-1">
-                          Silakan lengkapi alamat pada profil akun Anda atau
-                          daftar ulang untuk menggunakan fitur Supply Connect.
+                          Anda belum memiliki alamat yang terdaftar. Silakan
+                          tambahkan alamat terlebih dahulu untuk menggunakan
+                          fitur Supply Connect.
                         </p>
                       </div>
                     </div>
@@ -284,11 +287,11 @@ export default function SupplyPage() {
               {/* Action Button based on status */}
               {locationStatus === "not_registered" ? (
                 <Link
-                  href="/register"
+                  href="/profile/addresses"
                   className="w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all bg-[#A3AF87] text-white hover:bg-[#95a17a] shadow-lg hover:shadow-xl"
                 >
-                  <UserCircle className="h-4 w-4" />
-                  Daftar / Lengkapi Profil
+                  <MapPin className="h-4 w-4" />
+                  Tambah Alamat
                 </Link>
               ) : locationStatus === "not_allowed" ? (
                 <div className="text-center py-3 px-4 rounded-xl bg-gray-100 text-gray-500 text-sm">
@@ -418,21 +421,21 @@ export default function SupplyPage() {
                     </div>
                     <h3 className="text-gray-700 font-semibold text-lg mb-2">
                       {locationStatus === "not_registered"
-                        ? "Data Alamat Tidak Ditemukan"
+                        ? "Alamat Belum Terdaftar"
                         : "Di Luar Jangkauan Layanan"}
                     </h3>
                     <p className="text-gray-500 text-sm max-w-md mx-auto mb-4">
                       {locationStatus === "not_registered"
-                        ? "Silakan lengkapi data alamat Anda saat mendaftar untuk menggunakan fitur Supply Connect."
-                        : `Alamat Anda (${userLocation?.kabupatenKota}, ${userLocation?.provinsi}) berada di luar wilayah layanan. Saat ini Supply Connect hanya tersedia di Kota Banda Aceh.`}
+                        ? "Anda belum memiliki alamat yang terdaftar. Silakan tambahkan alamat terlebih dahulu untuk menggunakan fitur Supply Connect."
+                        : `Alamat Anda (${userLocation?.kabupatenKota}, ${userLocation?.provinsi}) berada di luar wilayah layanan. Saat ini Supply Connect hanya tersedia untuk wilayah Aceh (NAD) - Kota Banda Aceh.`}
                     </p>
                     {locationStatus === "not_registered" ? (
                       <Link
-                        href="/register"
+                        href="/profile/addresses"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-semibold text-sm hover:bg-[#95a17a] transition-colors"
                       >
-                        <UserCircle className="h-4 w-4" />
-                        Daftar Sekarang
+                        <MapPin className="h-4 w-4" />
+                        Tambah Alamat
                       </Link>
                     ) : (
                       <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-500 rounded-xl font-semibold text-sm cursor-not-allowed">

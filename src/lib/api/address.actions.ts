@@ -710,6 +710,8 @@ export async function getDefaultAddress(): Promise<ActionResponse<Address>> {
       streetAddress: address.street,
       city: address.city,
       province: address.province,
+      district: address.district,
+      village: address.village,
       postalCode: address.postal_code,
       isDefault: address.is_default,
       latitude: address.latitude,

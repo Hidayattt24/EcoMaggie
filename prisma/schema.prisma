@@ -102,6 +102,8 @@ model Address {
   street      String
   city        String
   province    String
+  district    String?  // Kecamatan
+  village     String?  // Kelurahan/Desa
   postalCode  String   @map("postal_code")
   isDefault   Boolean  @default(false) @map("is_default")
   latitude    Float?

@@ -343,6 +343,7 @@ export default function FarmerSidebar({
                           onClose={() => setShowMobileLogout(false)}
                           className="rounded-xl justify-center"
                           hideText={true}
+                          showInDropdown={false}
                         />
                       </div>
                     </div>

@@ -9,14 +9,21 @@ interface LogoutButtonProps {
   onClose?: () => void;
   className?: string;
   hideText?: boolean;
+  showInDropdown?: boolean; // New prop to control if shown in dropdown
 }
 
 export function LogoutButton({
   onClose,
   className = "",
   hideText = false,
+  showInDropdown = true, // Default true for backward compatibility
 }: LogoutButtonProps) {
   const router = useRouter();
+
+  // Don't render if showInDropdown is false
+  if (!showInDropdown) {
+    return null;
+  }
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -123,25 +130,21 @@ export function LogoutButton({
   return (
     <button
       onClick={handleLogout}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${className}`}
-      style={{
-        backgroundColor: "transparent",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "rgba(163, 175, 135, 0.1)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
-      }}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group hover:bg-[#A3AF87]/10 ${className}`}
     >
-      <div
-        className="p-2 rounded-lg transition-all"
-        style={{
-          backgroundColor: "rgba(163, 175, 135, 0.15)",
-        }}
-      >
-        <LogOut className="h-5 w-5" style={{ color: "#A3AF87" }} />
+      <div className="p-2 bg-[#A3AF87]/15 rounded-lg group-hover:bg-[#A3AF87]/25 transition-all">
+        <LogOut className="h-5 w-5 text-[#A3AF87]" />
       </div>
+      {!hideText && (
+        <div className="flex-1 text-left">
+          <p className="font-bold text-sm text-gray-900">
+            Keluar dari Aplikasi
+          </p>
+          <p className="text-xs text-gray-500">
+            Logout dari akun Anda
+          </p>
+        </div>
+      )}
     </button>
   );
 }

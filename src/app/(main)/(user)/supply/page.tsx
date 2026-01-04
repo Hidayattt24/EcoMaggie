@@ -76,18 +76,36 @@ export default function SupplyPage() {
 
   const statsData = [
     {
-      icon: Scale,
+      icon: Recycle,
       value: "1,250",
       label: "kg Sampah",
-      color: "text-emerald-600",
+      color: "text-[#A3AF87]",
+      bgColor: "bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5",
+      iconBg: "bg-gradient-to-br from-[#A3AF87] to-[#95a17a]",
     },
-    { icon: Users, value: "48", label: "Kontributor", color: "text-blue-600" },
-    { icon: TreePine, value: "12", label: "Peternak", color: "text-amber-600" },
+    { 
+      icon: Users, 
+      value: "48", 
+      label: "Kontributor", 
+      color: "text-blue-600",
+      bgColor: "bg-gradient-to-br from-blue-50 to-blue-50/50",
+      iconBg: "bg-gradient-to-br from-blue-500 to-blue-600",
+    },
+    { 
+      icon: TreePine, 
+      value: "12", 
+      label: "Peternak", 
+      color: "text-amber-600",
+      bgColor: "bg-gradient-to-br from-amber-50 to-amber-50/50",
+      iconBg: "bg-gradient-to-br from-amber-500 to-amber-600",
+    },
     {
       icon: Leaf,
       value: "500",
       label: "kg CO₂ Tersimpan",
       color: "text-green-600",
+      bgColor: "bg-gradient-to-br from-green-50 to-green-50/50",
+      iconBg: "bg-gradient-to-br from-green-500 to-green-600",
     },
   ];
 
@@ -309,21 +327,34 @@ export default function SupplyPage() {
             {/* Stats Grid */}
             <motion.div
               variants={itemVariants}
-              className="grid grid-cols-2 gap-3"
+              className="grid grid-cols-2 gap-4"
             >
               {statsData.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
-                  <div
+                  <motion.div
                     key={index}
-                    className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100"
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className={`${stat.bgColor} rounded-2xl p-5 border-2 border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group`}
                   >
-                    <Icon className={`h-5 w-5 ${stat.color} mb-2`} />
-                    <p className="text-2xl font-bold text-gray-900">
+                    {/* Background decoration */}
+                    <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                    
+                    {/* Icon with gradient background */}
+                    <div className={`inline-flex p-2.5 rounded-xl ${stat.iconBg} shadow-lg mb-3 relative z-10`}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                    
+                    {/* Value */}
+                    <p className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1 relative z-10">
                       {stat.value}
                     </p>
-                    <p className="text-xs text-gray-500">{stat.label}</p>
-                  </div>
+                    
+                    {/* Label */}
+                    <p className={`text-xs font-semibold ${stat.color} relative z-10`}>
+                      {stat.label}
+                    </p>
+                  </motion.div>
                 );
               })}
             </motion.div>

@@ -33,8 +33,11 @@ import {
   Sunrise,
   Sun,
   Sunset,
+  History,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useDefaultAddress } from "@/hooks/useDefaultAddress";
+import MediaUploader from "@/components/supply/MediaUploader";
 
 const wasteTypes = [
   {
@@ -104,7 +107,7 @@ const weightOptions = [
 ];
 
 const impactStats = [
-  { label: "Sampah Diselamatkan", value: "1,250 kg", icon: Scale },
+  { label: "Sampah Diselamatkan", value: "1,250 kg", icon: Recycle },
   { label: "CO₂ Terhindar", value: "500 kg", icon: Globe },
   { label: "Peternak Terbantu", value: "12", icon: TreePine },
 ];
@@ -113,30 +116,46 @@ export default function SupplyInputPage() {
   const router = useRouter();
   const { userLocation, isSupplyConnectAvailable, isLoading } =
     useUserLocation();
+  const { address: defaultAddressData, isLoading: isLoadingAddress } =
+    useDefaultAddress();
 
-  // Initialize default address from userLocation or fallback
-  const initialAddress =
-    userLocation?.alamatLengkap ||
-    "Jl. T. Nyak Arief No. 12, Lamnyong, Banda Aceh";
+  // Get clean default address
+  const defaultAddress = defaultAddressData?.fullAddress || "Belum ada alamat terdaftar";
+  const defaultAddressId = defaultAddressData?.id || null;
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     wasteType: "",
     weight: "",
-    address: initialAddress,
+    address: "",
+    addressId: null as string | null,
     date: "",
     timeSlot: "",
     notes: "",
     photo: null as File | null,
+    video: null as File | null,
+    videoDuration: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [successData, setSuccessData] = useState<any>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [useCustomAddress, setUseCustomAddress] = useState(false);
   const [customAddress, setCustomAddress] = useState("");
-  const [defaultAddress] = useState(initialAddress);
+
+  // Update form address when defaultAddress loads
+  useEffect(() => {
+    if (defaultAddressData && !useCustomAddress) {
+      setFormData((prev) => ({
+        ...prev,
+        address: defaultAddressData.fullAddress,
+        addressId: defaultAddressData.id,
+      }));
+    }
+  }, [defaultAddressData, useCustomAddress]);
 
   // Date picker helpers
   const getDaysInMonth = (date: Date) => {
@@ -190,34 +209,62 @@ export default function SupplyInputPage() {
     setShowDatePicker(false);
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData({ ...formData, photo: file });
-      setPreviewUrl(URL.createObjectURL(file));
-    }
+  const handlePhotoChange = (file: File | null, preview: string | null) => {
+    setFormData({ ...formData, photo: file });
+    setPreviewUrl(preview);
   };
 
-  const removePhoto = () => {
-    setFormData({ ...formData, photo: null });
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
+  const handleVideoChange = (file: File | null, preview: string | null, duration: number) => {
+    setFormData({ ...formData, video: file, videoDuration: duration });
+    setVideoPreviewUrl(preview);
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    
+    try {
+      // Import the action
+      const { createSupply } = await import("@/lib/api/supply.actions");
+      
+      // Prepare data
+      const supplyData = {
+        wasteType: formData.wasteType,
+        estimatedWeight: formData.weight,
+        photoUrl: previewUrl || undefined,
+        videoUrl: videoPreviewUrl || undefined,
+        videoDuration: formData.videoDuration || undefined,
+        pickupAddress: useCustomAddress ? customAddress : defaultAddress,
+        pickupAddressId: (useCustomAddress ? undefined : defaultAddressId) || undefined,
+        pickupDate: formData.date,
+        pickupTimeSlot: formData.timeSlot,
+        notes: formData.notes || undefined,
+      };
+      
+      console.log("Submitting supply data:", supplyData);
+      
+      // Submit to database
+      const result = await createSupply(supplyData);
+      
+      if (result.success) {
+        setSuccessData(result.data);
+        setIsSuccess(true);
+      } else {
+        console.error("Create supply error:", result);
+        alert(result.message || "Gagal membuat supply request");
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      alert("Terjadi kesalahan saat mengirim data");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const canProceedStep1 = formData.wasteType && formData.weight;
+  const canProceedStep1 = formData.wasteType && formData.weight && (formData.photo || formData.video);
   const canProceedStep2 = formData.date && formData.timeSlot;
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || isLoadingAddress) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <motion.div
@@ -291,22 +338,68 @@ export default function SupplyInputPage() {
   }
 
   // Success State
-  if (isSuccess) {
+  if (isSuccess && successData) {
+    // Map waste type to display name
+    const wasteTypeNames: Record<string, string> = {
+      sisa_makanan: "Sisa Makanan",
+      sayuran_buah: "Sayuran & Buah",
+      sisa_dapur: "Sisa Dapur",
+      campuran: "Campuran Organik",
+    };
+
+    // Map weight to display label
+    const weightLabels: Record<string, string> = {
+      "1": "< 1 kg",
+      "3": "1-3 kg",
+      "5": "3-5 kg",
+      "10": "5-10 kg",
+      "15": "> 10 kg",
+    };
+
+    // Map status to display
+    const statusLabels: Record<string, string> = {
+      PENDING: "Menunggu Konfirmasi",
+      SCHEDULED: "Dijadwalkan",
+      ON_THE_WAY: "Kurir Dalam Perjalanan",
+      PICKED_UP: "Sudah Diambil",
+      COMPLETED: "Selesai",
+      CANCELLED: "Dibatalkan",
+    };
+
+    // Format date
+    const formatDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    };
+
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100"
+          className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-gray-100"
         >
+          {/* Success Icon */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+            className="relative mx-auto mb-6"
           >
-            <CheckCircle className="h-10 w-10 text-white" />
+            <div className="w-24 h-24 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] rounded-full flex items-center justify-center mx-auto shadow-lg">
+              <CheckCircle className="h-12 w-12 text-white" />
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <Leaf className="h-6 w-6 text-green-600" />
+            </div>
           </motion.div>
+
+          {/* Title */}
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Permintaan Berhasil!
           </h2>
@@ -315,44 +408,91 @@ export default function SupplyInputPage() {
             segera menghubungi Anda.
           </p>
 
-          <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left">
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <span className="text-sm text-gray-500">ID Supply</span>
-              <span className="text-sm font-semibold text-gray-900">
-                SUP-{Math.random().toString(36).substring(2, 8).toUpperCase()}
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <span className="text-sm text-gray-500">Jenis</span>
-              <span className="text-sm font-medium text-gray-900">
-                {wasteTypes.find((t) => t.id === formData.wasteType)?.name}
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <span className="text-sm text-gray-500">Berat</span>
-              <span className="text-sm font-medium text-gray-900">
-                {weightOptions.find((w) => w.value === formData.weight)?.label}
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-gray-500">Status</span>
-              <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                Menunggu Pickup
-              </span>
+          {/* Supply Details Card */}
+          <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-5 mb-6 text-left border border-gray-100 shadow-sm">
+            <div className="space-y-3">
+              {/* ID Supply */}
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  ID Supply
+                </span>
+                <span className="text-sm font-bold text-[#A3AF87]">
+                  {successData.supplyNumber}
+                </span>
+              </div>
+
+              {/* Jenis */}
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <Recycle className="h-4 w-4" />
+                  Jenis
+                </span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {wasteTypeNames[successData.wasteType] || successData.wasteType}
+                </span>
+              </div>
+
+              {/* Berat */}
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <Scale className="h-4 w-4" />
+                  Berat
+                </span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {weightLabels[successData.estimatedWeight] || successData.estimatedWeight}
+                </span>
+              </div>
+
+              {/* Tanggal Pickup */}
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Tanggal Pickup
+                </span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {formatDate(successData.pickupDate)}
+                </span>
+              </div>
+
+              {/* Waktu Pickup */}
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Waktu
+                </span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {successData.pickupTimeRange}
+                </span>
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <Info className="h-4 w-4" />
+                  Status
+                </span>
+                <span className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+                  {statusLabels[successData.status] || successData.status}
+                </span>
+              </div>
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="space-y-3">
             <Link
               href="/supply/history"
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#A3AF87] to-[#8a9b73] text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
             >
+              <History className="h-5 w-5" />
               Lihat Riwayat
             </Link>
             <Link
               href="/supply"
               className="w-full flex items-center justify-center gap-2 text-gray-600 py-3 font-medium hover:text-gray-900 transition-colors"
             >
+              <ArrowLeft className="h-4 w-4" />
               Kembali ke Beranda
             </Link>
           </div>
@@ -381,10 +521,7 @@ export default function SupplyInputPage() {
               Input Sampah Organik
             </h1>
             <p className="text-sm text-gray-500">
-              Langkah {step} dari 2 •{" "}
-              {useCustomAddress
-                ? formData.address
-                : userLocation?.alamatLengkap || defaultAddress}
+              Langkah {step} dari 2
             </p>
           </div>
           <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl border border-green-200">
@@ -516,54 +653,27 @@ export default function SupplyInputPage() {
                       </div>
                     </div>
 
-                    {/* Photo Upload */}
+                    {/* Photo/Video Upload */}
                     <div>
                       <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Foto Sampah{" "}
-                        <span className="font-normal text-gray-400">
-                          (opsional)
-                        </span>
+                        Foto / Video Sampah{" "}
+                        <span className="text-red-500">*</span>
                       </label>
-                      {previewUrl ? (
-                        <div className="relative w-full max-w-sm">
-                          <img
-                            src={previewUrl}
-                            alt="Preview"
-                            className="w-full h-48 object-cover rounded-2xl border border-gray-200"
-                          />
-                          <button
-                            onClick={removePhoto}
-                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <label className="block w-full max-w-sm p-8 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-center hover:border-[#A3AF87]/50 hover:bg-gray-100 transition-all cursor-pointer">
-                          <Camera className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                          <p className="text-sm text-gray-600 font-medium">
-                            Klik untuk upload foto
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            PNG, JPG hingga 5MB
-                          </p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoChange}
-                            className="hidden"
-                          />
-                        </label>
-                      )}
+                      <MediaUploader
+                        onPhotoChange={handlePhotoChange}
+                        onVideoChange={handleVideoChange}
+                        photoPreview={previewUrl}
+                        videoPreview={videoPreviewUrl}
+                      />
                     </div>
 
-                    {/* Continue Button */}
+                    {/* Continue Button - Full Width */}
                     <motion.button
                       whileHover={{ scale: canProceedStep1 ? 1.01 : 1 }}
                       whileTap={{ scale: canProceedStep1 ? 0.99 : 1 }}
                       onClick={() => setStep(2)}
                       disabled={!canProceedStep1}
-                      className={`w-full lg:w-auto lg:px-12 py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
+                      className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                         canProceedStep1
                           ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -608,9 +718,11 @@ export default function SupplyInputPage() {
                                 type="button"
                                 onClick={() => {
                                   setUseCustomAddress(true);
+                                  setCustomAddress("");
                                   setFormData({
                                     ...formData,
-                                    address: customAddress || "",
+                                    address: "",
+                                    addressId: null,
                                   });
                                 }}
                                 className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline flex items-center gap-1"
@@ -638,10 +750,12 @@ export default function SupplyInputPage() {
                                 <textarea
                                   value={customAddress}
                                   onChange={(e) => {
-                                    setCustomAddress(e.target.value);
+                                    const value = e.target.value;
+                                    setCustomAddress(value);
                                     setFormData({
                                       ...formData,
-                                      address: e.target.value,
+                                      address: value,
+                                      addressId: null,
                                     });
                                   }}
                                   placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
@@ -653,10 +767,14 @@ export default function SupplyInputPage() {
                                     type="button"
                                     onClick={() => {
                                       setUseCustomAddress(false);
-                                      setFormData({
-                                        ...formData,
-                                        address: defaultAddress,
-                                      });
+                                      setCustomAddress("");
+                                      if (defaultAddressData) {
+                                        setFormData({
+                                          ...formData,
+                                          address: defaultAddressData.fullAddress,
+                                          addressId: defaultAddressData.id,
+                                        });
+                                      }
                                     }}
                                     className="text-sm text-gray-600 font-medium hover:text-gray-900 flex items-center gap-1"
                                   >
@@ -942,7 +1060,7 @@ export default function SupplyInputPage() {
                       />
                     </div>
 
-                    {/* Submit Button */}
+                    {/* Submit Button - Full Width */}
                     <motion.button
                       whileHover={{
                         scale: canProceedStep2 && !isSubmitting ? 1.01 : 1,
@@ -952,7 +1070,7 @@ export default function SupplyInputPage() {
                       }}
                       onClick={handleSubmit}
                       disabled={!canProceedStep2 || isSubmitting}
-                      className={`w-full lg:w-auto lg:px-12 py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
+                      className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                         canProceedStep2 && !isSubmitting
                           ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -1087,25 +1205,61 @@ export default function SupplyInputPage() {
               </div>
             </div>
 
-            {/* Pickup Map Placeholder */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            {/* Pickup Map - Banda Aceh */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm overflow-hidden">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <MapPin className="h-5 w-5 text-green-600" />
+                <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-lg shadow-sm">
+                  <MapPin className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-bold text-gray-900">Lokasi Pickup</h3>
-              </div>
-              <div className="bg-gray-100 rounded-xl h-32 flex items-center justify-center">
-                <div className="text-center">
-                  <Globe className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-xs text-gray-500">Peta lokasi pickup</p>
+                <div>
+                  <h3 className="font-bold text-gray-900">Lokasi Pickup</h3>
+                  <p className="text-xs text-gray-500">Banda Aceh, NAD</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-3 text-center">
-                {useCustomAddress && formData.address
-                  ? formData.address
-                  : userLocation?.alamatLengkap || defaultAddress}
-              </p>
+              
+              {/* Modern Map Embed */}
+              <div className="relative rounded-xl overflow-hidden border-2 border-gray-100 shadow-inner">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127334.89283826!2d95.24!3d5.55!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3040377ae63dbbed%3A0x3039d80b220cb90!2sBanda%20Aceh%2C%20Aceh!5e0!3m2!1sen!2sid!4v1234567890"
+                  width="100%"
+                  height="200"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="grayscale-[30%]"
+                />
+                
+                {/* Overlay to prevent interaction */}
+                <div 
+                  className="absolute inset-0 bg-[#A3AF87]/20 pointer-events-auto"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(163, 175, 135, 0.15) 0%, rgba(163, 175, 135, 0.25) 100%)'
+                  }}
+                />
+                
+                {/* Overlay badge */}
+                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-semibold text-gray-700">
+                      Area Layanan Aktif
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Address Info */}
+              <div className="mt-4 p-3 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-[#A3AF87] flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {useCustomAddress && customAddress
+                      ? customAddress
+                      : defaultAddress}
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>

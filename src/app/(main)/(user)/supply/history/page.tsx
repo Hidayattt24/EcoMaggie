@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,107 +27,36 @@ import {
   Sparkles,
   History,
   UserCircle,
+  AlertCircle,
+  Recycle,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { getUserSupplies, type UserSupply } from "@/lib/api/supply.actions";
 
-// Dummy data riwayat supply dengan detail lebih lengkap
-const supplyHistory = [
-  {
-    id: "SUP-001",
-    date: "2025-12-30",
-    weight: 5.5,
-    type: "Sisa Makanan",
-    status: "completed",
-    pickupDate: "2025-12-31",
-    pickupTime: "08:30",
-    address: "Jl. T. Nyak Arief No. 12, Banda Aceh",
-    notes: "Sampah di depan pagar rumah",
-    courier: {
-      name: "Ahmad Ridwan",
-      phone: "081234567890",
-      photo: null,
-    },
-    farmer: {
-      name: "Peternakan Maggot Aceh Jaya",
-      location: "Aceh Besar",
-    },
-    photo: null,
-  },
-  {
-    id: "SUP-002",
-    date: "2025-12-28",
-    weight: 3.2,
-    type: "Sayuran & Buah",
-    status: "picked_up",
-    pickupDate: "2025-12-29",
-    pickupTime: "14:15",
-    address: "Jl. T. Nyak Arief No. 12, Banda Aceh",
-    notes: "Kantong warna hitam",
-    courier: {
-      name: "Muhammad Faisal",
-      phone: "081298765432",
-      photo: null,
-    },
-    farmer: null,
-    photo: null,
-  },
-  {
-    id: "SUP-003",
-    date: "2025-12-27",
-    weight: 8.0,
-    type: "Campuran Organik",
-    status: "waiting",
-    pickupDate: null,
-    pickupTime: null,
-    address: "Jl. T. Nyak Arief No. 12, Banda Aceh",
-    notes: "Sampah dapur dan sisa makanan",
-    courier: null,
-    farmer: null,
-    photo: null,
-  },
-  {
-    id: "SUP-004",
-    date: "2025-12-25",
-    weight: 4.5,
-    type: "Sisa Makanan",
-    status: "completed",
-    pickupDate: "2025-12-26",
-    pickupTime: "10:00",
-    address: "Jl. T. Nyak Arief No. 12, Banda Aceh",
-    notes: "",
-    courier: {
-      name: "Ahmad Ridwan",
-      phone: "081234567890",
-      photo: null,
-    },
-    farmer: {
-      name: "CV. Maggot Banda Aceh",
-      location: "Banda Aceh",
-    },
-    photo: null,
-  },
-  {
-    id: "SUP-005",
-    date: "2025-12-20",
-    weight: 6.0,
-    type: "Sayuran & Buah",
-    status: "completed",
-    pickupDate: "2025-12-21",
-    pickupTime: "16:45",
-    address: "Jl. T. Nyak Arief No. 12, Banda Aceh",
-    notes: "Kulit buah dan sayuran busuk",
-    courier: {
-      name: "Rizki Pratama",
-      phone: "081387654321",
-      photo: null,
-    },
-    farmer: {
-      name: "Peternakan Maggot Aceh Jaya",
-      location: "Aceh Besar",
-    },
-    photo: null,
-  },
-];
+// Map database waste types to display labels
+const wasteTypeLabels: Record<string, string> = {
+  sisa_makanan: "Sisa Makanan",
+  sayuran_buah: "Sayuran & Buah",
+  sisa_dapur: "Sisa Dapur",
+  campuran: "Campuran Organik",
+};
+
+// Map database weight values to display labels
+const weightLabels: Record<string, string> = {
+  "1": "1 kg",
+  "3": "1-3 kg",
+  "5": "3-5 kg",
+  "10": "5-10 kg",
+  "15": "10-15 kg",
+};
+
+// Map database status to component status
+const mapDatabaseStatus = (dbStatus: string): "waiting" | "picked_up" | "completed" => {
+  if (dbStatus === "PENDING" || dbStatus === "SCHEDULED") return "waiting";
+  if (dbStatus === "ON_THE_WAY" || dbStatus === "PICKED_UP") return "picked_up";
+  if (dbStatus === "COMPLETED") return "completed";
+  return "waiting"; // default
+};
 
 const statusConfig = {
   waiting: {
@@ -156,25 +85,106 @@ const statusConfig = {
   },
 };
 
-type SupplyItem = (typeof supplyHistory)[0];
+// Transform UserSupply to component format
+interface TransformedSupply {
+  id: string;
+  date: string;
+  weight: number;
+  type: string;
+  status: "waiting" | "picked_up" | "completed";
+  pickupDate: string | null;
+  pickupTime: string | null;
+  address: string;
+  notes: string | null;
+  courier: {
+    name: string;
+    phone: string;
+    photo: null;
+  } | null;
+  farmer: null; // Not implemented yet
+  photo: string | null;
+  supplyNumber: string;
+}
 
 export default function SupplyHistoryPage() {
-  const { userLocation, isSupplyConnectAvailable, isLoading } =
+  const { userLocation, isSupplyConnectAvailable, isLoading: locationLoading } =
     useUserLocation();
 
   const [activeTab, setActiveTab] = useState<
     "all" | "waiting" | "picked_up" | "completed"
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedItem, setSelectedItem] = useState<SupplyItem | null>(
-    supplyHistory[0]
-  );
+  const [selectedItem, setSelectedItem] = useState<TransformedSupply | null>(null);
+  
+  // State for supplies data
+  const [supplyHistory, setSupplyHistory] = useState<TransformedSupply[]>([]);
+  const [isLoadingSupplies, setIsLoadingSupplies] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch supplies from database
+  useEffect(() => {
+    async function fetchSupplies() {
+      if (!isSupplyConnectAvailable || locationLoading) return;
+      
+      setIsLoadingSupplies(true);
+      setError(null);
+      
+      try {
+        const response = await getUserSupplies();
+        
+        if (response.success && response.data) {
+          // Transform database data to component format
+          const transformed: TransformedSupply[] = response.data.map((supply) => {
+            const weightValue = parseInt(supply.estimatedWeight);
+            
+            return {
+              id: supply.id,
+              supplyNumber: supply.supplyNumber,
+              date: supply.createdAt,
+              weight: weightValue,
+              type: wasteTypeLabels[supply.wasteType] || supply.wasteType,
+              status: mapDatabaseStatus(supply.status),
+              pickupDate: supply.pickupDate,
+              pickupTime: supply.pickupTimeRange,
+              address: supply.pickupAddress,
+              notes: supply.notes,
+              courier: supply.courierName && supply.courierPhone
+                ? {
+                    name: supply.courierName,
+                    phone: supply.courierPhone,
+                    photo: null,
+                  }
+                : null,
+              farmer: null, // Not implemented yet
+              photo: supply.photoUrl,
+            };
+          });
+          
+          setSupplyHistory(transformed);
+          
+          // Auto-select first item if available
+          if (transformed.length > 0 && !selectedItem) {
+            setSelectedItem(transformed[0]);
+          }
+        } else {
+          setError(response.message || "Gagal memuat riwayat supply");
+        }
+      } catch (err) {
+        console.error("Error fetching supplies:", err);
+        setError("Terjadi kesalahan saat memuat data");
+      } finally {
+        setIsLoadingSupplies(false);
+      }
+    }
+    
+    fetchSupplies();
+  }, [isSupplyConnectAvailable, locationLoading]);
 
   const filteredSupply = supplyHistory.filter((item) => {
     const matchesTab = activeTab === "all" || item.status === activeTab;
     const matchesSearch =
       item.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.id.toLowerCase().includes(searchQuery.toLowerCase());
+      item.supplyNumber.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -182,6 +192,8 @@ export default function SupplyHistoryPage() {
   const completedCount = supplyHistory.filter(
     (s) => s.status === "completed"
   ).length;
+  
+  const isLoading = locationLoading || isLoadingSupplies;
 
   // Loading state
   if (isLoading) {
@@ -199,8 +211,42 @@ export default function SupplyHistoryPage() {
     );
   }
 
+  // Error state
+  if (error && !locationLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100"
+        >
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-10 w-10 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Terjadi Kesalahan
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full flex items-center justify-center gap-2 bg-[#A3AF87] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#95a17a] transition-colors"
+          >
+            Coba Lagi
+          </button>
+          <Link
+            href="/supply"
+            className="w-full flex items-center justify-center gap-2 text-gray-600 py-3 font-medium hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
   // Location not allowed state - user not registered or outside service area
-  if (!isSupplyConnectAvailable) {
+  if (!isSupplyConnectAvailable && !locationLoading) {
     const isNotRegistered = !userLocation;
 
     return (
@@ -286,17 +332,27 @@ export default function SupplyHistoryPage() {
 
           {/* Stats Cards - Desktop */}
           <div className="hidden lg:flex items-center gap-3 ml-auto">
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl border border-green-200">
-              <Scale className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-semibold text-green-700">
-                {totalWeight.toFixed(1)} kg
-              </span>
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/20">
+              <div className="p-1.5 bg-[#A3AF87]/20 rounded-lg">
+                <Recycle className="h-4 w-4 text-[#A3AF87]" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total Sampah</p>
+                <p className="text-sm font-bold text-[#5a6c5b]">
+                  ~{totalWeight.toFixed(1)} kg
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
-              <CheckCircle className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-700">
-                {completedCount} Selesai
-              </span>
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-green-50 to-green-50/50 rounded-xl border border-green-200">
+              <div className="p-1.5 bg-green-100 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Selesai</p>
+                <p className="text-sm font-bold text-green-700">
+                  {completedCount} Supply
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -310,59 +366,84 @@ export default function SupplyHistoryPage() {
             className="lg:col-span-5 xl:col-span-4"
           >
             {/* Search & Filter */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
-              <div className="relative mb-4">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+              {/* Search Bar */}
+              <div className="relative mb-5">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari berdasarkan jenis atau ID..."
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all text-sm"
+                  placeholder="Cari jenis sampah atau nomor supply..."
+                  className="w-full pl-12 pr-4 py-3.5 bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#A3AF87] focus:ring-4 focus:ring-[#A3AF87]/10 transition-all text-sm text-gray-900 placeholder:text-gray-400"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="h-4 w-4 text-gray-400" />
+                  </button>
+                )}
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-2 overflow-x-auto pb-1">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {[
-                  { key: "all", label: "Semua", count: supplyHistory.length },
+                  { 
+                    key: "all", 
+                    label: "Semua", 
+                    count: supplyHistory.length,
+                    icon: Package,
+                  },
                   {
                     key: "waiting",
                     label: "Menunggu",
                     count: supplyHistory.filter((s) => s.status === "waiting")
                       .length,
+                    icon: Clock,
                   },
                   {
                     key: "picked_up",
                     label: "Diproses",
                     count: supplyHistory.filter((s) => s.status === "picked_up")
                       .length,
+                    icon: Truck,
                   },
                   {
                     key: "completed",
                     label: "Selesai",
                     count: completedCount,
+                    icon: CheckCircle,
                   },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
-                      activeTab === tab.key
-                        ? "bg-[#A3AF87] text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {tab.label}
-                    <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${
-                        activeTab === tab.key ? "bg-white/20" : "bg-gray-200"
+                ].map((tab) => {
+                  const TabIcon = tab.icon;
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 border-2 ${
+                        activeTab === tab.key
+                          ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] text-white border-[#A3AF87] shadow-lg shadow-[#A3AF87]/20"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-[#A3AF87]/30 hover:bg-gray-50"
                       }`}
                     >
-                      {tab.count}
-                    </span>
-                  </button>
-                ))}
+                      <TabIcon className={`h-4 w-4 ${activeTab === tab.key ? "text-white" : "text-gray-400"}`} />
+                      {tab.label}
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                          activeTab === tab.key 
+                            ? "bg-white/25 text-white" 
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -379,11 +460,22 @@ export default function SupplyHistoryPage() {
                       <Package className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="font-semibold text-gray-700 mb-2">
-                      Tidak Ada Data
+                      {supplyHistory.length === 0 ? "Belum Ada Supply" : "Tidak Ada Data"}
                     </h3>
-                    <p className="text-gray-500 text-sm">
-                      Belum ada riwayat supply untuk filter ini
+                    <p className="text-gray-500 text-sm mb-4">
+                      {supplyHistory.length === 0 
+                        ? "Anda belum pernah membuat permintaan supply. Mulai sekarang untuk berkontribusi!"
+                        : "Belum ada riwayat supply untuk filter ini"}
                     </p>
+                    {supplyHistory.length === 0 && (
+                      <Link
+                        href="/supply/input"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#95a17a] transition-colors"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Buat Supply Pertama
+                      </Link>
+                    )}
                   </motion.div>
                 ) : (
                   filteredSupply.map((item) => {
@@ -400,44 +492,65 @@ export default function SupplyHistoryPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         onClick={() => setSelectedItem(item)}
-                        className={`w-full text-left bg-white rounded-xl p-4 border-2 transition-all ${
+                        className={`w-full text-left bg-white rounded-2xl p-4 border-2 transition-all group ${
                           isSelected
-                            ? "border-[#A3AF87] shadow-md bg-[#A3AF87]/5"
-                            : "border-gray-100 hover:border-gray-200 hover:shadow-sm"
+                            ? "border-[#A3AF87] shadow-lg shadow-[#A3AF87]/10 bg-gradient-to-br from-[#A3AF87]/5 to-white"
+                            : "border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-md"
                         }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${status.iconBg}`}>
-                            <StatusIcon
-                              className={`h-4 w-4 ${status.iconColor}`}
+                        <div className="flex items-start gap-4">
+                          {/* Icon with gradient background */}
+                          <div className={`relative p-3 rounded-xl transition-all ${
+                            isSelected 
+                              ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-lg shadow-[#A3AF87]/20" 
+                              : `${status.iconBg} group-hover:scale-105`
+                          }`}>
+                            <Recycle
+                              className={`h-5 w-5 ${
+                                isSelected ? "text-white" : status.iconColor
+                              }`}
+                            />
+                            {/* Status dot badge */}
+                            <span
+                              className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${status.dotColor}`}
                             />
                           </div>
+                          
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <h3
-                                className={`font-semibold text-sm truncate ${
-                                  isSelected
-                                    ? "text-[#A3AF87]"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {item.type}
-                              </h3>
-                              <span
-                                className={`w-2 h-2 rounded-full flex-shrink-0 ${status.dotColor}`}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-500 mb-2">
-                              {item.id}
-                            </p>
-                            <div className="flex items-center gap-3 text-xs text-gray-500">
-                              <div className="flex items-center gap-1">
-                                <Scale className="h-3 w-3" />
-                                <span>{item.weight} kg</span>
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex-1 min-w-0">
+                                <h3
+                                  className={`font-bold text-base truncate mb-0.5 ${
+                                    isSelected
+                                      ? "text-[#A3AF87]"
+                                      : "text-gray-900"
+                                  }`}
+                                >
+                                  {item.type}
+                                </h3>
+                                <p className="text-xs text-gray-500 font-medium">
+                                  {item.supplyNumber}
+                                </p>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>
+                              <ChevronRight className={`h-5 w-5 flex-shrink-0 transition-all ${
+                                isSelected 
+                                  ? "text-[#A3AF87] translate-x-1" 
+                                  : "text-gray-300 group-hover:text-gray-400"
+                              }`} />
+                            </div>
+                            
+                            {/* Info badges */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
+                                <Scale className="h-3.5 w-3.5 text-gray-400" />
+                                <span className="text-xs font-semibold text-gray-700">
+                                  {weightLabels[item.weight.toString()] || `${item.weight} kg`}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
+                                <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                <span className="text-xs font-semibold text-gray-700">
                                   {new Date(item.date).toLocaleDateString(
                                     "id-ID",
                                     {
@@ -447,6 +560,11 @@ export default function SupplyHistoryPage() {
                                   )}
                                 </span>
                               </div>
+                              <span
+                                className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${status.color}`}
+                              >
+                                {status.label}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -479,7 +597,7 @@ export default function SupplyHistoryPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-white/70 text-sm mb-1">
-                          {selectedItem.id}
+                          {selectedItem.supplyNumber}
                         </p>
                         <h2 className="text-2xl font-bold">
                           {selectedItem.type}
@@ -503,7 +621,7 @@ export default function SupplyHistoryPage() {
                       <div>
                         <p className="text-white/70 text-xs mb-1">Berat</p>
                         <p className="font-bold text-lg">
-                          {selectedItem.weight} kg
+                          {weightLabels[selectedItem.weight.toString()] || `${selectedItem.weight} kg`}
                         </p>
                       </div>
                       <div>
@@ -560,60 +678,77 @@ export default function SupplyHistoryPage() {
                     </div>
 
                     {/* Courier Info */}
-                    {selectedItem.courier && (
-                      <div className="border border-gray-100 rounded-xl p-4">
-                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <Truck className="h-4 w-4 text-[#A3AF87]" />
-                          Informasi Kurir
-                        </h3>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                              <User className="h-6 w-6 text-gray-400" />
+                    <div className="border border-gray-100 rounded-xl p-4">
+                      <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-[#A3AF87]" />
+                        Informasi Kurir
+                      </h3>
+                      
+                      {selectedItem.courier ? (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                <User className="h-6 w-6 text-gray-400" />
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900">
+                                  {selectedItem.courier.name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  Kurir EcoMaggie
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-semibold text-gray-900">
-                                {selectedItem.courier.name}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                Kurir EcoMaggie
-                              </p>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={`tel:${selectedItem.courier.phone}`}
+                                className="p-2.5 bg-[#A3AF87]/10 text-[#A3AF87] rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
+                              >
+                                <Phone className="h-5 w-5" />
+                              </a>
+                              <a
+                                href={`https://wa.me/${selectedItem.courier.phone.replace(
+                                  /^0/,
+                                  "62"
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2.5 bg-green-100 text-green-600 rounded-xl hover:bg-green-200 transition-colors"
+                              >
+                                <MessageCircle className="h-5 w-5" />
+                              </a>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={`tel:${selectedItem.courier.phone}`}
-                              className="p-2.5 bg-[#A3AF87]/10 text-[#A3AF87] rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
-                            >
-                              <Phone className="h-5 w-5" />
-                            </a>
-                            <a
-                              href={`https://wa.me/${selectedItem.courier.phone.replace(
-                                /^0/,
-                                "62"
-                              )}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2.5 bg-green-100 text-green-600 rounded-xl hover:bg-green-200 transition-colors"
-                            >
-                              <MessageCircle className="h-5 w-5" />
-                            </a>
+                          {selectedItem.pickupTime && (
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Clock className="h-4 w-4" />
+                                <span>
+                                  Dijemput pukul {selectedItem.pickupTime}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg">
+                          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Clock className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-amber-900 text-sm">
+                              Masih Diproses
+                            </p>
+                            <p className="text-xs text-amber-700">
+                              Kurir akan segera ditugaskan untuk pickup Anda
+                            </p>
                           </div>
                         </div>
-                        {selectedItem.pickupTime && (
-                          <div className="mt-4 pt-4 border-t border-gray-100">
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                Dijemput pukul {selectedItem.pickupTime}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
 
-                    {/* Farmer Info */}
+                    {/* Farmer Info - Not implemented yet, hidden */}
                     {selectedItem.farmer && (
                       <div className="border border-gray-100 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -626,10 +761,10 @@ export default function SupplyHistoryPage() {
                           </div>
                           <div>
                             <p className="font-semibold text-gray-900">
-                              {selectedItem.farmer.name}
+                              Informasi peternak akan tersedia setelah proses selesai
                             </p>
                             <p className="text-sm text-gray-500">
-                              {selectedItem.farmer.location}
+                              -
                             </p>
                           </div>
                         </div>

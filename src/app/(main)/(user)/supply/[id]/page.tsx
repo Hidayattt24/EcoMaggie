@@ -1,98 +1,263 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Package,
   Scale,
   MapPin,
   Calendar,
   Clock,
   CheckCircle,
-  Truck,
   Phone,
   User,
   Copy,
   MessageCircle,
-  Circle,
   Recycle,
   FileText,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
+import { getSupplyById, type UserSupply } from "@/lib/api/supply.actions";
 
-// Dummy data detail supply
-const supplyDetail = {
-  id: "SUP-001",
-  date: "2025-12-30",
-  weight: "3-5 kg",
-  type: "Sisa Makanan",
-  status: "completed",
-  pickupDate: "2025-12-31",
-  pickupTime: "08:00 - 10:00",
-  address: "Jl. T. Nyak Arief No. 12, Lamnyong, Banda Aceh",
-  notes: "Sampah sudah dikemas dalam plastik hitam, diletakkan di depan pagar",
-  courier: {
-    name: "Ahmad Fauzi",
-    phone: "082288953268",
-  },
-  timeline: [
-    {
-      status: "submitted",
-      label: "Permintaan Diterima",
-      date: "30 Des 2025, 14:30",
-      completed: true,
-    },
-    {
-      status: "confirmed",
-      label: "Pickup Dikonfirmasi",
-      date: "30 Des 2025, 15:00",
-      completed: true,
-    },
-    {
-      status: "picked_up",
-      label: "Sampah Diambil",
-      date: "31 Des 2025, 08:45",
-      completed: true,
-    },
-    {
-      status: "completed",
-      label: "Selesai Diproses",
-      date: "31 Des 2025, 10:00",
-      completed: true,
-    },
-  ],
+// Map database waste types to display labels
+const wasteTypeLabels: Record<string, string> = {
+  sisa_makanan: "Sisa Makanan",
+  sayuran_buah: "Sayuran & Buah",
+  sisa_dapur: "Sisa Dapur",
+  campuran: "Campuran Organik",
 };
 
-const statusConfig = {
-  waiting: {
+// Map database weight values to display labels
+const weightLabels: Record<string, string> = {
+  "1": "1 kg",
+  "3": "1-3 kg",
+  "5": "3-5 kg",
+  "10": "5-10 kg",
+  "15": "10-15 kg",
+};
+
+// Map database status to display config
+const getStatusConfig = (dbStatus: string) => {
+  if (dbStatus === "PENDING" || dbStatus === "SCHEDULED") {
+    return {
+      label: "Menunggu",
+      color: "bg-amber-50 text-amber-700 border-amber-200",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+    };
+  }
+  if (dbStatus === "ON_THE_WAY" || dbStatus === "PICKED_UP") {
+    return {
+      label: "Diproses",
+      color: "bg-blue-50 text-blue-700 border-blue-200",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+    };
+  }
+  if (dbStatus === "COMPLETED") {
+    return {
+      label: "Selesai",
+      color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]",
+      iconBg: "bg-[#A3AF87]/20",
+      iconColor: "text-[#A3AF87]",
+    };
+  }
+  if (dbStatus === "CANCELLED") {
+    return {
+      label: "Dibatalkan",
+      color: "bg-red-50 text-red-700 border-red-200",
+      iconBg: "bg-red-100",
+      iconColor: "text-red-600",
+    };
+  }
+  return {
     label: "Menunggu",
-    color: "bg-amber-50 text-amber-700 border-amber-200",
-    iconBg: "bg-amber-100",
-    iconColor: "text-amber-600",
-  },
-  picked_up: {
-    label: "Diproses",
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-  },
-  completed: {
-    label: "Selesai",
-    color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]",
-    iconBg: "bg-[#A3AF87]/20",
-    iconColor: "text-[#A3AF87]",
-  },
+    color: "bg-gray-50 text-gray-700 border-gray-200",
+    iconBg: "bg-gray-100",
+    iconColor: "text-gray-600",
+  };
+};
+
+// Build timeline from status history
+const buildTimeline = (supply: UserSupply) => {
+  const timeline = [
+    {
+      status: "PENDING",
+      label: "Permintaan Diterima",
+      date: supply.createdAt,
+      completed: true,
+    },
+  ];
+
+  // Add status history items
+  if (supply.statusHistory && supply.statusHistory.length > 0) {
+    supply.statusHistory.forEach((history) => {
+      if (history.status === "SCHEDULED") {
+        timeline.push({
+          status: "SCHEDULED",
+          label: "Pickup Dikonfirmasi",
+          date: history.timestamp,
+          completed: true,
+        });
+      } else if (history.status === "ON_THE_WAY") {
+        timeline.push({
+          status: "ON_THE_WAY",
+          label: "Kurir Dalam Perjalanan",
+          date: history.timestamp,
+          completed: true,
+        });
+      } else if (history.status === "PICKED_UP") {
+        timeline.push({
+          status: "PICKED_UP",
+          label: "Sampah Diambil",
+          date: history.timestamp,
+          completed: true,
+        });
+      } else if (history.status === "COMPLETED") {
+        timeline.push({
+          status: "COMPLETED",
+          label: "Selesai Diproses",
+          date: history.timestamp,
+          completed: true,
+        });
+      } else if (history.status === "CANCELLED") {
+        timeline.push({
+          status: "CANCELLED",
+          label: "Dibatalkan",
+          date: history.timestamp,
+          completed: true,
+        });
+      }
+    });
+  }
+
+  // Add pending steps based on current status
+  const currentStatus = supply.status;
+  if (currentStatus === "PENDING") {
+    timeline.push({
+      status: "SCHEDULED",
+      label: "Pickup Dikonfirmasi",
+      date: "",
+      completed: false,
+    });
+  }
+  if (
+    currentStatus === "PENDING" ||
+    currentStatus === "SCHEDULED" ||
+    currentStatus === "ON_THE_WAY"
+  ) {
+    timeline.push({
+      status: "PICKED_UP",
+      label: "Sampah Diambil",
+      date: "",
+      completed: false,
+    });
+  }
+  if (currentStatus !== "COMPLETED" && currentStatus !== "CANCELLED") {
+    timeline.push({
+      status: "COMPLETED",
+      label: "Selesai Diproses",
+      date: "",
+      completed: false,
+    });
+  }
+
+  return timeline;
 };
 
 export default function SupplyDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const status = statusConfig[supplyDetail.status as keyof typeof statusConfig];
+  const router = useRouter();
+  const [supply, setSupply] = useState<UserSupply | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [supplyId, setSupplyId] = useState<string | null>(null);
+
+  // Unwrap params Promise
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setSupplyId(resolvedParams.id);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (!supplyId) return;
+
+    async function fetchSupply() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await getSupplyById(supplyId!);
+
+        if (response.success && response.data) {
+          setSupply(response.data);
+        } else {
+          setError(response.message || "Supply tidak ditemukan");
+        }
+      } catch (err) {
+        console.error("Error fetching supply:", err);
+        setError("Terjadi kesalahan saat memuat data");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchSupply();
+  }, [supplyId]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
+          <p className="text-gray-600">Memuat detail supply...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !supply) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-10 w-10 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {error || "Supply Tidak Ditemukan"}
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">
+            Supply yang Anda cari tidak ditemukan atau Anda tidak memiliki akses
+            ke supply ini.
+          </p>
+          <Link
+            href="/supply/history"
+            className="w-full flex items-center justify-center gap-2 bg-[#A3AF87] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#95a17a] transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali ke Riwayat
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const status = getStatusConfig(supply.status);
+  const timeline = buildTimeline(supply);
+  const wasteType = wasteTypeLabels[supply.wasteType] || supply.wasteType;
+  const weight = weightLabels[supply.estimatedWeight] || `${supply.estimatedWeight} kg`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#A3AF87]/5">
@@ -114,10 +279,10 @@ export default function SupplyDetailPage({
                   </h1>
                   <span className="text-lg text-gray-400">•</span>
                   <span className="text-lg font-semibold text-[#A3AF87]">
-                    {supplyDetail.id}
+                    {supply.supplyNumber}
                   </span>
                   <button
-                    onClick={() => copyToClipboard(supplyDetail.id)}
+                    onClick={() => copyToClipboard(supply.supplyNumber)}
                     className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                     title="Salin ID"
                   >
@@ -125,7 +290,7 @@ export default function SupplyDetailPage({
                   </button>
                 </div>
                 <p className="text-sm text-gray-500">
-                  {new Date(supplyDetail.date).toLocaleDateString("id-ID", {
+                  {new Date(supply.createdAt).toLocaleDateString("id-ID", {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
@@ -155,10 +320,10 @@ export default function SupplyDetailPage({
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-[#303646] poppins-bold">
-                {supplyDetail.id}
+                {supply.supplyNumber}
               </h1>
               <button
-                onClick={() => copyToClipboard(supplyDetail.id)}
+                onClick={() => copyToClipboard(supply.supplyNumber)}
                 className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <Copy className="h-4 w-4 text-gray-400" />
@@ -190,10 +355,10 @@ export default function SupplyDetailPage({
                 </div>
                 <div className="flex-1">
                   <h2 className="font-bold text-[#303646] text-lg lg:text-xl poppins-bold">
-                    {supplyDetail.type}
+                    {wasteType}
                   </h2>
                   <p className="text-sm lg:text-base text-gray-500">
-                    {new Date(supplyDetail.date).toLocaleDateString("id-ID", {
+                    {new Date(supply.createdAt).toLocaleDateString("id-ID", {
                       weekday: "long",
                       day: "numeric",
                       month: "long",
@@ -213,7 +378,7 @@ export default function SupplyDetailPage({
                     <span className="text-xs text-gray-500">Berat</span>
                   </div>
                   <p className="font-bold text-[#303646] text-lg">
-                    {supplyDetail.weight}
+                    {weight}
                   </p>
                 </div>
                 <div
@@ -227,8 +392,8 @@ export default function SupplyDetailPage({
                     </span>
                   </div>
                   <p className="font-bold text-[#303646] text-lg">
-                    {supplyDetail.pickupDate
-                      ? new Date(supplyDetail.pickupDate).toLocaleDateString(
+                    {supply.pickupDate
+                      ? new Date(supply.pickupDate).toLocaleDateString(
                           "id-ID",
                           { day: "numeric", month: "short" }
                         )
@@ -244,7 +409,7 @@ export default function SupplyDetailPage({
                     <span className="text-xs text-gray-500">Waktu</span>
                   </div>
                   <p className="font-bold text-[#303646] text-lg">
-                    {supplyDetail.pickupTime}
+                    {supply.pickupTimeRange || "Menunggu"}
                   </p>
                 </div>
                 <div
@@ -279,12 +444,12 @@ export default function SupplyDetailPage({
                   <div className="flex-1">
                     <p className="text-xs text-gray-500 mb-1">Alamat Pickup</p>
                     <p className="text-sm lg:text-base text-[#303646] font-medium">
-                      {supplyDetail.address}
+                      {supply.pickupAddress}
                     </p>
                   </div>
                 </div>
 
-                {supplyDetail.notes && (
+                {supply.notes && (
                   <div className="flex items-start gap-4">
                     <div
                       className="p-2.5 lg:p-3 rounded-xl flex-shrink-0"
@@ -295,7 +460,7 @@ export default function SupplyDetailPage({
                     <div className="flex-1">
                       <p className="text-xs text-gray-500 mb-1">Catatan</p>
                       <p className="text-sm lg:text-base text-[#303646]">
-                        {supplyDetail.notes}
+                        {supply.notes}
                       </p>
                     </div>
                   </div>
@@ -304,12 +469,12 @@ export default function SupplyDetailPage({
             </div>
 
             {/* Courier Card */}
-            {supplyDetail.courier && (
-              <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-8 border border-gray-100 shadow-sm">
-                <h3 className="font-bold text-[#303646] text-base lg:text-lg poppins-bold mb-5">
-                  Kurir Pickup
-                </h3>
+            <div className="bg-white rounded-2xl lg:rounded-3xl p-5 lg:p-8 border border-gray-100 shadow-sm">
+              <h3 className="font-bold text-[#303646] text-base lg:text-lg poppins-bold mb-5">
+                Kurir Pickup
+              </h3>
 
+              {supply.courierName && supply.courierPhone ? (
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-4">
                     <div
@@ -323,14 +488,14 @@ export default function SupplyDetailPage({
                     </div>
                     <div>
                       <p className="font-semibold text-[#303646] text-base lg:text-lg">
-                        {supplyDetail.courier.name}
+                        {supply.courierName}
                       </p>
                       <p className="text-sm text-gray-500">Kurir EcoMaggie</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <a
-                      href={`tel:${supplyDetail.courier.phone}`}
+                      href={`tel:${supply.courierPhone}`}
                       className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                     >
                       <Phone className="h-5 w-5 text-gray-600" />
@@ -339,9 +504,7 @@ export default function SupplyDetailPage({
                       </span>
                     </a>
                     <a
-                      href={`https://wa.me/62${supplyDetail.courier.phone.slice(
-                        1
-                      )}`}
+                      href={`https://wa.me/${supply.courierPhone.replace(/^0/, "62")}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors"
@@ -354,8 +517,22 @@ export default function SupplyDetailPage({
                     </a>
                   </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-amber-900 text-sm">
+                      Masih Diproses
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Kurir akan segera ditugaskan untuk pickup Anda
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column - Timeline & Actions */}
@@ -367,7 +544,7 @@ export default function SupplyDetailPage({
               </h3>
 
               <div className="space-y-0">
-                {supplyDetail.timeline.map((item, index) => (
+                {timeline.map((item, index) => (
                   <div key={item.status} className="flex gap-4">
                     {/* Timeline Line & Dot */}
                     <div className="flex flex-col items-center">
@@ -380,7 +557,7 @@ export default function SupplyDetailPage({
                           <CheckCircle className="h-3 w-3 text-white" />
                         )}
                       </div>
-                      {index < supplyDetail.timeline.length - 1 && (
+                      {index < timeline.length - 1 && (
                         <div
                           className={`w-0.5 h-14 ${
                             item.completed ? "bg-[#A3AF87]" : "bg-gray-200"
@@ -403,7 +580,15 @@ export default function SupplyDetailPage({
                           item.completed ? "text-gray-500" : "text-gray-300"
                         }`}
                       >
-                        {item.completed ? item.date : "Menunggu"}
+                        {item.completed && item.date
+                          ? new Date(item.date).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Menunggu"}
                       </p>
                     </div>
                   </div>

@@ -11,6 +11,8 @@ import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/user/LogoutButton";
 import { useProfile, formatPhoneNumber } from "@/hooks/useProfile";
 import { getCartItemCount } from "@/lib/api/cart.actions";
+import { getWishlistCount } from "@/lib/api/product.actions";
+import { getTransactionCount } from "@/lib/api/transaction.actions";
 
 export function NavbarUser() {
   const pathname = usePathname();
@@ -20,23 +22,31 @@ export function NavbarUser() {
   // Get user profile data
   const { profile, loading: profileLoading } = useProfile();
 
-  // Cart count state
+  // Cart, Wishlist, and Transaction count states
   const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [transactionCount, setTransactionCount] = useState(0);
 
-  // Fetch cart count on mount and when cart page is visited
+  // Fetch counts on mount and when pathname changes
   useEffect(() => {
-    const fetchCartCount = async () => {
-      const count = await getCartItemCount();
-      setCartCount(count);
+    const fetchCounts = async () => {
+      const [cart, wishlist, transaction] = await Promise.all([
+        getCartItemCount(),
+        getWishlistCount(),
+        getTransactionCount(),
+      ]);
+      setCartCount(cart);
+      setWishlistCount(wishlist);
+      setTransactionCount(transaction);
     };
 
-    fetchCartCount();
+    fetchCounts();
 
-    // Refresh cart count every 30 seconds
-    const interval = setInterval(fetchCartCount, 30000);
+    // Refresh counts every 30 seconds
+    const interval = setInterval(fetchCounts, 30000);
 
     return () => clearInterval(interval);
-  }, [pathname]); // Re-fetch when pathname changes (especially when coming from cart page)
+  }, [pathname]); // Re-fetch when pathname changes
 
   const navItems = [
     {
@@ -160,7 +170,7 @@ export function NavbarUser() {
           <div className="flex items-center gap-4">
             <Link
               href="/wishlist"
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+              className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/wishlist"
                   ? "shadow-md scale-105"
                   : "text-gray-700"
@@ -202,6 +212,14 @@ export function NavbarUser() {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
+              {wishlistCount > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                  style={{ backgroundColor: "#A3AF87" }}
+                >
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
             </Link>
 
             <Link
@@ -260,7 +278,7 @@ export function NavbarUser() {
 
             <Link
               href="/transaction"
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+              className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/transaction"
                   ? "shadow-md scale-105"
                   : "text-gray-700"
@@ -302,6 +320,14 @@ export function NavbarUser() {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                 />
               </svg>
+              {transactionCount > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                  style={{ backgroundColor: "#A3AF87" }}
+                >
+                  {transactionCount > 99 ? "99+" : transactionCount}
+                </span>
+              )}
             </Link>
 
             <div className="relative" ref={dropdownRef}>
@@ -490,7 +516,7 @@ export function NavbarUser() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/wishlist"
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
                     pathname === "/wishlist" ? "scale-105" : "text-gray-600"
                   }`}
                   style={{
@@ -528,6 +554,14 @@ export function NavbarUser() {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
+                  {wishlistCount > 0 && (
+                    <span
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
+                      {wishlistCount > 99 ? "99+" : wishlistCount}
+                    </span>
+                  )}
                 </Link>
 
                 <Link
@@ -582,7 +616,7 @@ export function NavbarUser() {
 
                 <Link
                   href="/transaction"
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
                     pathname === "/transaction" ? "scale-105" : "text-gray-600"
                   }`}
                   style={{
@@ -620,6 +654,14 @@ export function NavbarUser() {
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                     />
                   </svg>
+                  {transactionCount > 0 && (
+                    <span
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
+                      {transactionCount > 99 ? "99+" : transactionCount}
+                    </span>
+                  )}
                 </Link>
 
                 <div className="relative" ref={mobileDropdownRef}>

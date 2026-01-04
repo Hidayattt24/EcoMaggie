@@ -190,7 +190,7 @@ export default function WishlistPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/20 via-white to-[#A3AF87]/10 pb-6 lg:pb-0">
+      <div className="min-h-screen bg-white pb-6 lg:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mb-4"></div>
@@ -202,7 +202,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/20 via-white to-[#A3AF87]/10 pb-6 lg:pb-0">
+    <div className="min-h-screen bg-white pb-6 lg:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Back Button - Mobile Only */}
         <button

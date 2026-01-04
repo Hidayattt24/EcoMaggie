@@ -2629,3 +2629,42 @@ export async function getUserWishlistIds(): Promise<
     };
   }
 }
+
+// ===========================================
+// GET WISHLIST COUNT (FOR NAVBAR BADGE)
+// ===========================================
+
+/**
+ * Get total count of items in user's wishlist
+ * Used for displaying badge count in navbar
+ */
+export async function getWishlistCount(): Promise<number> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return 0;
+    }
+
+    // Get count of wishlist items
+    const { count, error } = await supabase
+      .from("wishlists")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Get wishlist count error:", error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error("Get wishlist count exception:", error);
+    return 0;
+  }
+}

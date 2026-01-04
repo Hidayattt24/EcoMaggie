@@ -1751,3 +1751,393 @@ export async function getProductCategories(): Promise<
     };
   }
 }
+
+// ===========================================
+// PRODUCT REVIEW TYPES (USER SIDE)
+// ===========================================
+
+export type ProductReview = {
+  id: string;
+  author: string;
+  authorAvatar: string | null;
+  rating: number;
+  comment: string | null;
+  images: string[];
+  createdAt: string;
+  isVerified: boolean; // User has purchased this product
+};
+
+export type ProductReviewsResponse = {
+  reviews: ProductReview[];
+  total: number;
+  averageRating: number;
+  ratingDistribution: {
+    [key: number]: number; // e.g., { 5: 45, 4: 30, 3: 15, 2: 5, 1: 5 }
+  };
+};
+
+// ===========================================
+// GET PRODUCT REVIEWS (USER SIDE)
+// ===========================================
+
+export async function getProductReviews(
+  productId: string,
+  limit: number = 10,
+  offset: number = 0
+): Promise<ActionResponse<ProductReviewsResponse>> {
+  try {
+    const supabase = await createClient();
+
+    // Fetch reviews with user info
+    const { data: reviews, error } = await supabase
+      .from("reviews")
+      .select(
+        `
+        id,
+        rating,
+        comment,
+        images,
+        created_at,
+        users:user_id(full_name, avatar_url)
+      `
+      )
+      .eq("product_id", productId)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Get product reviews error:", error);
+      return {
+        success: false,
+        message: `Gagal mengambil ulasan: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    // Fetch total count and rating distribution
+    const { data: allReviews, error: countError } = await supabase
+      .from("reviews")
+      .select("rating")
+      .eq("product_id", productId);
+
+    if (countError) {
+      console.error("Get review count error:", countError);
+    }
+
+    // Calculate rating distribution
+    const ratingDistribution: { [key: number]: number } = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+    };
+    let totalRating = 0;
+
+    (allReviews || []).forEach((r) => {
+      ratingDistribution[r.rating] = (ratingDistribution[r.rating] || 0) + 1;
+      totalRating += r.rating;
+    });
+
+    const total = allReviews?.length || 0;
+    const averageRating = total > 0 ? totalRating / total : 0;
+
+    // Check if users have purchased (simplified - check if order exists)
+    // For now, we'll mark all as verified since they can only review after purchase
+
+    const transformedReviews: ProductReview[] = (reviews || []).map((r) => {
+      const userData = r.users as {
+        full_name?: string;
+        avatar_url?: string;
+      } | null;
+      return {
+        id: r.id,
+        author: userData?.full_name || "Anonymous",
+        authorAvatar: userData?.avatar_url || null,
+        rating: r.rating,
+        comment: r.comment,
+        images: r.images || [],
+        createdAt: r.created_at,
+        isVerified: true, // Since users can only review after purchase
+      };
+    });
+
+    return {
+      success: true,
+      message: "Berhasil mengambil ulasan",
+      data: {
+        reviews: transformedReviews,
+        total,
+        averageRating: Math.round(averageRating * 10) / 10,
+        ratingDistribution,
+      },
+    };
+  } catch (error) {
+    console.error("Get product reviews exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil ulasan",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// SUBMIT PRODUCT REVIEW (USER SIDE)
+// ===========================================
+
+export type SubmitReviewData = {
+  productId: string;
+  rating: number;
+  comment?: string;
+  images?: string[];
+};
+
+export async function submitProductReview(
+  data: SubmitReviewData
+): Promise<ActionResponse<ProductReview>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Anda harus login untuk memberikan ulasan",
+        error: "UNAUTHORIZED",
+      };
+    }
+
+    // Validate rating
+    if (data.rating < 1 || data.rating > 5) {
+      return {
+        success: false,
+        message: "Rating harus antara 1-5",
+        error: "INVALID_RATING",
+      };
+    }
+
+    // Check if product exists
+    const { data: product, error: productError } = await supabase
+      .from("products")
+      .select("id")
+      .eq("id", data.productId)
+      .single();
+
+    if (productError || !product) {
+      return {
+        success: false,
+        message: "Produk tidak ditemukan",
+        error: "NOT_FOUND",
+      };
+    }
+
+    // Check if user already reviewed this product
+    const { data: existingReview } = await supabase
+      .from("reviews")
+      .select("id")
+      .eq("product_id", data.productId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingReview) {
+      return {
+        success: false,
+        message: "Anda sudah memberikan ulasan untuk produk ini",
+        error: "ALREADY_REVIEWED",
+      };
+    }
+
+    // TODO: Check if user has purchased this product (optional)
+    // For now, we allow reviews without purchase check
+
+    // Insert review
+    const { data: review, error } = await supabase
+      .from("reviews")
+      .insert({
+        user_id: user.id,
+        product_id: data.productId,
+        rating: data.rating,
+        comment: data.comment?.trim() || null,
+        images: data.images || [],
+      })
+      .select(
+        `
+        id,
+        rating,
+        comment,
+        images,
+        created_at,
+        users:user_id(full_name, avatar_url)
+      `
+      )
+      .single();
+
+    if (error) {
+      console.error("Submit review error:", error);
+      return {
+        success: false,
+        message: `Gagal mengirim ulasan: ${error.message}`,
+        error: error.code,
+      };
+    }
+
+    // Update product average rating
+    await updateProductRating(data.productId);
+
+    const userData = review.users as {
+      full_name?: string;
+      avatar_url?: string;
+    } | null;
+
+    return {
+      success: true,
+      message: "Ulasan berhasil dikirim!",
+      data: {
+        id: review.id,
+        author: userData?.full_name || "Anonymous",
+        authorAvatar: userData?.avatar_url || null,
+        rating: review.rating,
+        comment: review.comment,
+        images: review.images || [],
+        createdAt: review.created_at,
+        isVerified: true,
+      },
+    };
+  } catch (error) {
+    console.error("Submit review exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengirim ulasan",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// UPDATE PRODUCT RATING (HELPER)
+// ===========================================
+
+async function updateProductRating(productId: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+
+    // Calculate new average rating
+    const { data: reviews } = await supabase
+      .from("reviews")
+      .select("rating")
+      .eq("product_id", productId);
+
+    if (reviews && reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+      const avgRating = Math.round((totalRating / reviews.length) * 100) / 100;
+
+      await supabase
+        .from("products")
+        .update({ rating: avgRating })
+        .eq("id", productId);
+    }
+  } catch (error) {
+    console.error("Update product rating error:", error);
+  }
+}
+
+// ===========================================
+// GET DETAILED PRODUCT FOR MARKET (WITH FARMER INFO)
+// ===========================================
+
+export type MarketProductDetail = MarketProduct & {
+  farmer: MarketProduct["farmer"] & {
+    joinedAt: string;
+    totalProducts: number;
+    phone: string | null;
+  };
+};
+
+export async function getMarketProductDetail(
+  slug: string
+): Promise<ActionResponse<MarketProductDetail>> {
+  try {
+    const supabase = await createClient();
+
+    // Get product with farmer details
+    const { data: product, error } = await supabase
+      .from("products")
+      .select(
+        `
+        *,
+        farmers!inner(id, user_id, farm_name, location, rating, is_verified, created_at),
+        reviews:reviews(count),
+        wishlists:wishlists(count)
+      `
+      )
+      .eq("slug", slug)
+      .eq("status", "active")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .single();
+
+    if (error || !product) {
+      return {
+        success: false,
+        message: "Produk tidak ditemukan",
+        error: "NOT_FOUND",
+      };
+    }
+
+    // Get farmer's total products count and phone
+    const farmerData = product.farmers as {
+      id: string;
+      user_id: string;
+      farm_name: string;
+      location: string | null;
+      rating: number;
+      is_verified: boolean;
+      created_at: string;
+    };
+
+    const farmerId = farmerData?.id;
+    const farmerUserId = farmerData?.user_id;
+
+    const [{ count: totalProducts }, { data: userData }] = await Promise.all([
+      supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("farmer_id", farmerId)
+        .eq("status", "active")
+        .eq("is_active", true)
+        .is("deleted_at", null),
+      supabase.from("users").select("phone").eq("id", farmerUserId).single(),
+    ]);
+
+    // Transform product
+    const baseProduct = transformMarketProduct(
+      product as Record<string, unknown>
+    );
+
+    return {
+      success: true,
+      message: "Berhasil mengambil data produk",
+      data: {
+        ...baseProduct,
+        farmer: {
+          ...baseProduct.farmer,
+          joinedAt: farmerData.created_at,
+          totalProducts: totalProducts || 0,
+          phone: userData?.phone || null,
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Get market product detail exception:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data produk",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}

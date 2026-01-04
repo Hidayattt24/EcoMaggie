@@ -114,11 +114,16 @@ export default function SupplyInputPage() {
   const { userLocation, isSupplyConnectAvailable, isLoading } =
     useUserLocation();
 
+  // Initialize default address from userLocation or fallback
+  const initialAddress =
+    userLocation?.alamatLengkap ||
+    "Jl. T. Nyak Arief No. 12, Lamnyong, Banda Aceh";
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     wasteType: "",
     weight: "",
-    address: "Jl. T. Nyak Arief No. 12, Lamnyong, Banda Aceh",
+    address: initialAddress,
     date: "",
     timeSlot: "",
     notes: "",
@@ -129,6 +134,9 @@ export default function SupplyInputPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [useCustomAddress, setUseCustomAddress] = useState(false);
+  const [customAddress, setCustomAddress] = useState("");
+  const [defaultAddress] = useState(initialAddress);
 
   // Date picker helpers
   const getDaysInMonth = (date: Date) => {
@@ -374,7 +382,9 @@ export default function SupplyInputPage() {
             </h1>
             <p className="text-sm text-gray-500">
               Langkah {step} dari 2 •{" "}
-              {userLocation?.address || formData.address}
+              {useCustomAddress
+                ? formData.address
+                : userLocation?.alamatLengkap || defaultAddress}
             </p>
           </div>
           <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl border border-green-200">
@@ -579,21 +589,101 @@ export default function SupplyInputPage() {
                       <label className="block text-base font-semibold text-gray-900 mb-4">
                         Alamat Pickup
                       </label>
-                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                            <MapPin className="h-6 w-6 text-[#A3AF87]" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-gray-900 font-medium">
-                              {formData.address}
-                            </p>
-                            <button className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline">
-                              Ubah alamat pickup
-                            </button>
+
+                      {/* Default Address */}
+                      {!useCustomAddress && (
+                        <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
+                              <MapPin className="h-6 w-6 text-[#A3AF87]" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-500 mb-1">
+                                Alamat Default
+                              </p>
+                              <p className="text-gray-900 font-medium">
+                                {defaultAddress}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setUseCustomAddress(true);
+                                  setFormData({
+                                    ...formData,
+                                    address: customAddress || "",
+                                  });
+                                }}
+                                className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline flex items-center gap-1"
+                              >
+                                <MapPin className="h-3.5 w-3.5" />
+                                Gunakan alamat lain
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
+
+                      {/* Custom Address Input */}
+                      {useCustomAddress && (
+                        <div className="space-y-4">
+                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border-2 border-blue-200">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 bg-blue-100 rounded-xl">
+                                <MapPin className="h-6 w-6 text-blue-600" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-blue-900 mb-2">
+                                  Alamat Kustom
+                                </p>
+                                <textarea
+                                  value={customAddress}
+                                  onChange={(e) => {
+                                    setCustomAddress(e.target.value);
+                                    setFormData({
+                                      ...formData,
+                                      address: e.target.value,
+                                    });
+                                  }}
+                                  placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
+                                  rows={3}
+                                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 focus:border-blue-400 focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
+                                />
+                                <div className="flex items-center gap-3 mt-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setUseCustomAddress(false);
+                                      setFormData({
+                                        ...formData,
+                                        address: defaultAddress,
+                                      });
+                                    }}
+                                    className="text-sm text-gray-600 font-medium hover:text-gray-900 flex items-center gap-1"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                    Gunakan alamat default
+                                  </button>
+                                  {customAddress && (
+                                    <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                                      <CheckCircle className="h-3.5 w-3.5" />
+                                      Alamat tersimpan
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                            <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-amber-800">
+                              Pastikan alamat yang Anda masukkan berada di Kota
+                              Banda Aceh dan mudah diakses untuk pickup.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Date & Time Grid */}
@@ -1012,7 +1102,9 @@ export default function SupplyInputPage() {
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-3 text-center">
-                {formData.address}
+                {useCustomAddress && formData.address
+                  ? formData.address
+                  : userLocation?.alamatLengkap || defaultAddress}
               </p>
             </div>
           </motion.div>

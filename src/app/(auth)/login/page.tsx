@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/lib/api/auth.actions";
-import Swal from "sweetalert2";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/ui/Toast";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast, success, error: showError, warning, hideToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -22,28 +24,12 @@ function LoginForm() {
   useEffect(() => {
     const verified = searchParams.get("verified");
     if (verified === "true") {
-      Swal.fire({
-        icon: "success",
-        title: "Email Terverifikasi!",
-        text: "Akun Anda berhasil diverifikasi. Silakan login.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#A3AF87",
-        customClass: {
-          popup: "rounded-3xl shadow-2xl border border-gray-100",
-          title: "text-xl font-bold text-[#5a6c5b]",
-          htmlContainer: "text-gray-600",
-          confirmButton:
-            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
-        },
-        showClass: {
-          popup: "animate__animated animate__zoomIn animate__faster",
-        },
-        hideClass: {
-          popup: "animate__animated animate__zoomOut animate__faster",
-        },
-      });
+      success(
+        "Email Terverifikasi!",
+        "Akun Anda berhasil diverifikasi. Silakan login."
+      );
     }
-  }, [searchParams]);
+  }, [searchParams, success]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,55 +39,31 @@ function LoginForm() {
     const result = await loginUser(formData.email, formData.password);
 
     if (result.success) {
-      await Swal.fire({
-        icon: "success",
-        title: "Login Berhasil!",
-        text: "Selamat datang kembali di EcoMaggie",
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        toast: true,
-        position: "top-end",
-        customClass: {
-          popup: "rounded-2xl shadow-xl border-2 border-[#A3AF87]",
-          title: "text-base font-bold text-[#A3AF87]",
-          htmlContainer: "text-sm text-gray-600",
-        },
-        background: "#ffffff",
-        iconColor: "#A3AF87",
-        didOpen: (toast) => {
-          toast.style.animation =
-            "slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
-        },
-        willClose: (toast) => {
-          toast.style.animation = "fadeOutRight 0.4s ease-in-out";
-        },
-      });
+      success(
+        "Login Berhasil!",
+        "Selamat datang kembali di EcoMaggie"
+      );
 
       // Redirect based on redirectUrl from server
-      const redirectUrl =
-        (result.data?.redirectUrl as string) || "/market/products";
-      router.push(redirectUrl);
+      setTimeout(() => {
+        const redirectUrl =
+          (result.data?.redirectUrl as string) || "/market/products";
+        router.push(redirectUrl);
+      }, 1500);
     } else {
       setError(result.message);
 
-      // If email not verified, offer to resend
+      // If email not verified, show warning
       if (result.error === "EMAIL_NOT_VERIFIED") {
-        const resendResult = await Swal.fire({
-          icon: "warning",
-          title: "Email Belum Diverifikasi",
-          text: result.message,
-          showCancelButton: true,
-          confirmButtonText: "Kirim Ulang Email",
-          cancelButtonText: "Batal",
-          confirmButtonColor: "#A3AF87",
-        });
-
-        if (resendResult.isConfirmed) {
-          router.push(
-            `/otp?email=${encodeURIComponent(formData.email)}&resend=true`
-          );
-        }
+        warning(
+          "Email Belum Diverifikasi",
+          result.message
+        );
+      } else {
+        showError(
+          "Login Gagal",
+          result.message || "Terjadi kesalahan saat login"
+        );
       }
     }
 
@@ -109,19 +71,29 @@ function LoginForm() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
-      style={{
-        background:
-          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
-      }}
-    >
-      <div className="w-full max-w-lg">
-        {/* Card */}
-        <div
-          className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
-          style={{ borderTop: "4px solid #A3AF87" }}
-        >
+    <>
+      {/* Toast Notification */}
+      <Toast
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+
+      <div
+        className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
+        style={{
+          background:
+            "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+        }}
+      >
+        <div className="w-full max-w-lg">
+          {/* Card */}
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
+            style={{ borderTop: "4px solid #A3AF87" }}
+          >
           {/* Decorative corner */}
           <div
             className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
@@ -470,32 +442,33 @@ function LoginForm() {
               Daftar Akun
             </Link>
           </div>
-        </div>
+          </div>
 
-        {/* Back to Home */}
-        <div className="text-center mt-4 sm:mt-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/50 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 poppins-regular text-xs sm:text-sm"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Back to Home */}
+          <div className="text-center mt-4 sm:mt-6">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/50 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 poppins-regular text-xs sm:text-sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Kembali ke Beranda
-          </Link>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Kembali ke Beranda
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

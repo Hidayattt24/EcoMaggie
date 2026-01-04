@@ -38,6 +38,8 @@ import {
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useDefaultAddress } from "@/hooks/useDefaultAddress";
 import MediaUploader from "@/components/supply/MediaUploader";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/ui/Toast";
 
 const wasteTypes = [
   {
@@ -114,6 +116,7 @@ const impactStats = [
 
 export default function SupplyInputPage() {
   const router = useRouter();
+  const { toast, success, error: showError, hideToast } = useToast();
   const { userLocation, isSupplyConnectAvailable, isLoading } =
     useUserLocation();
   const { address: defaultAddressData, isLoading: isLoadingAddress } =
@@ -213,11 +216,11 @@ export default function SupplyInputPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
       // Import the actions
       const { createSupply, uploadSupplyMedia } = await import("@/lib/api/supply.actions");
-      
+
       let uploadedPhotoUrl: string | undefined;
 
       // Upload photo if exists
@@ -229,12 +232,15 @@ export default function SupplyInputPage() {
           console.log("Photo uploaded:", uploadedPhotoUrl);
         } else {
           console.error("Photo upload failed:", photoResult.error);
-          alert("Gagal mengupload foto: " + photoResult.error);
+          showError(
+            "Upload Gagal",
+            "Gagal mengupload foto: " + photoResult.error
+          );
           setIsSubmitting(false);
           return;
         }
       }
-      
+
       // Prepare data
       const supplyData = {
         wasteType: formData.wasteType,
@@ -246,22 +252,32 @@ export default function SupplyInputPage() {
         pickupTimeSlot: formData.timeSlot,
         notes: formData.notes || undefined,
       };
-      
+
       console.log("Submitting supply data:", supplyData);
-      
+
       // Submit to database
       const result = await createSupply(supplyData);
-      
+
       if (result.success) {
         setSuccessData(result.data);
         setIsSuccess(true);
+        success(
+          "Permintaan Berhasil!",
+          "Supply pickup Anda telah berhasil didaftarkan"
+        );
       } else {
         console.error("Create supply error:", result);
-        alert(result.message || "Gagal membuat supply request");
+        showError(
+          "Gagal Membuat Supply",
+          result.message || "Gagal membuat supply request"
+        );
       }
     } catch (error) {
       console.error("Submit error:", error);
-      alert("Terjadi kesalahan saat mengirim data");
+      showError(
+        "Terjadi Kesalahan",
+        "Terjadi kesalahan saat mengirim data"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -509,8 +525,18 @@ export default function SupplyInputPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+    <>
+      {/* Toast Notification */}
+      <Toast
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -1269,6 +1295,7 @@ export default function SupplyInputPage() {
           </motion.div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

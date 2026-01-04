@@ -15,7 +15,12 @@ import {
   User,
   Recycle,
   LogOut,
+  AlertTriangle,
+  X,
 } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/ui/Toast";
+import { signOut } from "@/lib/api/auth.actions";
 
 const farmerLinks = [
   {
@@ -71,7 +76,10 @@ export default function FarmerSidebar({
 }) {
   const [open, setOpen] = useState(false);
   const [showMobileLogout, setShowMobileLogout] = useState(false);
+  const [showDesktopLogout, setShowDesktopLogout] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
+  const { toast, success, error: showError, hideToast } = useToast();
 
   // Check if current path matches the link
   const isActiveLink = (href: string) => {
@@ -79,6 +87,32 @@ export default function FarmerSidebar({
       return pathname === "/farmer/dashboard" || pathname === "/farmer";
     }
     return pathname.startsWith(href);
+  };
+
+  // Handle logout confirmation
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await signOut();
+      success("Berhasil Logout", "Sampai jumpa lagi di EcoMaggie!");
+      setShowDesktopLogout(false);
+    } catch (error) {
+      const isRedirect =
+        error &&
+        typeof error === "object" &&
+        "digest" in error &&
+        typeof error.digest === "string" &&
+        error.digest.startsWith("NEXT_REDIRECT");
+
+      if (isRedirect) {
+        throw error;
+      }
+
+      console.error("Logout error:", error);
+      showError("Gagal Logout", "Terjadi kesalahan saat logout. Silakan coba lagi.");
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -110,52 +144,13 @@ export default function FarmerSidebar({
             <div className="border-t border-gray-200 pt-4 pb-3">
               <div className="flex justify-center">
                 <button
-                  onClick={async () => {
-                    const { signOut } = await import("@/lib/api/auth.actions");
-                    const Swal = (await import("sweetalert2")).default;
-
-                    const result = await Swal.fire({
-                      title: "Keluar dari Akun?",
-                      text: "Apakah Anda yakin ingin keluar?",
-                      icon: "question",
-                      showCancelButton: true,
-                      confirmButtonColor: "#A3AF87",
-                      cancelButtonColor: "#9CA3AF",
-                      confirmButtonText: "Ya, Keluar",
-                      cancelButtonText: "Batal",
-                      reverseButtons: true,
-                      customClass: {
-                        popup: "rounded-2xl",
-                        title: "text-xl font-bold poppins-bold",
-                        htmlContainer: "text-gray-600 poppins-regular",
-                        confirmButton:
-                          "rounded-xl px-6 py-3 font-medium shadow-lg poppins-semibold",
-                        cancelButton:
-                          "rounded-xl px-6 py-3 font-medium poppins-regular",
-                      },
-                    });
-
-                    if (result.isConfirmed) {
-                      try {
-                        await signOut();
-                      } catch (error) {
-                        const isRedirect =
-                          error &&
-                          typeof error === "object" &&
-                          "digest" in error &&
-                          typeof error.digest === "string" &&
-                          error.digest.startsWith("NEXT_REDIRECT");
-                        if (isRedirect) throw error;
-                      }
-                    }
-                  }}
-                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all hover:scale-105"
-                  style={{ backgroundColor: "rgba(163, 175, 135, 0.15)" }}
+                  onClick={() => setShowDesktopLogout(true)}
+                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all hover:scale-105 hover:bg-red-50"
+                  style={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }}
                   title="Keluar dari Akun"
                 >
                   <LogOut
-                    className="h-5 w-5 transition-transform group-hover:translate-x-0.5"
-                    style={{ color: "#A3AF87" }}
+                    className="h-5 w-5 text-red-600 transition-transform group-hover:translate-x-0.5"
                   />
 
                   {/* Tooltip */}
@@ -302,50 +297,76 @@ export default function FarmerSidebar({
                     className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
                   />
 
-                  {/* Modal */}
+                  {/* Modal - Centered */}
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="md:hidden fixed bottom-0 left-0 right-0 z-[70] pb-safe"
+                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    className="md:hidden fixed inset-0 z-[70] flex items-center justify-center p-4"
+                    onClick={() => setShowMobileLogout(false)}
                   >
-                    <div className="mx-3 mb-20">
-                      <div className="bg-white rounded-3xl shadow-2xl p-4 border border-gray-200">
-                        <div className="mb-3 pb-3 border-b border-gray-100">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-bold text-gray-900 poppins-semibold">
-                              Akun Anda
-                            </h3>
-                            <button
-                              onClick={() => setShowMobileLogout(false)}
-                              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                            >
-                              <svg
-                                className="w-5 h-5 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
+                    <div
+                      className="bg-white rounded-3xl shadow-2xl p-6 border border-gray-200 max-w-sm w-full"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4">
+                          <div className="relative">
+                            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                              <AlertTriangle className="h-8 w-8 text-white" />
+                            </div>
+                            <div className="absolute inset-0 w-16 h-16 bg-red-500/30 rounded-full animate-ping"></div>
                           </div>
-                          <p className="text-xs text-gray-500 poppins-regular mt-1">
-                            egomaggie@gmail.com
+                        </div>
+
+                        <div className="text-center mb-6">
+                          <h3 className="font-bold text-xl text-gray-900 mb-2">
+                            Keluar dari Akun?
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Apakah Anda yakin ingin keluar dari EcoMaggie?
                           </p>
                         </div>
-                        <LogoutButton
-                          onClose={() => setShowMobileLogout(false)}
-                          className="rounded-xl justify-center"
-                          hideText={true}
-                          showInDropdown={false}
-                        />
-                      </div>
+
+                        {/* Info Card */}
+                        <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200 mb-4">
+                          <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                          <p className="text-xs text-amber-700">
+                            Anda akan keluar dari sesi saat ini dan harus login kembali.
+                          </p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-2 gap-3">
+                          {/* Cancel Button */}
+                          <button
+                            onClick={() => setShowMobileLogout(false)}
+                            className="px-4 py-3.5 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm touch-manipulation"
+                          >
+                            <X className="h-4 w-4" />
+                            Batal
+                          </button>
+
+                          {/* Confirm Button */}
+                          <button
+                            onClick={handleConfirmLogout}
+                            disabled={isLoggingOut}
+                            className="px-4 py-3.5 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 active:from-red-700 active:to-orange-700 text-white rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm touch-manipulation"
+                          >
+                            {isLoggingOut ? (
+                              <>
+                                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>...</span>
+                              </>
+                            ) : (
+                              <>
+                                <LogOut className="h-4 w-4" />
+                                Keluar
+                              </>
+                            )}
+                          </button>
+                        </div>
                     </div>
                   </motion.div>
                 </>
@@ -361,6 +382,142 @@ export default function FarmerSidebar({
           {children}
         </div>
       </main>
+
+      {/* Toast Notification */}
+      <Toast
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+
+      {/* Desktop Logout Modal */}
+      <AnimatePresence>
+        {showDesktopLogout && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowDesktopLogout(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden border border-gray-100"
+            >
+              {/* Header with Icon */}
+              <div className="relative bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 p-6 sm:p-8 text-center border-b border-gray-100">
+                {/* Close Button */}
+                <button
+                  onClick={() => setShowDesktopLogout(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all group"
+                >
+                  <X className="h-4 w-4 text-gray-600 group-hover:text-gray-900" />
+                </button>
+
+                {/* Animated Icon */}
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.1, type: "spring", damping: 15 }}
+                  className="relative mx-auto mb-4"
+                >
+                  <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <AlertTriangle className="h-10 w-10 text-white" />
+                  </div>
+                  {/* Pulse Ring */}
+                  <div className="absolute inset-0 w-20 h-20 mx-auto bg-red-500/30 rounded-full animate-ping"></div>
+                </motion.div>
+
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-xl sm:text-2xl font-bold text-gray-900 mb-2"
+                >
+                  Keluar dari Akun?
+                </motion.h2>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="text-gray-600 text-sm sm:text-base"
+                >
+                  Apakah Anda yakin ingin keluar dari EcoMaggie?
+                </motion.p>
+              </div>
+
+              {/* Content */}
+              <div className="p-4 sm:p-6 space-y-4">
+                {/* Info Cards */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex items-start gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-200"
+                >
+                  <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900">Perhatian</p>
+                    <p className="text-xs text-amber-700 mt-1">
+                      Anda akan keluar dari sesi saat ini dan harus login kembali untuk mengakses akun Anda.
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  {/* Cancel Button */}
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowDesktopLogout(false)}
+                    className="px-4 sm:px-6 py-3.5 sm:py-4 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 border-2 border-transparent hover:border-gray-300 text-sm sm:text-base touch-manipulation"
+                  >
+                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                    Batal
+                  </motion.button>
+
+                  {/* Confirm Button */}
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    whileHover={{ scale: isLoggingOut ? 1 : 1.02 }}
+                    whileTap={{ scale: isLoggingOut ? 1 : 0.98 }}
+                    onClick={handleConfirmLogout}
+                    disabled={isLoggingOut}
+                    className="px-4 sm:px-6 py-3.5 sm:py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 active:from-red-700 active:to-orange-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base touch-manipulation"
+                  >
+                    {isLoggingOut ? (
+                      <>
+                        <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="hidden sm:inline">Keluar...</span>
+                        <span className="sm:hidden">...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="hidden sm:inline">Ya, Keluar</span>
+                        <span className="sm:hidden">Keluar</span>
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

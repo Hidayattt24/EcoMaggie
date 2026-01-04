@@ -13,7 +13,8 @@ import {
   type ProductReviewsResponse,
 } from "@/lib/api/product.actions";
 import { addToCart } from "@/lib/api/cart.actions";
-import Swal from "sweetalert2";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/ui/Toast";
 
 // Category display names mapping
 const categoryDisplayNames: Record<string, string> = {
@@ -57,6 +58,7 @@ interface PageProps {
 
 export default function ProductDetailPage({ params }: PageProps) {
   const router = useRouter();
+  const { toast, success, error: showError, warning, hideToast } = useToast();
   const [slug, setSlug] = useState<string>("");
   const [product, setProduct] = useState<MarketProductDetail | null>(null);
   const [reviewsData, setReviewsData] = useState<ProductReviewsResponse | null>(
@@ -156,45 +158,6 @@ export default function ProductDetailPage({ params }: PageProps) {
     checkWishlist();
   }, [product?.id]);
 
-  // Handle wishlist toggle
-  const handleToggleWishlist = async () => {
-    if (!product?.id) return;
-
-    setIsTogglingWishlist(true);
-    try {
-      const result = await toggleWishlist(product.id);
-
-      if (result.success && result.data) {
-        setIsWishlisted(result.data.isWishlisted);
-        // Removed toast notification for wishlist
-      } else if (result.error === "UNAUTHORIZED") {
-        Swal.fire({
-          icon: "warning",
-          title: "Login Diperlukan",
-          text: "Silakan login untuk menambahkan ke wishlist",
-          confirmButtonColor: "#A3AF87",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: result.message,
-          confirmButtonColor: "#A3AF87",
-        });
-      }
-    } catch (error) {
-      console.error("Error toggling wishlist:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Terjadi Kesalahan",
-        text: "Gagal memproses wishlist",
-        confirmButtonColor: "#A3AF87",
-      });
-    } finally {
-      setIsTogglingWishlist(false);
-    }
-  };
-
   // Handle add to cart
   const handleAddToCart = async () => {
     if (!product?.id) return;
@@ -204,141 +167,75 @@ export default function ProductDetailPage({ params }: PageProps) {
       const result = await addToCart(product.id, quantity);
 
       if (result.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: result.message,
-          timer: 3000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          toast: true,
-          position: "top-end",
-          customClass: {
-            popup: "rounded-2xl shadow-xl border-2 border-[#A3AF87]",
-            title: "text-base font-bold text-[#A3AF87]",
-            htmlContainer: "text-sm text-gray-600",
-          },
-          background: "#ffffff",
-          iconColor: "#A3AF87",
-          didOpen: (toast) => {
-            toast.style.animation =
-              "slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
-          },
-          willClose: (toast) => {
-            toast.style.animation = "fadeOutRight 0.4s ease-in-out";
-          },
-        });
+        success(
+          "Berhasil!",
+          result.message || `${product.name} berhasil ditambahkan ke keranjang`
+        );
         // Reset quantity after adding to cart
         setQuantity(1);
       } else if (result.error === "Unauthorized") {
-        Swal.fire({
-          icon: "warning",
-          title: "Login Diperlukan",
-          text: "Silakan login untuk menambahkan ke keranjang",
-          confirmButtonColor: "#A3AF87",
-          customClass: {
-            popup: "rounded-3xl shadow-2xl border border-gray-100",
-            title: "text-lg font-bold text-[#5a6c5b]",
-            htmlContainer: "text-gray-600",
-            confirmButton:
-              "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
-          },
-          showClass: {
-            popup: "animate__animated animate__headShake",
-          },
-        });
+        warning(
+          "Login Diperlukan",
+          "Silakan login untuk menambahkan ke keranjang"
+        );
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: result.message,
-          confirmButtonColor: "#A3AF87",
-          customClass: {
-            popup: "rounded-3xl shadow-2xl border border-gray-100",
-            title: "text-lg font-bold text-[#5a6c5b]",
-            htmlContainer: "text-gray-600",
-            confirmButton:
-              "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
-          },
-          showClass: {
-            popup: "animate__animated animate__shakeX",
-          },
-        });
+        showError(
+          "Gagal",
+          result.message || "Gagal menambahkan ke keranjang"
+        );
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Terjadi Kesalahan",
-        text: "Gagal menambahkan ke keranjang",
-        confirmButtonColor: "#A3AF87",
-        customClass: {
-          popup: "rounded-3xl shadow-2xl border border-gray-100",
-          title: "text-lg font-bold text-[#5a6c5b]",
-          htmlContainer: "text-gray-600",
-          confirmButton:
-            "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
-        },
-        showClass: {
-          popup: "animate__animated animate__shakeX",
-        },
-      });
+      showError(
+        "Terjadi Kesalahan",
+        "Gagal menambahkan ke keranjang"
+      );
     } finally {
       setIsAddingToCart(false);
     }
   };
 
-  // Handle image upload for review
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newImages: string[] = [];
-      Array.from(files).forEach((file) => {
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          Swal.fire({
-            icon: "warning",
-            title: "Ukuran file terlalu besar",
-            text: "Maksimal ukuran file adalah 5MB",
-            confirmButtonColor: "#A3AF87",
-            customClass: {
-              popup: "rounded-2xl shadow-2xl",
-              title: "text-lg font-bold",
-              confirmButton: "rounded-xl px-6 py-2.5 shadow-lg",
-            },
-          });
-          return;
-        }
+  // Handle toggle wishlist
+  const handleToggleWishlist = async () => {
+    if (!product?.id) return;
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            newImages.push(event.target.result as string);
-            if (newImages.length === files.length) {
-              setReviewImages((prev) => [...prev, ...newImages].slice(0, 5));
-            }
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+    setIsTogglingWishlist(true);
+    try {
+      const result = await toggleWishlist(product.id);
+
+      if (result.success) {
+        setIsWishlisted(!isWishlisted);
+        success(
+          result.message.includes("ditambahkan") ? "Ditambahkan ke Wishlist!" : "Dihapus dari Wishlist",
+          result.message
+        );
+      } else if (result.error === "UNAUTHORIZED") {
+        warning(
+          "Login Diperlukan",
+          "Silakan login untuk menambahkan ke wishlist"
+        );
+      } else {
+        showError(
+          "Gagal",
+          result.message || "Gagal mengupdate wishlist"
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      showError(
+        "Terjadi Kesalahan",
+        "Gagal mengupdate wishlist"
+      );
+    } finally {
+      setIsTogglingWishlist(false);
     }
-  };
-
-  const removeReviewImage = (index: number) => {
-    setReviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Handle submit review
   const handleSubmitReview = async () => {
     if (!product?.id) return;
-
     if (!reviewText.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Komentar tidak boleh kosong",
-        text: "Silakan tulis komentar untuk ulasan Anda",
-        confirmButtonColor: "#A3AF87",
-      });
+      warning("Ulasan Kosong", "Silakan tulis ulasan Anda");
       return;
     }
 
@@ -352,37 +249,85 @@ export default function ProductDetailPage({ params }: PageProps) {
       });
 
       if (result.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: "Ulasan Anda berhasil dikirim",
-          confirmButtonColor: "#A3AF87",
-        });
+        success(
+          "Berhasil!",
+          "Terima kasih atas ulasan Anda!"
+        );
         // Reset form
         setReviewText("");
         setReviewRating(5);
         setReviewImages([]);
         // Refresh reviews
         fetchReviews();
+      } else if (result.error === "UNAUTHORIZED") {
+        warning(
+          "Login Diperlukan",
+          "Silakan login untuk memberikan ulasan"
+        );
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal mengirim ulasan",
-          text: result.message,
-          confirmButtonColor: "#A3AF87",
-        });
+        showError(
+          "Gagal",
+          result.message || "Gagal mengirim ulasan"
+        );
       }
-    } catch (err) {
-      console.error("Error submitting review:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Terjadi kesalahan",
-        text: "Gagal mengirim ulasan",
-        confirmButtonColor: "#A3AF87",
-      });
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      showError(
+        "Terjadi Kesalahan",
+        "Gagal mengirim ulasan"
+      );
     } finally {
       setIsSubmittingReview(false);
     }
+  };
+
+  // Continue with rest of handlers that had Swal.fire calls
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    // Validate file count
+    if (reviewImages.length + files.length > 3) {
+      warning(
+        "Maksimal 3 Foto",
+        "Anda hanya dapat mengupload maksimal 3 foto"
+      );
+      return;
+    }
+
+    // Process each file
+    Array.from(files).forEach((file) => {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        showError(
+          "File Tidak Valid",
+          "Hanya file gambar yang diperbolehkan"
+        );
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError(
+          "File Terlalu Besar",
+          "Ukuran file maksimal 5MB"
+        );
+        return;
+      }
+
+      // Read and add to preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setReviewImages((prev) => [...prev, event.target!.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeReviewImage = (index: number) => {
+    setReviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Loading state
@@ -453,9 +398,19 @@ export default function ProductDetailPage({ params }: PageProps) {
     product.images.length > 0 ? product.images : ["/assets/dummy/magot.png"];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-6">
-      {/* Image Preview Modal */}
-      {previewImage && (
+    <>
+      {/* Toast Notification */}
+      <Toast
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+
+      <div className="min-h-screen bg-gray-50 pb-6">
+        {/* Image Preview Modal */}
+        {previewImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setPreviewImage(null)}
@@ -1245,6 +1200,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

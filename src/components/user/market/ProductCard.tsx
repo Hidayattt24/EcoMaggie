@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { addToCart } from "@/lib/api/cart.actions";
+import Swal from "sweetalert2";
 
 // Legacy Product interface for backward compatibility
 export interface Product {
@@ -52,22 +54,53 @@ export default function ProductCard({
   const productSlug = product.slug || product.id.toString();
   const reviews = product.reviews || 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     setIsAdding(true);
     setShowParticles(true);
-    setShowSuccess(true);
 
-    setTimeout(() => {
-      setIsAdding(false);
-    }, 1200);
+    try {
+      const result = await addToCart(product.id.toString(), 1);
 
-    setTimeout(() => {
+      if (result.success) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 2000);
+      } else {
+        // Hide particles on error
+        setShowParticles(false);
+
+        if (result.error === "Unauthorized") {
+          Swal.fire({
+            icon: "warning",
+            title: "Login Diperlukan",
+            text: "Silakan login untuk menambahkan produk ke keranjang",
+            confirmButtonColor: "#A3AF87",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Gagal",
+            text: result.message || "Gagal menambahkan ke keranjang",
+            confirmButtonColor: "#A3AF87",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
       setShowParticles(false);
-    }, 1500);
-
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 2000);
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan",
+        text: "Gagal menambahkan produk ke keranjang",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsAdding(false);
+      setTimeout(() => {
+        setShowParticles(false);
+      }, 1500);
+    }
   };
 
   const handleWishlistToggle = () => {

@@ -12,6 +12,7 @@ import {
   type ProductReview,
   type ProductReviewsResponse,
 } from "@/lib/api/product.actions";
+import { addToCart } from "@/lib/api/cart.actions";
 import Swal from "sweetalert2";
 
 // Category display names mapping
@@ -82,6 +83,9 @@ export default function ProductDetailPage({ params }: PageProps) {
   // Wishlist states
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+
+  // Cart states
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Fetch product data
   useEffect(() => {
@@ -198,6 +202,54 @@ export default function ProductDetailPage({ params }: PageProps) {
       });
     } finally {
       setIsTogglingWishlist(false);
+    }
+  };
+
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    if (!product?.id) return;
+
+    setIsAddingToCart(true);
+    try {
+      const result = await addToCart(product.id, quantity);
+
+      if (result.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: result.message,
+          timer: 1500,
+          showConfirmButton: false,
+          toast: true,
+          position: "top-end",
+        });
+        // Reset quantity after adding to cart
+        setQuantity(1);
+      } else if (result.error === "Unauthorized") {
+        Swal.fire({
+          icon: "warning",
+          title: "Login Diperlukan",
+          text: "Silakan login untuk menambahkan ke keranjang",
+          confirmButtonColor: "#A3AF87",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: result.message,
+          confirmButtonColor: "#A3AF87",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan",
+        text: "Gagal menambahkan ke keranjang",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -648,23 +700,33 @@ export default function ProductDetailPage({ params }: PageProps) {
               {/* Action Buttons - With Animation */}
               <div className="flex gap-2 mb-4">
                 <button
+                  onClick={handleAddToCart}
                   className="group flex-1 py-2.5 px-4 bg-[#A3AF87] text-white rounded-lg font-medium hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                  disabled={product.stock === 0}
+                  disabled={product.stock === 0 || isAddingToCart}
                 >
-                  <svg
-                    className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-200"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                  Keranjang
+                  {isAddingToCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span>Menambahkan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-200"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                      <span>Keranjang</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => router.push("/market/checkout")}

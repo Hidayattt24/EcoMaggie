@@ -2243,9 +2243,8 @@ export async function getUserWishlist(): Promise<
     // Transform wishlist items
     const items: WishlistItem[] = (wishlistData || [])
       .filter((w) => {
-        // Products is returned as array from Supabase relation
-        const products = w.products as unknown as Record<string, unknown>[];
-        const product = products?.[0];
+        // Product is returned as object from Supabase !inner join
+        const product = w.products as unknown as Record<string, unknown>;
         return (
           product &&
           product.is_active === true &&
@@ -2254,15 +2253,13 @@ export async function getUserWishlist(): Promise<
         );
       })
       .map((w) => {
-        // Products is returned as array from Supabase relation
-        const products = w.products as unknown as Record<string, unknown>[];
-        const product = products?.[0];
+        // Product is returned as object from Supabase !inner join
+        const product = w.products as unknown as Record<string, unknown>;
         if (!product) {
           throw new Error("Product data is missing");
         }
-        const farmers = product.farmers as Record<string, unknown>[];
-        const farmer = farmers?.[0];
-        const reviews = product.reviews as { count: number }[];
+        const farmer = product.farmers as unknown as Record<string, unknown>;
+        const reviews = product.reviews as unknown as { count: number }[];
         const price = Number(product.price) || 0;
         const discountPercent = Number(product.discount_percent) || 0;
         const finalPrice = Math.round(price * (1 - discountPercent / 100));
@@ -2387,6 +2384,7 @@ export async function addToWishlist(
 
     revalidatePath("/wishlist");
     revalidatePath("/market/products");
+    revalidatePath(`/market/products/${product.id}`);
 
     return {
       success: true,
@@ -2443,6 +2441,7 @@ export async function removeFromWishlist(
 
     revalidatePath("/wishlist");
     revalidatePath("/market/products");
+    revalidatePath("/market");
 
     return {
       success: true,
@@ -2498,6 +2497,7 @@ export async function toggleWishlist(
 
       revalidatePath("/wishlist");
       revalidatePath("/market/products");
+      revalidatePath("/market");
 
       return {
         success: true,
@@ -2513,6 +2513,7 @@ export async function toggleWishlist(
 
       revalidatePath("/wishlist");
       revalidatePath("/market/products");
+      revalidatePath("/market");
 
       return {
         success: true,

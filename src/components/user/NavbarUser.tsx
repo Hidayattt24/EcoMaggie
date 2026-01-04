@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/user/LogoutButton";
 import { useProfile, formatPhoneNumber } from "@/hooks/useProfile";
+import { getCartItemCount } from "@/lib/api/cart.actions";
 
 export function NavbarUser() {
   const pathname = usePathname();
@@ -18,6 +19,24 @@ export function NavbarUser() {
 
   // Get user profile data
   const { profile, loading: profileLoading } = useProfile();
+
+  // Cart count state
+  const [cartCount, setCartCount] = useState(0);
+
+  // Fetch cart count on mount and when cart page is visited
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      const count = await getCartItemCount();
+      setCartCount(count);
+    };
+
+    fetchCartCount();
+
+    // Refresh cart count every 30 seconds
+    const interval = setInterval(fetchCartCount, 30000);
+
+    return () => clearInterval(interval);
+  }, [pathname]); // Re-fetch when pathname changes (especially when coming from cart page)
 
   const navItems = [
     {
@@ -229,12 +248,14 @@ export function NavbarUser() {
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
-              <span
-                className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                style={{ backgroundColor: "#A3AF87" }}
-              >
-                3
-              </span>
+              {cartCount > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                  style={{ backgroundColor: "#A3AF87" }}
+                >
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
             </Link>
 
             <Link
@@ -549,12 +570,14 @@ export function NavbarUser() {
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
-                  <span
-                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                    style={{ backgroundColor: "#A3AF87" }}
-                  >
-                    3
-                  </span>
+                  {cartCount > 0 && (
+                    <span
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                      style={{ backgroundColor: "#A3AF87" }}
+                    >
+                      {cartCount > 99 ? "99+" : cartCount}
+                    </span>
+                  )}
                 </Link>
 
                 <Link

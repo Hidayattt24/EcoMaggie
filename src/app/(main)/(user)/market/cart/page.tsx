@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart,
@@ -17,101 +17,82 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-interface CartItem {
-  id: number;
-  slug: string;
-  name: string;
-  variant: string;
-  price: number;
-  unit: string;
-  quantity: number;
-  image: string;
-  stock: number;
-  discount?: number;
-}
-
-interface RecommendedProduct {
-  id: number;
-  slug: string;
-  name: string;
-  price: number;
-  unit: string;
-  image: string;
-  discount?: number;
-}
+import {
+  getCartItems,
+  updateCartItemQuantity,
+  removeFromCart,
+  type Cart,
+  type CartItem,
+} from "@/lib/api/cart.actions";
+import { getFeaturedProducts } from "@/lib/api/product.actions";
+import Swal from "sweetalert2";
 
 export default function CartPage() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      slug: "maggot-bsf-premium",
-      name: "Maggot BSF Premium",
-      variant: "500gr",
-      price: 45000,
-      unit: "kg",
-      quantity: 2,
-      image: "/assets/dummy/magot.png",
-      stock: 150,
-      discount: 15,
-    },
-    {
-      id: 2,
-      slug: "maggot-bsf-organik",
-      name: "Maggot BSF Organik",
-      variant: "1kg",
-      price: 38000,
-      unit: "kg",
-      quantity: 1,
-      image: "/assets/dummy/magot.png",
-      stock: 200,
-    },
-    {
-      id: 3,
-      slug: "maggot-bsf-kering",
-      name: "Maggot BSF Kering",
-      variant: "250gr",
-      price: 65000,
-      unit: "kg",
-      quantity: 3,
-      image: "/assets/dummy/magot.png",
-      stock: 80,
-      discount: 20,
-    },
-  ]);
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
 
-  const [selectedItems, setSelectedItems] = useState<number[]>([1, 2, 3]);
-
-  const recommendedProducts: RecommendedProduct[] = [
-    {
-      id: 4,
-      slug: "maggot-bsf-fresh",
-      name: "Maggot BSF Fresh",
-      price: 42000,
-      unit: "kg",
-      image: "/assets/dummy/magot.png",
-      discount: 10,
-    },
-    {
-      id: 5,
-      slug: "maggot-bsf-jumbo",
-      name: "Maggot BSF Jumbo",
-      price: 52000,
-      unit: "kg",
-      image: "/assets/dummy/magot.png",
-    },
-  ];
-
-  const toggleSelectAll = () => {
-    if (selectedItems.length === cartItems.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(cartItems.map((item) => item.id));
+  // Fetch cart data
+  const fetchCart = async () => {
+    try {
+      const result = await getCartItems();
+      if (result.success && result.data) {
+        setCart(result.data);
+        // Auto select all items by default
+        setSelectedItems(result.data.items.map((item) => item.id));
+      } else if (result.error === "Unauthorized") {
+        Swal.fire({
+          icon: "warning",
+          title: "Login Diperlukan",
+          text: "Silakan login untuk melihat keranjang",
+          confirmButtonColor: "#A3AF87",
+        }).then(() => {
+          router.push("/auth/sign-in");
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Memuat Keranjang",
+        text: "Terjadi kesalahan saat memuat keranjang",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const toggleSelectItem = (id: number) => {
+  useEffect(() => {
+    fetchCart();
+    fetchRecommendedProducts();
+  }, []);
+
+  const fetchRecommendedProducts = async () => {
+    try {
+      const result = await getFeaturedProducts(8);
+      if (result.success && result.data) {
+        setRecommendedProducts(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching recommended products:", error);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (!cart) return;
+    if (selectedItems.length === cart.items.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(cart.items.map((item) => item.id));
+    }
+  };
+
+  const toggleSelectItem = (id: string) => {
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
     } else {
@@ -119,36 +100,124 @@ export default function CartPage() {
     }
   };
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems(
-      cartItems.map((item) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(
-            1,
-            Math.min(item.stock, item.quantity + delta)
-          );
-          return { ...item, quantity: newQuantity };
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1 || isUpdating) return;
+
+    setIsUpdating(itemId);
+    try {
+      const result = await updateCartItemQuantity(itemId, newQuantity);
+
+      if (result.success) {
+        // Update local state optimistically
+        if (cart) {
+          setCart({
+            ...cart,
+            items: cart.items.map((item) =>
+              item.id === itemId ? { ...item, quantity: newQuantity } : item
+            ),
+          });
         }
-        return item;
-      })
-    );
+
+        // Show success feedback with Framer Motion toast
+        const toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+
+        toast.fire({
+          icon: "success",
+          title: "Jumlah berhasil diperbarui",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: result.message,
+          confirmButtonColor: "#A3AF87",
+        });
+        // Refresh cart to get accurate data
+        fetchCart();
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan",
+        text: "Gagal memperbarui jumlah produk",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsUpdating(null);
+    }
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
-    setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+  const removeItem = async (itemId: string) => {
+    setIsDeleting(itemId);
+
+    try {
+      const result = await removeFromCart(itemId);
+
+      if (result.success) {
+        // Update local state with animation
+        if (cart) {
+          setCart({
+            ...cart,
+            items: cart.items.filter((item) => item.id !== itemId),
+            totalItems:
+              cart.totalItems -
+              (cart.items.find((i) => i.id === itemId)?.quantity || 0),
+            totalPrice:
+              cart.totalPrice -
+              (cart.items.find((i) => i.id === itemId)?.product?.finalPrice ||
+                0) *
+                (cart.items.find((i) => i.id === itemId)?.quantity || 0),
+          });
+        }
+
+        // Remove from selected items
+        setSelectedItems(selectedItems.filter((id) => id !== itemId));
+
+        // Show success animation
+        Swal.fire({
+          icon: "success",
+          title: "Dihapus!",
+          text: "Produk berhasil dihapus dari keranjang",
+          timer: 1500,
+          showConfirmButton: false,
+          toast: true,
+          position: "top-end",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: result.message,
+          confirmButtonColor: "#A3AF87",
+        });
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan",
+        text: "Gagal menghapus produk",
+        confirmButtonColor: "#A3AF87",
+      });
+    } finally {
+      setIsDeleting(null);
+    }
   };
 
   const calculateItemTotal = (item: CartItem) => {
-    const finalPrice = item.discount
-      ? Math.round(item.price * (1 - item.discount / 100))
-      : item.price;
-    return finalPrice * item.quantity;
+    if (!item.product) return 0;
+    return item.product.finalPrice * item.quantity;
   };
 
-  const selectedItemsData = cartItems.filter((item) =>
-    selectedItems.includes(item.id)
-  );
+  const selectedItemsData =
+    cart?.items.filter((item) => selectedItems.includes(item.id)) || [];
 
   const subtotal = selectedItemsData.reduce(
     (sum, item) => sum + calculateItemTotal(item),
@@ -159,6 +228,18 @@ export default function CartPage() {
     (sum, item) => sum + item.quantity,
     0
   );
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat keranjang...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -193,14 +274,14 @@ export default function CartPage() {
                 className="text-xs sm:text-sm font-medium mt-0.5"
                 style={{ color: "rgba(90, 108, 91, 0.7)" }}
               >
-                {cartItems.length} produk di keranjang Anda
+                {cart?.items.length || 0} produk di keranjang Anda
               </p>
             </div>
           </div>
         </div>
 
         <AnimatePresence mode="wait">
-          {cartItems.length === 0 ? (
+          {!cart || cart.items.length === 0 ? (
             /* Empty Cart State */
             <motion.div
               key="empty"
@@ -235,12 +316,11 @@ export default function CartPage() {
                   { color: "rgba(90, 108, 91, 0.7)" } as React.CSSProperties
                 }
               >
-                Yuk, mulai belanja produk maggot berkualitas untuk kebutuhan
-                ternak Anda
+                Yuk, mulai belanja produk berkualitas untuk kebutuhan Anda
               </p>
               <Link
                 href="/market/products"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-[#A3AF87] text-white rounded-xl font-bold text-sm sm:text-base transition-all"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-[#A3AF87] text-white rounded-xl font-bold text-sm sm:text-base transition-all hover:bg-[#95a17a]"
                 style={{
                   boxShadow: "0 20px 50px -12px rgba(163, 175, 135, 0.3)",
                 }}
@@ -268,7 +348,7 @@ export default function CartPage() {
                     <div className="relative">
                       <input
                         type="checkbox"
-                        checked={selectedItems.length === cartItems.length}
+                        checked={selectedItems.length === cart.items.length}
                         onChange={toggleSelectAll}
                         className="peer w-5 h-5 rounded-md border-2 cursor-pointer transition-all appearance-none"
                         style={{
@@ -297,7 +377,7 @@ export default function CartPage() {
                       </svg>
                     </div>
                     <span className="text-sm font-bold text-[#5a6c5b] group-hover:text-[#5a6c5b]/80">
-                      Pilih Semua ({cartItems.length})
+                      Pilih Semua ({cart.items.length})
                     </span>
                   </label>
                   {selectedItems.length > 0 && (
@@ -309,7 +389,7 @@ export default function CartPage() {
 
                 {/* Cart Items List */}
                 <div className="space-y-3">
-                  {cartItems.map((item, index) => (
+                  {cart.items.map((item, index) => (
                     <motion.div
                       key={item.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -318,9 +398,9 @@ export default function CartPage() {
                       transition={{ delay: index * 0.05 }}
                       className={`p-4 bg-white border-2 rounded-xl transition-all ${
                         selectedItems.includes(item.id)
-                          ? "border-[#A3AF87] shadow-md style={{boxShadow: '0 4px 6px -1px rgba(163, 175, 135, 0.15)'}"
+                          ? "border-[#A3AF87] shadow-md"
                           : "border-gray-200 hover:border-[#A3AF87]/30"
-                      }`}
+                      } ${isDeleting === item.id ? "opacity-50" : ""}`}
                     >
                       <div className="flex gap-4">
                         {/* Checkbox */}
@@ -366,7 +446,7 @@ export default function CartPage() {
 
                         {/* Product Image */}
                         <Link
-                          href={`/market/products/${item.slug}`}
+                          href={`/market/products/${item.product?.slug || ""}`}
                           className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden hover:scale-105 transition-transform"
                           style={
                             {
@@ -375,8 +455,11 @@ export default function CartPage() {
                           }
                         >
                           <img
-                            src={item.image}
-                            alt={item.name}
+                            src={
+                              item.product?.images?.[0] ||
+                              "/assets/dummy/magot.png"
+                            }
+                            alt={item.product?.name || "Product"}
                             className="w-full h-full object-cover"
                           />
                         </Link>
@@ -386,108 +469,104 @@ export default function CartPage() {
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <div className="flex-1 min-w-0">
                               <Link
-                                href={`/market/products/${item.slug}`}
+                                href={`/market/products/${
+                                  item.product?.slug || ""
+                                }`}
                                 className="font-bold text-sm sm:text-base text-[#5a6c5b] hover:text-[#5a6c5b]/80 line-clamp-1"
                               >
-                                {item.name}
+                                {item.product?.name || "Product"}
                               </Link>
                               <p
                                 className="text-xs sm:text-sm font-medium"
                                 style={{ color: "rgba(90, 108, 91, 0.7)" }}
                               >
-                                Varian: {item.variant}
+                                {item.product?.farmer?.farmName || "Petani"}
                               </p>
                             </div>
                             <button
                               onClick={() => removeItem(item.id)}
-                              className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-all hover:scale-110"
+                              disabled={isDeleting === item.id}
+                              className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Hapus dari keranjang"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              {isDeleting === item.id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-500 border-t-transparent"></div>
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
 
                           {/* Price */}
                           <div className="mb-3">
-                            {item.discount ? (
+                            {item.product?.discountPercent &&
+                            item.product.discountPercent > 0 ? (
                               <div className="space-y-1">
                                 <div className="flex items-baseline gap-2">
                                   <span className="text-base sm:text-lg font-bold text-[#5a6c5b]">
                                     Rp{" "}
-                                    {Math.round(
-                                      item.price * (1 - item.discount / 100)
-                                    ).toLocaleString("id-ID")}
+                                    {item.product.finalPrice.toLocaleString(
+                                      "id-ID"
+                                    )}
                                   </span>
                                   <span className="text-xs text-gray-400 line-through">
-                                    Rp {item.price.toLocaleString("id-ID")}
+                                    Rp{" "}
+                                    {item.product.price.toLocaleString("id-ID")}
                                   </span>
                                   <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 font-bold rounded">
-                                    -{item.discount}%
+                                    -{item.product.discountPercent}%
                                   </span>
                                 </div>
                               </div>
                             ) : (
                               <span className="text-base sm:text-lg font-bold text-[#5a6c5b]">
-                                Rp {item.price.toLocaleString("id-ID")}
+                                Rp{" "}
+                                {item.product?.finalPrice.toLocaleString(
+                                  "id-ID"
+                                ) || 0}
                               </span>
                             )}
+                            <span className="text-xs text-gray-500 ml-2">
+                              per {item.product?.unit || "kg"}
+                            </span>
                           </div>
 
                           {/* Quantity Control */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
                               <button
-                                onClick={() => updateQuantity(item.id, -1)}
-                                disabled={item.quantity <= 1}
-                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={
-                                  {
-                                    "--hover-bg": "#A3AF87",
-                                    "--hover-border": "#A3AF87",
-                                  } as React.CSSProperties
+                                onClick={() =>
+                                  updateQuantity(item.id, item.quantity - 1)
                                 }
-                                onMouseEnter={(e) => {
-                                  if (item.quantity > 1) {
-                                    e.currentTarget.style.backgroundColor =
-                                      "#A3AF87";
-                                    e.currentTarget.style.color = "white";
-                                    e.currentTarget.style.borderColor =
-                                      "#A3AF87";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor =
-                                    "white";
-                                  e.currentTarget.style.color = "";
-                                  e.currentTarget.style.borderColor = "#e5e7eb";
-                                }}
+                                disabled={
+                                  item.quantity <= 1 || isUpdating === item.id
+                                }
+                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#A3AF87] hover:text-white hover:border-[#A3AF87]"
                               >
-                                <Minus className="h-3 w-3" />
+                                {isUpdating === item.id ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-gray-400 border-t-transparent"></div>
+                                ) : (
+                                  <Minus className="h-3 w-3" />
+                                )}
                               </button>
                               <span className="w-8 text-center text-sm font-bold text-[#5a6c5b]">
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() => updateQuantity(item.id, 1)}
-                                disabled={item.quantity >= item.stock}
-                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                onMouseEnter={(e) => {
-                                  if (item.quantity < item.stock) {
-                                    e.currentTarget.style.backgroundColor =
-                                      "#A3AF87";
-                                    e.currentTarget.style.color = "white";
-                                    e.currentTarget.style.borderColor =
-                                      "#A3AF87";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor =
-                                    "white";
-                                  e.currentTarget.style.color = "";
-                                  e.currentTarget.style.borderColor = "#e5e7eb";
-                                }}
+                                onClick={() =>
+                                  updateQuantity(item.id, item.quantity + 1)
+                                }
+                                disabled={
+                                  (item.product?.stock || 0) <= item.quantity ||
+                                  isUpdating === item.id
+                                }
+                                className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#A3AF87] hover:text-white hover:border-[#A3AF87]"
                               >
-                                <Plus className="h-3 w-3" />
+                                {isUpdating === item.id ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-gray-400 border-t-transparent"></div>
+                                ) : (
+                                  <Plus className="h-3 w-3" />
+                                )}
                               </button>
                             </div>
 
@@ -512,6 +591,15 @@ export default function CartPage() {
                               </motion.p>
                             </div>
                           </div>
+
+                          {/* Stock Warning */}
+                          {item.product &&
+                            item.quantity >= item.product.stock - 5 && (
+                              <p className="text-xs text-orange-500 mt-2">
+                                Stok tersisa: {item.product.stock}{" "}
+                                {item.product.unit}
+                              </p>
+                            )}
                         </div>
                       </div>
                     </motion.div>
@@ -601,7 +689,7 @@ export default function CartPage() {
                     href="/market/checkout"
                     className={`w-full py-4 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
                       selectedItems.length > 0
-                        ? "bg-[#A3AF87] text-white"
+                        ? "bg-[#A3AF87] text-white hover:bg-[#95a17a]"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
                     }`}
                     style={
@@ -632,7 +720,7 @@ export default function CartPage() {
         </AnimatePresence>
 
         {/* Recommended Products */}
-        {cartItems.length > 0 && (
+        {cart && cart.items.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -676,13 +764,13 @@ export default function CartPage() {
                     }
                   >
                     <img
-                      src={product.image}
+                      src={product.images?.[0] || "/assets/dummy/magot.png"}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                    {product.discount && (
+                    {product.discountPercent > 0 && (
                       <div className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-md">
-                        -{product.discount}%
+                        -{product.discountPercent}%
                       </div>
                     )}
                   </div>
@@ -691,12 +779,7 @@ export default function CartPage() {
                       {product.name}
                     </h3>
                     <p className="text-sm sm:text-base font-bold text-[#5a6c5b]">
-                      Rp{" "}
-                      {product.discount
-                        ? Math.round(
-                            product.price * (1 - product.discount / 100)
-                          ).toLocaleString("id-ID")
-                        : product.price.toLocaleString("id-ID")}
+                      Rp {product.finalPrice.toLocaleString("id-ID")}
                     </p>
                   </div>
                 </Link>
@@ -707,7 +790,7 @@ export default function CartPage() {
       </div>
 
       {/* Mobile Sticky Bottom Bar */}
-      {cartItems.length > 0 && (
+      {cart && cart.items.length > 0 && (
         <div
           className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 shadow-2xl p-4 z-50"
           style={{ borderColor: "rgba(163, 175, 135, 0.2)" }}
@@ -733,7 +816,7 @@ export default function CartPage() {
               href="/market/checkout"
               className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                 selectedItems.length > 0
-                  ? "bg-[#A3AF87] text-white hover:shadow-lg"
+                  ? "bg-[#A3AF87] text-white hover:shadow-lg hover:bg-[#95a17a]"
                   : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
               }`}
             >

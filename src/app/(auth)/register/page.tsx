@@ -1089,18 +1089,19 @@ export default function RegisterPage() {
               {/* Address Form Fields with Biteship API Integration */}
               <AddressFormFields
                 formData={{
-                  provinsi: formData.provinsi,
-                  kabupatenKota: formData.kabupatenKota,
-                  kecamatan: formData.kecamatan,
-                  kodePos: formData.kodePos,
-                  alamatLengkap: formData.alamatLengkap,
+                  province: formData.province,
+                  city: formData.city,
+                  district: formData.district,
+                  village: formData.village,
+                  postalCode: formData.postalCode,
+                  fullAddress: formData.fullAddress,
                 }}
                 errors={errors}
                 onChange={handleAddressFieldChange}
               />
 
               {/* Supply Connect Availability Notice */}
-              {formData.kabupatenKota === "Banda Aceh" && (
+              {formData.city === "Banda Aceh" && (
                 <p
                   className="text-xs poppins-regular flex items-center gap-1 p-3 rounded-lg"
                   style={{ 

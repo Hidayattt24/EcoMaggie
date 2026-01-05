@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getUserAddresses, createAddress, type CreateAddressData } from "@/lib/api/address.actions";
 import { getCheckoutData, type CheckoutProduct } from "@/lib/api/checkout.actions";
+import { getShippingOptions, transformCartToBiteshipItems, type ShippingOption } from "@/lib/api/biteship.actions";
 import AddressFormFields from "@/components/auth/AddressFormFields";
 
 // Types
@@ -72,6 +73,11 @@ export default function CheckoutPage() {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkoutSource, setCheckoutSource] = useState<"direct" | "cart">("cart");
+
+  // Shipping States
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState<string | null>(null);
 
   // Inline Form States
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -153,6 +159,81 @@ export default function CheckoutPage() {
     fetchData();
   }, [searchParams]);
 
+  // Fetch shipping options when address is selected
+  // WITH DEBOUNCING to prevent excessive API calls
+  useEffect(() => {
+    // Clear previous shipping selection when address changes
+    setSelectedShipping("");
+
+    if (!selectedAddress || checkoutProducts.length === 0) {
+      setShippingOptions([]);
+      return;
+    }
+
+    // DEBOUNCE: Wait 800ms before calling API
+    // This prevents multiple API calls when user is still selecting address
+    setIsLoadingShipping(true);
+    const debounceTimer = setTimeout(async () => {
+      try {
+        setShippingError(null);
+
+        // Transform checkout products to Biteship items format
+        const biteshipItems = await transformCartToBiteshipItems(
+          checkoutProducts.map((p) => ({
+            name: p.name,
+            price: p.finalPrice,
+            quantity: p.quantity,
+            weight: 1000, // Default 1kg per product
+          }))
+        );
+
+        console.log("🔄 Fetching shipping options...");
+
+        // Get shipping options with full address data
+        const result = await getShippingOptions(
+          selectedAddress.city,
+          selectedAddress.province,
+          selectedAddress.district,
+          selectedAddress.postalCode,
+          undefined, // area_id will be searched automatically if needed
+          biteshipItems
+        );
+
+        if (result.success && result.data) {
+          setShippingOptions(result.data);
+          console.log("✅ Shipping options loaded:", result.data.length);
+        } else {
+          setShippingError(result.message || "Gagal memuat opsi pengiriman");
+          // Fallback to default options
+          setShippingOptions([
+            {
+              id: "self-pickup",
+              courierCode: "pickup",
+              courierName: "Ambil di Toko",
+              serviceCode: "pickup",
+              serviceName: "Self Pickup",
+              description: "Jl. Teuku Umar No. 99, Banda Aceh",
+              price: 0,
+              estimatedDays: "Siap diambil hari ini",
+              type: "regular",
+            },
+          ]);
+        }
+      } catch (err) {
+        console.error("Error fetching shipping:", err);
+        setShippingError("Terjadi kesalahan saat memuat opsi pengiriman");
+      } finally {
+        setIsLoadingShipping(false);
+      }
+    }, 800); // Wait 800ms before calling API
+
+    // Cleanup: Cancel API call if address changes again
+    return () => {
+      clearTimeout(debounceTimer);
+      console.log("⏹️ Cancelled pending shipping API call");
+    };
+  }, [selectedAddress, checkoutProducts]);
+
   // Handlers
   const handleFormChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -229,49 +310,24 @@ export default function CheckoutPage() {
     }
   };
 
-  // Shipping methods based on city
-  const getBandaAcehShipping = (): ShippingMethod[] => [
-    {
-      id: "ecomaggie-delivery",
-      name: "Eco-maggie Delivery",
-      description: "Pengiriman motor dalam kota",
-      price: 15000,
-      estimatedDays: "Hari ini",
-      icon: Bike,
-    },
-    {
-      id: "self-pickup",
-      name: "Ambil di Toko",
-      description: "Jl. Teuku Umar No. 99, Banda Aceh",
-      price: 0,
-      estimatedDays: "Siap diambil",
-      icon: Store,
-    },
-  ];
+  // Map shipping option type to icon
+  const getShippingIcon = (type: string, courierCode: string): React.ElementType => {
+    if (courierCode === "pickup") return Store;
+    if (courierCode === "ecomaggie") return Bike;
+    if (type === "instant") return Bike;
+    if (type === "cargo") return Truck;
+    return Package;
+  };
 
-  const getOutsideCityShipping = (): ShippingMethod[] => [
-    {
-      id: "regular",
-      name: "Ekspedisi Reguler",
-      description: "JNE / J&T / SiCepat",
-      price: 25000,
-      estimatedDays: "3-5 hari",
-      icon: Package,
-    },
-    {
-      id: "cargo",
-      name: "Kargo",
-      description: "Untuk volume besar",
-      price: 50000,
-      estimatedDays: "5-7 hari",
-      icon: Truck,
-    },
-  ];
-
-  const shippingMethods =
-    selectedAddress?.city === "Banda Aceh"
-      ? getBandaAcehShipping()
-      : getOutsideCityShipping();
+  // Transform ShippingOption to ShippingMethod for UI compatibility
+  const shippingMethods: ShippingMethod[] = shippingOptions.map((option) => ({
+    id: option.id,
+    name: option.courierName,
+    description: option.description,
+    price: option.price,
+    estimatedDays: option.estimatedDays,
+    icon: getShippingIcon(option.type, option.courierCode),
+  }));
 
   const paymentMethods: PaymentMethod[] = [
     {
@@ -299,9 +355,13 @@ export default function CheckoutPage() {
 
   // Calculate totals
   const subtotal = checkoutProducts.reduce((sum, product) => sum + (product.finalPrice * product.quantity), 0);
-  // Shipping cost will be calculated via Bitship API later
-  const shippingCost = 0; // Placeholder, will be calculated after selecting shipping method
-  const total = subtotal; // For now, total = subtotal (shipping will be added after Bitship calculation)
+
+  // Get shipping cost from selected shipping method
+  const selectedShippingMethod = shippingMethods.find((m) => m.id === selectedShipping);
+  const shippingCost = selectedShippingMethod?.price || 0;
+
+  // Total = subtotal + shipping cost
+  const total = subtotal + shippingCost;
 
   const steps = [
     { number: 1, title: "Alamat", icon: MapPin },
@@ -817,9 +877,27 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
+                  {/* Shipping Loading State */}
+                  {isLoadingShipping && (
+                    <div className="p-6 border-2 border-[#5a6c5b]/20 rounded-xl bg-white">
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-5 h-5 border-2 border-[#A3AF87] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[#5a6c5b] font-medium">Memuat opsi pengiriman...</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Shipping Error State */}
+                  {shippingError && !isLoadingShipping && (
+                    <div className="p-4 border-2 border-orange-200 bg-orange-50 rounded-xl">
+                      <p className="text-orange-600 text-sm font-medium">{shippingError}</p>
+                    </div>
+                  )}
+
                   {/* Shipping Options */}
-                  <div className="space-y-3 sm:space-y-4">
-                    {shippingMethods.map((method) => (
+                  {!isLoadingShipping && (
+                    <div className="space-y-3 sm:space-y-4">
+                      {shippingMethods.map((method) => (
                       <button
                         key={method.id}
                         onClick={() => setSelectedShipping(method.id)}
@@ -871,8 +949,18 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                       </button>
-                    ))}
-                  </div>
+                      ))}
+
+                      {/* No shipping options available */}
+                      {shippingMethods.length === 0 && !isLoadingShipping && (
+                        <div className="p-6 border-2 border-[#5a6c5b]/20 rounded-xl bg-white text-center">
+                          <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <p className="text-[#5a6c5b] font-medium">Tidak ada opsi pengiriman tersedia</p>
+                          <p className="text-sm text-[#5a6c5b]/70 mt-1">Silakan pilih alamat lain atau hubungi customer service</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
                     <button
@@ -1077,18 +1165,22 @@ export default function CheckoutPage() {
                             Pilih alamat & metode pengiriman
                           </span>
                         )}
-                        {currentStep >= 2 && selectedShipping && (
-                          <span className="text-xs text-orange-600 mt-0.5 flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            Dihitung via Bitship API
+                        {currentStep >= 2 && selectedShipping && selectedShippingMethod && (
+                          <span className="text-xs text-green-600 mt-0.5 flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            {selectedShippingMethod.name}
                           </span>
                         )}
                       </div>
                       <span className="text-[#5a6c5b] font-bold">
                         {currentStep < 2 ? (
                           <span className="text-gray-400">-</span>
-                        ) : selectedShipping ? (
-                          <span className="text-orange-600">Dalam Perhitungan</span>
+                        ) : selectedShipping && shippingCost >= 0 ? (
+                          shippingCost === 0 ? (
+                            <span className="text-green-600">GRATIS</span>
+                          ) : (
+                            <span>Rp {shippingCost.toLocaleString("id-ID")}</span>
+                          )
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
@@ -1111,14 +1203,9 @@ export default function CheckoutPage() {
                         Total Pembayaran
                       </span>
                       <span className="text-2xl font-bold text-[#5a6c5b]">
-                        Rp {subtotal.toLocaleString("id-ID")}
+                        Rp {total.toLocaleString("id-ID")}
                       </span>
                     </div>
-                    {currentStep >= 2 && selectedShipping && (
-                      <p className="text-xs text-[#5a6c5b]/60 text-right">
-                        *Belum termasuk ongkos kirim
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1257,18 +1344,22 @@ export default function CheckoutPage() {
                           Pilih alamat & metode
                         </span>
                       )}
-                      {currentStep >= 2 && selectedShipping && (
-                        <span className="text-xs text-orange-600 mt-0.5 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          Via Bitship API
+                      {currentStep >= 2 && selectedShipping && selectedShippingMethod && (
+                        <span className="text-xs text-green-600 mt-0.5 flex items-center gap-1">
+                          <Check className="h-3 w-3" />
+                          {selectedShippingMethod.name}
                         </span>
                       )}
                     </div>
                     <span className="text-[#5a6c5b] font-bold text-right">
                       {currentStep < 2 ? (
                         <span className="text-gray-400">-</span>
-                      ) : selectedShipping ? (
-                        <span className="text-orange-600 text-xs">Dalam Perhitungan</span>
+                      ) : selectedShipping && shippingCost >= 0 ? (
+                        shippingCost === 0 ? (
+                          <span className="text-green-600">GRATIS</span>
+                        ) : (
+                          <span>Rp {shippingCost.toLocaleString("id-ID")}</span>
+                        )
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
@@ -1291,14 +1382,9 @@ export default function CheckoutPage() {
                       Total Pembayaran
                     </span>
                     <span className="text-xl font-bold text-[#5a6c5b]">
-                      Rp {subtotal.toLocaleString("id-ID")}
+                      Rp {total.toLocaleString("id-ID")}
                     </span>
                   </div>
-                  {currentStep >= 2 && selectedShipping && (
-                    <p className="text-xs text-[#5a6c5b]/60 text-right">
-                      *Belum termasuk ongkos kirim
-                    </p>
-                  )}
                 </div>
               </div>
             </div>

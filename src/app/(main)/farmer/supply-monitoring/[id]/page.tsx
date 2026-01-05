@@ -349,9 +349,8 @@ export default function SupplyMonitoringDetailPage({
                     <img
                       src={supply.photoUrl}
                       alt="Foto sampah untuk pickup"
-                      className="w-full h-auto min-h-[400px] max-h-[600px] object-contain bg-gray-50"
-                      onClick={() => window.open(supply.photoUrl, '_blank')}
-                      style={{ cursor: 'pointer' }}
+                      className="w-full h-auto min-h-[400px] max-h-[600px] object-contain bg-gray-50 cursor-pointer"
+                      onClick={() => supply.photoUrl && window.open(supply.photoUrl, '_blank')}
                     />
 
                     {/* Overlay Info */}

@@ -411,12 +411,6 @@ export default function NavbarLandingPage() {
                         ? "slideInRight 0.3s ease-out forwards"
                         : "none",
                     }}
-                    style={{
-                      animationDelay: `${index * 50}ms`,
-                      animation: mobileMenuOpen
-                        ? "slideInRight 0.3s ease-out forwards"
-                        : "none",
-                    }}
                   >
                     <div
                       className={cn(

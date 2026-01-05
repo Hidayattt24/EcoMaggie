@@ -68,10 +68,17 @@ export default function CustomSelect({
     option.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Find selected option by exact value match
   const selectedOption = options.find((opt) => opt.value === value);
-  const displayValue = selectedOption?.label || value || "";
+  
+  // Display label from selected option, or empty string
+  const displayValue = selectedOption?.label || "";
+
+  // Debug log
+  console.log(`🔍 [CustomSelect:${id}] value="${value}", selectedOption=`, selectedOption, `displayValue="${displayValue}"`);
 
   const handleSelect = (optionValue: string) => {
+    console.log(`✅ [CustomSelect:${id}] Selected:`, optionValue);
     onChange(optionValue);
     setIsOpen(false);
     setSearchQuery("");

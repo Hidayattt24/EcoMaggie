@@ -46,6 +46,16 @@ export default function AddressFormFields({
   const [selectedRegencyCode, setSelectedRegencyCode] = useState("");
   const [selectedDistrictCode, setSelectedDistrictCode] = useState("");
 
+  // Store selected values for display (format: "code|name")
+  const [selectedProvinceValue, setSelectedProvinceValue] = useState("");
+  const [selectedRegencyValue, setSelectedRegencyValue] = useState("");
+  const [selectedDistrictValue, setSelectedDistrictValue] = useState("");
+  const [selectedVillageValue, setSelectedVillageValue] = useState("");
+  
+  // Track if postal code was auto-filled from village selection
+  const [isPostalCodeVerified, setIsPostalCodeVerified] = useState(false);
+  const [verifiedPostalCode, setVerifiedPostalCode] = useState("");
+
   // Load provinces on mount
   useEffect(() => {
     loadProvinces();
@@ -170,60 +180,121 @@ export default function AddressFormFields({
   };
 
   const handleProvinceChange = (value: string) => {
-    // Check if it's a code|name format or custom input
+    console.log("📍 [AddressForm] Province onChange called with:", value);
+    // value is in format "code|name" from options
     if (value.includes("|")) {
       const [code, name] = value.split("|");
       console.log("📍 [AddressForm] Province selected:", { code, name });
       setSelectedProvinceCode(code);
+      setSelectedProvinceValue(value); // Store the full value for display
       onChange("province", name);
     } else {
-      // Custom input
+      // Custom input or empty
       console.log("📍 [AddressForm] Province custom input:", value);
       setSelectedProvinceCode("");
+      setSelectedProvinceValue("");
       onChange("province", value);
     }
+    // Reset child selections
     setSelectedRegencyCode("");
+    setSelectedRegencyValue("");
     setSelectedDistrictCode("");
+    setSelectedDistrictValue("");
+    setSelectedVillageValue("");
+    onChange("city", "");
+    onChange("district", "");
+    onChange("village", "");
+    onChange("postalCode", "");
   };
 
   const handleRegencyChange = (value: string) => {
+    console.log("📍 [AddressForm] Regency onChange called with:", value);
     if (value.includes("|")) {
       const [code, name] = value.split("|");
       console.log("📍 [AddressForm] Regency selected:", { code, name });
       setSelectedRegencyCode(code);
+      setSelectedRegencyValue(value);
       onChange("city", name);
     } else {
       console.log("📍 [AddressForm] Regency custom input:", value);
       setSelectedRegencyCode("");
+      setSelectedRegencyValue("");
       onChange("city", value);
     }
+    // Reset child selections
     setSelectedDistrictCode("");
+    setSelectedDistrictValue("");
+    setSelectedVillageValue("");
+    onChange("district", "");
+    onChange("village", "");
+    onChange("postalCode", "");
   };
 
   const handleDistrictChange = (value: string) => {
+    console.log("📍 [AddressForm] District onChange called with:", value);
     if (value.includes("|")) {
       const [code, name] = value.split("|");
       console.log("📍 [AddressForm] District selected:", { code, name });
       setSelectedDistrictCode(code);
+      setSelectedDistrictValue(value);
       onChange("district", name);
     } else {
       console.log("📍 [AddressForm] District custom input:", value);
       setSelectedDistrictCode("");
+      setSelectedDistrictValue("");
       onChange("district", value);
     }
+    // Reset village selection
+    setSelectedVillageValue("");
+    setVerifiedPostalCode("");
+    setIsPostalCodeVerified(false);
+    onChange("village", "");
+    onChange("postalCode", "");
   };
 
   const handleVillageChange = (value: string) => {
-    const selectedVillage = villages.find((v) => v.code === value);
-    console.log("📍 [AddressForm] Village selected:", selectedVillage);
-    if (selectedVillage) {
-      onChange("village", selectedVillage.name);
-      if (selectedVillage.postal_codes.length > 0) {
-        onChange("postalCode", selectedVillage.postal_codes[0]);
+    console.log("📍 [AddressForm] Village onChange called with:", value);
+    
+    if (value.includes("|")) {
+      // Value format: "code|name|postalCode" or "code|name"
+      const parts = value.split("|");
+      const code = parts[0];
+      const name = parts[1];
+      const postalCode = parts[2]; // May be undefined if no postal code
+      
+      console.log("📍 [AddressForm] Village selected:", { code, name, postalCode });
+      
+      setSelectedVillageValue(value);
+      onChange("village", name);
+      
+      // Auto-fill postal code if available
+      if (postalCode && postalCode.length === 5) {
+        console.log("📮 [AddressForm] Auto-filling postal code:", postalCode);
+        setVerifiedPostalCode(postalCode);
+        onChange("postalCode", postalCode);
+        setIsPostalCodeVerified(true);
+      } else {
+        console.log("⚠️ [AddressForm] No postal code in value, checking villages array...");
+        // Fallback: try to find from villages array
+        const selectedVillage = villages.find((v) => v.code === code);
+        if (selectedVillage && selectedVillage.postal_codes && selectedVillage.postal_codes.length > 0) {
+          const postal = selectedVillage.postal_codes[0];
+          console.log("📮 [AddressForm] Found postal code from villages array:", postal);
+          setVerifiedPostalCode(postal);
+          onChange("postalCode", postal);
+          setIsPostalCodeVerified(true);
+        } else {
+          setVerifiedPostalCode("");
+          setIsPostalCodeVerified(false);
+        }
       }
     } else {
       // Custom input
+      console.log("📍 [AddressForm] Village custom input:", value);
+      setSelectedVillageValue("");
       onChange("village", value);
+      setVerifiedPostalCode("");
+      setIsPostalCodeVerified(false);
     }
   };
 
@@ -244,7 +315,8 @@ export default function AddressFormFields({
   }));
 
   const villageOptions = villages.map((v) => ({
-    value: v.code,
+    // Include postal code in value: "code|name|postalCode"
+    value: `${v.code}|${v.name}${v.postal_codes.length > 0 ? `|${v.postal_codes[0]}` : ""}`,
     label: `${v.name}${v.postal_codes.length > 0 ? ` - ${v.postal_codes.join(", ")}` : ""}`,
   }));
 
@@ -253,7 +325,7 @@ export default function AddressFormFields({
       {/* Provinsi */}
       <CustomSelect
         id="province"
-        value={selectedProvinceCode ? `${selectedProvinceCode}|${formData.province}` : formData.province}
+        value={selectedProvinceValue}
         onChange={handleProvinceChange}
         options={provinceOptions}
         placeholder="Pilih Provinsi"
@@ -291,7 +363,7 @@ export default function AddressFormFields({
       {/* Kabupaten/Kota */}
       <CustomSelect
         id="city"
-        value={selectedRegencyCode ? `${selectedRegencyCode}|${formData.city}` : formData.city}
+        value={selectedRegencyValue}
         onChange={handleRegencyChange}
         options={regencyOptions}
         placeholder={!selectedProvinceCode ? "Pilih provinsi terlebih dahulu" : "Pilih Kabupaten/Kota"}
@@ -323,7 +395,7 @@ export default function AddressFormFields({
       {/* Kecamatan */}
       <CustomSelect
         id="district"
-        value={selectedDistrictCode ? `${selectedDistrictCode}|${formData.district}` : formData.district}
+        value={selectedDistrictValue}
         onChange={handleDistrictChange}
         options={districtOptions}
         placeholder={!selectedRegencyCode ? "Pilih kabupaten/kota terlebih dahulu" : "Pilih Kecamatan"}
@@ -361,7 +433,7 @@ export default function AddressFormFields({
       {/* Kelurahan/Desa */}
       <CustomSelect
         id="village"
-        value={formData.village}
+        value={selectedVillageValue}
         onChange={handleVillageChange}
         options={villageOptions}
         placeholder={!selectedDistrictCode && !formData.district ? "Pilih atau tulis kecamatan terlebih dahulu" : "Pilih Kelurahan/Desa"}
@@ -419,22 +491,54 @@ export default function AddressFormFields({
           </svg>
           Kode Pos
           <span className="text-red-500">*</span>
+          {isPostalCodeVerified && (
+            <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Terverifikasi
+            </span>
+          )}
         </label>
-        <input
-          type="text"
-          id="postalCode"
-          value={formData.postalCode}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, ""); // Only numbers
-            onChange("postalCode", value);
-          }}
-          placeholder="Contoh: 12345"
-          maxLength={5}
-          className={`w-full px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A3AF87] focus:border-[#A3AF87] transition-all text-sm poppins-regular ${
-            errors.postalCode ? "border-red-500" : "border-gray-300"
-          }`}
-          style={{ color: "#5a6c5b" }}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            id="postalCode"
+            value={isPostalCodeVerified ? verifiedPostalCode : (formData.postalCode || "")}
+            onChange={(e) => {
+              if (!isPostalCodeVerified) {
+                const value = e.target.value.replace(/\D/g, ""); // Only numbers
+                onChange("postalCode", value);
+              }
+            }}
+            placeholder="Contoh: 12345"
+            maxLength={5}
+            readOnly={isPostalCodeVerified}
+            className={`w-full px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A3AF87] focus:border-[#A3AF87] transition-all text-sm poppins-regular ${
+              errors.postalCode 
+                ? "border-red-500" 
+                : isPostalCodeVerified 
+                  ? "border-green-500 bg-green-50 cursor-not-allowed" 
+                  : "border-gray-300"
+            }`}
+            style={{ color: "#5a6c5b" }}
+          />
+          {isPostalCodeVerified && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
         {errors.postalCode && (
           <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -447,9 +551,22 @@ export default function AddressFormFields({
             {errors.postalCode}
           </p>
         )}
-        <p className="text-xs" style={{ color: "#5a6c5b" }}>
-          Kode pos akan terisi otomatis jika Anda memilih kelurahan/desa dari daftar
-        </p>
+        {isPostalCodeVerified ? (
+          <p className="text-xs flex items-center gap-1 text-green-600">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Kode pos otomatis terisi dari data kelurahan/desa
+          </p>
+        ) : (
+          <p className="text-xs" style={{ color: "#5a6c5b" }}>
+            Kode pos akan terisi otomatis jika Anda memilih kelurahan/desa dari daftar
+          </p>
+        )}
       </div>
 
       {/* Alamat Lengkap */}

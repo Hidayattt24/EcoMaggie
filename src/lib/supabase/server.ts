@@ -83,19 +83,18 @@ export async function getUserProfile() {
     return null;
   }
 
-  // Import prisma di sini untuk menghindari circular dependency
-  const { prisma } = await import("@/lib/prisma");
-
-  const profile = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: {
-      farmer: true,
-      addresses: {
-        where: { isDefault: true },
-        take: 1,
-      },
-    },
-  });
+  // Fetch user profile dari Supabase
+  const { data: profile } = await supabase
+    .from("users")
+    .select(
+      `
+      *,
+      farmer:farmers(*),
+      addresses:addresses(*)
+    `
+    )
+    .eq("id", user.id)
+    .single();
 
   return profile;
 }

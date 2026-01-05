@@ -93,7 +93,9 @@ export function LogoutButton({
       </div>
       {!hideText && (
         <div className="flex-1 text-left">
-          <p className="font-bold text-sm text-gray-900">Keluar dari Aplikasi</p>
+          <p className="font-bold text-sm text-gray-900">
+            Keluar dari Aplikasi
+          </p>
           <p className="text-xs text-gray-500">Logout dari akun Anda</p>
         </div>
       )}

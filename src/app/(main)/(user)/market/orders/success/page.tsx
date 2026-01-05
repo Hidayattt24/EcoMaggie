@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Check,
@@ -14,12 +14,13 @@ import {
   ArrowRight,
   Copy,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import InvoiceTemplate from "@/components/shared/InvoiceTemplate";
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId") || "ECO" + Date.now();
   const [orderData, setOrderData] = useState<any>(null);
@@ -358,7 +359,7 @@ export default function OrderSuccessPage() {
                   Hubungi kami jika ada pertanyaan tentang pesanan Anda.
                 </p>
                 <a
-                  href="https://wa.me/6282288953268"
+                  href="https://wa.me/6289534198039"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-2.5 bg-green-500 text-white text-sm font-semibold rounded-xl hover:bg-green-600 transition-colors"
@@ -378,5 +379,24 @@ export default function OrderSuccessPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-12 w-12 animate-spin text-[#A3AF87] mx-auto mb-4" />
+        <p className="text-gray-500">Memuat data pesanan...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

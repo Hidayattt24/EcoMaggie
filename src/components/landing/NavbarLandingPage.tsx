@@ -401,9 +401,16 @@ export default function NavbarLandingPage() {
                     className={cn(
                       "flex items-center gap-3 text-base poppins-medium transition-all duration-300 py-3.5 px-4 rounded-xl cursor-pointer transform",
                       isActive
-                        ? "text-white bg-gradient-to-r from-[#2D5016] to-[#3d6b1e] shadow-md scale-[1.02]"
-                        : "text-gray-700 hover:text-[#2D5016] hover:bg-green-50 hover:pl-6"
+                        ? "text-[#2D5016] shadow-md scale-[1.02]"
+                        : "text-gray-700 hover:text-[#A3AF87] hover:bg-green-50 hover:pl-6"
                     )}
+                    style={{
+                      backgroundColor: isActive ? "#A3AF87" : "transparent",
+                      animationDelay: `${index * 50}ms`,
+                      animation: mobileMenuOpen
+                        ? "slideInRight 0.3s ease-out forwards"
+                        : "none",
+                    }}
                     style={{
                       animationDelay: `${index * 50}ms`,
                       animation: mobileMenuOpen
@@ -414,7 +421,7 @@ export default function NavbarLandingPage() {
                     <div
                       className={cn(
                         "p-2 rounded-lg transition-all",
-                        isActive ? "bg-white/20" : "bg-green-50"
+                        isActive ? "bg-white/30" : "bg-green-50"
                       )}
                     >
                       <Icon />
@@ -455,7 +462,7 @@ export default function NavbarLandingPage() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-[#2D5016] poppins-semibold rounded-xl transition-all duration-300 border-2 border-[#2D5016] hover:bg-[#2D5016] hover:text-white transform hover:scale-[1.02] active:scale-95"
+                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-[#A3AF87] poppins-semibold rounded-xl transition-all duration-300 border-2 border-[#A3AF87] hover:bg-[#A3AF87] hover:text-white transform hover:scale-[1.02] active:scale-95"
               >
                 <LoginIcon />
                 Masuk ke Akun
@@ -463,7 +470,16 @@ export default function NavbarLandingPage() {
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-gradient-to-r from-[#2D5016] via-[#3d6b1e] to-[#4a8022] text-white poppins-semibold rounded-xl hover:from-[#3d6b1e] hover:to-[#4a8022] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95"
+                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-white poppins-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95"
+                style={{
+                  backgroundColor: "#A3AF87",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#8a9670";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#A3AF87";
+                }}
               >
                 <UserAddIcon />
                 Daftar Sekarang

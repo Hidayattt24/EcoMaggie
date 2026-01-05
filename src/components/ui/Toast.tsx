@@ -71,24 +71,28 @@ export default function Toast({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed top-4 right-4 z-[9999] max-w-md w-full sm:w-auto"
+          className="fixed top-4 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-4 z-[9999] w-[calc(100%-2rem)] sm:w-auto sm:max-w-md mx-auto sm:mx-0"
         >
           <div
             className={`${config.bgColor} text-white rounded-2xl shadow-2xl border-2 ${config.borderColor} overflow-hidden`}
           >
-            <div className="p-4 flex items-start gap-3">
+            <div className="p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
               {/* Icon */}
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <Icon className={`h-6 w-6 ${config.iconColor}`} />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Icon
+                    className={`h-5 w-5 sm:h-6 sm:w-6 ${config.iconColor}`}
+                  />
                 </div>
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base mb-1">{title}</h3>
+                <h3 className="font-bold text-sm sm:text-base mb-0.5 sm:mb-1">
+                  {title}
+                </h3>
                 {message && (
-                  <p className="text-sm text-white/90 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-white/90 leading-relaxed line-clamp-2">
                     {message}
                   </p>
                 )}
@@ -99,7 +103,7 @@ export default function Toast({
                 onClick={onClose}
                 className="flex-shrink-0 p-1 hover:bg-white/20 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
 

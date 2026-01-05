@@ -544,3 +544,187 @@ export async function getSupplyDailyTrend(): Promise<
     };
   }
 }
+
+// ==========================================
+// GET SOCIAL IMPACT DATA (FOR DASHBOARD)
+// ==========================================
+
+export interface TopSupplier {
+  userId: string;
+  name: string;
+  location: string;
+  totalWeight: number;
+  supplyCount: number;
+  rank: number;
+}
+
+export interface SocialImpactData {
+  totalWeightKg: number;
+  totalWeightTon: number;
+  co2Reduced: number;
+  familiesHelped: number;
+  totalSuppliers: number;
+  newSuppliers: number;
+  topSuppliers: TopSupplier[];
+}
+
+export async function getSocialImpactData(): Promise<ActionResponse<SocialImpactData>> {
+  try {
+    const supabase = await createClient();
+
+    // Get authenticated user and verify farmer role
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        message: "Anda harus login untuk melihat dampak sosial",
+        error: "Unauthorized",
+      };
+    }
+
+    // Verify user is farmer
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (userError || userData?.role !== "FARMER") {
+      return {
+        success: false,
+        message: "Akses ditolak. Hanya farmer yang dapat melihat dampak sosial",
+        error: "Forbidden",
+      };
+    }
+
+    // Get all completed supplies with user data
+    const { data: supplies, error: fetchError } = await supabase
+      .from("user_supplies")
+      .select(`
+        id,
+        user_id,
+        estimated_weight,
+        actual_weight,
+        status,
+        created_at,
+        users!user_supplies_user_id_fkey (
+          id,
+          name,
+          province,
+          city,
+          district,
+          village
+        )
+      `)
+      .eq("status", "COMPLETED");
+
+    if (fetchError) {
+      console.error("Fetch social impact error:", fetchError);
+      return {
+        success: false,
+        message: "Gagal mengambil data dampak sosial",
+        error: fetchError.message,
+      };
+    }
+
+    // Calculate total weight (use actual_weight if available, otherwise estimated_weight)
+    const totalWeightKg = (supplies || []).reduce((acc, supply: any) => {
+      const weight = supply.actual_weight || parseInt(supply.estimated_weight) || 0;
+      return acc + weight;
+    }, 0);
+
+    const totalWeightTon = totalWeightKg / 1000;
+
+    // Calculate CO2 reduction (estimate: 0.3 kg CO2 per kg organic waste)
+    const co2Reduced = Math.round(totalWeightKg * 0.3);
+
+    // Calculate families helped (estimate: 1 family per 20 kg)
+    const familiesHelped = Math.round(totalWeightKg / 20);
+
+    // Get unique suppliers
+    const uniqueSuppliers = new Set((supplies || []).map((s: any) => s.user_id));
+    const totalSuppliers = uniqueSuppliers.size;
+
+    // Get new suppliers (joined in last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const { data: newSuppliersData, error: newSuppliersError } = await supabase
+      .from("user_supplies")
+      .select("user_id, created_at")
+      .gte("created_at", thirtyDaysAgo.toISOString())
+      .order("created_at", { ascending: false });
+
+    const newSupplierIds = new Set(
+      (newSuppliersData || []).map((s: any) => s.user_id)
+    );
+    const newSuppliers = newSupplierIds.size;
+
+    // Calculate top suppliers
+    const supplierStats = new Map<string, {
+      userId: string;
+      name: string;
+      location: string;
+      totalWeight: number;
+      supplyCount: number;
+    }>();
+
+    (supplies || []).forEach((supply: any) => {
+      const userId = supply.user_id;
+      const weight = supply.actual_weight || parseInt(supply.estimated_weight) || 0;
+      const userName = supply.users?.name || "Unknown";
+      const location = supply.users?.village || supply.users?.district || supply.users?.city || "Unknown";
+
+      if (supplierStats.has(userId)) {
+        const stats = supplierStats.get(userId)!;
+        stats.totalWeight += weight;
+        stats.supplyCount += 1;
+      } else {
+        supplierStats.set(userId, {
+          userId,
+          name: userName,
+          location,
+          totalWeight: weight,
+          supplyCount: 1,
+        });
+      }
+    });
+
+    // Sort by total weight and get top 3
+    const topSuppliers: TopSupplier[] = Array.from(supplierStats.values())
+      .sort((a, b) => b.totalWeight - a.totalWeight)
+      .slice(0, 3)
+      .map((supplier, index) => ({
+        ...supplier,
+        rank: index + 1,
+      }));
+
+    const impactData: SocialImpactData = {
+      totalWeightKg,
+      totalWeightTon: parseFloat(totalWeightTon.toFixed(2)),
+      co2Reduced,
+      familiesHelped,
+      totalSuppliers,
+      newSuppliers,
+      topSuppliers,
+    };
+
+    return {
+      success: true,
+      message: "Data dampak sosial berhasil dimuat",
+      data: impactData,
+    };
+  } catch (error) {
+    console.error("Get social impact error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data dampak sosial",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+

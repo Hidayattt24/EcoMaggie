@@ -1,31 +1,50 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AlertTriangle, PackageX } from "lucide-react";
 import Link from "next/link";
-
-// Dummy data untuk alert stok
-const stockAlerts = [
-  { id: 1, name: "Maggot Segar 1kg", stock: 5, threshold: 10, urgency: "high" },
-  {
-    id: 2,
-    name: "Pupuk Organik 5kg",
-    stock: 8,
-    threshold: 10,
-    urgency: "medium",
-  },
-  {
-    id: 3,
-    name: "Pakan Ikan Premium",
-    stock: 3,
-    threshold: 10,
-    urgency: "high",
-  },
-];
+import { getOperationalAlerts } from "@/lib/api/farmer-dashboard.actions";
+import type { Alert } from "@/lib/api/farmer-dashboard.actions";
 
 export default function OperationalAlerts() {
-  const highUrgencyCount = stockAlerts.filter(
-    (a) => a.urgency === "high"
-  ).length;
+  const [stockAlerts, setStockAlerts] = useState<
+    Array<{ id: string; name: string; stock: number; threshold: number; urgency: string }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAlerts() {
+      try {
+        setIsLoading(true);
+        const alerts = await getOperationalAlerts();
+        // Transform alerts to stock format
+        const stockFormat = alerts
+          .filter((a) => a.type === "low_stock")
+          .map((a) => {
+            // Extract stock number from message like "Stok Product tersisa 5 unit"
+            const stockMatch = a.message.match(/tersisa (\d+)/);
+            const stock = stockMatch ? parseInt(stockMatch[1]) : 0;
+            return {
+              id: a.id,
+              name: a.message.replace(/Stok\s+(.+)\s+tersisa.*/  , "$1"),
+              stock,
+              threshold: 10,
+              urgency: stock <= 5 ? "high" : "medium",
+            };
+          });
+        setStockAlerts(stockFormat);
+      } catch (error) {
+        console.error("Error fetching alerts:", error);
+        setStockAlerts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAlerts();
+  }, []);
+
+  const highUrgencyCount = stockAlerts.filter((a) => a.urgency === "high").length;
 
   return (
     <div className="bg-white p-5 lg:p-6 rounded-2xl border border-gray-100 shadow-sm h-full">

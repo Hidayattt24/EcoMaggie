@@ -15,17 +15,35 @@ import SalesChart from "@/components/farmer/dashboard/SalesChart";
 import ImpactTile from "@/components/farmer/dashboard/ImpactTile";
 import TopProducts from "@/components/farmer/dashboard/TopProducts";
 import OperationalAlerts from "@/components/farmer/dashboard/OperationalAlerts";
-
-// Dummy stats data
-const dashboardStats = {
-  totalSales: 15750000,
-  newOrders: 12,
-  needsShipping: 8,
-  pendingPickup: 5,
-};
+import { getFarmerDashboardStats } from "@/lib/api/farmer-dashboard.actions";
+import type { DashboardStats } from "@/lib/api/farmer-dashboard.actions";
 
 export default function FarmerDashboard() {
   const [currentDate, setCurrentDate] = useState<string>("");
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+    totalSales: 0,
+    newOrders: 0,
+    needsShipping: 0,
+    pendingPickup: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch dashboard stats
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        setIsLoading(true);
+        const stats = await getFarmerDashboardStats();
+        setDashboardStats(stats);
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchStats();
+  }, []);
 
   // Handle hydration for date
   useEffect(() => {

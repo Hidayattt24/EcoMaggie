@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -10,15 +11,8 @@ import {
   Cell,
 } from "recharts";
 import { Package, TrendingUp } from "lucide-react";
-
-// Dummy data untuk produk terlaris
-const topProductsData = [
-  { name: "Maggot Segar 1kg", sold: 156, revenue: 2340000 },
-  { name: "Maggot Kering 500g", sold: 89, revenue: 1780000 },
-  { name: "Pupuk Organik 5kg", sold: 67, revenue: 1005000 },
-  { name: "Maggot Segar 500g", sold: 54, revenue: 540000 },
-  { name: "Pakan Ikan Premium", sold: 42, revenue: 840000 },
-];
+import { getTopProducts } from "@/lib/api/farmer-dashboard.actions";
+import type { TopProduct } from "@/lib/api/farmer-dashboard.actions";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -42,6 +36,33 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export default function TopProducts() {
+  const [topProductsData, setTopProductsData] = useState<
+    Array<{ name: string; sold: number; revenue: number }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTopProducts() {
+      try {
+        setIsLoading(true);
+        const products = await getTopProducts(5);
+        const formattedData = products.map((p) => ({
+          name: p.name,
+          sold: p.totalSold,
+          revenue: p.revenue,
+        }));
+        setTopProductsData(formattedData);
+      } catch (error) {
+        console.error("Error fetching top products:", error);
+        setTopProductsData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTopProducts();
+  }, []);
+
   const totalSold = topProductsData.reduce((sum, item) => sum + item.sold, 0);
 
   return (
@@ -67,42 +88,51 @@ export default function TopProducts() {
 
       {/* Chart */}
       <div className="h-[200px] lg:h-[220px] mb-4">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={topProductsData}
-            layout="vertical"
-            margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-          >
-            <XAxis type="number" hide />
-            <YAxis
-              type="category"
-              dataKey="name"
-              tick={{ fontSize: 11, fill: "#6b7280" }}
-              tickLine={false}
-              axisLine={false}
-              width={120}
-              tickFormatter={(value) =>
-                value.length > 15 ? `${value.slice(0, 15)}...` : value
-              }
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: "rgba(163, 175, 135, 0.1)" }}
-            />
-            <Bar dataKey="sold" radius={[0, 6, 6, 0]} barSize={20}>
-              {topProductsData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={
-                    index === 0
-                      ? "#A3AF87"
-                      : `rgba(163, 175, 135, ${0.8 - index * 0.15})`
-                  }
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        {topProductsData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={topProductsData}
+              layout="vertical"
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+            >
+              <XAxis type="number" hide />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={{ fontSize: 11, fill: "#6b7280" }}
+                tickLine={false}
+                axisLine={false}
+                width={120}
+                tickFormatter={(value) =>
+                  value.length > 15 ? `${value.slice(0, 15)}...` : value
+                }
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ fill: "rgba(163, 175, 135, 0.1)" }}
+              />
+              <Bar dataKey="sold" radius={[0, 6, 6, 0]} barSize={20}>
+                {topProductsData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      index === 0
+                        ? "#A3AF87"
+                        : `rgba(163, 175, 135, ${0.8 - index * 0.15})`
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="text-center">
+              <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Belum ada data penjualan</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Product List with Details */}

@@ -17,33 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
-// Seeded random for consistent data between server and client
-const seededRandom = (seed: number) => {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-};
-
-// Generate sales data for specific date range with seeded random
-const generateSalesData = (startDate: Date, endDate: Date) => {
-  const data = [];
-  const current = new Date(startDate);
-  let seed = startDate.getTime();
-  while (current <= endDate) {
-    seed += 1;
-    data.push({
-      date: current.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-      }),
-      fullDate: current.toISOString().split("T")[0],
-      sales: Math.floor(seededRandom(seed) * 500000) + 100000,
-      orders: Math.floor(seededRandom(seed + 1000) * 20) + 5,
-    });
-    current.setDate(current.getDate() + 1);
-  }
-  return data;
-};
+import { getSalesChartData } from "@/lib/api/farmer-dashboard.actions";
+import type { SalesDataPoint } from "@/lib/api/farmer-dashboard.actions";
 
 const formatRupiah = (value: number) => {
   if (value >= 1000000) {
@@ -222,7 +197,7 @@ function CustomCalendar({
 
 export default function SalesChart() {
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState(2); // Default 30 days
+  const [selectedPreset, setSelectedPreset] = useState(0); // Default 7 days
   const [customRange, setCustomRange] = useState({
     start: "",
     end: "",
@@ -232,11 +207,42 @@ export default function SalesChart() {
     null
   );
   const [mounted, setMounted] = useState(false);
+  const [salesData, setSalesData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle hydration
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Fetch sales data
+  useEffect(() => {
+    async function fetchSalesData() {
+      try {
+        setIsLoading(true);
+        const data = await getSalesChartData();
+        // Transform data for chart
+        const transformedData = data.map((item) => ({
+          date: new Date(item.date).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+          }),
+          fullDate: item.date,
+          sales: item.amount,
+          orders: 0, // TODO: Add orders count if needed
+        }));
+        setSalesData(transformedData);
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+        // Set empty data on error
+        setSalesData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchSalesData();
   }, []);
 
   // Close dropdown when clicking outside
@@ -254,26 +260,6 @@ export default function SalesChart() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Calculate date range - use fixed date for initial render to avoid hydration mismatch
-  const dateRange = useMemo(() => {
-    if (useCustomRange && customRange.start && customRange.end) {
-      return {
-        start: new Date(customRange.start),
-        end: new Date(customRange.end),
-      };
-    }
-    // Use a fixed base date for SSR consistency
-    const baseDate = mounted ? new Date() : new Date("2026-01-02");
-    const end = new Date(baseDate);
-    const start = new Date(baseDate);
-    start.setDate(end.getDate() - datePresets[selectedPreset].days + 1);
-    return { start, end };
-  }, [selectedPreset, customRange, useCustomRange, mounted]);
-
-  // Generate data based on date range
-  const salesData = useMemo(() => {
-    return generateSalesData(dateRange.start, dateRange.end);
-  }, [dateRange]);
 
   // Calculate total and average
   const totalSales = salesData.reduce((sum, item) => sum + item.sales, 0);

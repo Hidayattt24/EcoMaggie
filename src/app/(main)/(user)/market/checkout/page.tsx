@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
   Truck,
   CreditCard,
-  Home,
   Package,
   ChevronRight,
   Check,
@@ -23,17 +22,22 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getUserAddresses, createAddress, type CreateAddressData } from "@/lib/api/address.actions";
+import { getCheckoutData, type CheckoutProduct } from "@/lib/api/checkout.actions";
+import AddressFormFields from "@/components/auth/AddressFormFields";
 
 // Types
 interface Address {
-  id: number;
-  name: string;
-  phone: string;
-  address: string;
+  id: string;
+  label: string;
+  recipientName: string;
+  recipientPhone: string;
+  streetAddress: string;
   city: string;
   province: string;
-  district: string;
+  district?: string;
+  village?: string;
   postalCode: string;
   isDefault: boolean;
 }
@@ -55,160 +59,174 @@ interface PaymentMethod {
   logos: string[];
 }
 
-// Location Data
-const provinces = [
-  { id: "aceh", name: "Aceh" },
-  { id: "sumut", name: "Sumatera Utara" },
-  { id: "sumbar", name: "Sumatera Barat" },
-];
-
-const citiesByProvince: Record<string, { id: string; name: string }[]> = {
-  aceh: [
-    { id: "banda-aceh", name: "Banda Aceh" },
-    { id: "aceh-besar", name: "Aceh Besar" },
-    { id: "sabang", name: "Sabang" },
-  ],
-  sumut: [
-    { id: "medan", name: "Medan" },
-    { id: "binjai", name: "Binjai" },
-  ],
-  sumbar: [
-    { id: "padang", name: "Padang" },
-    { id: "bukittinggi", name: "Bukittinggi" },
-  ],
-};
-
-const districtsByCity: Record<
-  string,
-  { id: string; name: string; postalCode: string }[]
-> = {
-  "banda-aceh": [
-    { id: "kuta-alam", name: "Kuta Alam", postalCode: "23111" },
-    { id: "meuraxa", name: "Meuraxa", postalCode: "23112" },
-    { id: "jaya-baru", name: "Jaya Baru", postalCode: "23113" },
-    { id: "banda-raya", name: "Banda Raya", postalCode: "23114" },
-  ],
-  medan: [
-    { id: "medan-baru", name: "Medan Baru", postalCode: "20112" },
-    { id: "medan-timur", name: "Medan Timur", postalCode: "20231" },
-  ],
-  padang: [
-    { id: "padang-utara", name: "Padang Utara", postalCode: "25115" },
-    { id: "padang-barat", name: "Padang Barat", postalCode: "25115" },
-  ],
-};
-
-const savedAddresses: Address[] = [
-  {
-    id: 1,
-    name: "Rumah Utama",
-    phone: "08123456789",
-    address: "Jl. Teuku Umar No. 123",
-    city: "Banda Aceh",
-    province: "Aceh",
-    district: "Kuta Alam",
-    postalCode: "23111",
-    isDefault: true,
-  },
-];
-
-const productData = {
-  name: "Maggot BSF Premium",
-  price: 38250,
-  quantity: 2,
-  image: "/assets/dummy/magot.png",
-  weight: 2,
-};
-
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
-  const [addresses, setAddresses] = useState<Address[]>(savedAddresses);
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(
-    savedAddresses[0] || null
-  );
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [selectedShipping, setSelectedShipping] = useState<string>("");
   const [selectedPayment, setSelectedPayment] = useState<string>("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [checkoutProducts, setCheckoutProducts] = useState<CheckoutProduct[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [checkoutSource, setCheckoutSource] = useState<"direct" | "cart">("cart");
 
   // Inline Form States
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    address: "",
     province: "",
     city: "",
     district: "",
+    village: "",
     postalCode: "",
+    fullAddress: "",
   });
-  const [selectedProvinceId, setSelectedProvinceId] = useState("");
-  const [selectedCityId, setSelectedCityId] = useState("");
-  const [availableCities, setAvailableCities] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [availableDistricts, setAvailableDistricts] = useState<
-    { id: string; name: string; postalCode: string }[]
-  >([]);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Fetch addresses and checkout data on mount
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoadingData(true);
+      setError(null);
+
+      try {
+        // Fetch addresses
+        const addressResult = await getUserAddresses();
+        if (addressResult.success && addressResult.data) {
+          const transformedAddresses: Address[] = addressResult.data.map((addr) => ({
+            id: addr.id,
+            label: addr.label,
+            recipientName: addr.recipientName,
+            recipientPhone: addr.recipientPhone,
+            streetAddress: addr.streetAddress,
+            city: addr.city,
+            province: addr.province,
+            district: addr.district,
+            village: addr.village,
+            postalCode: addr.postalCode,
+            isDefault: addr.isDefault,
+          }));
+          setAddresses(transformedAddresses);
+          
+          // Set default address if exists
+          const defaultAddr = transformedAddresses.find(a => a.isDefault);
+          if (defaultAddr) {
+            setSelectedAddress(defaultAddr);
+          }
+        }
+
+        // Check for query parameters (Direct Buy mode)
+        const productId = searchParams.get('productId');
+        const qtyParam = searchParams.get('qty');
+        const quantity = qtyParam ? parseInt(qtyParam, 10) : 1;
+
+        // Fetch checkout data based on source
+        const checkoutResult = await getCheckoutData(
+          productId || undefined,
+          productId ? quantity : undefined
+        );
+
+        if (checkoutResult.success && checkoutResult.data) {
+          setCheckoutProducts(checkoutResult.data.products);
+          setCheckoutSource(checkoutResult.data.source);
+          
+          console.log(`✅ Checkout loaded from ${checkoutResult.data.source}:`, {
+            products: checkoutResult.data.products.length,
+            totalItems: checkoutResult.data.totalItems,
+            subtotal: checkoutResult.data.subtotal,
+          });
+        } else {
+          setError(checkoutResult.message || "Gagal memuat data checkout");
+        }
+      } catch (err) {
+        console.error("❌ Error fetching checkout data:", err);
+        setError("Terjadi kesalahan saat memuat data checkout");
+      } finally {
+        setIsLoadingData(false);
+      }
+    }
+
+    fetchData();
+  }, [searchParams]);
 
   // Handlers
-  const handleProvinceChange = (provinceId: string) => {
-    setSelectedProvinceId(provinceId);
-    const provinceName = provinces.find((p) => p.id === provinceId)?.name || "";
-    setFormData({
-      ...formData,
-      province: provinceName,
-      city: "",
-      district: "",
-      postalCode: "",
-    });
-    setAvailableCities(citiesByProvince[provinceId] || []);
-    setSelectedCityId("");
-    setAvailableDistricts([]);
-  };
-
-  const handleCityChange = (cityId: string) => {
-    setSelectedCityId(cityId);
-    const cityName = availableCities.find((c) => c.id === cityId)?.name || "";
-    setFormData({
-      ...formData,
-      city: cityName,
-      district: "",
-      postalCode: "",
-    });
-    setAvailableDistricts(districtsByCity[cityId] || []);
-  };
-
-  const handleDistrictChange = (districtId: string) => {
-    const district = availableDistricts.find((d) => d.id === districtId);
-    if (district) {
-      setFormData({
-        ...formData,
-        district: district.name,
-        postalCode: district.postalCode,
-      });
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user types
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: "" }));
     }
   };
 
-  const handleSaveAddress = (e: React.FormEvent) => {
+  const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newAddress: Address = {
-      ...formData,
-      id: addresses.length + 1,
-      isDefault: addresses.length === 0,
+    
+    // Validate form
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) errors.name = "Label alamat wajib diisi";
+    if (!formData.phone.trim()) errors.phone = "Nomor telepon wajib diisi";
+    if (!formData.province.trim()) errors.province = "Provinsi wajib dipilih";
+    if (!formData.city.trim()) errors.city = "Kota/Kabupaten wajib dipilih";
+    if (!formData.district.trim()) errors.district = "Kecamatan wajib dipilih";
+    if (!formData.village.trim()) errors.village = "Kelurahan/Desa wajib diisi";
+    if (!formData.postalCode.trim()) errors.postalCode = "Kode pos wajib diisi";
+    if (!formData.fullAddress.trim()) errors.fullAddress = "Alamat lengkap wajib diisi";
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    
+    const addressData: CreateAddressData = {
+      label: formData.name,
+      recipientName: formData.name,
+      recipientPhone: formData.phone,
+      streetAddress: formData.fullAddress,
+      city: formData.city,
+      province: formData.province,
+      district: formData.district,
+      village: formData.village,
+      postalCode: formData.postalCode,
     };
-    setAddresses([...addresses, newAddress]);
-    setSelectedAddress(newAddress);
-    setShowAddressForm(false);
-    setFormData({
-      name: "",
-      phone: "",
-      address: "",
-      province: "",
-      city: "",
-      district: "",
-      postalCode: "",
-    });
+
+    const result = await createAddress(addressData);
+    
+    if (result.success && result.data) {
+      const newAddress: Address = {
+        id: result.data.id,
+        label: result.data.label,
+        recipientName: result.data.recipientName,
+        recipientPhone: result.data.recipientPhone,
+        streetAddress: result.data.streetAddress,
+        city: result.data.city,
+        province: result.data.province,
+        district: result.data.district,
+        village: result.data.village,
+        postalCode: result.data.postalCode,
+        isDefault: result.data.isDefault,
+      };
+      
+      setAddresses([...addresses, newAddress]);
+      setSelectedAddress(newAddress);
+      setShowAddressForm(false);
+      setFormData({
+        name: "",
+        phone: "",
+        province: "",
+        city: "",
+        district: "",
+        village: "",
+        postalCode: "",
+        fullAddress: "",
+      });
+      setFormErrors({});
+    } else {
+      alert(result.message || "Gagal menyimpan alamat");
+    }
   };
 
   // Shipping methods based on city
@@ -280,10 +298,10 @@ export default function CheckoutPage() {
   ];
 
   // Calculate totals
-  const subtotal = productData.price * productData.quantity;
-  const shippingCost =
-    shippingMethods.find((m) => m.id === selectedShipping)?.price || 0;
-  const total = subtotal + shippingCost;
+  const subtotal = checkoutProducts.reduce((sum, product) => sum + (product.finalPrice * product.quantity), 0);
+  // Shipping cost will be calculated via Bitship API later
+  const shippingCost = 0; // Placeholder, will be calculated after selecting shipping method
+  const total = subtotal; // For now, total = subtotal (shipping will be added after Bitship calculation)
 
   const steps = [
     { number: 1, title: "Alamat", icon: MapPin },
@@ -308,9 +326,7 @@ export default function CheckoutPage() {
         "lastOrder",
         JSON.stringify({
           orderId,
-          productName: productData.name,
-          quantity: productData.quantity,
-          price: productData.price,
+          products: checkoutProducts,
           subtotal: subtotal,
           total,
           address: selectedAddress,
@@ -323,7 +339,66 @@ export default function CheckoutPage() {
     }, 2000);
   };
 
-  const isBandaAceh = formData.city === "Banda Aceh";
+  // Loading state
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
+      }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
+          <p className="text-[#5a6c5b] font-medium">Memuat data checkout...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
+      }}>
+        <div className="text-center max-w-md px-4">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{error}</h2>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No products state
+  if (checkoutProducts.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
+      }}>
+        <div className="text-center max-w-md px-4">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <ShoppingBag className="w-8 h-8 text-gray-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Keranjang Kosong</h2>
+          <p className="text-gray-600 mb-4">Belum ada produk yang akan di-checkout</p>
+          <Link
+            href="/market/products"
+            className="inline-block px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+          >
+            Belanja Sekarang
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -364,9 +439,21 @@ export default function CheckoutPage() {
             <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
               <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
-              Checkout
-            </h1>
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
+                Checkout
+              </h1>
+              {checkoutSource === "direct" && (
+                <p className="text-xs sm:text-sm text-[#5a6c5b]/70 mt-1 font-medium">
+                  Pembelian Langsung
+                </p>
+              )}
+              {checkoutSource === "cart" && (
+                <p className="text-xs sm:text-sm text-[#5a6c5b]/70 mt-1 font-medium">
+                  Dari Keranjang ({checkoutProducts.length} produk)
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -540,253 +627,62 @@ export default function CheckoutPage() {
                               "0 20px 50px -12px rgba(163, 175, 135, 0.15)",
                           }}
                         >
-                          {isBandaAceh && (
-                            <div
-                              className="flex items-start gap-3 p-4 border-2 rounded-xl"
-                              style={{
-                                background:
-                                  "linear-gradient(to right, rgba(163, 175, 135, 0.1), rgba(163, 175, 135, 0.05))",
-                                borderColor: "rgba(163, 175, 135, 0.3)",
-                              }}
-                            >
-                              <div className="p-1.5 bg-[#A3AF87] rounded-full">
-                                <Check
-                                  className="h-3.5 w-3.5 text-white"
-                                  strokeWidth={3}
-                                />
-                              </div>
-                              <div>
-                                <p className="font-bold text-[#5a6c5b]">
-                                  Lokasi: Banda Aceh
-                                </p>
-                                <p
-                                  className="text-xs mt-1 font-medium"
-                                  style={{ color: "rgba(90, 108, 91, 0.8)" }}
-                                >
-                                  Tersedia pengiriman lokal dan ambil di toko
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                                Label Alamat
+                                Label Alamat <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
                                 required
                                 placeholder="Rumah, Kantor, dll"
                                 value={formData.name}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    name: e.target.value,
-                                  })
-                                }
-                                className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white"
-                                style={{
-                                  borderColor: "rgba(163, 175, 135, 0.2)",
-                                  color: "#5a6c5b",
-                                }}
-                                onFocus={(e) =>
-                                  (e.target.style.borderColor = "#A3AF87")
-                                }
-                                onBlur={(e) =>
-                                  (e.target.style.borderColor =
-                                    "rgba(163, 175, 135, 0.2)")
-                                }
+                                onChange={(e) => handleFormChange("name", e.target.value)}
+                                className={`w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white ${
+                                  formErrors.name ? "border-red-500" : "border-gray-300"
+                                }`}
+                                style={{ color: "#5a6c5b" }}
                               />
+                              {formErrors.name && (
+                                <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
+                              )}
                             </div>
 
                             <div>
                               <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                                Nomor Telepon
+                                Nomor Telepon <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="tel"
                                 required
                                 placeholder="08xxxxxxxxxx"
                                 value={formData.phone}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    phone: e.target.value,
-                                  })
-                                }
-                                className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white"
-                                style={{
-                                  borderColor: "rgba(163, 175, 135, 0.2)",
-                                  color: "#5a6c5b",
-                                }}
-                                onFocus={(e) =>
-                                  (e.target.style.borderColor = "#A3AF87")
-                                }
-                                onBlur={(e) =>
-                                  (e.target.style.borderColor =
-                                    "rgba(163, 175, 135, 0.2)")
-                                }
+                                onChange={(e) => handleFormChange("phone", e.target.value)}
+                                className={`w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white ${
+                                  formErrors.phone ? "border-red-500" : "border-gray-300"
+                                }`}
+                                style={{ color: "#5a6c5b" }}
                               />
+                              {formErrors.phone && (
+                                <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>
+                              )}
                             </div>
                           </div>
 
-                          <div className="grid md:grid-cols-3 gap-4">
-                            <div>
-                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                                Provinsi
-                              </label>
-                              <div className="relative">
-                                <select
-                                  required
-                                  value={selectedProvinceId}
-                                  onChange={(e) =>
-                                    handleProvinceChange(e.target.value)
-                                  }
-                                  className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none appearance-none bg-white pr-10 transition-all"
-                                  style={{
-                                    borderColor: "rgba(163, 175, 135, 0.2)",
-                                    color: "#5a6c5b",
-                                  }}
-                                  onFocus={(e) =>
-                                    (e.target.style.borderColor = "#A3AF87")
-                                  }
-                                  onBlur={(e) =>
-                                    (e.target.style.borderColor =
-                                      "rgba(163, 175, 135, 0.2)")
-                                  }
-                                >
-                                  <option value="">Pilih</option>
-                                  {provinces.map((prov) => (
-                                    <option key={prov.id} value={prov.id}>
-                                      {prov.name}
-                                    </option>
-                                  ))}
-                                </select>
-                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                                Kota/Kabupaten
-                              </label>
-                              <div className="relative">
-                                <select
-                                  required
-                                  value={selectedCityId}
-                                  onChange={(e) =>
-                                    handleCityChange(e.target.value)
-                                  }
-                                  disabled={!selectedProvinceId}
-                                  className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none appearance-none bg-white pr-10 transition-all"
-                                  style={{
-                                    borderColor: "rgba(163, 175, 135, 0.2)",
-                                    color: "#5a6c5b",
-                                    backgroundColor: !selectedProvinceId
-                                      ? "rgba(163, 175, 135, 0.1)"
-                                      : "white",
-                                  }}
-                                  onFocus={(e) =>
-                                    !e.target.disabled &&
-                                    (e.target.style.borderColor = "#A3AF87")
-                                  }
-                                  onBlur={(e) =>
-                                    (e.target.style.borderColor =
-                                      "rgba(163, 175, 135, 0.2)")
-                                  }
-                                >
-                                  <option value="">Pilih</option>
-                                  {availableCities.map((city) => (
-                                    <option key={city.id} value={city.id}>
-                                      {city.name}
-                                    </option>
-                                  ))}
-                                </select>
-                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                                Kecamatan
-                              </label>
-                              <div className="relative">
-                                <select
-                                  required
-                                  value={
-                                    availableDistricts.find(
-                                      (d) => d.name === formData.district
-                                    )?.id || ""
-                                  }
-                                  onChange={(e) =>
-                                    handleDistrictChange(e.target.value)
-                                  }
-                                  disabled={!selectedCityId}
-                                  className="w-full px-4 py-3 border-2 border-[#5a6c5b]/20 rounded-xl text-sm text-[#5a6c5b] font-medium focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#5a6c5b]/10 appearance-none bg-white pr-10 disabled:bg-green-50 disabled:border-[#5a6c5b]/10 disabled:text-[#5a6c5b]/50 transition-all"
-                                >
-                                  <option value="">Pilih</option>
-                                  {availableDistricts.map((district) => (
-                                    <option
-                                      key={district.id}
-                                      value={district.id}
-                                    >
-                                      {district.name}
-                                    </option>
-                                  ))}
-                                </select>
-                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                              Alamat Lengkap
-                            </label>
-                            <textarea
-                              required
-                              rows={3}
-                              placeholder="Nama jalan, nomor rumah, RT/RW"
-                              value={formData.address}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  address: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none resize-none transition-all bg-white"
-                              style={{
-                                borderColor: "rgba(163, 175, 135, 0.2)",
-                                color: "#5a6c5b",
-                              }}
-                              onFocus={(e) =>
-                                (e.target.style.borderColor = "#A3AF87")
-                              }
-                              onBlur={(e) =>
-                                (e.target.style.borderColor =
-                                  "rgba(163, 175, 135, 0.2)")
-                              }
-                            />
-                          </div>
-
-                          <div className="w-36">
-                            <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
-                              Kode Pos
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              readOnly
-                              value={formData.postalCode}
-                              className="w-full px-4 py-3 border-2 border-[#5a6c5b]/20 rounded-xl text-sm bg-gradient-to-br from-green-50 to-green-100/50 font-bold text-[#5a6c5b]"
-                            />
-                          </div>
+                          {/* Address Form Fields Component */}
+                          <AddressFormFields
+                            formData={formData}
+                            errors={formErrors}
+                            onChange={handleFormChange}
+                          />
 
                           <div className="flex gap-3 pt-5 border-t-2 border-[#5a6c5b]/10">
                             <button
                               type="button"
-                              onClick={() => setShowAddressForm(false)}
+                              onClick={() => {
+                                setShowAddressForm(false);
+                                setFormErrors({});
+                              }}
                               className="px-6 py-3 text-sm font-bold text-[#5a6c5b]/70 hover:text-[#5a6c5b] hover:bg-green-50 rounded-xl transition-all"
                             >
                               Batal
@@ -833,7 +729,7 @@ export default function CheckoutPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-bold text-[#5a6c5b]">
-                                {address.name}
+                                {address.label}
                               </p>
                               {address.isDefault && (
                                 <span className="px-3 py-1 bg-gradient-to-r from-[#A3AF87] to-[#95a17a]/90 text-white text-xs font-bold rounded-lg shadow-sm">
@@ -842,14 +738,15 @@ export default function CheckoutPage() {
                               )}
                             </div>
                             <p className="text-sm text-[#5a6c5b]/70 font-medium">
-                              {address.phone}
+                              {address.recipientName} - {address.recipientPhone}
                             </p>
                             <p className="text-sm text-[#5a6c5b]/70 mt-1 font-medium">
-                              {address.address}, {address.district},{" "}
-                              {address.city}
+                              {address.streetAddress}
+                              {address.district && `, ${address.district}`}
+                              {address.village && `, ${address.village}`}
                             </p>
                             <p className="text-sm text-[#5a6c5b]/70 font-medium">
-                              {address.province} {address.postalCode}
+                              {address.city}, {address.province} {address.postalCode}
                             </p>
                           </div>
                         </div>
@@ -901,10 +798,13 @@ export default function CheckoutPage() {
                         </div>
                         <div>
                           <p className="font-bold text-[#5a6c5b]">
-                            {selectedAddress.name}
+                            {selectedAddress.label}
                           </p>
                           <p className="text-[#5a6c5b]/70 mt-1 text-sm font-medium">
-                            {selectedAddress.address}, {selectedAddress.city}
+                            {selectedAddress.recipientName} - {selectedAddress.recipientPhone}
+                          </p>
+                          <p className="text-[#5a6c5b]/70 text-sm font-medium">
+                            {selectedAddress.streetAddress}, {selectedAddress.city}
                           </p>
                         </div>
                       </div>
@@ -1116,7 +1016,7 @@ export default function CheckoutPage() {
             </AnimatePresence>
           </div>
 
-          {/* Order Summary Sidebar */}
+          {/* Order Summary Sidebar - Desktop */}
           <div className="hidden lg:block lg:col-span-2">
             <div className="sticky top-4 space-y-6">
               {/* Order Summary Card */}
@@ -1131,48 +1031,69 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Product */}
-                <div className="flex gap-4 pb-5 mb-5 border-b-2 border-[#A3AF87]/10">
-                  <div className="w-24 h-24 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#A3AF87]/10">
-                    <img
-                      src={productData.image}
-                      alt={productData.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-base font-bold text-[#5a6c5b] leading-snug mb-2">
-                      {productData.name}
-                    </p>
-                    <p className="text-xs text-[#5a6c5b] font-bold bg-[#A3AF87]/20 px-3 py-1.5 rounded-lg inline-block mb-2">
-                      {productData.quantity} kg
-                    </p>
-                    <p className="text-lg font-bold text-[#5a6c5b]">
-                      Rp {productData.price.toLocaleString("id-ID")}
-                    </p>
-                  </div>
+                <div className="pb-5 mb-5 border-b-2 border-[#A3AF87]/10 space-y-4">
+                  {checkoutProducts.map((product) => (
+                    <div key={product.id} className="flex gap-4">
+                      <div className="w-24 h-24 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#A3AF87]/10">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-base font-bold text-[#5a6c5b] leading-snug mb-2">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-[#5a6c5b] font-bold bg-[#A3AF87]/20 px-3 py-1.5 rounded-lg inline-block mb-2">
+                          {product.quantity} {product.unit}
+                        </p>
+                        <p className="text-lg font-bold text-[#5a6c5b]">
+                          Rp {product.finalPrice.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Price Details */}
                 <div className="space-y-4 text-sm mb-5">
                   <div className="flex justify-between">
                     <span className="text-[#5a6c5b]/70 font-medium">
-                      Subtotal ({productData.quantity} item)
+                      Subtotal ({checkoutProducts.reduce((sum, p) => sum + p.quantity, 0)} item)
                     </span>
                     <span className="text-[#5a6c5b] font-bold">
                       Rp {subtotal.toLocaleString("id-ID")}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#5a6c5b]/70 font-medium">
-                      Ongkos Kirim
-                    </span>
-                    <span className="text-[#5a6c5b] font-bold">
-                      {shippingCost === 0
-                        ? "GRATIS"
-                        : currentStep < 2
-                        ? "-"
-                        : `Rp ${shippingCost.toLocaleString("id-ID")}`}
-                    </span>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between items-start">
+                      <div className="flex flex-col">
+                        <span className="text-[#5a6c5b]/70 font-medium">
+                          Ongkos Kirim
+                        </span>
+                        {currentStep < 2 && (
+                          <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                            Pilih alamat & metode pengiriman
+                          </span>
+                        )}
+                        {currentStep >= 2 && selectedShipping && (
+                          <span className="text-xs text-orange-600 mt-0.5 flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            Dihitung via Bitship API
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[#5a6c5b] font-bold">
+                        {currentStep < 2 ? (
+                          <span className="text-gray-400">-</span>
+                        ) : selectedShipping ? (
+                          <span className="text-orange-600">Dalam Perhitungan</span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#5a6c5b]/70 font-medium">
@@ -1184,13 +1105,20 @@ export default function CheckoutPage() {
 
                 {/* Total */}
                 <div className="pt-5 border-t-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 -mx-6 px-6 -mb-6 pb-6 rounded-b-2xl">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-[#5a6c5b] text-lg">
-                      Total Pembayaran
-                    </span>
-                    <span className="text-2xl font-bold text-[#5a6c5b]">
-                      Rp {total.toLocaleString("id-ID")}
-                    </span>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-[#5a6c5b] text-lg">
+                        Total Pembayaran
+                      </span>
+                      <span className="text-2xl font-bold text-[#5a6c5b]">
+                        Rp {subtotal.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                    {currentStep >= 2 && selectedShipping && (
+                      <p className="text-xs text-[#5a6c5b]/60 text-right">
+                        *Belum termasuk ongkos kirim
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1266,6 +1194,185 @@ export default function CheckoutPage() {
                   Hubungi via WhatsApp
                 </a>
               </div>
+            </div>
+          </div>
+
+          {/* Order Summary - Mobile */}
+          <div className="lg:hidden space-y-4">
+            {/* Order Summary Card */}
+            <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white to-[#A3AF87]/5 rounded-2xl p-4 shadow-xl shadow-[#A3AF87]/10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-[#A3AF87] rounded-xl shadow-lg">
+                  <ShoppingBag className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-bold text-[#5a6c5b] text-base">
+                  Ringkasan Pesanan
+                </h3>
+              </div>
+
+              {/* Product */}
+              <div className="pb-4 mb-4 border-b-2 border-[#A3AF87]/10 space-y-3">
+                {checkoutProducts.map((product) => (
+                  <div key={product.id} className="flex gap-3">
+                    <div className="w-20 h-20 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#A3AF87]/10">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] leading-snug mb-2">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-[#5a6c5b] font-bold bg-[#A3AF87]/20 px-2.5 py-1 rounded-lg inline-block mb-2">
+                        {product.quantity} {product.unit}
+                      </p>
+                      <p className="text-base font-bold text-[#5a6c5b]">
+                        Rp {product.finalPrice.toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Price Details */}
+              <div className="space-y-3 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-[#5a6c5b]/70 font-medium">
+                    Subtotal ({checkoutProducts.reduce((sum, p) => sum + p.quantity, 0)} item)
+                  </span>
+                  <span className="text-[#5a6c5b] font-bold">
+                    Rp {subtotal.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col">
+                      <span className="text-[#5a6c5b]/70 font-medium">
+                        Ongkos Kirim
+                      </span>
+                      {currentStep < 2 && (
+                        <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                          Pilih alamat & metode
+                        </span>
+                      )}
+                      {currentStep >= 2 && selectedShipping && (
+                        <span className="text-xs text-orange-600 mt-0.5 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          Via Bitship API
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[#5a6c5b] font-bold text-right">
+                      {currentStep < 2 ? (
+                        <span className="text-gray-400">-</span>
+                      ) : selectedShipping ? (
+                        <span className="text-orange-600 text-xs">Dalam Perhitungan</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#5a6c5b]/70 font-medium">
+                    Biaya Layanan
+                  </span>
+                  <span className="text-[#5a6c5b] font-bold">Rp 0</span>
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="pt-4 border-t-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 -mx-4 px-4 -mb-4 pb-4 rounded-b-2xl">
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-[#5a6c5b] text-base">
+                      Total Pembayaran
+                    </span>
+                    <span className="text-xl font-bold text-[#5a6c5b]">
+                      Rp {subtotal.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                  {currentStep >= 2 && selectedShipping && (
+                    <p className="text-xs text-[#5a6c5b]/60 text-right">
+                      *Belum termasuk ongkos kirim
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="border-2 border-[#A3AF87]/20 bg-white rounded-2xl p-4">
+              <h4 className="font-bold text-[#5a6c5b] text-sm mb-3">
+                Jaminan Belanja Aman
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
+                    <Check className="h-4 w-4 text-[#A3AF87]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#5a6c5b]">
+                      100% Produk Original
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Dijamin keaslian produk
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
+                    <Truck className="h-4 w-4 text-[#A3AF87]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#5a6c5b]">
+                      Pengiriman Cepat
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Sampai tepat waktu
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="h-4 w-4 text-[#A3AF87]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#5a6c5b]">
+                      Pembayaran Aman
+                    </p>
+                    <p className="text-xs text-gray-500">Powered by DOKU</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Help Section */}
+            <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-white rounded-2xl p-4">
+              <h4 className="font-bold text-[#5a6c5b] text-sm mb-3">
+                Butuh Bantuan?
+              </h4>
+              <p className="text-xs text-gray-600 mb-3">
+                Tim kami siap membantu Anda setiap saat untuk menjawab
+                pertanyaan seputar pesanan.
+              </p>
+              <a
+                href="https://wa.me/6282288953268"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#A3AF87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                </svg>
+                Hubungi via WhatsApp
+              </a>
             </div>
           </div>
         </div>

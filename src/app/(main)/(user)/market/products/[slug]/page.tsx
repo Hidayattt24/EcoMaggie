@@ -724,7 +724,11 @@ export default function ProductDetailPage({ params }: PageProps) {
                   )}
                 </button>
                 <button
-                  onClick={() => router.push("/market/checkout")}
+                  onClick={() => {
+                    // Direct buy - navigate to checkout with query params
+                    const checkoutUrl = `/market/checkout?productId=${product.id}&qty=${quantity}`;
+                    router.push(checkoutUrl);
+                  }}
                   className="group flex-1 py-2.5 px-4 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   disabled={product.stock === 0}
                 >

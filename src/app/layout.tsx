@@ -112,6 +112,31 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
+        {/* Critical Resource Preloading */}
+        <link
+          rel="preload"
+          href="/assets/logo.svg"
+          as="image"
+          type="image/svg+xml"
+        />
+        <link
+          rel="preload"
+          href="/assets/landing/beranda.svg"
+          as="image"
+          type="image/svg+xml"
+          media="(min-width: 1024px)"
+        />
+        <link
+          rel="preload"
+          href="/assets/landing/beranda-mobile.svg"
+          as="image"
+          type="image/svg+xml"
+          media="(max-width: 1023px)"
+        />
+
+        {/* DNS Prefetch for external domains */}
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
         <StructuredData />
       </head>
       <body className={`${poppins.variable} font-sans antialiased`}>

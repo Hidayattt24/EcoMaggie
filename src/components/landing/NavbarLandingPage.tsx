@@ -253,6 +253,8 @@ export default function NavbarLandingPage() {
                 width={100}
                 height={100}
                 className="w-36 h-36"
+                priority
+                fetchPriority="high"
               />
             </Link>
 
@@ -345,6 +347,8 @@ export default function NavbarLandingPage() {
                 width={100}
                 height={100}
                 className="w-28 h-28"
+                priority
+                fetchPriority="high"
               />
             </Link>
 

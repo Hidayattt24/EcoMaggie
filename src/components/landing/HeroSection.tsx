@@ -45,6 +45,8 @@ export default function HeroSection() {
           fill
           className="hidden lg:block object-cover brightness-75"
           priority
+          fetchPriority="high"
+          quality={90}
         />
         {/* Mobile Image */}
         <Image
@@ -53,6 +55,8 @@ export default function HeroSection() {
           fill
           className="lg:hidden object-cover brightness-75"
           priority
+          fetchPriority="high"
+          quality={90}
         />
         {/* Gradient Overlay */}
         <div

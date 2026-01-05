@@ -1,22 +1,24 @@
 import Script from "next/script";
 
 export default function StructuredData() {
+  const baseUrl = "https://eco-maggie.vercel.app";
+
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://ecomaggie.id/#organization",
+        "@id": `${baseUrl}/#organization`,
         name: "EcoMaggie",
-        url: "https://ecomaggie.id",
+        url: baseUrl,
         logo: {
           "@type": "ImageObject",
-          url: "https://ecomaggie.id/assets/logo.svg",
+          url: `${baseUrl}/assets/logo.svg`,
           width: 250,
           height: 100,
         },
         description:
-          "Platform digital untuk pengelolaan sampah organik dan budidaya maggot di Indonesia",
+          "Platform digital untuk pengelolaan sampah organik dan budidaya maggot BSF di Indonesia",
         email: "info@ecomaggie.id",
         telephone: "+6281234567890",
         address: {
@@ -34,62 +36,135 @@ export default function StructuredData() {
       },
       {
         "@type": "WebSite",
-        "@id": "https://ecomaggie.id/#website",
-        url: "https://ecomaggie.id",
+        "@id": `${baseUrl}/#website`,
+        url: baseUrl,
         name: "EcoMaggie",
         description:
-          "Platform Pengelolaan Sampah Organik & Budidaya Maggot Indonesia",
+          "Platform Sampah Organik & Budidaya Maggot Indonesia",
         publisher: {
-          "@id": "https://ecomaggie.id/#organization",
+          "@id": `${baseUrl}/#organization`,
         },
         inLanguage: "id-ID",
         potentialAction: {
           "@type": "SearchAction",
-          target: "https://ecomaggie.id/?s={search_term_string}",
+          target: `${baseUrl}/market/products?q={search_term_string}`,
           "query-input": "required name=search_term_string",
         },
       },
       {
         "@type": "WebPage",
-        "@id": "https://ecomaggie.id/#webpage",
-        url: "https://ecomaggie.id",
-        name: "EcoMaggie - Platform Pengelolaan Sampah Organik & Budidaya Maggot",
+        "@id": `${baseUrl}/#webpage`,
+        url: baseUrl,
+        name: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
         isPartOf: {
-          "@id": "https://ecomaggie.id/#website",
+          "@id": `${baseUrl}/#website`,
         },
         about: {
-          "@id": "https://ecomaggie.id/#organization",
+          "@id": `${baseUrl}/#organization`,
         },
         description:
-          "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot. Ciptakan ekonomi sirkular berkelanjutan bersama EcoMaggie.",
+          "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Ciptakan ekonomi sirkular berkelanjutan bersama EcoMaggie.",
         inLanguage: "id-ID",
       },
       {
         "@type": "Service",
         name: "Supply Connect",
         description:
-          "Sistem yang menghubungkan produsen sampah organik dengan peternak maggot",
+          "Sistem yang menghubungkan produsen sampah organik dengan peternak maggot BSF untuk budidaya berkelanjutan",
         provider: {
-          "@id": "https://ecomaggie.id/#organization",
+          "@id": `${baseUrl}/#organization`,
         },
         serviceType: "Waste Management Platform",
         areaServed: {
           "@type": "Country",
           name: "Indonesia",
         },
+        offers: {
+          "@type": "Offer",
+          availability: "https://schema.org/InStock",
+          price: "0",
+          priceCurrency: "IDR",
+        },
       },
       {
         "@type": "Service",
         name: "Maggot Market",
-        description: "Marketplace untuk jual beli produk maggot dan turunannya",
+        description: "Marketplace untuk jual beli produk maggot BSF, pupa, dan turunannya",
         provider: {
-          "@id": "https://ecomaggie.id/#organization",
+          "@id": `${baseUrl}/#organization`,
         },
         serviceType: "Agricultural Marketplace",
         areaServed: {
           "@type": "Country",
           name: "Indonesia",
         },
+        offers: {
+          "@type": "AggregateOffer",
+          priceCurrency: "IDR",
+          lowPrice: "50000",
+          highPrice: "500000",
+        },
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": `${baseUrl}/#localbusiness`,
+        name: "EcoMaggie",
+        image: `${baseUrl}/assets/logo.svg`,
+        description:
+          "Platform digital pengelolaan sampah organik dan budidaya maggot BSF",
+        url: baseUrl,
+        telephone: "+6281234567890",
+        email: "info@ecomaggie.id",
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "ID",
+          addressLocality: "Jakarta",
+          addressRegion: "DKI Jakarta",
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: -6.2088,
+          longitude: 106.8456,
+        },
+        openingHoursSpecification: {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          opens: "00:00",
+          closes: "23:59",
+        },
+        priceRange: "$$",
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Beranda",
+            item: baseUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Maggot Market",
+            item: `${baseUrl}/market`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Supply Connect",
+            item: `${baseUrl}/supply`,
+          },
+        ],
       },
       {
         "@type": "FAQPage",

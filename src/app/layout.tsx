@@ -13,14 +13,14 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ecomaggie.id"),
+  metadataBase: new URL("https://eco-maggie.vercel.app"),
   title: {
     default:
-      "EcoMaggie - Platform Pengelolaan Sampah Organik & Budidaya Maggot Indonesia",
+      "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
     template: "%s | EcoMaggie",
   },
   description:
-    "EcoMaggie adalah platform digital terdepan untuk pengelolaan sampah organik dan budidaya maggot di Indonesia. Hubungkan penghasil sampah organik dengan peternak maggot untuk menciptakan ekonomi sirkular berkelanjutan. Solusi ramah lingkungan untuk masa depan yang lebih hijau.",
+    "Platform digital untuk pengelolaan sampah organik dan budidaya maggot BSF di Indonesia. Hubungkan penghasil sampah dengan peternak maggot untuk ekonomi sirkular berkelanjutan. Solusi ramah lingkungan berbasis teknologi.",
   keywords: [
     "pengelolaan sampah organik",
     "budidaya maggot",
@@ -62,25 +62,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "https://ecomaggie.id",
+    url: "https://eco-maggie.vercel.app",
     siteName: "EcoMaggie",
-    title: "EcoMaggie - Platform Pengelolaan Sampah Organik & Budidaya Maggot",
+    title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
     description:
-      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot. Ciptakan ekonomi sirkular berkelanjutan bersama EcoMaggie.",
+      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Ciptakan ekonomi sirkular berkelanjutan bersama EcoMaggie.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "EcoMaggie - Platform Pengelolaan Sampah Organik",
+        alt: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot BSF",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "EcoMaggie - Platform Pengelolaan Sampah Organik & Budidaya Maggot",
+    title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
     description:
-      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot. Solusi ramah lingkungan untuk masa depan berkelanjutan.",
+      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Solusi ramah lingkungan untuk ekonomi sirkular berkelanjutan.",
     images: ["/og-image.jpg"],
     creator: "@ecomaggie",
   },
@@ -90,7 +90,10 @@ export const metadata: Metadata = {
     // bing: "your-bing-verification-code",
   },
   alternates: {
-    canonical: "https://ecomaggie.id",
+    canonical: "https://eco-maggie.vercel.app",
+    languages: {
+      "id-ID": "https://eco-maggie.vercel.app",
+    },
   },
   category: "Technology",
 };

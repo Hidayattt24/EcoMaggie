@@ -1,13 +1,15 @@
 "use server";
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { 
-  midtransService, 
-  verifySignature, 
-  validateNotification, 
-  mapMidtransStatus, 
+import {
+  midtransService,
+  verifySignature,
+  validateNotification,
+  mapMidtransStatus,
   normalizeOrderId,
 } from "@/lib/midtrans";
+// NOTE: Biteship Order API tidak digunakan (manual booking workflow)
+// Farmer akan booking courier manual dan input resi ke sistem
 
 // =====================================================
 // TYPES & INTERFACES
@@ -579,14 +581,14 @@ export async function handlePaymentNotification(
       }
     }
 
-    // 7. Clear cart items and update stock if payment is successful
+    // 7. Process paid transaction: Create Biteship order, update stock, clear cart
     if (newStatus === "paid") {
       console.log("🛒 [WEBHOOK] Processing paid transaction...");
-      
-      // Get product IDs and quantities from transaction_items
+
+      // Get transaction items with product details
       const { data: transactionItems, error: itemsError } = await supabase
         .from("transaction_items")
-        .select("product_id, quantity")
+        .select("product_id, product_name, quantity, unit_price")
         .eq("transaction_id", transaction.id);
 
       if (itemsError) {
@@ -594,14 +596,34 @@ export async function handlePaymentNotification(
       } else if (transactionItems && transactionItems.length > 0) {
         const productIds = transactionItems.map((item: any) => item.product_id);
         console.log(`🛒 [WEBHOOK] Processing ${productIds.length} products...`);
+
+        // ===========================================
+        // BITESHIP ORDER - DISABLED (Manual Booking Workflow)
+        // ===========================================
+        // NOTE: Biteship Order API tidak digunakan untuk menghemat biaya
+        // Workflow manual:
+        // 1. Farmer menerima notifikasi pesanan baru
+        // 2. Farmer booking courier manual (JNE/J&T/dll)
+        // 3. Farmer input nomor resi ke sistem
+        // 4. Customer bisa tracking via link courier atau Biteship Tracking API
         
+        if (transaction.shipping_courier &&
+            transaction.shipping_courier !== "pickup" &&
+            transaction.shipping_courier !== "ecomaggie") {
+          console.log("📦 [WEBHOOK] Courier shipping detected - awaiting manual booking by farmer");
+          console.log("   - Courier: " + transaction.shipping_courier);
+          console.log("   - Farmer will book manually and input tracking number");
+        } else {
+          console.log("ℹ️ [WEBHOOK] Local delivery/pickup - no courier booking needed");
+        }
+
         // Update product stock (reduce by quantity sold)
         for (const item of transactionItems) {
           const { error: stockError } = await supabase.rpc('decrement_stock', {
             p_product_id: item.product_id,
             p_quantity: item.quantity
           });
-          
+
           // Fallback if RPC doesn't exist - manual update
           if (stockError) {
             console.log(`⚠️ [WEBHOOK] RPC not available, using manual stock update`);
@@ -610,7 +632,7 @@ export async function handlePaymentNotification(
               .select("stock, total_sold")
               .eq("id", item.product_id)
               .single();
-            
+
             if (product) {
               await supabase
                 .from("products")
@@ -623,7 +645,7 @@ export async function handlePaymentNotification(
           }
         }
         console.log("✅ [WEBHOOK] Product stock updated!");
-        
+
         // Clear cart items
         const { data: userCart } = await supabase
           .from("carts")

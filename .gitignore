@@ -4,6 +4,9 @@
 .claude/
 .vscode/
 
+# scripts
+/scripts
+
 # dependencies
 /node_modules
 /.pnp

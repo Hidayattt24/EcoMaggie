@@ -8,6 +8,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { LogoutButton } from "@/components/user/LogoutButton";
+import NotificationDropdown from "@/components/farmer/dashboard/NotificationDropdown";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -199,42 +200,19 @@ export default function FarmerSidebar({
                 />
               </Link>
 
-              <div className="flex items-center gap-3">
-                {/* Logout Button Mobile */}
+              <div className="flex items-center gap-2">
+                {/* Notification Dropdown - Left */}
+                <NotificationDropdown />
+
+                {/* Logout Button Mobile - Right */}
                 <button
                   onClick={() => setShowMobileLogout(true)}
                   className="relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95"
-                  style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                  style={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }}
                   title="Keluar"
                 >
-                  <LogOut className="h-5 w-5" style={{ color: "#A3AF87" }} />
+                  <LogOut className="h-5 w-5 text-red-500" />
                 </button>
-
-                {/* Notification Badge */}
-                <Link
-                  href="/farmer/orders"
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
-                  title="Notifikasi"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  {/* Badge Count */}
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
-                    3
-                  </span>
-                </Link>
               </div>
             </div>
           </div>

@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export type DashboardStats = {
   totalSales: number;
+  totalSalesLastMonth: number;
+  salesGrowthPercentage: number;
   newOrders: number;
   needsShipping: number;
   pendingPickup: number;
@@ -35,9 +37,18 @@ export type TopProduct = {
 
 export type Alert = {
   id: string;
-  type: "low_stock" | "new_order" | "pending_pickup";
+  type: "low_stock" | "new_order" | "pending_pickup" | "new_supply_request";
   message: string;
   createdAt: string;
+  metadata?: {
+    orderId?: string;
+    orderNumber?: string;
+    productName?: string;
+    stock?: number;
+    supplyId?: string;
+    customerName?: string;
+    amount?: number;
+  };
 };
 
 // ===========================================
@@ -70,12 +81,15 @@ async function getCurrentFarmerId(): Promise<string | null> {
 
 /**
  * Get dashboard statistics
+ * Includes comparison with last month
  */
 export async function getFarmerDashboardStats(): Promise<DashboardStats> {
   const farmerId = await getCurrentFarmerId();
   if (!farmerId) {
     return {
       totalSales: 0,
+      totalSalesLastMonth: 0,
+      salesGrowthPercentage: 0,
       newOrders: 0,
       needsShipping: 0,
       pendingPickup: 0,
@@ -84,60 +98,114 @@ export async function getFarmerDashboardStats(): Promise<DashboardStats> {
 
   const supabase = await createClient();
 
-  // Get total sales and new orders count
-  const { data: orders } = await supabase
-    .from("orders")
+  // Get all transactions that contain farmer's products
+  const { data: transactionIds } = await supabase
+    .from("transaction_items")
     .select(
       `
-      id,
-      total,
-      status,
-      created_at,
-      order_items!inner(
-        product_id,
-        products!inner(
-          farmer_id
-        )
+      transaction_id,
+      products!inner(
+        farmer_id
       )
     `
     )
-    .eq("order_items.products.farmer_id", farmerId);
+    .eq("products.farmer_id", farmerId);
 
-  let totalSales = 0;
+  if (!transactionIds || transactionIds.length === 0) {
+    return {
+      totalSales: 0,
+      totalSalesLastMonth: 0,
+      salesGrowthPercentage: 0,
+      newOrders: 0,
+      needsShipping: 0,
+      pendingPickup: 0,
+    };
+  }
+
+  const uniqueTransactionIds = [...new Set(transactionIds.map((item: any) => item.transaction_id))];
+
+  // Get date ranges
+  const now = new Date();
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+  // Fetch all transactions
+  const { data: allTransactions } = await supabase
+    .from("transactions")
+    .select("id, status, total_amount, subtotal, service_fee, paid_at, created_at")
+    .in("id", uniqueTransactionIds);
+
+  let totalSalesAllTime = 0; // Total keseluruhan (untuk display)
+  let totalSalesLastMonth = 0; // Total bulan lalu (untuk comparison)
   let newOrders = 0;
   let needsShipping = 0;
 
-  if (orders) {
-    // Calculate total sales from completed orders
-    orders.forEach((order) => {
-      if (order.status === "DELIVERED" || order.status === "COMPLETED") {
-        totalSales += Number(order.total) || 0;
+  if (allTransactions) {
+    allTransactions.forEach((transaction) => {
+      const netEarning = transaction.subtotal - (transaction.subtotal * 0.05); // After 5% platform fee
+      const paidDate = transaction.paid_at ? new Date(transaction.paid_at) : null;
+
+      // Calculate total sales ALL TIME from paid transactions
+      if (
+        transaction.status === "paid" ||
+        transaction.status === "shipped" ||
+        transaction.status === "delivered" ||
+        transaction.status === "completed"
+      ) {
+        totalSalesAllTime += netEarning;
       }
 
-      // Count new orders (pending or confirmed)
-      if (order.status === "PENDING" || order.status === "CONFIRMED") {
+      // Calculate total sales from LAST MONTH only
+      if (
+        paidDate &&
+        paidDate >= startOfLastMonth &&
+        paidDate <= endOfLastMonth &&
+        (transaction.status === "paid" ||
+          transaction.status === "shipped" ||
+          transaction.status === "delivered" ||
+          transaction.status === "completed")
+      ) {
+        totalSalesLastMonth += netEarning;
+      }
+
+      // Count new orders (paid status - needs farmer action)
+      if (transaction.status === "paid") {
         newOrders++;
       }
 
       // Count orders that need shipping
       if (
-        order.status === "CONFIRMED" ||
-        order.status === "PROCESSING"
+        transaction.status === "paid" ||
+        transaction.status === "confirmed" ||
+        transaction.status === "processing"
       ) {
         needsShipping++;
       }
     });
   }
 
-  // Get pending pickup count from supplies
+  // Calculate growth percentage
+  // Compare: (Total All Time - Last Month) vs Last Month
+  let salesGrowthPercentage = 0;
+  const totalExcludingLastMonth = totalSalesAllTime - totalSalesLastMonth;
+  
+  if (totalSalesLastMonth > 0) {
+    salesGrowthPercentage = ((totalExcludingLastMonth - totalSalesLastMonth) / totalSalesLastMonth) * 100;
+  } else if (totalSalesAllTime > 0) {
+    // If last month was 0 but we have sales, show as new growth
+    salesGrowthPercentage = 0; // Don't show percentage if no comparison data
+  }
+
+  // Get pending pickup count from supplies (masyarakat yang butuh diambil sampahnya)
   const { count: pendingPickup } = await supabase
     .from("supplies")
     .select("*", { count: "exact", head: true })
-    .eq("farmer_id", farmerId)
-    .eq("status", "SCHEDULED");
+    .in("status", ["PENDING", "SCHEDULED"]);
 
   return {
-    totalSales,
+    totalSales: Math.round(totalSalesAllTime),
+    totalSalesLastMonth: Math.round(totalSalesLastMonth),
+    salesGrowthPercentage: Math.round(salesGrowthPercentage * 10) / 10, // Round to 1 decimal
     newOrders,
     needsShipping,
     pendingPickup: pendingPickup || 0,
@@ -146,6 +214,8 @@ export async function getFarmerDashboardStats(): Promise<DashboardStats> {
 
 /**
  * Get sales chart data for last 7 days
+ * Shows revenue from all PAID transactions (not just delivered)
+ * Because revenue is recognized when customer pays, not when delivered
  */
 export async function getSalesChartData(): Promise<SalesDataPoint[]> {
   const farmerId = await getCurrentFarmerId();
@@ -160,25 +230,33 @@ export async function getSalesChartData(): Promise<SalesDataPoint[]> {
     return date.toISOString().split("T")[0];
   });
 
-  const { data: orders } = await supabase
-    .from("orders")
+  // Get transaction IDs with farmer's products in the last 7 days
+  const { data: transactionIds } = await supabase
+    .from("transaction_items")
     .select(
       `
-      created_at,
-      total,
-      order_items!inner(
-        product_id,
-        products!inner(
-          farmer_id
-        )
+      transaction_id,
+      products!inner(
+        farmer_id
       )
     `
     )
-    .eq("order_items.products.farmer_id", farmerId)
-    .gte(
-      "created_at",
-      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-    );
+    .eq("products.farmer_id", farmerId);
+
+  if (!transactionIds || transactionIds.length === 0) {
+    return last7Days.map((date) => ({ date, amount: 0 }));
+  }
+
+  const uniqueTransactionIds = [...new Set(transactionIds.map((item: any) => item.transaction_id))];
+
+  // Fetch transactions from last 7 days
+  // Include all paid transactions (paid, shipped, delivered, completed)
+  const { data: transactions } = await supabase
+    .from("transactions")
+    .select("created_at, subtotal, status, paid_at")
+    .in("id", uniqueTransactionIds)
+    .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+    .in("status", ["paid", "shipped", "delivered", "completed"]); // All paid statuses
 
   // Group by date
   const salesByDate: Record<string, number> = {};
@@ -186,18 +264,24 @@ export async function getSalesChartData(): Promise<SalesDataPoint[]> {
     salesByDate[date] = 0;
   });
 
-  if (orders) {
-    orders.forEach((order) => {
-      const date = new Date(order.created_at).toISOString().split("T")[0];
+  if (transactions) {
+    transactions.forEach((transaction) => {
+      // Use paid_at date if available, otherwise use created_at
+      const dateToUse = transaction.paid_at || transaction.created_at;
+      const date = new Date(dateToUse).toISOString().split("T")[0];
+      
       if (salesByDate[date] !== undefined) {
-        salesByDate[date] += Number(order.total) || 0;
+        // Calculate net earning (after 5% platform fee)
+        const netEarning = transaction.subtotal - (transaction.subtotal * 0.05);
+        // Count all paid transactions (revenue recognized at payment)
+        salesByDate[date] += netEarning;
       }
     });
   }
 
   return last7Days.map((date) => ({
     date,
-    amount: salesByDate[date],
+    amount: Math.round(salesByDate[date]),
   }));
 }
 
@@ -231,7 +315,8 @@ export async function getTopProducts(limit: number = 5): Promise<TopProduct[]> {
 }
 
 /**
- * Get operational alerts
+ * Get operational alerts (last 10 hours)
+ * Includes: new orders, low stock, pending pickups, supply requests
  */
 export async function getOperationalAlerts(): Promise<Alert[]> {
   const farmerId = await getCurrentFarmerId();
@@ -240,7 +325,88 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
   const supabase = await createClient();
   const alerts: Alert[] = [];
 
-  // Check for low stock products
+  // Get timestamp for 10 hours ago
+  const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString();
+
+  // 1. Check for NEW ORDERS (last 10 hours)
+  const { data: transactionIds } = await supabase
+    .from("transaction_items")
+    .select(
+      `
+      transaction_id,
+      product_name,
+      quantity,
+      products!inner(
+        farmer_id
+      )
+    `
+    )
+    .eq("products.farmer_id", farmerId);
+
+  if (transactionIds && transactionIds.length > 0) {
+    const uniqueTransactionIds = [...new Set(transactionIds.map((item: any) => item.transaction_id))];
+
+    const { data: newOrders } = await supabase
+      .from("transactions")
+      .select("id, order_id, customer_name, subtotal, status, paid_at, created_at")
+      .in("id", uniqueTransactionIds)
+      .eq("status", "paid")
+      .gte("paid_at", tenHoursAgo)
+      .order("paid_at", { ascending: false })
+      .limit(10);
+
+    if (newOrders) {
+      newOrders.forEach((order) => {
+        // Get product names for this order
+        const orderItems = transactionIds.filter(
+          (item: any) => item.transaction_id === order.id
+        );
+        const productNames = orderItems.map((item: any) => item.product_name).join(", ");
+
+        alerts.push({
+          id: `new-order-${order.id}`,
+          type: "new_order",
+          message: `Pesanan baru dari ${order.customer_name}`,
+          createdAt: order.paid_at || order.created_at,
+          metadata: {
+            orderId: order.id,
+            orderNumber: order.order_id,
+            customerName: order.customer_name,
+            amount: order.subtotal,
+            productName: productNames,
+          },
+        });
+      });
+    }
+  }
+
+  // 2. Check for PENDING SUPPLY REQUESTS (last 10 hours)
+  const { data: pendingSupplies } = await supabase
+    .from("supplies")
+    .select("id, user_id, waste_type, estimated_weight, status, created_at, users(full_name)")
+    .in("status", ["PENDING", "SCHEDULED"])
+    .gte("created_at", tenHoursAgo)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (pendingSupplies) {
+    pendingSupplies.forEach((supply: any) => {
+      alerts.push({
+        id: `supply-${supply.id}`,
+        type: "new_supply_request",
+        message: `Permintaan pickup sampah ${supply.waste_type} (${supply.estimated_weight}kg)`,
+        createdAt: supply.created_at,
+        metadata: {
+          supplyId: supply.id,
+          customerName: supply.users?.full_name || "Customer",
+          productName: supply.waste_type,
+          amount: supply.estimated_weight,
+        },
+      });
+    });
+  }
+
+  // 3. Check for LOW STOCK products (always show, not time-based)
   const { data: lowStockProducts } = await supabase
     .from("products")
     .select("id, name, stock")
@@ -248,7 +414,7 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
     .eq("is_active", true)
     .lte("stock", 10)
     .order("stock", { ascending: true })
-    .limit(3);
+    .limit(5);
 
   if (lowStockProducts) {
     lowStockProducts.forEach((product) => {
@@ -257,47 +423,19 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
         type: "low_stock",
         message: `Stok ${product.name} tersisa ${product.stock} unit`,
         createdAt: new Date().toISOString(),
+        metadata: {
+          productName: product.name,
+          stock: product.stock,
+        },
       });
     });
   }
 
-  // Check for new orders
-  const { data: newOrders } = await supabase
-    .from("orders")
-    .select(
-      `
-      id,
-      order_number,
-      created_at,
-      order_items!inner(
-        product_id,
-        products!inner(
-          farmer_id
-        )
-      )
-    `
-    )
-    .eq("order_items.products.farmer_id", farmerId)
-    .eq("status", "PENDING")
-    .order("created_at", { ascending: false })
-    .limit(3);
-
-  if (newOrders) {
-    newOrders.forEach((order) => {
-      alerts.push({
-        id: `new-order-${order.id}`,
-        type: "new_order",
-        message: `Pesanan baru ${order.order_number}`,
-        createdAt: order.created_at,
-      });
-    });
-  }
-
-  // Sort by created_at descending
+  // Sort by created_at descending (newest first)
   alerts.sort(
     (a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  return alerts.slice(0, 5);
+  return alerts;
 }

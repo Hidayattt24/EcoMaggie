@@ -8,6 +8,7 @@ interface StatsTileProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
+  description?: string;
   trend?: {
     value: number;
     isPositive: boolean;
@@ -21,6 +22,7 @@ export default function StatsTile({
   title,
   value,
   icon: Icon,
+  description,
   trend,
   variant = "default",
   badge,
@@ -70,6 +72,9 @@ export default function StatsTile({
           <p className="text-2xl lg:text-3xl font-bold text-[#303646] poppins-bold">
             {value}
           </p>
+          {description && (
+            <p className="text-[10px] text-gray-400 mt-1 leading-tight">{description}</p>
+          )}
           {trend && (
             <div className="flex items-center gap-1 mt-2">
               <span

@@ -1,20 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Banknote,
   ShoppingBag,
   PackageCheck,
   Truck,
   CalendarDays,
-  Bell,
+  Recycle,
 } from "lucide-react";
 import StatsTile from "@/components/farmer/dashboard/StatsTile";
 import SalesChart from "@/components/farmer/dashboard/SalesChart";
 import ImpactTile from "@/components/farmer/dashboard/ImpactTile";
 import TopProducts from "@/components/farmer/dashboard/TopProducts";
 import OperationalAlerts from "@/components/farmer/dashboard/OperationalAlerts";
+import NotificationDropdown from "@/components/farmer/dashboard/NotificationDropdown";
 import { getFarmerDashboardStats } from "@/lib/api/farmer-dashboard.actions";
 import type { DashboardStats } from "@/lib/api/farmer-dashboard.actions";
 
@@ -22,6 +22,8 @@ export default function FarmerDashboard() {
   const [currentDate, setCurrentDate] = useState<string>("");
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalSales: 0,
+    totalSalesLastMonth: 0,
+    salesGrowthPercentage: 0,
     newOrders: 0,
     needsShipping: 0,
     pendingPickup: 0,
@@ -73,22 +75,13 @@ export default function FarmerDashboard() {
               </span>
             </p>
           </div>
-          <div className="hidden sm:flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
               <CalendarDays className="h-4 w-4" />
               <span>{currentDate || "Loading..."}</span>
             </div>
-            {/* Notification Icon (Desktop) */}
-            <Link
-              href="/farmer/orders"
-              className="relative flex items-center justify-center h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-              title="Notifikasi"
-            >
-              <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
-                8
-              </span>
-            </Link>
+            {/* Notification Dropdown */}
+            <NotificationDropdown />
           </div>
         </div>
       </div>
@@ -100,9 +93,17 @@ export default function FarmerDashboard() {
           title="Total Penjualan"
           value={`Rp ${dashboardStats.totalSales.toLocaleString("id-ID")}`}
           icon={Banknote}
-          trend={{ value: 12.5, isPositive: true }}
+          description="Pendapatan bersih setelah potongan 5%"
+          trend={
+            dashboardStats.salesGrowthPercentage !== 0
+              ? {
+                  value: Math.abs(dashboardStats.salesGrowthPercentage),
+                  isPositive: dashboardStats.salesGrowthPercentage > 0,
+                }
+              : undefined
+          }
           variant="highlight"
-          href="/farmer/analytics"
+          href="/farmer/orders"
         />
         <StatsTile
           title="Pesanan Baru"
@@ -122,9 +123,13 @@ export default function FarmerDashboard() {
           href="/farmer/orders?status=shipping"
         />
         <StatsTile
-          title="Menunggu Pickup"
+          title="Supply Masyarakat"
           value={dashboardStats.pendingPickup}
-          icon={Truck}
+          icon={Recycle}
+          description="Permintaan pickup sampah organik"
+          badge={
+            dashboardStats.pendingPickup > 0 ? dashboardStats.pendingPickup : undefined
+          }
           variant="default"
           href="/farmer/supply-monitoring"
         />

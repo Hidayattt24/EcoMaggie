@@ -290,6 +290,126 @@ function CustomCalendar({
   );
 }
 
+// ============================================
+// SKELETON COMPONENTS
+// ============================================
+function StatsTileSkeleton() {
+  return (
+    <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-3 bg-gray-200 rounded-xl w-12 h-12"></div>
+        <div className="flex-1">
+          <div className="h-5 bg-gray-200 rounded w-32 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-20"></div>
+        </div>
+      </div>
+      <div className="space-y-4">
+        <div className="p-4 bg-gray-100 rounded-xl">
+          <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+          <div className="h-8 bg-gray-200 rounded w-24 mb-1"></div>
+          <div className="h-3 bg-gray-200 rounded w-32"></div>
+        </div>
+        <div className="p-4 bg-gray-100 rounded-xl">
+          <div className="h-4 bg-gray-200 rounded w-36 mb-2"></div>
+          <div className="h-8 bg-gray-200 rounded w-20 mb-1"></div>
+          <div className="h-3 bg-gray-200 rounded w-16"></div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-gray-100 rounded-xl">
+            <div className="h-3 bg-gray-200 rounded w-16 mb-2"></div>
+            <div className="h-8 bg-gray-200 rounded w-12"></div>
+          </div>
+          <div className="p-3 bg-gray-100 rounded-xl">
+            <div className="h-3 bg-gray-200 rounded w-20 mb-2"></div>
+            <div className="h-8 bg-gray-200 rounded w-12"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChartSkeleton() {
+  return (
+    <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gray-200 rounded-xl w-12 h-12"></div>
+          <div>
+            <div className="h-5 bg-gray-200 rounded w-40 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-24"></div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-7 bg-gray-200 rounded-full w-16"></div>
+          <div className="h-7 bg-gray-200 rounded-xl w-28"></div>
+        </div>
+      </div>
+      <div className="flex items-end justify-between gap-3 h-64 px-4">
+        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <div key={i} className="flex-1 flex flex-col items-center gap-3">
+            <div className="relative w-full flex items-end justify-center h-52">
+              <div
+                className="w-full rounded-t-xl bg-gray-200"
+                style={{ height: `${Math.random() * 80 + 20}%` }}
+              ></div>
+            </div>
+            <div className="h-4 bg-gray-200 rounded w-12"></div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t-2 border-gray-100">
+        {[1, 2, 3].map((i) => (
+          <div key={i}>
+            <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+            <div className="h-6 bg-gray-200 rounded w-16"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TableRowSkeleton() {
+  return (
+    <tr className="border-b border-gray-100 animate-pulse">
+      <td className="py-4 px-4">
+        <div className="h-5 bg-gray-200 rounded w-24 mb-1"></div>
+        <div className="h-3 bg-gray-200 rounded w-32"></div>
+      </td>
+      <td className="py-4 px-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+          <div>
+            <div className="h-5 bg-gray-200 rounded w-28 mb-1"></div>
+            <div className="h-3 bg-gray-200 rounded w-24"></div>
+          </div>
+        </div>
+      </td>
+      <td className="py-4 px-4">
+        <div className="h-5 bg-gray-200 rounded w-32 mb-1"></div>
+        <div className="h-4 bg-gray-200 rounded w-16"></div>
+      </td>
+      <td className="py-4 px-4">
+        <div className="h-4 bg-gray-200 rounded w-40"></div>
+      </td>
+      <td className="py-4 px-4">
+        <div className="h-5 bg-gray-200 rounded w-20 mb-1"></div>
+        <div className="h-3 bg-gray-200 rounded w-24"></div>
+      </td>
+      <td className="py-4 px-4">
+        <div className="h-7 bg-gray-200 rounded-full w-24"></div>
+      </td>
+      <td className="py-4 px-4">
+        <div className="flex gap-2">
+          <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+          <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 const statusConfig = {
   waiting: {
     label: "Menunggu",
@@ -498,24 +618,12 @@ export default function SupplyMonitoringPage() {
     return "waiting";
   };
   
-  const filteredSupplies = filter === "all" 
-    ? supplies 
+  const filteredSupplies = filter === "all"
+    ? supplies
     : supplies.filter((s) => mapStatus(s.status) === filter);
 
-  // Show loading state
-  if (isLoadingSupplies) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-600">Memuat data supply monitoring...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -546,21 +654,24 @@ export default function SupplyMonitoringPage() {
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-12 gap-6 mb-6">
           {/* Tile 1: Live Supply Stats (Medium - 4 cols) */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 p-6"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-[#A3AF87] rounded-xl">
-                <Scale className="h-6 w-6 text-white" />
+          {isLoadingSupplies ? (
+            <StatsTileSkeleton />
+          ) : (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-[#A3AF87] rounded-xl">
+                  <Scale className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#303646]">Live Supply Stats</h3>
+                  <p className="text-xs text-gray-500">Update realtime</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-[#303646]">Live Supply Stats</h3>
-                <p className="text-xs text-gray-500">Update realtime</p>
-              </div>
-            </div>
 
             <div className="space-y-4">
               {/* Total Weight */}
@@ -613,15 +724,19 @@ export default function SupplyMonitoringPage() {
                 </div>
               </div>
             </div>
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* Tile 2: Visual Graph (Wide - 8 cols) */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 p-6"
-          >
+          {isLoadingTrend || isLoadingSupplies ? (
+            <ChartSkeleton />
+          ) : (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+            >
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-[#A3AF87] rounded-xl">
@@ -929,7 +1044,8 @@ export default function SupplyMonitoringPage() {
                 </p>
               </motion.div>
             )}
-          </motion.div>
+            </motion.div>
+          )}
         </div>
 
         {/* Tile 3: Real-time Incoming Supply Table (Full Width) */}
@@ -937,7 +1053,7 @@ export default function SupplyMonitoringPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl border-2 border-gray-100 p-6"
+          className="bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -1007,7 +1123,14 @@ export default function SupplyMonitoringPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredSupplies.map((supply, index) => {
+                {isLoadingSupplies ? (
+                  <>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <TableRowSkeleton key={i} />
+                    ))}
+                  </>
+                ) : (
+                  filteredSupplies.map((supply, index) => {
                   const mappedStatus = mapStatus(supply.status);
                   const status =
                     statusConfig[mappedStatus as keyof typeof statusConfig];
@@ -1170,12 +1293,13 @@ export default function SupplyMonitoringPage() {
                       </td>
                     </motion.tr>
                   );
-                })}
+                })
+                )}
               </tbody>
             </table>
           </div>
 
-          {filteredSupplies.length === 0 && (
+          {!isLoadingSupplies && filteredSupplies.length === 0 && (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">Tidak ada data supply</p>

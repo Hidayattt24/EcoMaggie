@@ -2,12 +2,12 @@
  * Biteship API Server Actions
  * ========================================
  *
- * Integrasi dengan Biteship API untuk shipping & delivery dengan optimasi untuk menghemat API calls
+ * Integrasi dengan Biteship API untuk shipping & tracking dengan optimasi untuk menghemat API calls
  *
  * FITUR:
  * ✅ Search Area ID (Maps API)
  * ✅ Get Shipping Rates (multiple couriers)
- * ✅ Create Shipping Order (booking pengiriman)
+ * ✅ Track Shipment (Biteship Tracking API)
  * ✅ Detailed logging untuk debugging
  * ✅ Smart caching (30 menit TTL) - hemat API calls!
  * ✅ Rate limiting (max 10 calls/menit per endpoint)
@@ -27,25 +27,12 @@
  * );
  * ```
  *
- * 2. BUAT ORDER PENGIRIMAN:
+ * 2. TRACK PENGIRIMAN (Manual Resi):
  * ```typescript
- * const orderRequest = await prepareBiteshipOrderData({
- *   customerName: "John Doe",
- *   customerPhone: "08123456789",
- *   customerAddress: "Jl. Contoh No. 123",
- *   city: "Jakarta Selatan",
- *   province: "DKI Jakarta",
- *   postalCode: "12345",
- *   courierCode: "jne",
- *   courierType: "reg",
- *   items: checkoutProducts,
- *   referenceId: "ORDER-12345",
- * });
- *
- * const result = await createBiteshipOrder(orderRequest);
+ * const result = await trackBiteshipShipment("JT123456789", "jne");
  * if (result.success) {
- *   console.log("Tracking ID:", result.data.courier.tracking_id);
- *   console.log("Waybill ID:", result.data.courier.waybill_id);
+ *   console.log("Status:", result.data.status);
+ *   console.log("History:", result.data.history);
  * }
  * ```
  *
@@ -154,55 +141,34 @@ export interface ShippingOption {
   type: "instant" | "regular" | "cargo";
 }
 
-export interface BiteshipOrderRequest {
-  // Origin (Toko Eco-maggie)
-  origin_contact_name: string;
-  origin_contact_phone: string;
-  origin_address: string;
-  origin_postal_code?: number;
-  origin_area_id?: string;
-
-  // Destination (Customer)
-  destination_contact_name: string;
-  destination_contact_phone: string;
-  destination_address: string;
-  destination_postal_code?: number;
-  destination_area_id?: string;
-  destination_note?: string;
-
-  // Courier
-  courier_company: string;
-  courier_type: string;
-  delivery_type: "now" | "scheduled";
-
-  // Items
-  items: Array<{
-    name: string;
-    value: number;
-    quantity: number;
-    weight: number;
-    length?: number;
-    width?: number;
-    height?: number;
-  }>;
-
-  // Optional
-  reference_id?: string;
-  order_note?: string;
+export interface BiteshipTrackingHistory {
+  note: string;
+  updated_at: string;
+  status: string;
 }
 
-export interface BiteshipOrderResponse {
+export interface BiteshipTrackingResponse {
   success: boolean;
-  message: string;
+  object: string;
   id: string;
+  waybill_id: string;
   courier: {
-    tracking_id: string;
-    waybill_id: string;
     company: string;
-    type: string;
+    name: string;
+    phone: string;
   };
+  origin: {
+    contact_name: string;
+    address: string;
+  };
+  destination: {
+    contact_name: string;
+    address: string;
+  };
+  history: BiteshipTrackingHistory[];
+  link: string;
+  order_id: string;
   status: string;
-  price: number;
 }
 
 interface ApiResponse<T> {
@@ -723,14 +689,49 @@ export async function getShippingOptions(
 
         console.log(`✅ Loaded ${courierOptions.length} courier options from Biteship`);
       } else {
-        console.warn("⚠️ No rates from Biteship API - courier options unavailable");
-        console.warn("⚠️ Possible issues: Invalid API key, wrong area ID, or Biteship service down");
-        // Return error for Biteship system failure
-        return {
-          success: false,
-          message: "BITESHIP_ERROR",
-          data: options,
-        };
+        console.warn("⚠️ No rates from Biteship API - using fallback shipping options");
+        console.warn("⚠️ Possible issues: Insufficient balance, Invalid API key, or Biteship service down");
+
+        // FALLBACK: Provide estimated shipping options when Biteship API fails
+        // This allows checkout to continue even when balance is insufficient
+        const fallbackOptions: ShippingOption[] = [
+          {
+            id: "jne-reg-fallback",
+            courierCode: "jne",
+            courierName: "JNE",
+            serviceCode: "reg",
+            serviceName: "Reguler",
+            description: "Estimasi 2-3 hari (harga estimasi)",
+            price: 25000,
+            estimatedDays: "2-3 hari",
+            type: "regular",
+          },
+          {
+            id: "sicepat-reg-fallback",
+            courierCode: "sicepat",
+            courierName: "SiCepat",
+            serviceCode: "reg",
+            serviceName: "Reguler",
+            description: "Estimasi 2-3 hari (harga estimasi)",
+            price: 23000,
+            estimatedDays: "2-3 hari",
+            type: "regular",
+          },
+          {
+            id: "jnt-reg-fallback",
+            courierCode: "jnt",
+            courierName: "J&T Express",
+            serviceCode: "reg",
+            serviceName: "Reguler",
+            description: "Estimasi 2-4 hari (harga estimasi)",
+            price: 20000,
+            estimatedDays: "2-4 hari",
+            type: "regular",
+          },
+        ];
+
+        options.push(...fallbackOptions);
+        console.log(`⚠️ Using ${fallbackOptions.length} fallback shipping options`);
       }
     } else {
       // No area ID found - Biteship system issue
@@ -760,77 +761,51 @@ export async function getShippingOptions(
 }
 
 /**
- * Create Biteship shipping order
- * @param orderData - Order details including origin, destination, courier, and items
- * @returns Biteship order response with tracking ID and waybill
+ * Track shipment using Biteship Tracking API
+ * @param waybillId - Resi/waybill number from courier (e.g., "JT123456789")
+ * @param courierCode - Courier code (e.g., "jne", "jnt", "sicepat")
+ * @returns Tracking information with history
  */
-export async function createBiteshipOrder(
-  orderData: BiteshipOrderRequest
-): Promise<ApiResponse<BiteshipOrderResponse>> {
-  console.log("📦 [createBiteshipOrder] Creating order with data:", {
-    courier: `${orderData.courier_company} - ${orderData.courier_type}`,
-    destination: orderData.destination_contact_name,
-    itemsCount: orderData.items.length,
-  });
+export async function trackBiteshipShipment(
+  waybillId: string,
+  courierCode: string
+): Promise<ApiResponse<any>> {
+  console.log(`🔍 [trackBiteshipShipment] Tracking shipment: ${waybillId} via ${courierCode}`);
 
-  // Validate required fields
-  if (!orderData.origin_contact_name || !orderData.origin_contact_phone || !orderData.origin_address) {
+  if (!waybillId || !courierCode) {
     return {
       success: false,
-      message: "Data origin (toko) tidak lengkap",
+      message: "Waybill ID dan courier code harus diisi",
     };
   }
 
-  if (!orderData.destination_contact_name || !orderData.destination_contact_phone || !orderData.destination_address) {
-    return {
-      success: false,
-      message: "Data destination (customer) tidak lengkap",
-    };
-  }
-
-  if (!orderData.courier_company || !orderData.courier_type) {
-    return {
-      success: false,
-      message: "Courier tidak dipilih",
-    };
-  }
-
-  if (!orderData.items || orderData.items.length === 0) {
-    return {
-      success: false,
-      message: "Tidak ada items untuk dikirim",
-    };
-  }
-
-  // Create order via Biteship API
-  const result = await biteshipRequest<BiteshipOrderResponse>(
-    "/v1/orders",
-    {
-      method: "POST",
-      body: JSON.stringify(orderData),
-    }
+  // Call Biteship Tracking API
+  const result = await biteshipRequest<any>(
+    `/v1/trackings/${waybillId}/couriers/${courierCode}`,
+    { method: "GET" }
   );
 
   if (!result.success || !result.data) {
-    console.error("❌ [createBiteshipOrder] Failed:", result.message);
+    console.error("❌ [trackBiteshipShipment] Failed:", result.message);
     return {
       success: false,
-      message: result.message || "Gagal membuat order pengiriman",
+      message: result.message || "Gagal melacak pengiriman",
     };
   }
 
-  console.log("✅ [createBiteshipOrder] Order created successfully:", {
-    orderId: result.data.id,
-    trackingId: result.data.courier?.tracking_id,
-    waybillId: result.data.courier?.waybill_id,
+  console.log("✅ [trackBiteshipShipment] Tracking retrieved:", {
+    waybill: waybillId,
+    courier: courierCode,
+    status: result.data.status,
+    historyCount: result.data.history?.length || 0,
   });
 
   return {
     success: true,
     data: result.data,
-    message: "Order pengiriman berhasil dibuat",
   };
 }
+
 
 /**
  * Calculate total weight from cart items
@@ -857,101 +832,3 @@ export async function transformCartToBiteshipItems(
   }));
 }
 
-/**
- * Prepare order data for Biteship order creation
- * Helper function to construct BiteshipOrderRequest from checkout data
- *
- * @example
- * ```typescript
- * const orderRequest = await prepareBiteshipOrderData({
- *   customerName: "John Doe",
- *   customerPhone: "08123456789",
- *   customerAddress: "Jl. Contoh No. 123",
- *   city: "Jakarta Selatan",
- *   province: "DKI Jakarta",
- *   postalCode: "12345",
- *   areaId: "area-id-from-maps-api",
- *   courierCode: "jne",
- *   courierType: "reg",
- *   items: checkoutProducts,
- *   referenceId: "ORDER-123",
- * });
- *
- * const result = await createBiteshipOrder(orderRequest);
- * ```
- */
-export async function prepareBiteshipOrderData(params: {
-  // Customer info
-  customerName: string;
-  customerPhone: string;
-  customerAddress: string;
-  city: string;
-  province: string;
-  district?: string;
-  postalCode?: string;
-  areaId?: string;
-  destinationNote?: string;
-
-  // Courier info
-  courierCode: string;
-  courierType: string;
-
-  // Items
-  items: Array<{
-    name: string;
-    price: number;
-    quantity: number;
-    weight?: number;
-  }>;
-
-  // Optional
-  referenceId?: string;
-  orderNote?: string;
-}): Promise<BiteshipOrderRequest> {
-  // Construct full destination address
-  const fullAddress = [
-    params.customerAddress,
-    params.district,
-    params.city,
-    params.province,
-    params.postalCode,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  return {
-    // Origin (Toko Eco-maggie)
-    origin_contact_name: "Eco-maggie Store",
-    origin_contact_phone: "082288953268", // WhatsApp dari help section
-    origin_address: STORE_ORIGIN.address,
-    origin_postal_code: 23116, // Banda Aceh postal code
-
-    // Destination (Customer)
-    destination_contact_name: params.customerName,
-    destination_contact_phone: params.customerPhone,
-    destination_address: fullAddress,
-    destination_postal_code: params.postalCode ? parseInt(params.postalCode) : undefined,
-    destination_area_id: params.areaId,
-    destination_note: params.destinationNote,
-
-    // Courier
-    courier_company: params.courierCode,
-    courier_type: params.courierType,
-    delivery_type: "now",
-
-    // Items
-    items: params.items.map((item) => ({
-      name: item.name,
-      value: item.price * item.quantity,
-      quantity: item.quantity,
-      weight: item.weight || 1000, // Default 1kg
-      length: 10,
-      width: 10,
-      height: 10,
-    })),
-
-    // Optional
-    reference_id: params.referenceId,
-    order_note: params.orderNote,
-  };
-}

@@ -11,6 +11,8 @@ import {
   Building2,
   Copy,
   Check,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,50 +32,50 @@ interface TrackingDetailProps {
     farmName: string;
     trackingNumber?: string;
     shippingMethod: string;
+    shippingCourier?: string;
   };
+  trackingData?: {
+    waybillId?: string;
+    trackingLink?: string;
+    courier?: {
+      name?: string;
+      company?: string;
+    };
+    history?: Array<{
+      note: string;
+      updatedAt: string;
+      status?: string;
+    }>;
+  } | null;
 }
-
-const mockTrackingEvents: TrackingEvent[] = [
-  {
-    time: "14:30",
-    date: "30 Des 2025",
-    description: "Paket dalam perjalanan ke alamat Anda",
-    location: "Banda Aceh, Aceh",
-    status: "current",
-  },
-  {
-    time: "10:15",
-    date: "30 Des 2025",
-    description: "Paket sudah dijemput kurir",
-    location: "Pusat Distribusi Eco-maggie",
-    status: "completed",
-  },
-  {
-    time: "08:00",
-    date: "30 Des 2025",
-    description: "Paket sedang dikemas oleh petani",
-    location: "Toko: Kebun Maggot Berkah",
-    status: "completed",
-  },
-  {
-    time: "20:45",
-    date: "29 Des 2025",
-    description: "Pesanan dikonfirmasi",
-    location: "Sistem Eco-maggie",
-    status: "completed",
-  },
-];
 
 export function TrackingDetail({
   isOpen,
   onClose,
   transaction,
+  trackingData,
 }: TrackingDetailProps) {
   const [copied, setCopied] = useState(false);
 
+  const trackingNumber = trackingData?.waybillId || transaction.trackingNumber;
+  const trackingLink = trackingData?.trackingLink;
+  const courierName = trackingData?.courier?.name || transaction.shippingCourier?.toUpperCase() || "";
+
+  // Transform history to tracking events
+  const trackingEvents: TrackingEvent[] = (trackingData?.history || []).map((h, index) => {
+    const date = new Date(h.updatedAt);
+    return {
+      time: date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      date: date.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+      description: h.note,
+      location: "Indonesia",
+      status: index === 0 ? "current" : "completed",
+    };
+  });
+
   const copyTrackingNumber = () => {
-    if (transaction.trackingNumber) {
-      navigator.clipboard.writeText(transaction.trackingNumber);
+    if (trackingNumber) {
+      navigator.clipboard.writeText(trackingNumber);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -102,9 +104,7 @@ export function TrackingDetail({
           >
             <div className="sticky top-0 bg-white border-b border-[#A3AF87]/20 px-6 py-4 rounded-t-3xl">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-bold text-[#5a6c5b]">
-                  Lacak Pesanan
-                </h2>
+                <h2 className="text-xl font-bold text-[#5a6c5b]">Lacak Pesanan</h2>
                 <button
                   onClick={onClose}
                   className="p-2 hover:bg-[#A3AF87]/10 rounded-full transition-colors"
@@ -114,18 +114,12 @@ export function TrackingDetail({
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  No. Pesanan:{" "}
-                  <span className="font-bold text-[#5a6c5b]">
-                    {transaction.orderId}
-                  </span>
+                  No. Pesanan: <span className="font-bold text-[#5a6c5b]">{transaction.orderId}</span>
                 </p>
-                {transaction.trackingNumber && (
-                  <div className="flex items-center gap-2">
+                {trackingNumber && (
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm text-gray-600">
-                      No. Resi:{" "}
-                      <span className="font-bold text-[#5a6c5b]">
-                        {transaction.trackingNumber}
-                      </span>
+                      No. Resi: <span className="font-bold text-[#5a6c5b] font-mono">{trackingNumber}</span>
                     </p>
                     <button
                       onClick={copyTrackingNumber}
@@ -137,104 +131,94 @@ export function TrackingDetail({
                         <Copy className="h-4 w-4 text-gray-400" />
                       )}
                     </button>
+                    {trackingLink && (
+                      <a
+                        href={trackingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        <ExternalLink className="h-4 w-4 text-blue-500" />
+                      </a>
+                    )}
                   </div>
+                )}
+                {courierName && (
+                  <p className="text-sm text-gray-600">
+                    Kurir: <span className="font-bold text-[#5a6c5b]">{courierName}</span>
+                  </p>
                 )}
               </div>
             </div>
 
-            {/* Map Placeholder (Local Delivery) */}
-            {transaction.shippingMethod === "Local Delivery" && (
-              <div className="mx-6 mt-4 mb-6">
-                <div className="relative w-full h-48 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl overflow-hidden border border-[#A3AF87]/20">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-14 h-14 bg-[#A3AF87] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#A3AF87]/30">
-                        <MapPin className="h-7 w-7 text-white" />
-                      </div>
-                      <p className="text-sm font-bold text-[#5a6c5b]">
-                        Estimasi Kurir di Area Anda
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Banda Aceh, Aceh
-                      </p>
-                    </div>
-                  </div>
-                  <div className="absolute top-3 right-3 px-3 py-1.5 bg-white rounded-lg text-xs font-bold text-[#5a6c5b] shadow-md border border-[#A3AF87]/20">
-                    ± 15 menit lagi
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Timeline */}
+            {/* Content */}
             <div className="px-6 pb-6">
-              <h3 className="text-sm font-bold text-[#5a6c5b] mb-4">
-                Riwayat Pengiriman
-              </h3>
-              <div className="space-y-4">
-                {mockTrackingEvents.map((event, index) => (
-                  <div key={index} className="relative flex gap-4">
-                    {/* Timeline Line */}
-                    {index < mockTrackingEvents.length - 1 && (
-                      <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-[#A3AF87]/20" />
-                    )}
-
-                    {/* Icon */}
-                    <div className="flex-shrink-0">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          event.status === "current"
-                            ? "bg-[#A3AF87] shadow-lg shadow-[#A3AF87]/30"
-                            : event.status === "completed"
-                            ? "bg-[#A3AF87]/20"
-                            : "bg-gray-100"
-                        }`}
-                      >
-                        {event.status === "current" ? (
-                          <Truck className="h-5 w-5 text-white" />
-                        ) : event.status === "completed" ? (
-                          <CheckCircle2 className="h-5 w-5 text-[#5a6c5b]" />
-                        ) : (
-                          <Clock className="h-5 w-5 text-gray-400" />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 pb-6">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span
-                          className={`text-sm font-bold ${
-                            event.status === "current"
-                              ? "text-[#5a6c5b]"
-                              : event.status === "completed"
-                              ? "text-gray-700"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {event.time}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {event.date}
-                        </span>
-                      </div>
-                      <p
-                        className={`text-sm font-bold mb-1 ${
-                          event.status === "current"
-                            ? "text-[#5a6c5b]"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {event.description}
-                      </p>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Building2 className="h-3 w-3" />
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
+              {trackingEvents.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <Package className="h-8 w-8 text-gray-400" />
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm text-gray-600 text-center">Belum ada riwayat pengiriman</p>
+                  {trackingLink && (
+                    <a
+                      href={trackingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 px-4 py-2 bg-[#A3AF87] text-white rounded-lg text-sm font-bold flex items-center gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Lacak di Website Kurir
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-sm font-bold text-[#5a6c5b] mb-4 mt-4">Riwayat Pengiriman</h3>
+                  <div className="space-y-4">
+                    {trackingEvents.map((event, index) => (
+                      <div key={index} className="relative flex gap-4">
+                        {index < trackingEvents.length - 1 && (
+                          <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-[#A3AF87]/20" />
+                        )}
+                        <div className="flex-shrink-0">
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              event.status === "current"
+                                ? "bg-[#A3AF87] shadow-lg shadow-[#A3AF87]/30"
+                                : "bg-[#A3AF87]/20"
+                            }`}
+                          >
+                            {event.status === "current" ? (
+                              <Truck className="h-5 w-5 text-white" />
+                            ) : (
+                              <CheckCircle2 className="h-5 w-5 text-[#5a6c5b]" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex-1 pb-6">
+                          <div className="flex items-baseline gap-2 mb-1">
+                            <span className={`text-sm font-bold ${
+                              event.status === "current" ? "text-[#5a6c5b]" : "text-gray-700"
+                            }`}>
+                              {event.time}
+                            </span>
+                            <span className="text-xs text-gray-500">{event.date}</span>
+                          </div>
+                          <p className={`text-sm font-bold mb-1 ${
+                            event.status === "current" ? "text-[#5a6c5b]" : "text-gray-700"
+                          }`}>
+                            {event.description}
+                          </p>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Building2 className="h-3 w-3" />
+                            <span>{event.location}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
 
@@ -247,9 +231,7 @@ export function TrackingDetail({
           >
             <div className="sticky top-0 bg-white border-b border-[#A3AF87]/20 px-6 py-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-bold text-[#5a6c5b]">
-                  Lacak Pesanan
-                </h2>
+                <h2 className="text-xl font-bold text-[#5a6c5b]">Lacak Pesanan</h2>
                 <button
                   onClick={onClose}
                   className="p-2 hover:bg-[#A3AF87]/10 rounded-full transition-colors"
@@ -257,20 +239,14 @@ export function TrackingDetail({
                   <X className="h-5 w-5 text-gray-600" />
                 </button>
               </div>
-              <div className="flex gap-6">
+              <div className="flex gap-6 flex-wrap">
                 <p className="text-sm text-gray-600">
-                  No. Pesanan:{" "}
-                  <span className="font-bold text-[#5a6c5b]">
-                    {transaction.orderId}
-                  </span>
+                  No. Pesanan: <span className="font-bold text-[#5a6c5b]">{transaction.orderId}</span>
                 </p>
-                {transaction.trackingNumber && (
+                {trackingNumber && (
                   <div className="flex items-center gap-2">
                     <p className="text-sm text-gray-600">
-                      No. Resi:{" "}
-                      <span className="font-bold text-[#5a6c5b]">
-                        {transaction.trackingNumber}
-                      </span>
+                      No. Resi: <span className="font-bold text-[#5a6c5b] font-mono">{trackingNumber}</span>
                     </p>
                     <button
                       onClick={copyTrackingNumber}
@@ -282,100 +258,95 @@ export function TrackingDetail({
                         <Copy className="h-4 w-4 text-gray-400" />
                       )}
                     </button>
+                    {trackingLink && (
+                      <a
+                        href={trackingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Lacak di website kurir"
+                      >
+                        <ExternalLink className="h-4 w-4 text-blue-500" />
+                      </a>
+                    )}
                   </div>
+                )}
+                {courierName && (
+                  <p className="text-sm text-gray-600">
+                    Kurir: <span className="font-bold text-[#5a6c5b]">{courierName}</span>
+                  </p>
                 )}
               </div>
             </div>
 
             <div className="overflow-y-auto max-h-[calc(85vh-100px)]">
-              {/* Map Placeholder */}
-              {transaction.shippingMethod === "Local Delivery" && (
-                <div className="p-6 pb-0">
-                  <div className="relative w-full h-64 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl overflow-hidden border border-[#A3AF87]/20">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-[#A3AF87] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#A3AF87]/30">
-                          <MapPin className="h-8 w-8 text-white" />
-                        </div>
-                        <p className="text-base font-bold text-[#5a6c5b]">
-                          Estimasi Kurir di Area Anda
-                        </p>
-                        <p className="text-sm text-gray-500 mt-2">
-                          Banda Aceh, Aceh
-                        </p>
-                      </div>
-                    </div>
-                    <div className="absolute top-4 right-4 px-4 py-2 bg-white rounded-lg text-sm font-bold text-[#5a6c5b] shadow-md border border-[#A3AF87]/20">
-                      ± 15 menit lagi
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Timeline */}
               <div className="p-6">
-                <h3 className="text-sm font-bold text-[#5a6c5b] mb-4">
-                  Riwayat Pengiriman
-                </h3>
-                <div className="space-y-4">
-                  {mockTrackingEvents.map((event, index) => (
-                    <div key={index} className="relative flex gap-4">
-                      {index < mockTrackingEvents.length - 1 && (
-                        <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-[#A3AF87]/20" />
-                      )}
-                      <div className="flex-shrink-0">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            event.status === "current"
-                              ? "bg-[#A3AF87] shadow-lg shadow-[#A3AF87]/30"
-                              : event.status === "completed"
-                              ? "bg-[#A3AF87]/20"
-                              : "bg-gray-100"
-                          }`}
-                        >
-                          {event.status === "current" ? (
-                            <Truck className="h-5 w-5 text-white" />
-                          ) : event.status === "completed" ? (
-                            <CheckCircle2 className="h-5 w-5 text-[#5a6c5b]" />
-                          ) : (
-                            <Clock className="h-5 w-5 text-gray-400" />
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex-1 pb-6">
-                        <div className="flex items-baseline gap-2 mb-1">
-                          <span
-                            className={`text-sm font-bold ${
-                              event.status === "current"
-                                ? "text-[#5a6c5b]"
-                                : event.status === "completed"
-                                ? "text-gray-700"
-                                : "text-gray-400"
-                            }`}
-                          >
-                            {event.time}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {event.date}
-                          </span>
-                        </div>
-                        <p
-                          className={`text-sm font-bold mb-1 ${
-                            event.status === "current"
-                              ? "text-[#5a6c5b]"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {event.description}
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <Building2 className="h-3 w-3" />
-                          <span>{event.location}</span>
-                        </div>
-                      </div>
+                {trackingEvents.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <Package className="h-8 w-8 text-gray-400" />
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-gray-600 text-center mb-4">Belum ada riwayat pengiriman</p>
+                    {trackingLink && (
+                      <a
+                        href={trackingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-[#A3AF87] text-white rounded-lg text-sm font-bold flex items-center gap-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Lacak di Website Kurir
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-sm font-bold text-[#5a6c5b] mb-4">Riwayat Pengiriman</h3>
+                    <div className="space-y-4">
+                      {trackingEvents.map((event, index) => (
+                        <div key={index} className="relative flex gap-4">
+                          {index < trackingEvents.length - 1 && (
+                            <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-[#A3AF87]/20" />
+                          )}
+                          <div className="flex-shrink-0">
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                event.status === "current"
+                                  ? "bg-[#A3AF87] shadow-lg shadow-[#A3AF87]/30"
+                                  : "bg-[#A3AF87]/20"
+                              }`}
+                            >
+                              {event.status === "current" ? (
+                                <Truck className="h-5 w-5 text-white" />
+                              ) : (
+                                <CheckCircle2 className="h-5 w-5 text-[#5a6c5b]" />
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex-1 pb-6">
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className={`text-sm font-bold ${
+                                event.status === "current" ? "text-[#5a6c5b]" : "text-gray-700"
+                              }`}>
+                                {event.time}
+                              </span>
+                              <span className="text-xs text-gray-500">{event.date}</span>
+                            </div>
+                            <p className={`text-sm font-bold mb-1 ${
+                              event.status === "current" ? "text-[#5a6c5b]" : "text-gray-700"
+                            }`}>
+                              {event.description}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Building2 className="h-3 w-3" />
+                              <span>{event.location}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

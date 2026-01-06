@@ -14,9 +14,11 @@ import {
   getProductBySlug,
   incrementViewCount,
   getProductSalesTrend,
+  getProductTotalRevenue,
   type Product,
   type ProductAnalytics,
   type SalesTrendSummary,
+  type ProductRevenueStats,
 } from "@/lib/api/product.actions";
 
 // ===========================================
@@ -363,6 +365,59 @@ export function useSalesTrend(productId: string | undefined, days: number = 7) {
 }
 
 // ===========================================
+// USE PRODUCT REVENUE HOOK (ALL TIME)
+// ===========================================
+
+export const defaultRevenueStats: ProductRevenueStats = {
+  totalRevenue: 0,
+  totalQuantitySold: 0,
+  totalOrders: 0,
+};
+
+export function useProductRevenue(productId: string | undefined) {
+  const [revenueStats, setRevenueStats] = useState<ProductRevenueStats>(defaultRevenueStats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRevenue = useCallback(async () => {
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await getProductTotalRevenue(productId);
+
+      if (result.success && result.data) {
+        setRevenueStats(result.data);
+      } else {
+        setError(result.message);
+        setRevenueStats(defaultRevenueStats);
+      }
+    } catch (err) {
+      setError("Gagal mengambil data pendapatan");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [productId]);
+
+  useEffect(() => {
+    fetchRevenue();
+  }, [fetchRevenue]);
+
+  return {
+    revenueStats,
+    loading,
+    error,
+    refetch: fetchRevenue,
+  };
+}
+
+// ===========================================
 // RE-EXPORT TYPES
 // ===========================================
 
@@ -370,4 +425,5 @@ export type {
   Product,
   ProductAnalytics,
   SalesTrendSummary,
+  ProductRevenueStats,
 } from "@/lib/api/product.actions";

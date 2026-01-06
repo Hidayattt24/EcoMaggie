@@ -31,8 +31,10 @@ import { motion } from "framer-motion";
 import {
   useProduct,
   useSalesTrend,
+  useProductRevenue,
   type Product,
 } from "@/hooks/farmer/useProducts";
+import { getProductReviews } from "@/lib/api/product.actions";
 
 interface Review {
   id: string;
@@ -143,8 +145,14 @@ export default function ProductPerformancePage({ params }: PageProps) {
   const resolvedParams = use(params);
   const { product, loading, error } = useProduct(resolvedParams.slug);
   const { salesTrend, loading: salesLoading } = useSalesTrend(product?.id);
+  const { revenueStats, loading: revenueLoading } = useProductRevenue(product?.id);
 
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingDistribution, setRatingDistribution] = useState<{ [key: number]: number }>({
+    1: 0, 2: 0, 3: 0, 4: 0, 5: 0
+  });
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -159,54 +167,36 @@ export default function ProductPerformancePage({ params }: PageProps) {
   const fetchReviews = async (productId: string) => {
     setLoadingReviews(true);
     try {
-      // TODO: Implement actual reviews fetch from backend
-      // const response = await getProductReviews(productId);
+      // Fetch real reviews from database
+      const response = await getProductReviews(productId);
 
-      // For now, simulate with mock data
-      // In production, replace with actual API call
-      const mockReviews: Review[] = [
-        {
-          id: "1",
-          author: "Budi Santoso",
-          rating: 5,
-          date: "20 Des 2024",
-          comment:
-            "Kualitas maggot sangat bagus! Ikan saya jadi cepat besar. Pengiriman cepat dan aman.",
-          verified: true,
-        },
-        {
-          id: "2",
-          author: "Siti Aminah",
-          rating: 5,
-          date: "18 Des 2024",
-          comment:
-            "Sudah order berkali-kali, selalu puas. Maggot fresh dan harga bersaing.",
-          verified: true,
-        },
-        {
-          id: "3",
-          author: "Ahmad Rifai",
-          rating: 4,
-          date: "5 Des 2024",
-          comment:
-            "Bagus, tapi pengiriman agak lama. Overall recommended untuk peternak.",
-          verified: true,
-        },
-      ];
-
-      // Only show reviews if product has reviews
-      if (product && product.totalReviews > 0) {
-        setReviews(
-          mockReviews.slice(
-            0,
-            Math.min(mockReviews.length, product.totalReviews)
-          )
-        );
+      if (response.success && response.data) {
+        const transformedReviews: Review[] = response.data.reviews.map((r) => ({
+          id: r.id,
+          author: r.author,
+          rating: r.rating,
+          date: new Date(r.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+          comment: r.comment || "",
+          verified: r.isVerified,
+          images: r.images,
+        }));
+        setReviews(transformedReviews);
+        setRatingDistribution(response.data.ratingDistribution);
+        setAverageRating(response.data.averageRating);
+        setTotalReviews(response.data.total);
       } else {
         setReviews([]);
+        setRatingDistribution({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+        setAverageRating(0);
+        setTotalReviews(0);
       }
     } catch (err) {
       console.error("Failed to fetch reviews:", err);
+      setReviews([]);
     } finally {
       setLoadingReviews(false);
     }
@@ -337,17 +327,25 @@ export default function ProductPerformancePage({ params }: PageProps) {
             <div className="p-2.5 bg-green-50 rounded-lg">
               <DollarSign className="h-5 w-5 text-green-600" />
             </div>
-            {revenue > 0 && <TrendingUp className="h-4 w-4 text-green-600" />}
+            {(revenueStats.totalRevenue > 0 || revenue > 0) && <TrendingUp className="h-4 w-4 text-green-600" />}
           </div>
           <p className="text-xs text-gray-600 mb-1">Total Pendapatan</p>
-          <p className="text-xl font-bold text-[#303646]">
-            {new Intl.NumberFormat("id-ID", {
-              style: "currency",
-              currency: "IDR",
-              minimumFractionDigits: 0,
-            }).format(revenue)}
+          {revenueLoading ? (
+            <div className="h-7 w-24 bg-gray-200 rounded animate-pulse"></div>
+          ) : (
+            <p className="text-xl font-bold text-[#303646]">
+              {new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+              }).format(revenueStats.totalRevenue > 0 ? revenueStats.totalRevenue : revenue)}
+            </p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">
+            {revenueStats.totalRevenue > 0 
+              ? `${revenueStats.totalOrders} pesanan selesai` 
+              : "Estimasi dari penjualan"}
           </p>
-          <p className="text-xs text-gray-500 mt-1">Dari semua penjualan</p>
         </div>
 
         {/* Rating */}
@@ -360,14 +358,14 @@ export default function ProductPerformancePage({ params }: PageProps) {
           <p className="text-xs text-gray-600 mb-1">Rating Produk</p>
           <div className="flex items-baseline gap-2">
             <p className="text-2xl font-bold text-[#303646]">
-              {product.rating > 0 ? product.rating.toFixed(1) : "-"}
+              {averageRating > 0 ? averageRating.toFixed(1) : product.rating > 0 ? product.rating.toFixed(1) : "-"}
             </p>
             <div className="flex">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
                   className={`h-3.5 w-3.5 ${
-                    star <= Math.round(product.rating)
+                    star <= Math.round(averageRating || product.rating)
                       ? "fill-yellow-500 text-yellow-500"
                       : "text-gray-300"
                   }`}
@@ -376,8 +374,32 @@ export default function ProductPerformancePage({ params }: PageProps) {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            {product.totalReviews} ulasan
+            {totalReviews || product.totalReviews} ulasan
           </p>
+          
+          {/* Rating Distribution */}
+          {(totalReviews > 0 || product.totalReviews > 0) && (
+            <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = ratingDistribution[star] || 0;
+                const total = totalReviews || product.totalReviews || 1;
+                const percentage = (count / total) * 100;
+                return (
+                  <div key={star} className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500 w-3">{star}</span>
+                    <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-yellow-500 rounded-full transition-all"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-gray-500 w-4 text-right">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -423,7 +445,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
                     >
                       <div className="relative w-full flex items-end justify-center h-40">
                         <div
-                          className={`w-full rounded-t-lg transition-all group relative ${
+                          className={`w-full rounded-t-lg transition-all group relative cursor-pointer ${
                             isEmpty
                               ? "bg-gray-200"
                               : "bg-gradient-to-t from-[#A3AF87] to-[#95a17a] hover:shadow-lg"
@@ -432,8 +454,15 @@ export default function ProductPerformancePage({ params }: PageProps) {
                             height: isEmpty ? "8px" : `${Math.max(height, 8)}%`,
                           }}
                         >
-                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#303646] text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                            {data.quantitySold} {product.unit}
+                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-[#303646] text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-lg">
+                            <p className="font-bold">{data.quantitySold} {product.unit}</p>
+                            <p className="text-gray-300 text-[10px]">
+                              {new Intl.NumberFormat("id-ID", {
+                                style: "currency",
+                                currency: "IDR",
+                                minimumFractionDigits: 0,
+                              }).format(data.revenue)}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -446,7 +475,7 @@ export default function ProductPerformancePage({ params }: PageProps) {
               </div>
 
               {/* Stats Summary - Real Data */}
-              <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t-2 border-gray-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6 pt-6 border-t-2 border-gray-100">
                 <div>
                   <p className="text-xs text-gray-600">Rata-rata/hari</p>
                   <p className="text-lg font-bold text-[#303646]">
@@ -478,6 +507,25 @@ export default function ProductPerformancePage({ params }: PageProps) {
                   >
                     {salesTrend.totalSales > 0
                       ? `${salesTrend.totalSales} ${product.unit}`
+                      : "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Pendapatan 7 Hari</p>
+                  <p
+                    className={`text-lg font-bold ${
+                      salesTrend.totalRevenue > 0
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {salesTrend.totalRevenue > 0
+                      ? new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }).format(salesTrend.totalRevenue)
                       : "-"}
                   </p>
                 </div>
@@ -656,16 +704,48 @@ export default function ProductPerformancePage({ params }: PageProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Wishlist */}
-            <div className="p-4 bg-red-50 rounded-lg border-2 border-red-100">
+            {/* Total Orders */}
+            <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-100">
               <div className="flex items-center gap-2 mb-2">
-                <Heart className="h-4 w-4 text-red-600" />
-                <p className="text-xs text-red-700 font-semibold">Wishlist</p>
+                <ShoppingCart className="h-4 w-4 text-blue-600" />
+                <p className="text-xs text-blue-700 font-semibold">Total Order</p>
               </div>
-              <p className="text-2xl font-bold text-red-600">
-                {product.wishlistCount}
+              {revenueLoading ? (
+                <div className="h-8 w-12 bg-blue-200 rounded animate-pulse"></div>
+              ) : (
+                <p className="text-2xl font-bold text-blue-600">
+                  {revenueStats.totalOrders}
+                </p>
+              )}
+              <p className="text-xs text-gray-600 mt-1">Pesanan masuk</p>
+            </div>
+
+            {/* Total Sold */}
+            <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="h-4 w-4 text-purple-600" />
+                <p className="text-xs text-purple-700 font-semibold">Terjual</p>
+              </div>
+              {revenueLoading ? (
+                <div className="h-8 w-16 bg-purple-200 rounded animate-pulse"></div>
+              ) : (
+                <p className="text-2xl font-bold text-purple-600">
+                  {revenueStats.totalQuantitySold > 0 ? revenueStats.totalQuantitySold : product.totalSold}
+                </p>
+              )}
+              <p className="text-xs text-gray-600 mt-1">{product.unit} terjual</p>
+            </div>
+
+            {/* Total Reviews */}
+            <div className="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="h-4 w-4 text-yellow-600" />
+                <p className="text-xs text-yellow-700 font-semibold">Ulasan</p>
+              </div>
+              <p className="text-2xl font-bold text-yellow-600">
+                {totalReviews || product.totalReviews}
               </p>
-              <p className="text-xs text-gray-600 mt-1">Orang menyukai</p>
+              <p className="text-xs text-gray-600 mt-1">Review diterima</p>
             </div>
 
             {/* Stock Status */}

@@ -324,69 +324,7 @@ export default function SupplyPage() {
               ) : null}
             </motion.div>
 
-            {/* Stats Grid */}
-            <motion.div
-              variants={itemVariants}
-              className="grid grid-cols-2 gap-4"
-            >
-              {statsData.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    className={`${stat.bgColor} rounded-2xl p-5 border-2 border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group`}
-                  >
-                    {/* Background decoration */}
-                    <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
-                    
-                    {/* Icon with gradient background */}
-                    <div className={`inline-flex p-2.5 rounded-xl ${stat.iconBg} shadow-lg mb-3 relative z-10`}>
-                      <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    
-                    {/* Value */}
-                    <p className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1 relative z-10">
-                      {stat.value}
-                    </p>
-                    
-                    {/* Label */}
-                    <p className={`text-xs font-semibold ${stat.color} relative z-10`}>
-                      {stat.label}
-                    </p>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-
-            {/* Impact Info */}
-            <motion.div
-              variants={itemVariants}
-              className="bg-gradient-to-br from-[#A3AF87]/5 to-[#95a17a]/10 rounded-2xl p-5 border border-[#A3AF87]/10"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <Globe className="h-5 w-5 text-[#A3AF87]" />
-                <h3 className="font-semibold text-gray-900">
-                  Dampak untuk Bumi
-                </h3>
-              </div>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Setiap kilogram sampah organik yang Anda sumbangkan membantu
-                mengurangi emisi gas rumah kaca dan mendukung pertanian
-                berkelanjutan. Bersama kita wujudkan lingkungan yang lebih
-                bersih.
-              </p>
-            </motion.div>
-          </motion.div>
-
-          {/* Right Column - Actions & How It Works */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="lg:col-span-7 space-y-6"
-          >
-            {/* Action Cards */}
+            {/* Action Cards - Moved below Status Wilayah Layanan */}
             <motion.div variants={itemVariants}>
               <AnimatePresence mode="wait">
                 {isLocationAllowed ? (
@@ -479,6 +417,68 @@ export default function SupplyPage() {
               </AnimatePresence>
             </motion.div>
 
+            {/* Stats Grid */}
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-2 gap-4"
+            >
+              {statsData.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className={`${stat.bgColor} rounded-2xl p-5 border-2 border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group`}
+                  >
+                    {/* Background decoration */}
+                    <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                    
+                    {/* Icon with gradient background */}
+                    <div className={`inline-flex p-2.5 rounded-xl ${stat.iconBg} shadow-lg mb-3 relative z-10`}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                    
+                    {/* Value */}
+                    <p className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1 relative z-10">
+                      {stat.value}
+                    </p>
+                    
+                    {/* Label */}
+                    <p className={`text-xs font-semibold ${stat.color} relative z-10`}>
+                      {stat.label}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+
+            {/* Impact Info */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-gradient-to-br from-[#A3AF87]/5 to-[#95a17a]/10 rounded-2xl p-5 border border-[#A3AF87]/10"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Globe className="h-5 w-5 text-[#A3AF87]" />
+                <h3 className="font-semibold text-gray-900">
+                  Dampak untuk Bumi
+                </h3>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Setiap kilogram sampah organik yang Anda sumbangkan membantu
+                mengurangi emisi gas rumah kaca dan mendukung pertanian
+                berkelanjutan. Bersama kita wujudkan lingkungan yang lebih
+                bersih.
+              </p>
+            </motion.div>
+          </motion.div>
+
+          {/* Right Column - How It Works & Info */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="lg:col-span-7 space-y-6"
+          >
             {/* How It Works */}
             <motion.div
               variants={itemVariants}

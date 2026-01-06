@@ -196,11 +196,19 @@ export async function getFarmerDashboardStats(): Promise<DashboardStats> {
     salesGrowthPercentage = 0; // Don't show percentage if no comparison data
   }
 
-  // Get pending pickup count from supplies (masyarakat yang butuh diambil sampahnya)
-  const { count: pendingPickup } = await supabase
-    .from("supplies")
-    .select("*", { count: "exact", head: true })
+  // Get pending pickup count from user_supplies (masyarakat yang butuh diambil sampahnya)
+  // Count unique user_id (suppliers) with PENDING or SCHEDULED status
+  const { data: pendingSupplies, error: supplyError } = await supabase
+    .from("user_supplies")
+    .select("user_id")
     .in("status", ["PENDING", "SCHEDULED"]);
+
+  // Count unique suppliers
+  let pendingPickup = 0;
+  if (!supplyError && pendingSupplies) {
+    const uniqueSuppliers = new Set(pendingSupplies.map(s => s.user_id));
+    pendingPickup = uniqueSuppliers.size;
+  }
 
   return {
     totalSales: Math.round(totalSalesAllTime),
@@ -208,7 +216,7 @@ export async function getFarmerDashboardStats(): Promise<DashboardStats> {
     salesGrowthPercentage: Math.round(salesGrowthPercentage * 10) / 10, // Round to 1 decimal
     newOrders,
     needsShipping,
-    pendingPickup: pendingPickup || 0,
+    pendingPickup,
   };
 }
 
@@ -380,10 +388,10 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
     }
   }
 
-  // 2. Check for PENDING SUPPLY REQUESTS (last 10 hours)
+  // 2. Check for PENDING SUPPLY REQUESTS from community (last 10 hours)
   const { data: pendingSupplies } = await supabase
-    .from("supplies")
-    .select("id, user_id, waste_type, estimated_weight, status, created_at, users(full_name)")
+    .from("user_supplies")
+    .select("id, user_id, waste_type, estimated_weight, status, created_at, users:user_id(name, full_name)")
     .in("status", ["PENDING", "SCHEDULED"])
     .gte("created_at", tenHoursAgo)
     .order("created_at", { ascending: false })
@@ -391,14 +399,15 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
 
   if (pendingSupplies) {
     pendingSupplies.forEach((supply: any) => {
+      const userName = supply.users?.full_name || supply.users?.name || "Penyuplai";
       alerts.push({
         id: `supply-${supply.id}`,
         type: "new_supply_request",
-        message: `Permintaan pickup sampah ${supply.waste_type} (${supply.estimated_weight}kg)`,
+        message: `Permintaan pickup sampah ${supply.waste_type} (${supply.estimated_weight}kg) dari ${userName}`,
         createdAt: supply.created_at,
         metadata: {
           supplyId: supply.id,
-          customerName: supply.users?.full_name || "Customer",
+          customerName: userName,
           productName: supply.waste_type,
           amount: supply.estimated_weight,
         },

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import {
   Package,
@@ -12,40 +12,34 @@ import {
   XCircle,
   PackageCheck,
   Search,
-  ChevronRight,
   Calendar,
   User,
-  MapPin,
-  ArrowUpDown,
-  LayoutGrid,
-  List,
   AlertCircle,
   Bike,
   Store,
-  Box,
   TrendingUp,
   TrendingDown,
-  SlidersHorizontal,
-  Sparkles,
-  Bell,
-  Loader2,
+  Ban,
+  Activity,
+  Eye,
+  ArrowRight,
+  Banknote,
+  ShoppingBag,
+  RefreshCw,
+  ChevronDown,
+  Download,
 } from "lucide-react";
 import { getFarmerOrders } from "@/lib/api/orders.actions";
 import type { Order as DbOrder } from "@/lib/api/orders.actions";
+import { CancelOrderModal } from "@/components/farmer/orders/CancelOrderModal";
+import { exportOrdersToExcel, type OrderExportData } from "@/utils/exportExcel";
 
 // ============================================
 // TYPES
 // ============================================
 type OrderStatus =
-  | "pending"
-  | "paid"
-  | "confirmed"
-  | "processing"
-  | "ready_pickup"
-  | "shipped"
-  | "delivered"
-  | "completed"
-  | "cancelled";
+  | "pending" | "paid" | "confirmed" | "processing"
+  | "ready_pickup" | "shipped" | "delivered" | "completed" | "cancelled";
 
 type ShippingType = "ecomaggie-delivery" | "self-pickup" | "expedition";
 
@@ -70,37 +64,26 @@ interface Order {
   trackingNumber?: string;
   date: string;
   createdAt: string;
-  customer: {
-    name: string;
-    phone: string;
-  };
-  shippingAddress: {
-    city: string;
-    province: string;
-  };
+  customer: { name: string; phone: string };
+  shippingAddress: { city: string; province: string };
 }
 
 // ============================================
-// SHIPPING TYPE CONFIGURATION
+// CONFIGURATIONS
 // ============================================
-const shippingTypeConfig: Record<
-  ShippingType,
-  {
-    label: string;
-    shortLabel: string;
-    icon: typeof Bike;
-    bgColor: string;
-    textColor: string;
-    description: string;
-  }
-> = {
+const shippingTypeConfig: Record<ShippingType, {
+  label: string;
+  shortLabel: string;
+  icon: typeof Bike;
+  bgColor: string;
+  textColor: string;
+}> = {
   "ecomaggie-delivery": {
     label: "Eco-Maggie Delivery",
     shortLabel: "Delivery",
     icon: Bike,
     bgColor: "bg-green-100",
     textColor: "text-green-700",
-    description: "Antar ke alamat (Banda Aceh)",
   },
   "self-pickup": {
     label: "Ambil di Toko",
@@ -108,7 +91,6 @@ const shippingTypeConfig: Record<
     icon: Store,
     bgColor: "bg-orange-100",
     textColor: "text-orange-700",
-    description: "Customer ambil sendiri",
   },
   expedition: {
     label: "Ekspedisi Reguler",
@@ -116,130 +98,45 @@ const shippingTypeConfig: Record<
     icon: Package,
     bgColor: "bg-blue-100",
     textColor: "text-blue-700",
-    description: "JNE / J&T / SiCepat",
   },
 };
 
-// ============================================
-// STATUS CONFIGURATION
-// ============================================
-const statusConfig: Record<
-  OrderStatus,
-  {
-    label: string;
-    color: string;
-    bgColor: string;
-    iconBg: string;
-    iconColor: string;
-    icon: typeof Clock;
-  }
-> = {
-  pending: {
-    label: "Menunggu",
-    color: "text-amber-700",
-    bgColor: "bg-amber-100",
-    iconBg: "bg-amber-100",
-    iconColor: "text-amber-600",
-    icon: Clock,
-  },
-  paid: {
-    label: "Dibayar",
-    color: "text-blue-700",
-    bgColor: "bg-blue-100",
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-    icon: CheckCircle2,
-  },
-  confirmed: {
-    label: "Dikonfirmasi",
-    color: "text-blue-700",
-    bgColor: "bg-blue-100",
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-    icon: CheckCircle2,
-  },
-  processing: {
-    label: "Dikemas",
-    color: "text-purple-700",
-    bgColor: "bg-purple-100",
-    iconBg: "bg-purple-100",
-    iconColor: "text-purple-600",
-    icon: Package,
-  },
-  ready_pickup: {
-    label: "Siap Diambil",
-    color: "text-orange-700",
-    bgColor: "bg-orange-100",
-    iconBg: "bg-orange-100",
-    iconColor: "text-orange-600",
-    icon: Store,
-  },
-  shipped: {
-    label: "Dikirim",
-    color: "text-[#5a6c5b]",
-    bgColor: "bg-[#A3AF87]/20",
-    iconBg: "bg-[#A3AF87]/20",
-    iconColor: "text-[#5a6c5b]",
-    icon: Truck,
-  },
-  delivered: {
-    label: "Terkirim",
-    color: "text-teal-700",
-    bgColor: "bg-teal-100",
-    iconBg: "bg-teal-100",
-    iconColor: "text-teal-600",
-    icon: PackageCheck,
-  },
-  completed: {
-    label: "Selesai",
-    color: "text-green-700",
-    bgColor: "bg-green-100",
-    iconBg: "bg-green-100",
-    iconColor: "text-green-600",
-    icon: CheckCircle2,
-  },
-  cancelled: {
-    label: "Dibatalkan",
-    color: "text-red-700",
-    bgColor: "bg-red-100",
-    iconBg: "bg-red-100",
-    iconColor: "text-red-600",
-    icon: XCircle,
-  },
+const statusConfig: Record<OrderStatus, {
+  label: string;
+  color: string;
+  bgColor: string;
+  dotColor: string;
+  icon: typeof Clock;
+}> = {
+  pending: { label: "Menunggu", color: "bg-amber-50 text-amber-700 border-amber-200", bgColor: "bg-amber-100", dotColor: "bg-amber-500", icon: Clock },
+  paid: { label: "Dibayar", color: "bg-blue-50 text-blue-700 border-blue-200", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: CheckCircle2 },
+  confirmed: { label: "Dikonfirmasi", color: "bg-blue-50 text-blue-700 border-blue-200", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: CheckCircle2 },
+  processing: { label: "Dikemas", color: "bg-purple-50 text-purple-700 border-purple-200", bgColor: "bg-purple-100", dotColor: "bg-purple-500", icon: Package },
+  ready_pickup: { label: "Siap Diambil", color: "bg-orange-50 text-orange-700 border-orange-200", bgColor: "bg-orange-100", dotColor: "bg-orange-500", icon: Store },
+  shipped: { label: "Dikirim", color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]", bgColor: "bg-[#A3AF87]/20", dotColor: "bg-[#A3AF87]", icon: Truck },
+  delivered: { label: "Terkirim", color: "bg-teal-50 text-teal-700 border-teal-200", bgColor: "bg-teal-100", dotColor: "bg-teal-500", icon: PackageCheck },
+  completed: { label: "Selesai", color: "bg-green-50 text-green-700 border-green-200", bgColor: "bg-green-100", dotColor: "bg-green-500", icon: CheckCircle2 },
+  cancelled: { label: "Dibatalkan", color: "bg-red-50 text-red-700 border-red-200", bgColor: "bg-red-100", dotColor: "bg-red-500", icon: XCircle },
 };
 
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
-function detectShippingType(shippingMethod: string | null, shippingCourier: string | null): ShippingType {
+function detectShippingType(shippingMethod: string | null): ShippingType {
   if (!shippingMethod) return "expedition";
-
   const method = shippingMethod.toLowerCase();
-
-  if (method.includes("ecomaggie") || method.includes("delivery") || method.includes("motor")) {
-    return "ecomaggie-delivery";
-  }
-
-  if (method.includes("pickup") || method.includes("ambil")) {
-    return "self-pickup";
-  }
-
+  if (method.includes("ecomaggie") || method.includes("delivery") || method.includes("motor")) return "ecomaggie-delivery";
+  if (method.includes("pickup") || method.includes("ambil")) return "self-pickup";
   return "expedition";
 }
 
 function transformDbOrderToOrder(dbOrder: DbOrder): Order {
-  const shippingType = detectShippingType(dbOrder.shipping_method, dbOrder.shipping_courier);
-
-  // Extract city and province from customer_address
+  const shippingType = detectShippingType(dbOrder.shipping_method);
   const addressParts = dbOrder.customer_address.split(",");
   const city = addressParts[addressParts.length - 2]?.trim() || "Unknown";
   const province = addressParts[addressParts.length - 1]?.trim() || "Unknown";
-
-  // Calculate net earnings from SUBTOTAL (product price only), not total_amount
-  // total_amount includes shipping + service fee which is not farmer's revenue
-  const subtotal = dbOrder.subtotal || dbOrder.total_amount; // fallback if subtotal not available
-  const platformFee = subtotal * 0.05; // 5% platform fee (same as checkout service fee)
-  const netEarnings = subtotal - platformFee;
+  const subtotal = dbOrder.subtotal || dbOrder.total_amount;
+  const netEarnings = Math.round(subtotal * 0.95);
 
   return {
     id: dbOrder.id,
@@ -254,152 +151,99 @@ function transformDbOrderToOrder(dbOrder: DbOrder): Order {
     })),
     totalItems: dbOrder.items.reduce((sum, item) => sum + item.quantity, 0),
     totalPrice: dbOrder.total_amount,
-    netEarnings: Math.round(netEarnings),
+    netEarnings,
     shippingType,
     expeditionName: dbOrder.shipping_courier?.toUpperCase(),
     trackingNumber: dbOrder.shipping_tracking_number || undefined,
-    date: new Date(dbOrder.created_at).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }),
+    date: new Date(dbOrder.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
     createdAt: dbOrder.created_at,
-    customer: {
-      name: dbOrder.customer_name,
-      phone: dbOrder.customer_phone,
-    },
-    shippingAddress: {
-      city,
-      province,
-    },
+    customer: { name: dbOrder.customer_name, phone: dbOrder.customer_phone },
+    shippingAddress: { city, province },
   };
+}
+
+// Check if order is new (within last hour)
+function isNewOrder(createdAt: string): boolean {
+  const now = new Date();
+  const created = new Date(createdAt);
+  const diffHours = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
+  return diffHours <= 1;
 }
 
 // ============================================
 // SKELETON COMPONENTS
 // ============================================
-function StatsCardSkeleton() {
+function StatsTileSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="h-4 w-4 bg-gray-200 rounded"></div>
-        <div className="h-3 bg-gray-200 rounded w-24"></div>
-      </div>
-      <div className="h-8 bg-gray-200 rounded w-16"></div>
-    </div>
-  );
-}
-
-function OrderCardSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="h-5 bg-gray-200 rounded w-32"></div>
-            <div className="h-6 bg-gray-200 rounded-full w-20"></div>
-          </div>
-          <div className="h-5 w-5 bg-gray-200 rounded"></div>
-        </div>
-        <div className="flex items-center gap-4">
+    <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-3 bg-gray-200 rounded-xl w-12 h-12"></div>
+        <div className="flex-1">
+          <div className="h-5 bg-gray-200 rounded w-32 mb-2"></div>
           <div className="h-3 bg-gray-200 rounded w-20"></div>
-          <div className="h-3 bg-gray-200 rounded w-16"></div>
         </div>
       </div>
-
-      {/* Body */}
-      <div className="p-4">
-        <div className="flex items-start gap-4">
-          {/* Product Images */}
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-12 h-12 rounded-lg bg-gray-200"></div>
-            ))}
-          </div>
-
-          {/* Details */}
-          <div className="flex-1">
-            <div className="h-5 bg-gray-200 rounded w-24 mb-1"></div>
-            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-32"></div>
-          </div>
-
-          {/* Price */}
-          <div className="text-right">
-            <div className="h-6 bg-gray-200 rounded w-24 mb-1"></div>
-            <div className="h-3 bg-gray-200 rounded w-20"></div>
-          </div>
+      <div className="space-y-4">
+        <div className="p-4 bg-gray-100 rounded-xl">
+          <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+          <div className="h-8 bg-gray-200 rounded w-24 mb-1"></div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="p-3 bg-gray-100 rounded-xl">
+              <div className="h-3 bg-gray-200 rounded w-16 mb-2"></div>
+              <div className="h-6 bg-gray-200 rounded w-12"></div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// ============================================
-// TAB CONFIGURATION
-// ============================================
-type TabFilter = "all" | "latest" | "needs_action" | "processing" | "shipped" | "completed";
+function RevenueTileSkeleton() {
+  return (
+    <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-3 bg-gray-200 rounded-xl w-12 h-12"></div>
+        <div className="flex-1">
+          <div className="h-5 bg-gray-200 rounded w-40 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-24"></div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="p-4 bg-gray-100 rounded-xl">
+            <div className="h-3 bg-gray-200 rounded w-20 mb-2"></div>
+            <div className="h-8 bg-gray-200 rounded w-24"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-const tabConfig: Record<
-  TabFilter,
-  {
-    label: string;
-    icon: typeof Box;
-    description: string;
-    filter: (order: Order) => boolean;
-  }
-> = {
-  all: {
-    label: "Semua",
-    icon: Box,
-    description: "Semua pesanan",
-    filter: () => true,
-  },
-  latest: {
-    label: "Terbaru",
-    icon: Sparkles,
-    description: "24 jam terakhir",
-    filter: (order) => {
-      const dayAgo = new Date();
-      dayAgo.setDate(dayAgo.getDate() - 1);
-      return new Date(order.createdAt) > dayAgo;
-    },
-  },
-  needs_action: {
-    label: "Perlu Tindakan",
-    icon: Bell,
-    description: "Butuh respons",
-    filter: (order) => ["paid", "confirmed", "processing"].includes(order.status),
-  },
-  processing: {
-    label: "Diproses",
-    icon: Package,
-    description: "Sedang dikemas",
-    filter: (order) => ["processing", "ready_pickup"].includes(order.status),
-  },
-  shipped: {
-    label: "Dikirim",
-    icon: Truck,
-    description: "Dalam pengiriman",
-    filter: (order) => order.status === "shipped",
-  },
-  completed: {
-    label: "Selesai",
-    icon: CheckCircle2,
-    description: "Transaksi selesai",
-    filter: (order) => ["delivered", "completed"].includes(order.status),
-  },
-};
+function TableRowSkeleton() {
+  return (
+    <tr className="border-b border-gray-100 animate-pulse">
+      <td className="py-4 px-4"><div className="h-5 bg-gray-200 rounded w-24 mb-1"></div><div className="h-3 bg-gray-200 rounded w-32"></div></td>
+      <td className="py-4 px-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-gray-200"></div><div><div className="h-5 bg-gray-200 rounded w-28 mb-1"></div><div className="h-3 bg-gray-200 rounded w-24"></div></div></div></td>
+      <td className="py-4 px-4"><div className="h-5 bg-gray-200 rounded w-32 mb-1"></div><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+      <td className="py-4 px-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+      <td className="py-4 px-4"><div className="h-5 bg-gray-200 rounded w-20 mb-1"></div></td>
+      <td className="py-4 px-4"><div className="h-7 bg-gray-200 rounded-full w-24"></div></td>
+      <td className="py-4 px-4"><div className="flex gap-2"><div className="w-8 h-8 bg-gray-200 rounded-lg"></div><div className="w-8 h-8 bg-gray-200 rounded-lg"></div></div></td>
+    </tr>
+  );
+}
 
 // ============================================
 // MAIN COMPONENT
 // ============================================
 export default function FarmerOrdersPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabFilter>("all");
+  const [filter, setFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [sortBy, setSortBy] = useState<"date" | "price">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -408,7 +252,10 @@ export default function FarmerOrdersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch orders from database
+  // Cancel modal state
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [selectedOrderForCancel, setSelectedOrderForCancel] = useState<Order | null>(null);
+
   useEffect(() => {
     loadOrders();
   }, []);
@@ -416,13 +263,10 @@ export default function FarmerOrdersPage() {
   const loadOrders = async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const result = await getFarmerOrders();
-
       if (result.success && result.data) {
-        const transformedOrders = result.data.map(transformDbOrderToOrder);
-        setOrders(transformedOrders);
+        setOrders(result.data.map(transformDbOrderToOrder));
       } else {
         setError(result.message || "Gagal memuat pesanan");
       }
@@ -434,12 +278,65 @@ export default function FarmerOrdersPage() {
     }
   };
 
+  const handleOpenCancelModal = (order: Order, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedOrderForCancel(order);
+    setCancelModalOpen(true);
+  };
+
+  const handleExportExcel = () => {
+    const exportData: OrderExportData[] = filteredOrders.map((order) => ({
+      orderId: order.orderId,
+      customerName: order.customer.name,
+      customerPhone: order.customer.phone,
+      totalItems: order.totalItems,
+      totalPrice: order.totalPrice,
+      netEarnings: order.netEarnings,
+      shippingType: order.shippingType === "ecomaggie-delivery" ? "Eco-Maggie Delivery" : 
+                    order.shippingType === "self-pickup" ? "Ambil di Toko" : "Ekspedisi Reguler",
+      status: statusConfig[order.status].label,
+      date: order.date,
+      city: order.shippingAddress.city,
+      province: order.shippingAddress.province,
+    }));
+
+    exportOrdersToExcel(exportData, "farmer-orders");
+  };
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const total = orders.length;
+    const needsAction = orders.filter((o) => ["paid", "confirmed", "processing"].includes(o.status)).length;
+    const processing = orders.filter((o) => ["processing", "ready_pickup"].includes(o.status)).length;
+    const shipped = orders.filter((o) => o.status === "shipped").length;
+    const completed = orders.filter((o) => ["delivered", "completed"].includes(o.status)).length;
+    const cancelled = orders.filter((o) => o.status === "cancelled").length;
+    
+    const paidOrders = orders.filter((o) => 
+      ["paid", "confirmed", "processing", "ready_pickup", "shipped", "delivered", "completed"].includes(o.status)
+    );
+    const totalRevenue = paidOrders.reduce((sum, o) => sum + o.netEarnings, 0);
+    const totalSales = paidOrders.reduce((sum, o) => sum + o.totalPrice, 0);
+
+    return { total, needsAction, processing, shipped, completed, cancelled, totalRevenue, totalSales, paidOrdersCount: paidOrders.length };
+  }, [orders]);
+
   // Filter and sort orders
   const filteredOrders = useMemo(() => {
     let filtered = orders;
 
-    // Apply tab filter
-    filtered = filtered.filter(tabConfig[activeTab].filter);
+    // Apply filter
+    if (filter === "needs_action") {
+      filtered = filtered.filter((o) => ["paid", "confirmed", "processing"].includes(o.status));
+    } else if (filter === "processing") {
+      filtered = filtered.filter((o) => ["processing", "ready_pickup"].includes(o.status));
+    } else if (filter === "shipped") {
+      filtered = filtered.filter((o) => o.status === "shipped");
+    } else if (filter === "completed") {
+      filtered = filtered.filter((o) => ["delivered", "completed"].includes(o.status));
+    } else if (filter === "cancelled") {
+      filtered = filtered.filter((o) => o.status === "cancelled");
+    }
 
     // Apply search
     if (searchQuery) {
@@ -464,456 +361,479 @@ export default function FarmerOrdersPage() {
     });
 
     return filtered;
-  }, [orders, activeTab, searchQuery, sortBy, sortOrder]);
+  }, [orders, filter, searchQuery, sortBy, sortOrder]);
 
-  // Calculate stats
-  const stats = useMemo(() => {
-    const total = orders.length;
-    const needsAction = orders.filter((o) => ["paid", "confirmed", "processing"].includes(o.status)).length;
-    const processing = orders.filter((o) => ["processing", "ready_pickup"].includes(o.status)).length;
-    const shipped = orders.filter((o) => o.status === "shipped").length;
-    
-    // Total revenue ONLY from paid transactions (consistent with dashboard)
-    // Exclude: pending, cancelled orders
-    const paidOrders = orders.filter((o) => 
-      ["paid", "confirmed", "processing", "ready_pickup", "shipped", "delivered", "completed"].includes(o.status)
-    );
-    const totalRevenue = paidOrders.reduce((sum, o) => sum + o.netEarnings, 0);
-    const paidOrdersCount = paidOrders.length;
-
-    return { total, needsAction, processing, shipped, totalRevenue, paidOrdersCount };
-  }, [orders]);
-
-  // Render content (with loading state)
-  const renderContent = () => {
-    if (error) {
-      return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="text-center max-w-md">
-            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-[#303646] mb-2">Gagal Memuat Pesanan</h2>
-            <p className="text-gray-500 mb-6">{error}</p>
-            <button
-              onClick={loadOrders}
-              className="px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-bold hover:bg-[#8a9a6e] transition-colors"
-            >
-              Coba Lagi
-            </button>
-          </div>
-        </div>
-      );
-    }
-
+  if (error) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-gradient-to-br from-gray-50 to-white pb-8 pt-4 px-4 md:px-6 lg:px-0">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#303646] poppins-bold">Pesanan Saya</h1>
-              <p className="text-gray-500 text-sm mt-1">Kelola semua pesanan dari customer</p>
-            </div>
-            <button
-              onClick={loadOrders}
-              className="p-2.5 hover:bg-gray-100 rounded-xl transition-colors"
-              title="Refresh"
-            >
-              <ArrowUpDown className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-[#303646] mb-2">Gagal Memuat Pesanan</h2>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <button onClick={loadOrders} className="px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-bold hover:bg-[#8a9a6e] transition-colors">
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            {isLoading ? (
-              <>
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-              </>
-            ) : (
-              <>
-                <div className="bg-white rounded-xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Box className="h-4 w-4 text-gray-500" />
-                    <p className="text-xs text-gray-600 font-medium">Total Pesanan</p>
-                  </div>
-                  <p className="text-2xl font-bold text-[#303646]">{stats.total}</p>
-                </div>
-
-                <div className="bg-white rounded-xl border-2 border-gray-100 hover:border-orange-200 transition-colors p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Bell className="h-4 w-4 text-orange-500" />
-                    <p className="text-xs text-gray-600 font-medium">Perlu Tindakan</p>
-                  </div>
-                  <p className="text-2xl font-bold text-orange-600">{stats.needsAction}</p>
-                </div>
-
-                <div className="bg-white rounded-xl border-2 border-gray-100 hover:border-purple-200 transition-colors p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Package className="h-4 w-4 text-purple-500" />
-                    <p className="text-xs text-gray-600 font-medium">Diproses</p>
-                  </div>
-                  <p className="text-2xl font-bold text-purple-600">{stats.processing}</p>
-                </div>
-
-                <div className="bg-white rounded-xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Truck className="h-4 w-4 text-[#A3AF87]" />
-                    <p className="text-xs text-gray-600 font-medium">Dikirim</p>
-                  </div>
-                  <p className="text-2xl font-bold text-[#5a6c5b]">{stats.shipped}</p>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Revenue Card */}
-          {isLoading ? (
-            <div className="bg-gray-200 rounded-2xl h-32 animate-pulse"></div>
-          ) : (
-            <div className="bg-gradient-to-br from-[#A3AF87] to-[#8a9a6e] rounded-2xl p-4 sm:p-6 text-white mb-6 shadow-lg">
-              <div className="flex items-start sm:items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className="text-white/80 text-xs sm:text-sm font-medium">Total Pendapatan Bersih</p>
-                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-[10px] font-semibold">
-                      {stats.paidOrdersCount} pesanan
-                    </span>
-                  </div>
-                  <p className="text-2xl sm:text-3xl font-bold break-all">Rp {stats.totalRevenue.toLocaleString("id-ID")}</p>
-                  <div className="mt-2 space-y-1 hidden sm:block">
-                    <p className="text-white/70 text-xs flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-white/60 rounded-full"></span>
-                      Dihitung dari pesanan yang sudah dibayar
-                    </p>
-                    <p className="text-white/70 text-xs flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-white/60 rounded-full"></span>
-                      Setelah potongan platform 5% (biaya layanan)
-                    </p>
-                    <p className="text-white/70 text-xs flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-white/60 rounded-full"></span>
-                      Tidak termasuk ongkir (diteruskan ke kurir)
-                    </p>
-                  </div>
-                  {/* Mobile: Compact info */}
-                  <p className="text-white/70 text-[10px] mt-1 sm:hidden">
-                    Setelah potongan 5% • Tidak termasuk ongkir
-                  </p>
-                </div>
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
-                  <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8" />
+  return (
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Header */}
+          <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h1 className="text-3xl font-bold text-[#303646]">Pesanan Saya</h1>
+                <p className="text-gray-600 mt-1">Monitor dan kelola pesanan dari customer</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleExportExcel}
+                  disabled={isLoading || filteredOrders.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Export ke Excel"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="text-sm font-medium hidden sm:inline">Export Excel</span>
+                </button>
+                <button
+                  onClick={loadOrders}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl hover:border-[#A3AF87] transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-4 w-4 text-gray-600 ${isLoading ? "animate-spin" : ""}`} />
+                  <span className="text-sm font-medium text-gray-700 hidden sm:inline">Refresh</span>
+                </button>
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 rounded-xl">
+                  <Activity className="h-5 w-5 text-[#A3AF87] animate-pulse" />
+                  <span className="text-sm font-medium text-[#5a6c5b]">Live</span>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </motion.div>
 
-        {/* Tabs - Scrollable on Mobile */}
-        <div className="bg-white rounded-2xl border-2 border-gray-100 p-2 mb-4 shadow-sm overflow-hidden">
-          <div className="flex sm:justify-center items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {(Object.keys(tabConfig) as TabFilter[]).map((tab) => {
-              const config = tabConfig[tab];
-              const Icon = config.icon;
-              const count = isLoading ? 0 : orders.filter(config.filter).length;
+          {/* Bento Grid Layout */}
+          <div className="grid grid-cols-12 gap-6 mb-6">
+            {/* Tile 1: Live Order Stats */}
+            {isLoading ? <StatsTileSkeleton /> : (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-[#A3AF87] rounded-xl">
+                    <ShoppingBag className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[#303646]">Live Order Stats</h3>
+                    <p className="text-xs text-gray-500">Update realtime</p>
+                  </div>
+                </div>
 
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all whitespace-nowrap flex-shrink-0 ${
-                    activeTab === tab
-                      ? "bg-[#A3AF87] text-white shadow-md"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">{config.label}</span>
-                  <span className="xs:hidden">{config.label.split(" ")[0]}</span>
-                  <span
-                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold ${
-                      activeTab === tab ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                <div className="space-y-4">
+                  {/* Total Orders */}
+                  <div className="p-4 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl">
+                    <p className="text-sm text-gray-600 mb-1">Total Pesanan Aktif</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl font-bold text-[#303646]">{stats.total}</p>
+                      <p className="text-lg text-gray-600">pesanan</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{stats.paidOrdersCount} sudah dibayar</p>
+                  </div>
+
+                  {/* Status Breakdown */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-amber-50 rounded-xl">
+                      <p className="text-xs text-amber-700 font-medium mb-1">Perlu Tindakan</p>
+                      <p className="text-2xl font-bold text-amber-600">{stats.needsAction}</p>
+                    </div>
+                    <div className="p-3 bg-purple-50 rounded-xl">
+                      <p className="text-xs text-purple-700 font-medium mb-1">Diproses</p>
+                      <p className="text-2xl font-bold text-purple-600">{stats.processing}</p>
+                    </div>
+                    <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
+                      <p className="text-xs text-[#5a6c5b] font-medium mb-1">Dikirim</p>
+                      <p className="text-2xl font-bold text-[#5a6c5b]">{stats.shipped}</p>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded-xl">
+                      <p className="text-xs text-green-700 font-medium mb-1">Selesai</p>
+                      <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Tile 2: Revenue Summary */}
+            {isLoading ? <RevenueTileSkeleton /> : (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6e] rounded-xl">
+                      <Banknote className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-[#303646]">Ringkasan Pendapatan</h3>
+                      <p className="text-xs text-gray-500">Dari pesanan yang sudah dibayar</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
+                    <TrendingUp className="h-4 w-4 text-emerald-600" />
+                    <span className="text-xs font-semibold text-emerald-600">+{stats.paidOrdersCount} order</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-gradient-to-br from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-xl">
+                    <p className="text-xs text-gray-600 mb-1">Pendapatan Bersih</p>
+                    <p className="text-xl font-bold text-[#303646]">Rp {stats.totalRevenue.toLocaleString("id-ID")}</p>
+                    <p className="text-[10px] text-gray-500 mt-1">Setelah potongan 5%</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <p className="text-xs text-gray-600 mb-1">Total Penjualan</p>
+                    <p className="text-xl font-bold text-[#303646]">Rp {stats.totalSales.toLocaleString("id-ID")}</p>
+                    <p className="text-[10px] text-gray-500 mt-1">Termasuk ongkir</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 rounded-xl">
+                    <p className="text-xs text-amber-700 mb-1">Menunggu Proses</p>
+                    <p className="text-xl font-bold text-amber-600">{stats.needsAction}</p>
+                    <p className="text-[10px] text-amber-600/70 mt-1">Butuh tindakan</p>
+                  </div>
+                  <div className="p-4 bg-red-50 rounded-xl">
+                    <p className="text-xs text-red-700 mb-1">Dibatalkan</p>
+                    <p className="text-xl font-bold text-red-600">{stats.cancelled}</p>
+                    <p className="text-[10px] text-red-600/70 mt-1">Total cancel</p>
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                  <p className="text-xs text-blue-800 flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <span>Pendapatan bersih dihitung dari subtotal produk setelah potongan platform 5%. Ongkir tidak termasuk karena diteruskan ke kurir.</span>
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Real-time Orders Table */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl">
+                  <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base text-[#303646]">Real-time Incoming Orders</h3>
+                  <p className="text-xs text-gray-500">Data pesanan terbaru dari customer</p>
+                </div>
+              </div>
+
+              {/* Filter Tabs with Badge Counts */}
+              <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-xl p-1.5 overflow-x-auto w-full sm:w-auto">
+                {[
+                  { value: "all", label: "Semua", count: stats.total },
+                  { value: "needs_action", label: "Tindakan", count: stats.needsAction },
+                  { value: "processing", label: "Diproses", count: stats.processing },
+                  { value: "shipped", label: "Dikirim", count: stats.shipped },
+                  { value: "completed", label: "Selesai", count: stats.completed },
+                  { value: "cancelled", label: "Batal", count: stats.cancelled },
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => setFilter(tab.value)}
+                    className={`relative px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                      filter === tab.value ? "bg-white text-[#303646] shadow-md" : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Search & Filters */}
-        <div className="flex flex-col md:flex-row gap-3 mb-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Cari order ID, nama customer, atau produk..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            {/* Modern Dropdown - Sort By */}
-            <div className="relative min-w-[180px]">
-              <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A3AF87] pointer-events-none z-10" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "date" | "price")}
-                className="w-full pl-10 pr-10 py-3 border-2 border-[#A3AF87]/40 rounded-xl bg-white focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-sm appearance-none cursor-pointer text-[#303646] font-semibold hover:border-[#A3AF87] hover:shadow-md shadow-sm"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23A3AF87' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 10px center",
-                }}
-              >
-                <option value="date" className="bg-white text-[#303646] py-3">
-                  📅 Tanggal
-                </option>
-                <option value="price" className="bg-white text-[#303646] py-3">
-                  💰 Harga
-                </option>
-              </select>
+                    <span className="flex items-center gap-2">
+                      {tab.label}
+                      {tab.count > 0 && (
+                        <span className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-bold rounded-full ${
+                          tab.value === "needs_action" || tab.value === "cancelled" 
+                            ? "bg-red-500 text-white shadow-sm shadow-red-200" 
+                            : tab.value === "shipped" || tab.value === "completed"
+                            ? "bg-[#A3AF87] text-white shadow-sm shadow-[#A3AF87]/30"
+                            : "bg-gray-500 text-white"
+                        }`}>
+                          {tab.count}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className="px-4 py-3 bg-white border-2 border-[#A3AF87]/40 rounded-xl hover:border-[#A3AF87] hover:shadow-md transition-all shadow-sm"
-              title={sortOrder === "asc" ? "Urutan Naik" : "Urutan Turun"}
-            >
-              {sortOrder === "asc" ? (
-                <TrendingUp className="h-5 w-5 text-[#A3AF87]" />
-              ) : (
-                <TrendingDown className="h-5 w-5 text-[#A3AF87]" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Orders List */}
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <OrderCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-2xl border-2 border-gray-100 p-12 text-center">
-            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-[#303646] mb-2">Tidak Ada Pesanan</h3>
-            <p className="text-gray-500">
-              {searchQuery
-                ? "Tidak ada pesanan yang cocok dengan pencarian"
-                : "Belum ada pesanan di kategori ini"}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <AnimatePresence>
-              {filteredOrders.map((order) => {
-                const config = statusConfig[order.status];
-                const StatusIcon = config.icon;
-                const ShippingIcon = shippingTypeConfig[order.shippingType].icon;
-
-                return (
-                  <motion.div
-                    key={order.id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="bg-white rounded-xl sm:rounded-2xl border-2 border-gray-100 overflow-hidden hover:shadow-lg hover:border-[#A3AF87]/30 transition-all cursor-pointer active:scale-[0.99]"
-                    onClick={() => router.push(`/farmer/orders/${order.orderId}`)}
+            {/* Search & Sort */}
+            <div className="flex flex-col md:flex-row gap-3 mb-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Cari order ID, nama customer, atau produk..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] focus:bg-white transition-all"
+                />
+              </div>
+              <div className="flex gap-2">
+                {/* Custom Sort Dropdown with Green Color Palette */}
+                <div className="relative group">
+                  <button
+                    className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#A3AF87]/15 to-[#A3AF87]/5 border-2 border-[#A3AF87]/40 rounded-xl hover:border-[#A3AF87] hover:shadow-md hover:shadow-[#A3AF87]/10 transition-all"
                   >
-                    {/* Header */}
-                    <div className="p-3 sm:p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent">
-                      <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-sm sm:text-base text-[#303646]">{order.orderId}</p>
-                          <span
-                            className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${config.bgColor} ${config.color}`}
-                          >
-                            {config.label}
-                          </span>
-                        </div>
-                        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-[#A3AF87]/20 rounded-lg flex items-center justify-center">
+                        {sortBy === "date" ? (
+                          <Calendar className="h-4 w-4 text-[#5a6c5b]" />
+                        ) : (
+                          <Banknote className="h-4 w-4 text-[#5a6c5b]" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                          {order.date}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <ShippingIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                          {shippingTypeConfig[order.shippingType].shortLabel}
-                        </span>
-                      </div>
+                      <span className="text-sm font-semibold text-[#5a6c5b]">
+                        {sortBy === "date" ? "Tanggal" : "Harga"}
+                      </span>
                     </div>
+                    <ChevronDown className="h-4 w-4 text-[#5a6c5b] group-hover:rotate-180 transition-transform" />
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  <div className="absolute top-full left-0 mt-2 w-full min-w-[160px] bg-white rounded-xl border-2 border-[#A3AF87]/30 shadow-lg shadow-[#A3AF87]/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+                    <div className="p-2">
+                      <button
+                        onClick={() => setSortBy("date")}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                          sortBy === "date" ? "bg-[#A3AF87]/15 text-[#5a6c5b]" : "hover:bg-gray-50 text-gray-700"
+                        }`}
+                      >
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "date" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}>
+                          <Calendar className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Tanggal</span>
+                        {sortBy === "date" && <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />}
+                      </button>
+                      <button
+                        onClick={() => setSortBy("price")}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                          sortBy === "price" ? "bg-[#A3AF87]/15 text-[#5a6c5b]" : "hover:bg-gray-50 text-gray-700"
+                        }`}
+                      >
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "price" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}>
+                          <Banknote className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Harga</span>
+                        {sortBy === "price" && <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Sort Order Button */}
+                <button
+                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                  className={`px-4 py-3 rounded-xl border-2 transition-all flex items-center gap-2 ${
+                    sortOrder === "desc" 
+                      ? "bg-[#A3AF87] border-[#A3AF87] text-white shadow-md shadow-[#A3AF87]/30" 
+                      : "bg-white border-[#A3AF87]/40 text-[#5a6c5b] hover:border-[#A3AF87] hover:shadow-md"
+                  }`}
+                  title={sortOrder === "desc" ? "Terbaru dulu" : "Terlama dulu"}
+                >
+                  {sortOrder === "asc" ? (
+                    <TrendingUp className="h-5 w-5" />
+                  ) : (
+                    <TrendingDown className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-                    {/* Body */}
-                    <div className="p-3 sm:p-4">
-                      {/* Mobile Layout */}
-                      <div className="sm:hidden">
-                        <div className="flex items-start gap-3">
-                          {/* Product Images - Smaller on mobile */}
-                          <div className="flex -space-x-1.5 flex-shrink-0">
-                            {order.products.slice(0, 2).map((product, idx) => (
-                              <div
-                                key={idx}
-                                className="w-10 h-10 rounded-lg border-2 border-white bg-gray-100 overflow-hidden shadow-sm"
-                              >
-                                {product.image ? (
-                                  <Image
-                                    src={product.image}
-                                    alt={product.name}
-                                    width={40}
-                                    height={40}
-                                    className="object-cover w-full h-full"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="h-4 w-4 text-gray-400" />
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-gray-100">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">ID & Waktu</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Customer</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Produk</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Pengiriman</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Total</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Status</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <>{[1, 2, 3, 4, 5].map((i) => <TableRowSkeleton key={i} />)}</>
+                  ) : filteredOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center">
+                        <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500">{searchQuery ? "Tidak ada pesanan yang cocok" : "Tidak ada pesanan"}</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOrders.map((order, index) => {
+                      const config = statusConfig[order.status];
+                      const shippingConfig = shippingTypeConfig[order.shippingType];
+                      const ShippingIcon = shippingConfig.icon;
+                      const isNew = isNewOrder(order.createdAt);
+
+                      return (
+                        <motion.tr
+                          key={order.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors group cursor-pointer"
+                          onClick={() => router.push(`/farmer/orders/${order.orderId}`)}
+                        >
+                          {/* ID & Time */}
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <div>
+                                <p className="font-semibold text-[#303646]">{order.orderId}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(order.createdAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                </p>
+                              </div>
+                              {isNew && (
+                                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
+                                  NEW
+                                </motion.span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Customer */}
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center">
+                                <User className="h-5 w-5 text-white" />
+                              </div>
+                              <div>
+                                <p className="font-semibold text-[#303646]">{order.customer.name}</p>
+                                <p className="text-xs text-gray-500">{order.customer.phone}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Products */}
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-2">
+                                {order.products.slice(0, 2).map((product, idx) => (
+                                  <div key={idx} className="w-8 h-8 rounded-lg border-2 border-white bg-gray-100 overflow-hidden">
+                                    {product.image ? (
+                                      <Image src={product.image} alt={product.name} width={32} height={32} className="object-cover w-full h-full" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-gray-400" /></div>
+                                    )}
+                                  </div>
+                                ))}
+                                {order.products.length > 2 && (
+                                  <div className="w-8 h-8 rounded-lg border-2 border-white bg-gray-200 flex items-center justify-center">
+                                    <span className="text-[10px] font-bold text-gray-600">+{order.products.length - 2}</span>
                                   </div>
                                 )}
                               </div>
-                            ))}
-                            {order.products.length > 2 && (
-                              <div className="w-10 h-10 rounded-lg border-2 border-white bg-gray-100 flex items-center justify-center shadow-sm">
-                                <span className="text-[10px] font-bold text-gray-600">+{order.products.length - 2}</span>
+                              <div>
+                                <p className="font-medium text-[#303646]">{order.totalItems} item</p>
+                                <p className="text-xs text-gray-500 truncate max-w-[120px]">{order.products[0]?.name}</p>
                               </div>
+                            </div>
+                          </td>
+
+                          {/* Shipping */}
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${shippingConfig.bgColor} ${shippingConfig.textColor}`}>
+                                <ShippingIcon className="h-3.5 w-3.5" />
+                                {shippingConfig.shortLabel}
+                              </span>
+                            </div>
+                            {order.trackingNumber && (
+                              <p className="text-[10px] text-gray-500 mt-1 font-mono">{order.trackingNumber}</p>
                             )}
-                          </div>
+                          </td>
 
-                          {/* Details */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="font-semibold text-sm text-[#303646]">
-                                  {order.totalItems} item
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">
-                                  {order.products.map((p) => p.name).join(", ")}
-                                </p>
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="text-sm font-bold text-[#303646]">
-                                  Rp {order.totalPrice.toLocaleString("id-ID")}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between mt-1.5">
-                              <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                                <User className="h-3 w-3" />
-                                <span className="truncate max-w-[100px]">{order.customer.name}</span>
-                              </div>
-                              <p className="text-[10px] text-[#A3AF87] font-medium">
-                                +Rp {order.netEarnings.toLocaleString("id-ID")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                          {/* Total */}
+                          <td className="py-4 px-4">
+                            <p className="font-bold text-[#303646]">Rp {order.totalPrice.toLocaleString("id-ID")}</p>
+                            <p className="text-xs text-[#A3AF87]">+Rp {order.netEarnings.toLocaleString("id-ID")}</p>
+                          </td>
 
-                      {/* Desktop Layout */}
-                      <div className="hidden sm:flex items-start gap-4">
-                        {/* Product Images */}
-                        <div className="flex -space-x-2">
-                          {order.products.slice(0, 3).map((product, idx) => (
-                            <div
-                              key={idx}
-                              className="w-12 h-12 rounded-lg border-2 border-white bg-gray-100 overflow-hidden shadow-sm"
-                            >
-                              {product.image ? (
-                                <Image
-                                  src={product.image}
-                                  alt={product.name}
-                                  width={48}
-                                  height={48}
-                                  className="object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Package className="h-5 w-5 text-gray-400" />
-                                </div>
+                          {/* Status */}
+                          <td className="py-4 px-4">
+                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${config.color}`}>
+                              <div className={`w-2 h-2 rounded-full ${config.dotColor} animate-pulse`}></div>
+                              <span className="text-xs font-semibold">{config.label}</span>
+                            </div>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); router.push(`/farmer/orders/${order.orderId}`); }}
+                                className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                              >
+                                <Eye className="h-4 w-4 text-gray-600" />
+                              </button>
+                              {["paid", "confirmed", "processing"].includes(order.status) && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); router.push(`/farmer/orders/${order.orderId}`); }}
+                                  className="p-2 bg-[#A3AF87] rounded-lg hover:bg-[#95a17a] transition-colors"
+                                >
+                                  <ArrowRight className="h-4 w-4 text-white" />
+                                </button>
+                              )}
+                              {["paid", "confirmed", "processing", "ready_pickup"].includes(order.status) && (
+                                <button
+                                  onClick={(e) => handleOpenCancelModal(order, e)}
+                                  className="p-2 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+                                >
+                                  <Ban className="h-4 w-4 text-red-600" />
+                                </button>
                               )}
                             </div>
-                          ))}
-                          {order.products.length > 3 && (
-                            <div className="w-12 h-12 rounded-lg border-2 border-white bg-gray-100 flex items-center justify-center shadow-sm">
-                              <span className="text-xs font-bold text-gray-600">+{order.products.length - 3}</span>
-                            </div>
-                          )}
-                        </div>
+                          </td>
+                        </motion.tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        </div>
+      </div>
 
-                        {/* Details */}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-[#303646] mb-1">
-                            {order.totalItems} item{order.totalItems > 1 ? "s" : ""}
-                          </p>
-                          <p className="text-sm text-gray-500 truncate">
-                            {order.products.map((p) => p.name).join(", ")}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                            <User className="h-3.5 w-3.5" />
-                            <span className="truncate">{order.customer.name}</span>
-                            <span>•</span>
-                            <MapPin className="h-3.5 w-3.5" />
-                            <span className="truncate">{order.shippingAddress.city}</span>
-                          </div>
-                        </div>
-
-                        {/* Price */}
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-lg font-bold text-[#303646]">
-                            Rp {order.totalPrice.toLocaleString("id-ID")}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Earning: Rp {order.netEarnings.toLocaleString("id-ID")}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Tracking Number (if available) */}
-                      {order.trackingNumber && (
-                        <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-gray-100">
-                          <div className="flex items-center gap-2 text-[10px] sm:text-xs">
-                            <Truck className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#A3AF87]" />
-                            <span className="text-gray-500">Resi:</span>
-                            <span className="font-mono font-semibold text-[#303646] truncate">{order.trackingNumber}</span>
-                            {order.expeditionName && (
-                              <span className="px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] sm:text-xs font-semibold flex-shrink-0">
-                                {order.expeditionName}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Action Button for orders needing action */}
-                      {["paid", "confirmed", "processing"].includes(order.status) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/farmer/orders/action/${order.orderId}`);
-                          }}
-                          className="mt-3 w-full py-2.5 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#8a9a6e] hover:shadow-md transition-all text-sm"
-                        >
-                          {order.status === "processing" ? "Input Resi & Kirim" : "Proses Pesanan"}
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
-        )}
-      </motion.div>
-    );
-  };
-
-  return renderContent();
+      {/* Cancel Order Modal */}
+      <CancelOrderModal
+        isOpen={cancelModalOpen}
+        onClose={() => { setCancelModalOpen(false); setSelectedOrderForCancel(null); }}
+        onSuccess={loadOrders}
+        orderId={selectedOrderForCancel?.orderId || ""}
+        customerName={selectedOrderForCancel?.customer.name || ""}
+        customerPhone={selectedOrderForCancel?.customer.phone}
+      />
+    </>
+  );
 }

@@ -1,138 +1,113 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Package,
   ShoppingBag,
-  Filter,
   X,
   RefreshCw,
 } from "lucide-react";
 import { StatusTabs } from "@/components/user/transaction/StatusTabs";
 import { TransactionCard } from "@/components/user/transaction/TransactionCard";
 import { TrackingDetail } from "@/components/user/transaction/TrackingDetail";
+import { getCustomerOrders } from "@/lib/api/orders.actions";
+import type { Order as DbOrder } from "@/lib/api/orders.actions";
 
-// Mock Data
-const mockTransactions = [
-  {
-    id: "1",
-    orderId: "ORD-2025-12-001",
-    farmName: "Kebun Maggot Berkah",
+// ============================================
+// TYPES
+// ============================================
+type TransactionStatus = "unpaid" | "packed" | "shipped" | "completed" | "cancelled";
+
+interface Product {
+  id: number;
+  name: string;
+  variant: string;
+  quantity: number;
+  price: number;
+  image: string;
+  slug?: string;
+}
+
+interface Transaction {
+  id: string;
+  orderId: string;
+  farmName: string;
+  farmerId: number;
+  status: TransactionStatus;
+  products: Product[];
+  totalItems: number;
+  totalPrice: number;
+  shippingMethod: string;
+  shippingCourier: string;
+  date: string;
+  trackingNumber?: string;
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Map database status to UI status
+ */
+function mapDbStatusToUiStatus(dbStatus: string): TransactionStatus {
+  const statusMap: Record<string, TransactionStatus> = {
+    pending: "unpaid",
+    paid: "packed",
+    confirmed: "packed",
+    processing: "packed",
+    ready_pickup: "packed",
+    shipped: "shipped",
+    delivered: "completed",
+    completed: "completed",
+    cancelled: "cancelled",
+    failed: "cancelled",
+    expired: "cancelled",
+  };
+  return statusMap[dbStatus] || "unpaid";
+}
+
+/**
+ * Transform database order to UI transaction format
+ */
+function transformDbOrderToTransaction(dbOrder: DbOrder): Transaction {
+  const products: Product[] = dbOrder.items.map((item, index) => ({
+    id: index + 1,
+    name: item.product_name,
+    variant: item.unit || "Standard",
+    quantity: item.quantity,
+    price: item.unit_price,
+    image: item.product_image || "/assets/dummy/magot.png",
+    slug: item.product?.slug,
+  }));
+
+  const totalItems = products.reduce((sum, p) => sum + p.quantity, 0);
+
+  return {
+    id: dbOrder.id,
+    orderId: dbOrder.order_id,
+    farmName: "Eco-maggie Store", // TODO: Get from farmer data
     farmerId: 1,
-    status: "shipped" as const,
-    products: [
-      {
-        id: 1,
-        name: "Maggot BSF Premium",
-        variant: "500gr",
-        quantity: 2,
-        price: 76500,
-        image: "/assets/dummy/magot.png",
-      },
-    ],
-    totalItems: 2,
-    totalPrice: 153000,
-    shippingMethod: "Local Delivery",
-    date: "29 Des 2025",
-    trackingNumber: "ECO-BA-20251230001",
-  },
-  {
-    id: "2",
-    orderId: "ORD-2025-12-002",
-    farmName: "Maggot Organik Sentosa",
-    farmerId: 2,
-    status: "packed" as const,
-    products: [
-      {
-        id: 2,
-        name: "Maggot BSF Organik",
-        variant: "1kg",
-        quantity: 3,
-        price: 38000,
-        image: "/assets/dummy/magot.png",
-      },
-      {
-        id: 3,
-        name: "Maggot BSF Kering",
-        variant: "250gr",
-        quantity: 1,
-        price: 52000,
-        image: "/assets/dummy/magot.png",
-      },
-    ],
-    totalItems: 4,
-    totalPrice: 166000,
-    shippingMethod: "Regular",
-    date: "30 Des 2025",
-  },
-  {
-    id: "3",
-    orderId: "ORD-2025-12-003",
-    farmName: "Ternak Maggot Jaya",
-    farmerId: 3,
-    status: "completed" as const,
-    products: [
-      {
-        id: 1,
-        name: "Maggot BSF Premium",
-        variant: "500gr",
-        quantity: 5,
-        price: 76500,
-        image: "/assets/dummy/magot.png",
-      },
-    ],
-    totalItems: 5,
-    totalPrice: 382500,
-    shippingMethod: "Express",
-    date: "25 Des 2025",
-  },
-  {
-    id: "4",
-    orderId: "ORD-2025-12-004",
-    farmName: "BSF Farm Indonesia",
-    farmerId: 4,
-    status: "unpaid" as const,
-    products: [
-      {
-        id: 3,
-        name: "Maggot BSF Kering",
-        variant: "250gr",
-        quantity: 2,
-        price: 52000,
-        image: "/assets/dummy/magot.png",
-      },
-    ],
-    totalItems: 2,
-    totalPrice: 104000,
-    shippingMethod: "Regular",
-    date: "30 Des 2025",
-  },
-  {
-    id: "5",
-    orderId: "ORD-2025-12-005",
-    farmName: "Maggot Premium Farm",
-    farmerId: 5,
-    status: "cancelled" as const,
-    products: [
-      {
-        id: 1,
-        name: "Maggot BSF Premium",
-        variant: "500gr",
-        quantity: 1,
-        price: 76500,
-        image: "/assets/dummy/magot.png",
-      },
-    ],
-    totalItems: 1,
-    totalPrice: 76500,
-    shippingMethod: "Regular",
-    date: "28 Des 2025",
-  },
-];
+    status: mapDbStatusToUiStatus(dbOrder.status),
+    products,
+    totalItems,
+    totalPrice: dbOrder.total_amount,
+    shippingMethod: dbOrder.shipping_method || "Regular",
+    shippingCourier: dbOrder.shipping_courier || "",
+    date: new Date(dbOrder.created_at).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    trackingNumber: dbOrder.shipping_tracking_number || undefined,
+  };
+}
 
-// Skeleton Component
+// ============================================
+// SKELETON COMPONENT
+// ============================================
 function TransactionSkeleton() {
   return (
     <div className="bg-white border border-[#A3AF87]/20 rounded-2xl overflow-hidden animate-pulse shadow-sm">
@@ -160,38 +135,69 @@ function TransactionSkeleton() {
   );
 }
 
+// ============================================
+// MAIN COMPONENT
+// ============================================
 export default function TransactionPage() {
   const [activeTab, setActiveTab] = useState("shipped");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [trackingTransaction, setTrackingTransaction] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [trackingTransaction, setTrackingTransaction] = useState<Transaction | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Calculate counts for each tab
-  const counts = {
-    unpaid: mockTransactions.filter((t) => t.status === "unpaid").length,
-    packed: mockTransactions.filter((t) => t.status === "packed").length,
-    shipped: mockTransactions.filter((t) => t.status === "shipped").length,
-    completed: mockTransactions.filter((t) => t.status === "completed").length,
-    cancelled: mockTransactions.filter((t) => t.status === "cancelled").length,
+  // Fetch transactions from database
+  useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  const loadTransactions = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await getCustomerOrders();
+
+      if (result.success && result.data) {
+        const transformedTransactions = result.data.map(transformDbOrderToTransaction);
+        setTransactions(transformedTransactions);
+      } else {
+        setError(result.message || "Gagal memuat transaksi");
+      }
+    } catch (err) {
+      console.error("Error loading transactions:", err);
+      setError("Terjadi kesalahan saat memuat transaksi");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Calculate counts for each tab
+  const counts = useMemo(() => ({
+    unpaid: transactions.filter((t) => t.status === "unpaid").length,
+    packed: transactions.filter((t) => t.status === "packed").length,
+    shipped: transactions.filter((t) => t.status === "shipped").length,
+    completed: transactions.filter((t) => t.status === "completed").length,
+    cancelled: transactions.filter((t) => t.status === "cancelled").length,
+  }), [transactions]);
+
   // Filter transactions
-  const filteredTransactions = mockTransactions.filter((transaction) => {
-    const matchesTab = transaction.status === activeTab;
-    const matchesSearch =
-      searchQuery === "" ||
-      transaction.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.farmName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.products.some((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    return matchesTab && matchesSearch;
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((transaction) => {
+      const matchesTab = transaction.status === activeTab;
+      const matchesSearch =
+        searchQuery === "" ||
+        transaction.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.farmName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.products.some((p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      return matchesTab && matchesSearch;
+    });
+  }, [transactions, activeTab, searchQuery]);
 
   const handleTabChange = (tab: string) => {
-    setIsLoading(true);
     setActiveTab(tab);
-    setTimeout(() => setIsLoading(false), 300);
   };
 
   const handleTrack = (transaction: any) => {
@@ -199,8 +205,7 @@ export default function TransactionPage() {
   };
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 500);
+    loadTransactions();
   };
 
   return (
@@ -265,6 +270,19 @@ export default function TransactionPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+            <p className="text-red-600 text-sm">{error}</p>
+            <button
+              onClick={handleRefresh}
+              className="mt-2 text-sm text-red-700 font-medium hover:underline"
+            >
+              Coba lagi
+            </button>
+          </div>
+        )}
+
         {/* Results Count */}
         {!isLoading && filteredTransactions.length > 0 && (
           <div className="flex items-center justify-between mb-4">
@@ -321,7 +339,7 @@ export default function TransactionPage() {
                 </button>
               ) : (
                 <a
-                  href="/market/products"
+                  href="/market"
                   className="px-6 py-3 bg-[#A3AF87] text-white text-sm font-bold rounded-xl hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all"
                 >
                   Mulai Belanja
@@ -346,6 +364,7 @@ export default function TransactionPage() {
                   <TransactionCard
                     transaction={transaction}
                     onTrack={handleTrack}
+                    onCancelSuccess={loadTransactions}
                   />
                 </motion.div>
               ))}
@@ -358,7 +377,8 @@ export default function TransactionPage() {
       <TrackingDetail
         isOpen={trackingTransaction !== null}
         onClose={() => setTrackingTransaction(null)}
-        transaction={trackingTransaction || {}}
+        transaction={trackingTransaction || { orderId: "", farmName: "", shippingMethod: "" }}
+        trackingData={null}
       />
     </div>
   );

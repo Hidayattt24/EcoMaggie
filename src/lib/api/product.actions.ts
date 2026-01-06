@@ -308,15 +308,10 @@ export async function getProductBySlug(
       };
     }
 
+    // First get the product
     const { data: product, error } = await supabase
       .from("products")
-      .select(
-        `
-        *,
-        reviews:reviews(count),
-        wishlists:wishlists(count)
-      `
-      )
+      .select("*")
       .eq("slug", slug)
       .eq("farmer_id", farmerId)
       .is("deleted_at", null)
@@ -330,10 +325,29 @@ export async function getProductBySlug(
       };
     }
 
+    // Get review count separately
+    const { count: reviewCount } = await supabase
+      .from("reviews")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", product.id);
+
+    // Get wishlist count separately
+    const { count: wishlistCount } = await supabase
+      .from("wishlists")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", product.id);
+
+    // Add counts to product object
+    const productWithCounts = {
+      ...product,
+      _reviewCount: reviewCount || 0,
+      _wishlistCount: wishlistCount || 0,
+    };
+
     return {
       success: true,
       message: "Berhasil mengambil data produk",
-      data: transformProduct(product),
+      data: transformProductWithCounts(productWithCounts),
     };
   } catch (error) {
     console.error("Get product by slug exception:", error);
@@ -960,6 +974,38 @@ function transformProduct(dbProduct: Record<string, unknown>): Product {
   };
 }
 
+// Transform with separate counts (for getProductBySlug)
+function transformProductWithCounts(dbProduct: Record<string, unknown>): Product {
+  const price = Number(dbProduct.price) || 0;
+  const discountPercent = Number(dbProduct.discount_percent) || 0;
+  const finalPrice = Math.round(price * (1 - discountPercent / 100));
+
+  return {
+    id: dbProduct.id as string,
+    farmerId: dbProduct.farmer_id as string,
+    name: dbProduct.name as string,
+    slug: dbProduct.slug as string,
+    description: (dbProduct.description as string) || null,
+    price,
+    discountPercent,
+    finalPrice,
+    stock: (dbProduct.stock as number) || 0,
+    lowStockThreshold: (dbProduct.low_stock_threshold as number) || 10,
+    unit: (dbProduct.unit as string) || "kg",
+    category: (dbProduct.category as string) || "OTHER",
+    images: (dbProduct.images as string[]) || [],
+    isActive: (dbProduct.is_active as boolean) ?? true,
+    status: (dbProduct.status as ProductStatus) || "active",
+    rating: Number(dbProduct.rating) || 0,
+    totalSold: (dbProduct.total_sold as number) || 0,
+    totalReviews: (dbProduct._reviewCount as number) || 0,
+    viewsCount: 0,
+    wishlistCount: (dbProduct._wishlistCount as number) || 0,
+    createdAt: dbProduct.created_at as string,
+    updatedAt: dbProduct.updated_at as string,
+  };
+}
+
 // ===========================================
 // SALES TREND TYPES
 // ===========================================
@@ -1020,89 +1066,98 @@ export async function getProductSalesTrend(
       };
     }
 
-    // Try to use RPC function first
-    const { data: trendData, error: rpcError } = await supabase.rpc(
-      "get_product_sales_trend",
-      {
-        p_product_id: productId,
-        p_days: days,
-      }
-    );
+    // Generate date range for last N days
+    const today = new Date();
+    const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+    ];
 
-    let salesTrend: SalesTrendData[] = [];
+    // Initialize empty trend data
+    const salesTrend: SalesTrendData[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      salesTrend.push({
+        saleDate: date.toISOString().split("T")[0],
+        dayName: dayNames[date.getDay()],
+        dateLabel: `${date.getDate()} ${monthNames[date.getMonth()]}`,
+        quantitySold: 0,
+        revenue: 0,
+        ordersCount: 0,
+      });
+    }
 
-    if (rpcError || !trendData || trendData.length === 0) {
-      // Fallback: Generate empty data for last 7 days
-      const today = new Date();
-      const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-      const monthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "Mei",
-        "Jun",
-        "Jul",
-        "Agu",
-        "Sep",
-        "Okt",
-        "Nov",
-        "Des",
-      ];
+    // Calculate start date
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - (days - 1));
+    startDate.setHours(0, 0, 0, 0);
 
-      for (let i = days - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
+    // Query directly from transactions and transaction_items
+    // Get completed/paid transactions that contain this product
+    const { data: transactionItems, error: itemsError } = await supabase
+      .from("transaction_items")
+      .select(`
+        quantity,
+        subtotal,
+        transaction_id,
+        transactions!inner(
+          id,
+          status,
+          paid_at,
+          created_at
+        )
+      `)
+      .eq("product_id", productId);
 
-        salesTrend.push({
-          saleDate: date.toISOString().split("T")[0],
-          dayName: dayNames[date.getDay()],
-          dateLabel: `${date.getDate()} ${monthNames[date.getMonth()]}`,
-          quantitySold: 0,
-          revenue: 0,
-          ordersCount: 0,
-        });
-      }
+    if (itemsError) {
+      console.error("Error fetching transaction items:", itemsError);
+    }
 
-      // Try to get actual data from product_sales_history table
-      const startDate = new Date(today);
-      startDate.setDate(startDate.getDate() - (days - 1));
+    // Process transaction items and group by date
+    if (transactionItems && transactionItems.length > 0) {
+      const salesByDate = new Map<string, { quantity: number; revenue: number; orders: Set<string> }>();
 
-      const { data: historyData } = await supabase
-        .from("product_sales_history")
-        .select("sale_date, quantity_sold, revenue, orders_count")
-        .eq("product_id", productId)
-        .gte("sale_date", startDate.toISOString().split("T")[0])
-        .lte("sale_date", today.toISOString().split("T")[0])
-        .order("sale_date", { ascending: true });
+      transactionItems.forEach((item: any) => {
+        const transaction = item.transactions;
+        
+        // Only count paid/completed transactions
+        const validStatuses = ["paid", "shipped", "delivered", "completed", "ready_pickup"];
+        if (!transaction || !validStatuses.includes(transaction.status)) {
+          return;
+        }
 
-      // Merge actual data with empty trend
-      if (historyData && historyData.length > 0) {
-        const historyMap = new Map(historyData.map((h) => [h.sale_date, h]));
+        // Use paid_at date if available, otherwise created_at
+        const transactionDate = transaction.paid_at || transaction.created_at;
+        if (!transactionDate) return;
 
-        salesTrend = salesTrend.map((t) => {
-          const actual = historyMap.get(t.saleDate);
-          if (actual) {
-            return {
-              ...t,
-              quantitySold: actual.quantity_sold || 0,
-              revenue: Number(actual.revenue) || 0,
-              ordersCount: actual.orders_count || 0,
-            };
-          }
-          return t;
-        });
-      }
-    } else {
-      // Use RPC data
-      salesTrend = trendData.map((d: Record<string, unknown>) => ({
-        saleDate: d.sale_date as string,
-        dayName: d.day_name as string,
-        dateLabel: d.date_label as string,
-        quantitySold: Number(d.quantity_sold) || 0,
-        revenue: Number(d.revenue) || 0,
-        ordersCount: Number(d.orders_count) || 0,
-      }));
+        const dateObj = new Date(transactionDate);
+        const dateStr = dateObj.toISOString().split("T")[0];
+
+        // Check if within date range
+        if (dateObj < startDate) return;
+
+        // Aggregate sales
+        if (!salesByDate.has(dateStr)) {
+          salesByDate.set(dateStr, { quantity: 0, revenue: 0, orders: new Set() });
+        }
+
+        const dayData = salesByDate.get(dateStr)!;
+        dayData.quantity += item.quantity || 0;
+        dayData.revenue += item.subtotal || 0;
+        dayData.orders.add(transaction.id);
+      });
+
+      // Merge with trend data
+      salesTrend.forEach((trend) => {
+        const dayData = salesByDate.get(trend.saleDate);
+        if (dayData) {
+          trend.quantitySold = dayData.quantity;
+          trend.revenue = dayData.revenue;
+          trend.ordersCount = dayData.orders.size;
+        }
+      });
     }
 
     // Calculate summary
@@ -1110,8 +1165,8 @@ export async function getProductSalesTrend(
     const totalRevenue = salesTrend.reduce((sum, d) => sum + d.revenue, 0);
     const avgPerDay = Math.round(totalSales / days);
     const salesValues = salesTrend.map((d) => d.quantitySold);
-    const maxSales = Math.max(...salesValues);
-    const minSales = Math.min(...salesValues);
+    const maxSales = Math.max(...salesValues, 0);
+    const minSales = Math.min(...salesValues.filter(v => v > 0), 0);
     const maxSalesDay =
       salesTrend.find((d) => d.quantitySold === maxSales)?.dayName || "-";
     const hasData = totalSales > 0;
@@ -1135,6 +1190,101 @@ export async function getProductSalesTrend(
     return {
       success: false,
       message: "Gagal mengambil data trend penjualan",
+      error: "INTERNAL_ERROR",
+    };
+  }
+}
+
+// ===========================================
+// GET PRODUCT TOTAL REVENUE (ALL TIME)
+// ===========================================
+
+export type ProductRevenueStats = {
+  totalRevenue: number;
+  totalQuantitySold: number;
+  totalOrders: number;
+};
+
+export async function getProductTotalRevenue(
+  productId: string
+): Promise<ActionResponse<ProductRevenueStats>> {
+  try {
+    const supabase = await createClient();
+    const farmerId = await getCurrentFarmerId();
+
+    if (!farmerId) {
+      return {
+        success: false,
+        message: "Anda harus login sebagai Farmer",
+        error: "UNAUTHORIZED",
+      };
+    }
+
+    // Verify product belongs to farmer
+    const { data: product } = await supabase
+      .from("products")
+      .select("id, farmer_id")
+      .eq("id", productId)
+      .eq("farmer_id", farmerId)
+      .single();
+
+    if (!product) {
+      return {
+        success: false,
+        message: "Produk tidak ditemukan",
+        error: "NOT_FOUND",
+      };
+    }
+
+    // Query directly from transactions and transaction_items (ALL TIME)
+    const { data: transactionItems, error: itemsError } = await supabase
+      .from("transaction_items")
+      .select(`
+        quantity,
+        subtotal,
+        transaction_id,
+        transactions!inner(
+          id,
+          status,
+          paid_at
+        )
+      `)
+      .eq("product_id", productId);
+
+    let totalRevenue = 0;
+    let totalQuantitySold = 0;
+    const uniqueOrders = new Set<string>();
+
+    if (!itemsError && transactionItems && transactionItems.length > 0) {
+      transactionItems.forEach((item: any) => {
+        const transaction = item.transactions;
+        
+        // Only count paid/completed transactions
+        const validStatuses = ["paid", "shipped", "delivered", "completed", "ready_pickup"];
+        if (!transaction || !validStatuses.includes(transaction.status)) {
+          return;
+        }
+
+        totalRevenue += item.subtotal || 0;
+        totalQuantitySold += item.quantity || 0;
+        uniqueOrders.add(transaction.id);
+      });
+    }
+
+    return {
+      success: true,
+      message: "Berhasil mengambil data pendapatan",
+      data: {
+        totalRevenue,
+        totalQuantitySold,
+        totalOrders: uniqueOrders.size,
+      },
+    };
+  } catch (error) {
+    console.error("Get product revenue error:", error);
+    return {
+      success: false,
+      message: "Gagal mengambil data pendapatan",
       error: "INTERNAL_ERROR",
     };
   }

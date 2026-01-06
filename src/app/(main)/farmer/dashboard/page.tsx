@@ -126,7 +126,7 @@ export default function FarmerDashboard() {
           title="Supply Masyarakat"
           value={dashboardStats.pendingPickup}
           icon={Recycle}
-          description="Permintaan pickup sampah organik"
+          description="Jumlah penyuplai menunggu pickup"
           badge={
             dashboardStats.pendingPickup > 0 ? dashboardStats.pendingPickup : undefined
           }

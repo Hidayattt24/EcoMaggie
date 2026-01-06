@@ -16,6 +16,7 @@ import {
   Heart,
   MessageSquare,
   ShoppingCart,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
@@ -27,6 +28,7 @@ import {
   defaultAnalytics,
 } from "@/hooks/farmer/useProducts";
 import type { Product } from "@/lib/api/product.actions";
+import { exportProductsToExcel, type ProductExportData } from "@/utils/exportExcel";
 
 // ===========================================
 // SKELETON COMPONENTS
@@ -155,6 +157,24 @@ export default function FarmerProductsPage() {
     }
   };
 
+  const handleExportExcel = () => {
+    const exportData: ProductExportData[] = filteredProducts.map((product) => ({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      discount: product.discountPercent,
+      finalPrice: product.finalPrice,
+      stock: product.stock,
+      unit: product.unit,
+      status: product.status === "active" ? "Aktif" : product.status === "inactive" ? "Nonaktif" : "Draft",
+      totalSold: product.totalSold,
+      totalReviews: product.totalReviews,
+      averageRating: product.rating,
+    }));
+
+    exportProductsToExcel(exportData, "farmer-products");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-4 px-4 md:px-6 lg:px-0 pb-8">
       {/* Header */}
@@ -173,6 +193,15 @@ export default function FarmerProductsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportExcel}
+              disabled={loading || filteredProducts.length === 0}
+              className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export ke Excel"
+            >
+              <Download className="h-4 w-4" />
+              <span className="text-sm font-medium hidden sm:inline">Export Excel</span>
+            </button>
             <button
               onClick={() => refetch()}
               className="p-3 bg-white text-gray-600 rounded-lg border-2 border-gray-200 hover:border-[#A3AF87] hover:text-[#A3AF87] transition-colors"
@@ -582,40 +611,55 @@ export default function FarmerProductsPage() {
             />
           </div>
 
-          {/* Category Filter - Modern Styled Dropdown */}
-          <div className="relative min-w-[220px]">
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A3AF87] z-10" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-10 pr-10 py-2.5 border-2 border-[#A3AF87]/40 rounded-xl bg-white focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-sm appearance-none cursor-pointer text-[#303646] font-semibold hover:border-[#A3AF87] hover:shadow-md shadow-sm"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23A3AF87' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 10px center",
-                }}
-              >
-                {categories.map((cat) => (
-                  <option
-                    key={cat}
-                    value={cat}
-                    className="bg-white text-[#303646] py-3 hover:bg-[#A3AF87]/10 font-medium"
-                  >
-                    {cat === "all" ? "🏷️ Semua Kategori" : `📦 ${cat}`}
-                  </option>
-                ))}
-              </select>
+          {/* Category Filter - Modern Hover Dropdown */}
+          <div className="relative group">
+            <button
+              className="w-full md:w-auto px-4 py-3 rounded-xl border-2 border-[#A3AF87]/40 bg-white hover:border-[#A3AF87] hover:shadow-md transition-all flex items-center gap-2 text-[#5a6c5b] font-semibold"
+            >
+              <Filter className="h-5 w-5 text-[#A3AF87]" />
+              <span className="text-sm">
+                {selectedCategory === "all" ? "Semua Kategori" : selectedCategory}
+              </span>
+              <svg className="h-4 w-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown Menu */}
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl border-2 border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="p-2">
+                <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pilih Kategori</p>
+                </div>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                        selectedCategory === cat 
+                          ? "bg-[#A3AF87]/15 text-[#5a6c5b]" 
+                          : "hover:bg-gray-50 text-gray-700"
+                      }`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                        selectedCategory === cat ? "bg-[#A3AF87]/30" : "bg-gray-100"
+                      }`}>
+                        <Package className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">
+                        {cat === "all" ? "Semua Kategori" : cat}
+                      </span>
+                      {selectedCategory === cat && (
+                        <svg className="h-4 w-4 text-[#A3AF87] ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            {selectedCategory !== "all" && (
-              <button
-                onClick={() => setSelectedCategory("all")}
-                className="absolute -right-2 -top-2 w-5 h-5 bg-[#A3AF87] text-white rounded-full flex items-center justify-center text-xs hover:bg-[#95a17a] transition-colors shadow-sm"
-                title="Reset filter"
-              >
-                ×
-              </button>
-            )}
           </div>
         </div>
       </motion.div>

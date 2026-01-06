@@ -22,12 +22,14 @@ import {
   ChevronRight,
   PackageX,
   Loader2,
+  Download,
 } from "lucide-react";
 import {
   getFarmerSupplyOrders,
   getSupplyDailyTrend,
   type SupplyWithUser,
 } from "@/lib/api/farmer-supply.actions";
+import { exportSupplyToExcel, type SupplyExportData } from "@/utils/exportExcel";
 
 // Mock data - Real-time supply dari masyarakat
 const mockSupplyData = [
@@ -622,6 +624,38 @@ export default function SupplyMonitoringPage() {
     ? supplies
     : supplies.filter((s) => mapStatus(s.status) === filter);
 
+  const handleExportExcel = () => {
+    const exportData: SupplyExportData[] = filteredSupplies.map((supply) => {
+      const mappedStatus = mapStatus(supply.status);
+      const status = statusConfig[mappedStatus as keyof typeof statusConfig];
+      
+      return {
+        supplyId: supply.supplyNumber,
+        supplierName: supply.userName,
+        supplierPhone: supply.userPhone,
+        wasteType: supply.wasteType === "sisa_makanan" ? "Sisa Makanan" :
+                   supply.wasteType === "sayuran_buah" ? "Sayuran & Buah" :
+                   supply.wasteType === "sisa_dapur" ? "Sisa Dapur" :
+                   supply.wasteType === "campuran" ? "Campuran Organik" :
+                   supply.wasteType,
+        estimatedWeight: supply.estimatedWeight === "1" ? "1 kg" :
+                        supply.estimatedWeight === "3" ? "1-3 kg" :
+                        supply.estimatedWeight === "5" ? "3-5 kg" :
+                        supply.estimatedWeight === "10" ? "5-10 kg" :
+                        supply.estimatedWeight === "15" ? "10-15 kg" :
+                        `${supply.estimatedWeight} kg`,
+        address: supply.pickupAddress,
+        pickupDate: supply.pickupDate ? new Date(supply.pickupDate).toLocaleDateString("id-ID") : "Belum dijadwalkan",
+        pickupTime: supply.pickupTimeRange || supply.pickupTimeSlot || "-",
+        status: status.label,
+        submittedAt: new Date(supply.createdAt).toLocaleString("id-ID"),
+        notes: supply.notes || "-",
+      };
+    });
+
+    exportSupplyToExcel(exportData, "supply-monitoring");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
@@ -641,6 +675,15 @@ export default function SupplyMonitoringPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportExcel}
+                disabled={isLoadingSupplies || filteredSupplies.length === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Export ke Excel"
+              >
+                <Download className="h-4 w-4" />
+                <span className="text-sm font-medium hidden sm:inline">Export Excel</span>
+              </button>
               <div className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 rounded-xl">
                 <Activity className="h-5 w-5 text-[#A3AF87] animate-pulse" />
                 <span className="text-sm font-medium text-[#5a6c5b]">

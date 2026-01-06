@@ -638,22 +638,26 @@ export async function getShippingOptions(
   items?: BiteshipRateItem[]
 ): Promise<ApiResponse<ShippingOption[]>> {
   const options: ShippingOption[] = [];
+  const isFromBandaAceh = isBandaAceh(city);
 
-  // Option 1: Self Pickup (Always available, FREE)
-  options.push({
-    id: "self-pickup",
-    courierCode: "pickup",
-    courierName: "Ambil di Toko",
-    serviceCode: "pickup",
-    serviceName: "Self Pickup",
-    description: STORE_ORIGIN.address,
-    price: 0,
-    estimatedDays: "Siap diambil hari ini",
-    type: "regular",
-  });
+  // Option 1: Self Pickup (Only for Banda Aceh customers)
+  // Customers outside Banda Aceh cannot pick up at store
+  if (isFromBandaAceh) {
+    options.push({
+      id: "self-pickup",
+      courierCode: "pickup",
+      courierName: "Ambil di Toko",
+      serviceCode: "pickup",
+      serviceName: "Self Pickup",
+      description: STORE_ORIGIN.address,
+      price: 0,
+      estimatedDays: "Siap diambil hari ini",
+      type: "regular",
+    });
+  }
 
   // Option 2: Eco-maggie Delivery (Only for Banda Aceh)
-  if (isBandaAceh(city)) {
+  if (isFromBandaAceh) {
     options.push({
       id: "ecomaggie-delivery",
       courierCode: "ecomaggie",
@@ -721,12 +725,32 @@ export async function getShippingOptions(
       } else {
         console.warn("⚠️ No rates from Biteship API - courier options unavailable");
         console.warn("⚠️ Possible issues: Invalid API key, wrong area ID, or Biteship service down");
+        // Return error for Biteship system failure
+        return {
+          success: false,
+          message: "BITESHIP_ERROR",
+          data: options,
+        };
       }
     } else {
-      // No area ID found
+      // No area ID found - Biteship system issue
       console.warn("⚠️ No area ID found - cannot fetch courier rates");
       console.warn("⚠️ Destination address may be invalid or not supported by Biteship");
+      return {
+        success: false,
+        message: "BITESHIP_ERROR",
+        data: options,
+      };
     }
+  }
+
+  // If no options available for non-Banda Aceh users, return error
+  if (!isFromBandaAceh && options.length === 0) {
+    return {
+      success: false,
+      message: "BITESHIP_ERROR",
+      data: options,
+    };
   }
 
   return {

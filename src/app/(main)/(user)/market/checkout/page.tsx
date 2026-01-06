@@ -12,14 +12,17 @@ import {
   Plus,
   Store,
   Clock,
-  Wallet,
   Building2,
-  Smartphone,
   ShoppingBag,
-  ChevronDown,
   Bike,
   Minus,
   ArrowLeft,
+  Shield,
+  Lock,
+  RefreshCcw,
+  Headphones,
+  BadgeCheck,
+  Leaf,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -205,26 +208,17 @@ function CheckoutContent() {
         if (result.success && result.data) {
           setShippingOptions(result.data);
           console.log("✅ Shipping options loaded:", result.data.length);
+        } else if (result.message === "BITESHIP_ERROR") {
+          // Biteship system error - show contact message
+          setShippingError("Sistem terjadi masalah, mohon maaf. Tolong hubungi nomor +62 895-3419-80391");
+          setShippingOptions(result.data || []);
         } else {
           setShippingError(result.message || "Gagal memuat opsi pengiriman");
-          // Fallback to default options
-          setShippingOptions([
-            {
-              id: "self-pickup",
-              courierCode: "pickup",
-              courierName: "Ambil di Toko",
-              serviceCode: "pickup",
-              serviceName: "Self Pickup",
-              description: "Jl. Teuku Umar No. 99, Banda Aceh",
-              price: 0,
-              estimatedDays: "Siap diambil hari ini",
-              type: "regular",
-            },
-          ]);
+          setShippingOptions([]);
         }
       } catch (err) {
         console.error("Error fetching shipping:", err);
-        setShippingError("Terjadi kesalahan saat memuat opsi pengiriman");
+        setShippingError("Sistem terjadi masalah, mohon maaf. Tolong hubungi nomor +62 895-3419-80391");
       } finally {
         setIsLoadingShipping(false);
       }
@@ -349,8 +343,12 @@ function CheckoutContent() {
   const selectedShippingMethod = shippingMethods.find((m) => m.id === selectedShipping);
   const shippingCost = selectedShippingMethod?.price || 0;
 
-  // Total = subtotal + shipping cost
-  const total = subtotal + shippingCost;
+  // Service fee = 5% of subtotal (platform fee for business value)
+  const SERVICE_FEE_PERCENTAGE = 0.05; // 5%
+  const serviceFee = Math.round(subtotal * SERVICE_FEE_PERCENTAGE);
+
+  // Total = subtotal + shipping cost + service fee
+  const total = subtotal + shippingCost + serviceFee;
 
   const steps = [
     { number: 1, title: "Alamat", icon: MapPin },
@@ -408,6 +406,7 @@ function CheckoutContent() {
         customerEmail: user.email,
         subtotal,
         shippingCost,
+        serviceFee,
         total,
       };
 
@@ -945,8 +944,18 @@ function CheckoutContent() {
 
                   {/* Shipping Error State */}
                   {shippingError && !isLoadingShipping && (
-                    <div className="p-4 border-2 border-orange-200 bg-orange-50 rounded-xl">
-                      <p className="text-orange-600 text-sm font-medium">{shippingError}</p>
+                    <div className="p-4 sm:p-6 border-2 border-orange-200 bg-orange-50 rounded-xl mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-orange-800 font-bold mb-1">Tidak Dapat Memuat Opsi Pengiriman</p>
+                          <p className="text-orange-600 text-sm font-medium">{shippingError}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -1008,7 +1017,7 @@ function CheckoutContent() {
                       ))}
 
                       {/* No shipping options available */}
-                      {shippingMethods.length === 0 && !isLoadingShipping && (
+                      {shippingMethods.length === 0 && !isLoadingShipping && !shippingError && (
                         <div className="p-6 border-2 border-[#5a6c5b]/20 rounded-xl bg-white text-center">
                           <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                           <p className="text-[#5a6c5b] font-medium">Tidak ada opsi pengiriman tersedia</p>
@@ -1270,10 +1279,17 @@ function CheckoutContent() {
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#5a6c5b]/70 font-medium">
-                      Biaya Layanan
+                    <div className="flex flex-col">
+                      <span className="text-[#5a6c5b]/70 font-medium">
+                        Biaya Layanan
+                      </span>
+                      <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                        5% dari subtotal
+                      </span>
+                    </div>
+                    <span className="text-[#5a6c5b] font-bold">
+                      Rp {serviceFee.toLocaleString("id-ID")}
                     </span>
-                    <span className="text-[#5a6c5b] font-bold">Rp 0</span>
                   </div>
                 </div>
 
@@ -1292,48 +1308,123 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div className="border-2 border-[#A3AF87]/20 bg-white rounded-2xl p-5">
-                <h4 className="font-bold text-[#5a6c5b] text-sm mb-4">
-                  Jaminan Belanja Aman
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center">
-                      <Check className="h-5 w-5 text-[#A3AF87]" />
+              {/* Trust Badges - Enhanced Design */}
+              <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white via-green-50/30 to-[#A3AF87]/10 rounded-2xl p-5 overflow-hidden relative">
+                {/* Background Pattern */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#A3AF87]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#A3AF87]/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                
+                {/* Header with Shield Icon */}
+                <div className="flex items-center gap-3 mb-5 relative">
+                  <div className="p-2.5 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6d] rounded-xl shadow-lg shadow-[#A3AF87]/30">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[#5a6c5b] text-base">
+                      Jaminan Belanja Aman
+                    </h4>
+                    <p className="text-xs text-[#5a6c5b]/60">Belanja dengan tenang di Eco-maggie</p>
+                  </div>
+                </div>
+
+                {/* Trust Items */}
+                <div className="space-y-4 relative">
+                  {/* 100% Original */}
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <BadgeCheck className="h-5 w-5 text-emerald-600" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#5a6c5b]">
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
                         100% Produk Original
                       </p>
-                      <p className="text-xs text-gray-500">
-                        Dijamin keaslian produk
+                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                        Semua produk dijamin asli dan berkualitas tinggi langsung dari supplier terpercaya
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center">
-                      <Truck className="h-5 w-5 text-[#A3AF87]" />
+
+                  {/* Secure Payment */}
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Lock className="h-5 w-5 text-blue-600" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#5a6c5b]">
-                        Pengiriman Cepat
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                        Pembayaran Terenkripsi
                       </p>
-                      <p className="text-xs text-gray-500">
-                        Sampai tepat waktu
+                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                        Data pembayaran dilindungi enkripsi SSL 256-bit. Powered by Midtrans
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-[#A3AF87]" />
+
+                  {/* Fast Delivery */}
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Truck className="h-5 w-5 text-orange-600" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#5a6c5b]">
-                        Pembayaran Aman
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                        Pengiriman Cepat & Aman
                       </p>
-                      <p className="text-xs text-gray-500">Powered by DOKU</p>
+                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                        Dikemas dengan hati-hati dan dikirim tepat waktu ke alamat Anda
+                      </p>
                     </div>
+                  </div>
+
+                  {/* Return Policy */}
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <RefreshCcw className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                        Garansi Kepuasan
+                      </p>
+                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                        Komplain produk rusak/tidak sesuai akan kami proses dengan cepat
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Customer Support */}
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Headphones className="h-5 w-5 text-teal-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                        Layanan Pelanggan 24/7
+                      </p>
+                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                        Tim support siap membantu via WhatsApp kapan saja
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Eco-Friendly */}
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Leaf className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                        Ramah Lingkungan
+                      </p>
+                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                        Kemasan eco-friendly, mendukung gaya hidup berkelanjutan
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trust Seal */}
+                <div className="mt-5 pt-4 border-t border-[#A3AF87]/20">
+                  <div className="flex items-center justify-center gap-2 text-xs text-[#5a6c5b]/70">
+                    <Lock className="h-3.5 w-3.5" />
+                    <span className="font-medium">Transaksi Anda 100% Aman & Terlindungi</span>
                   </div>
                 </div>
               </div>
@@ -1449,10 +1540,17 @@ function CheckoutContent() {
                   </div>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#5a6c5b]/70 font-medium">
-                    Biaya Layanan
+                  <div className="flex flex-col">
+                    <span className="text-[#5a6c5b]/70 font-medium">
+                      Biaya Layanan
+                    </span>
+                    <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                      5% dari subtotal
+                    </span>
+                  </div>
+                  <span className="text-[#5a6c5b] font-bold">
+                    Rp {serviceFee.toLocaleString("id-ID")}
                   </span>
-                  <span className="text-[#5a6c5b] font-bold">Rp 0</span>
                 </div>
               </div>
 
@@ -1471,48 +1569,84 @@ function CheckoutContent() {
               </div>
             </div>
 
-            {/* Trust Badges */}
-            <div className="border-2 border-[#A3AF87]/20 bg-white rounded-2xl p-4">
-              <h4 className="font-bold text-[#5a6c5b] text-sm mb-3">
-                Jaminan Belanja Aman
-              </h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
-                    <Check className="h-4 w-4 text-[#A3AF87]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#5a6c5b]">
-                      100% Produk Original
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Dijamin keaslian produk
-                    </p>
-                  </div>
+            {/* Trust Badges - Mobile Enhanced */}
+            <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white via-green-50/30 to-[#A3AF87]/10 rounded-2xl p-4 overflow-hidden relative">
+              {/* Background Pattern */}
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#A3AF87]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              
+              {/* Header with Shield Icon */}
+              <div className="flex items-center gap-3 mb-4 relative">
+                <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6d] rounded-xl shadow-lg shadow-[#A3AF87]/30">
+                  <Shield className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
-                    <Truck className="h-4 w-4 text-[#A3AF87]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#5a6c5b]">
-                      Pengiriman Cepat
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Sampai tepat waktu
-                    </p>
-                  </div>
+                <div>
+                  <h4 className="font-bold text-[#5a6c5b] text-sm">
+                    Jaminan Belanja Aman
+                  </h4>
+                  <p className="text-xs text-[#5a6c5b]/60">Belanja dengan tenang</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="h-4 w-4 text-[#A3AF87]" />
+              </div>
+
+              {/* Trust Items - Compact Grid */}
+              <div className="grid grid-cols-2 gap-2 relative">
+                {/* 100% Original */}
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center mb-2 shadow-sm">
+                    <BadgeCheck className="h-5 w-5 text-emerald-600" />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#5a6c5b]">
-                      Pembayaran Aman
-                    </p>
-                    <p className="text-xs text-gray-500">Powered by DOKU</p>
+                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">100% Original</p>
+                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Produk asli berkualitas</p>
+                </div>
+
+                {/* Secure Payment */}
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center mb-2 shadow-sm">
+                    <Lock className="h-5 w-5 text-blue-600" />
                   </div>
+                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">Pembayaran Aman</p>
+                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Enkripsi SSL 256-bit</p>
+                </div>
+
+                {/* Fast Delivery */}
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center mb-2 shadow-sm">
+                    <Truck className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">Pengiriman Cepat</p>
+                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Dikemas dengan hati</p>
+                </div>
+
+                {/* Customer Support */}
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center mb-2 shadow-sm">
+                    <Headphones className="h-5 w-5 text-teal-600" />
+                  </div>
+                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">Support 24/7</p>
+                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Siap bantu kapan saja</p>
+                </div>
+              </div>
+
+              {/* Additional Info - Collapsible Style */}
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-2 p-2.5 bg-white/60 rounded-lg">
+                  <RefreshCcw className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                  <p className="text-[11px] text-[#5a6c5b]/70">
+                    <span className="font-semibold text-[#5a6c5b]">Garansi Kepuasan:</span> Komplain produk rusak diproses cepat
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 p-2.5 bg-white/60 rounded-lg">
+                  <Leaf className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <p className="text-[11px] text-[#5a6c5b]/70">
+                    <span className="font-semibold text-[#5a6c5b]">Eco-Friendly:</span> Kemasan ramah lingkungan
+                  </p>
+                </div>
+              </div>
+
+              {/* Trust Seal */}
+              <div className="mt-3 pt-3 border-t border-[#A3AF87]/20">
+                <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#5a6c5b]/70">
+                  <Lock className="h-3 w-3" />
+                  <span className="font-medium">Transaksi 100% Aman & Terlindungi</span>
                 </div>
               </div>
             </div>

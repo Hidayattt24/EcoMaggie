@@ -44,6 +44,7 @@ export interface CreatePaymentData {
   customerEmail: string;
   subtotal: number;
   shippingCost: number;
+  serviceFee: number;
   total: number;
 }
 
@@ -155,7 +156,7 @@ export async function createPaymentTransaction(
         status: "pending",
         subtotal: paymentData.subtotal,
         shipping_cost: paymentData.shippingCost,
-        service_fee: 0,
+        service_fee: paymentData.serviceFee,
         total_amount: paymentData.total,
         shipping_address_id: paymentData.shippingAddress.id,
         shipping_method: paymentData.shippingMethod.name,
@@ -250,6 +251,17 @@ export async function createPaymentTransaction(
                 price: paymentData.shippingCost,
                 quantity: 1,
                 name: `Ongkir - ${paymentData.shippingMethod.name}`,
+              },
+            ]
+          : []),
+        // Service fee (5% platform fee)
+        ...(paymentData.serviceFee > 0
+          ? [
+              {
+                id: "SERVICE_FEE",
+                price: paymentData.serviceFee,
+                quantity: 1,
+                name: "Biaya Layanan (5%)",
               },
             ]
           : []),

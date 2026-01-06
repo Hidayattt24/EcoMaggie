@@ -1798,7 +1798,7 @@ export async function getProductReviews(
         comment,
         images,
         created_at,
-        users:user_id(full_name, avatar_url)
+        users:user_id(name, avatar)
       `
       )
       .eq("product_id", productId)
@@ -1847,13 +1847,13 @@ export async function getProductReviews(
 
     const transformedReviews: ProductReview[] = (reviews || []).map((r) => {
       const userData = r.users as {
-        full_name?: string;
-        avatar_url?: string;
+        name?: string;
+        avatar?: string;
       } | null;
       return {
         id: r.id,
-        author: userData?.full_name || "Anonymous",
-        authorAvatar: userData?.avatar_url || null,
+        author: userData?.name || "Anonymous",
+        authorAvatar: userData?.avatar || null,
         rating: r.rating,
         comment: r.comment,
         images: r.images || [],
@@ -1972,7 +1972,7 @@ export async function submitProductReview(
         comment,
         images,
         created_at,
-        users:user_id(full_name, avatar_url)
+        users:user_id(name, avatar)
       `
       )
       .single();
@@ -1990,8 +1990,8 @@ export async function submitProductReview(
     await updateProductRating(data.productId);
 
     const userData = review.users as {
-      full_name?: string;
-      avatar_url?: string;
+      name?: string;
+      avatar?: string;
     } | null;
 
     return {
@@ -1999,8 +1999,8 @@ export async function submitProductReview(
       message: "Ulasan berhasil dikirim!",
       data: {
         id: review.id,
-        author: userData?.full_name || "Anonymous",
-        authorAvatar: userData?.avatar_url || null,
+        author: userData?.name || "Anonymous",
+        authorAvatar: userData?.avatar || null,
         rating: review.rating,
         comment: review.comment,
         images: review.images || [],
@@ -2666,5 +2666,115 @@ export async function getWishlistCount(): Promise<number> {
   } catch (error) {
     console.error("Get wishlist count exception:", error);
     return 0;
+  }
+}
+
+// ===========================================
+// CHECK PURCHASE STATUS
+// ===========================================
+
+export type PurchaseStatus = {
+  hasPurchased: boolean;
+  hasReviewed: boolean;
+  canReview: boolean;
+  purchaseDate?: string;
+  orderId?: string;
+};
+
+/**
+ * Check if user has purchased a product (from transactions table)
+ * User can only review if they have purchased and payment is completed
+ */
+export async function checkProductPurchaseStatus(
+  productId: string
+): Promise<ActionResponse<PurchaseStatus>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        success: true,
+        message: "User tidak login",
+        data: {
+          hasPurchased: false,
+          hasReviewed: false,
+          canReview: false,
+        },
+      };
+    }
+
+    // Check if user has purchased this product (status = 'paid')
+    const { data: purchaseData, error: purchaseError } = await supabase
+      .from("transaction_items")
+      .select(`
+        id,
+        transaction_id,
+        transactions!inner(
+          id,
+          order_id,
+          user_id,
+          status,
+          paid_at
+        )
+      `)
+      .eq("product_id", productId)
+      .eq("transactions.user_id", user.id)
+      .eq("transactions.status", "paid")
+      .order("transactions(paid_at)", { ascending: false })
+      .limit(1);
+
+    if (purchaseError) {
+      console.error("Check purchase error:", purchaseError);
+      // Continue anyway, just assume no purchase
+    }
+
+    const hasPurchased = !!(purchaseData && purchaseData.length > 0);
+    let purchaseDate: string | undefined;
+    let orderId: string | undefined;
+
+    if (hasPurchased && purchaseData[0]) {
+      const tx = purchaseData[0].transactions as any;
+      purchaseDate = tx?.paid_at;
+      orderId = tx?.order_id;
+    }
+
+    // Check if user has already reviewed this product
+    const { data: reviewData, error: reviewError } = await supabase
+      .from("reviews")
+      .select("id")
+      .eq("product_id", productId)
+      .eq("user_id", user.id)
+      .single();
+
+    const hasReviewed = !!reviewData && !reviewError;
+
+    return {
+      success: true,
+      message: "Status pembelian berhasil dicek",
+      data: {
+        hasPurchased,
+        hasReviewed,
+        canReview: hasPurchased && !hasReviewed,
+        purchaseDate,
+        orderId,
+      },
+    };
+  } catch (error) {
+    console.error("Check purchase status exception:", error);
+    return {
+      success: false,
+      message: "Gagal mengecek status pembelian",
+      error: "INTERNAL_ERROR",
+      data: {
+        hasPurchased: false,
+        hasReviewed: false,
+        canReview: false,
+      },
+    };
   }
 }

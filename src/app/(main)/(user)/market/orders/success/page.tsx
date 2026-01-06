@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Check,
@@ -15,61 +15,251 @@ import {
   Copy,
   CheckCircle,
   Loader2,
+  AlertCircle,
+  XCircle,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import InvoiceTemplate from "@/components/shared/InvoiceTemplate";
+import { useSearchParams, useRouter } from "next/navigation";
+import { getTransactionStatus, forceSyncTransactionStatus } from "@/lib/api/payment.actions";
+import { generateInvoicePDF } from "@/utils/generateInvoicePDF";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId") || "ECO" + Date.now();
-  const [orderData, setOrderData] = useState<any>(null);
-  const [showInvoice, setShowInvoice] = useState(false);
+  const router = useRouter();
+  const orderId = searchParams.get("orderId");
+  const [transactionData, setTransactionData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  // Fetch transaction data with self-healing
+  const fetchTransactionData = useCallback(async (showRefreshIndicator = false) => {
+    if (!orderId) {
+      setError("Order ID tidak ditemukan");
+      setIsLoading(false);
+      return;
+    }
+
+    if (showRefreshIndicator) {
+      setIsRefreshing(true);
+    }
+
+    try {
+      console.log("🔍 Fetching transaction data for:", orderId);
+      const result = await getTransactionStatus(orderId);
+
+      if (result.success && result.data) {
+        setTransactionData(result.data);
+        console.log("✅ Transaction data loaded:", result.data);
+        console.log("📊 Payment status:", result.data.paymentStatus);
+        console.log("📊 Transaction status:", result.data.status);
+        
+        // Check if status was synced
+        if (result.message.includes("disinkronkan")) {
+          setSyncMessage("Status berhasil disinkronkan dari Midtrans!");
+          setTimeout(() => setSyncMessage(null), 5000);
+        }
+      } else {
+        setError(result.message || "Gagal memuat data transaksi");
+      }
+    } catch (err) {
+      console.error("❌ Error fetching transaction:", err);
+      setError("Terjadi kesalahan saat memuat data transaksi");
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [orderId]);
+
+  // Manual refresh with force sync
+  const handleRefresh = async () => {
+    if (!orderId) return;
+    
+    setIsRefreshing(true);
+    setSyncMessage(null);
+    
+    try {
+      console.log("🔄 Force syncing transaction status...");
+      
+      // First, try to force sync from Midtrans
+      const syncResult = await forceSyncTransactionStatus(orderId);
+      
+      if (syncResult.success && syncResult.newStatus) {
+        setSyncMessage(`Status berhasil diupdate ke: ${syncResult.newStatus}`);
+      }
+      
+      // Then fetch the latest data
+      await fetchTransactionData(false);
+      
+      // Refresh the page cache
+      router.refresh();
+      
+    } catch (err) {
+      console.error("❌ Error during refresh:", err);
+    } finally {
+      setIsRefreshing(false);
+      setTimeout(() => setSyncMessage(null), 5000);
+    }
+  };
 
   useEffect(() => {
-    const lastOrder = localStorage.getItem("lastOrder");
-    if (lastOrder) {
-      setOrderData(JSON.parse(lastOrder));
+    fetchTransactionData();
+
+    // Poll for status updates only if pending
+    const interval = setInterval(() => {
+      // Stop polling if already paid
+      if (transactionData?.paymentStatus === "settlement" ||
+          transactionData?.paymentStatus === "capture" ||
+          transactionData?.status === "paid") {
+        return;
+      }
+      fetchTransactionData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [orderId, fetchTransactionData]);
+
+  // Stop polling when status changes to paid
+  useEffect(() => {
+    if (transactionData?.status === "paid" || 
+        transactionData?.paymentStatus === "settlement" ||
+        transactionData?.paymentStatus === "capture") {
+      console.log("✅ Payment confirmed, stopping polling");
     }
-  }, []);
+  }, [transactionData?.status, transactionData?.paymentStatus]);
 
   const copyOrderId = () => {
+    if (!orderId) return;
     navigator.clipboard.writeText(orderId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Generate and download PDF invoice
+  const handleDownloadPDF = () => {
+    if (!transactionData) return;
+
+    const transaction = transactionData.transaction;
+    const payment = transactionData.payment;
+    const items = transactionData.items || [];
+
+    // Determine payment status for invoice
+    const getInvoicePaymentStatus = (): "paid" | "pending" | "failed" => {
+      const status = transactionData.paymentStatus;
+      if (status === "settlement" || status === "capture" || status === "paid") {
+        return "paid";
+      } else if (status === "pending") {
+        return "pending";
+      }
+      return "failed";
+    };
+
+    const invoiceData = {
+      orderId: transactionData.orderId,
+      orderDate: transaction.created_at,
+      productName: items[0]?.product_name || "Product",
+      quantity: items[0]?.quantity || 1,
+      price: items[0]?.unit_price || 0,
+      subtotal: transaction.subtotal,
+      shippingCost: transaction.shipping_cost,
+      shippingMethod: transaction.shipping_method,
+      total: transactionData.total,
+      customerName: transaction.customer_name,
+      customerPhone: transaction.customer_phone,
+      customerAddress: transaction.customer_address,
+      paymentMethod: payment?.payment_type ? payment.payment_type.replace(/_/g, " ").toUpperCase() : "Midtrans",
+      paymentStatus: getInvoicePaymentStatus(),
+      items: items.map((item: any) => ({
+        name: item.product_name,
+        quantity: item.quantity,
+        unit: item.unit,
+        price: item.unit_price,
+        subtotal: item.subtotal,
+      })),
+      trackingNumber: transaction.shipping_tracking_number,
+      notes: transaction.notes,
+    };
+
+    generateInvoicePDF(invoiceData);
+  };
+
+  // Get status info based on payment status
+  const getStatusInfo = () => {
+    const paymentStatus = transactionData?.paymentStatus || transactionData?.status || "pending";
+
+    if (paymentStatus === "settlement" || paymentStatus === "capture" || paymentStatus === "paid") {
+      return {
+        icon: CheckCircle,
+        color: "text-green-600",
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200",
+        title: "Pembayaran Berhasil!",
+        message: "Terima kasih, pembayaran Anda telah berhasil diproses.",
+      };
+    } else if (paymentStatus === "pending") {
+      return {
+        icon: Clock,
+        color: "text-orange-600",
+        bgColor: "bg-orange-50",
+        borderColor: "border-orange-200",
+        title: "Menunggu Pembayaran",
+        message: "Silakan selesaikan pembayaran Anda sebelum batas waktu.",
+      };
+    } else {
+      return {
+        icon: AlertCircle,
+        color: "text-gray-600",
+        bgColor: "bg-gray-50",
+        borderColor: "border-gray-200",
+        title: "Pesanan Dibuat",
+        message: "Pesanan Anda sedang diproses.",
+      };
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-[#A3AF87] mx-auto mb-4" />
+          <p className="text-gray-500">Memuat data pesanan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !transactionData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{error || "Data transaksi tidak ditemukan"}</h2>
+          <Link
+            href="/market/products"
+            className="mt-4 inline-block px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+          >
+            Kembali ke Produk
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const statusInfo = getStatusInfo();
+  const StatusIcon = statusInfo.icon;
+  const transaction = transactionData.transaction;
+  const payment = transactionData.payment;
+  const items = transactionData.items || [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10">
-      {showInvoice && orderData ? (
-        <div className="py-8">
-          <div className="max-w-5xl mx-auto px-4 mb-4">
-            <button
-              onClick={() => setShowInvoice(false)}
-              className="text-sm font-bold text-[#5a6c5b] hover:text-[#5a6c5b]/80 flex items-center gap-2 px-4 py-2 hover:bg-[#A3AF87]/10 rounded-lg transition-all"
-            >
-              ← Kembali
-            </button>
-          </div>
-          <InvoiceTemplate
-            orderId={orderId}
-            orderDate={orderData.date}
-            productName={orderData.productName}
-            quantity={orderData.quantity}
-            price={orderData.price}
-            subtotal={orderData.subtotal}
-            shippingCost={orderData.shipping.price}
-            total={orderData.total}
-            customerName={orderData.address.name}
-            customerPhone={orderData.address.phone}
-            customerAddress={`${orderData.address.address}, ${orderData.address.district}, ${orderData.address.city}, ${orderData.address.province} ${orderData.address.postalCode}`}
-            shippingMethod={orderData.shipping.name}
-            paymentMethod={orderData.payment.name}
-            paymentStatus="pending"
-          />
-        </div>
-      ) : (
+      {(
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="grid lg:grid-cols-5 gap-8">
             {/* Main Content - Left */}
@@ -78,9 +268,9 @@ function OrderSuccessContent() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-xl border border-[#A3AF87]/20 p-6 sm:p-8 mb-6"
+                className={`rounded-2xl shadow-xl border-2 ${statusInfo.borderColor} ${statusInfo.bgColor} p-6 sm:p-8 mb-6`}
               >
-                {/* Success Animation */}
+                {/* Status Animation */}
                 <div className="flex flex-col items-center mb-6">
                   <motion.div
                     initial={{ scale: 0, opacity: 0 }}
@@ -88,161 +278,293 @@ function OrderSuccessContent() {
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
                     className="relative mb-4"
                   >
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#A3AF87] rounded-full flex items-center justify-center shadow-xl shadow-[#A3AF87]/30">
-                      <Check
-                        className="h-10 w-10 sm:h-12 sm:w-12 text-white"
+                    <div className={`w-20 h-20 sm:w-24 sm:h-24 ${statusInfo.bgColor} border-4 ${statusInfo.borderColor} rounded-full flex items-center justify-center shadow-xl`}>
+                      <StatusIcon
+                        className={`h-10 w-10 sm:h-12 sm:w-12 ${statusInfo.color}`}
                         strokeWidth={3}
                       />
                     </div>
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                      className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-white"
-                    >
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </motion.div>
                   </motion.div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b] mb-2 text-center">
-                    Pesanan Berhasil Dibuat!
+                  <h1 className={`text-2xl sm:text-3xl font-bold ${statusInfo.color} mb-2 text-center`}>
+                    {statusInfo.title}
                   </h1>
-                  <p className="text-sm sm:text-base text-gray-500 text-center">
-                    Terima kasih telah berbelanja di EcoMaggie
+                  <p className="text-sm sm:text-base text-gray-600 text-center">
+                    {statusInfo.message}
                   </p>
                 </div>
 
                 {/* Order ID Card */}
-                <div className="bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl p-4 sm:p-5 border border-[#A3AF87]/20">
-                  <div className="flex items-center justify-between">
-                    <div>
+                <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex-1">
                       <p className="text-xs text-gray-500 font-medium mb-1">
                         ID Pesanan
                       </p>
                       <p className="text-lg sm:text-xl font-bold text-[#5a6c5b]">
-                        {orderId}
+                        {transactionData.orderId}
                       </p>
                     </div>
-                    <button
-                      onClick={copyOrderId}
-                      className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-[#A3AF87]/30 text-sm font-medium text-[#5a6c5b] hover:bg-[#A3AF87]/10 transition-colors"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="h-4 w-4 text-green-500" />
-                          <span className="text-green-500">Tersalin!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" />
-                          <span>Salin</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        className="p-2 bg-blue-50 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                        title="Refresh Status"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                      </button>
+                      <button
+                        onClick={copyOrderId}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-[#5a6c5b] hover:bg-gray-100 transition-colors"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="h-4 w-4 text-green-500" />
+                            <span className="text-green-500">Tersalin!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            <span>Salin</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Status update info */}
+                  {transactionData.paymentStatus === "pending" && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <RefreshCw className="h-3 w-3" />
+                      <span>Status akan diperbarui otomatis setiap 5 detik</span>
+                    </div>
+                  )}
+                  
+                  {/* Sync message notification */}
+                  {syncMessage && (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                      <CheckCircle className="h-3 w-3" />
+                      <span>{syncMessage}</span>
+                    </div>
+                  )}
                 </div>
               </motion.div>
 
-              {/* Order Details */}
-              {orderData && (
+              {/* Payment Instructions (for pending VA payments) */}
+              {transactionData.paymentStatus === "pending" && payment?.va_number && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-white rounded-2xl shadow-xl border border-[#A3AF87]/20 p-6 sm:p-8"
+                  transition={{ delay: 0.1 }}
+                  className="bg-white rounded-2xl shadow-xl border-2 border-orange-200 p-6 sm:p-8 mb-6"
                 >
-                  <h2 className="text-lg font-bold text-[#5a6c5b] mb-5 flex items-center gap-2">
-                    <Package className="h-5 w-5 text-[#A3AF87]" />
-                    Detail Pesanan
+                  <h2 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Instruksi Pembayaran
                   </h2>
-
                   <div className="space-y-4">
-                    {/* Product */}
-                    <div className="flex items-start gap-4 p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
+                    <div>
+                      <p className="text-sm text-orange-700 mb-1 font-medium">Bank</p>
+                      <p className="text-lg font-bold text-orange-900 uppercase">{payment.bank}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-orange-700 mb-1 font-medium">Nomor Virtual Account</p>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 px-4 py-3 bg-orange-50 border-2 border-orange-200 rounded-xl text-lg font-mono font-bold text-orange-900">
+                          {payment.va_number}
+                        </code>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(payment.va_number);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          className="p-3 bg-orange-100 border-2 border-orange-200 rounded-xl hover:bg-orange-200 transition-colors"
+                        >
+                          {copied ? (
+                            <Check className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Copy className="h-5 w-5 text-orange-600" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-orange-700 mb-1 font-medium">Total Pembayaran</p>
+                      <p className="text-2xl font-bold text-orange-900">
+                        Rp {transactionData.total.toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                    {payment.expiry_time && (
+                      <div className="p-4 bg-orange-50 border-2 border-orange-200 rounded-xl">
+                        <p className="text-sm text-orange-700 mb-1 font-medium flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          Batas Waktu Pembayaran
+                        </p>
+                        <p className="font-bold text-orange-900">
+                          {new Date(payment.expiry_time).toLocaleString("id-ID", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Order Details */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl shadow-xl border border-[#A3AF87]/20 p-6 sm:p-8"
+              >
+                <h2 className="text-lg font-bold text-[#5a6c5b] mb-5 flex items-center gap-2">
+                  <Package className="h-5 w-5 text-[#A3AF87]" />
+                  Detail Pesanan
+                </h2>
+
+                <div className="space-y-4">
+                  {/* Products */}
+                  {items.map((item: any) => (
+                    <div key={item.id} className="flex items-start gap-4 p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl flex items-center justify-center border border-[#A3AF87]/20 overflow-hidden">
-                        <img
-                          src="/assets/dummy/magot.png"
-                          alt={orderData.productName}
-                          className="w-full h-full object-cover"
-                        />
+                        {item.product_image && (
+                          <img
+                            src={item.product_image}
+                            alt={item.product_name}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-[#5a6c5b] mb-1">
-                          {orderData.productName}
+                          {item.product_name}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {orderData.quantity} kg
+                          {item.quantity} {item.unit} × Rp {item.unit_price.toLocaleString("id-ID")}
                         </p>
                         <p className="text-lg font-bold text-[#5a6c5b] mt-2">
-                          Rp {orderData.total.toLocaleString("id-ID")}
+                          Rp {item.subtotal.toLocaleString("id-ID")}
                         </p>
                       </div>
                     </div>
+                  ))}
 
-                    {/* Shipping Info */}
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
-                            <MapPin className="h-4 w-4 text-white" />
-                          </div>
-                          <p className="text-xs font-semibold text-gray-500 uppercase">
-                            Alamat Pengiriman
-                          </p>
-                        </div>
-                        <p className="font-semibold text-[#5a6c5b] text-sm">
-                          {orderData.address.name}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {orderData.address.phone}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {orderData.address.address}, {orderData.address.city}
-                        </p>
-                      </div>
-
-                      <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
-                            <Truck className="h-4 w-4 text-white" />
-                          </div>
-                          <p className="text-xs font-semibold text-gray-500 uppercase">
-                            Metode Pengiriman
-                          </p>
-                        </div>
-                        <p className="font-semibold text-[#5a6c5b] text-sm">
-                          {orderData.shipping.name}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Est: {orderData.shipping.estimatedDays}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Payment Info */}
+                  {/* Shipping Info */}
+                  <div className="grid sm:grid-cols-2 gap-4">
                     <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
-                            <CreditCard className="h-4 w-4 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-semibold text-gray-500 uppercase">
-                              Pembayaran
-                            </p>
-                            <p className="font-semibold text-[#5a6c5b] text-sm">
-                              {orderData.payment.name}
-                            </p>
-                          </div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
+                          <MapPin className="h-4 w-4 text-white" />
                         </div>
-                        <span className="px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-lg flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" />
-                          Menunggu Pembayaran
+                        <p className="text-xs font-semibold text-gray-500 uppercase">
+                          Alamat Pengiriman
+                        </p>
+                      </div>
+                      <p className="font-semibold text-[#5a6c5b] text-sm">
+                        {transaction.customer_name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {transaction.customer_phone}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {transaction.customer_address}
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
+                          <Truck className="h-4 w-4 text-white" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase">
+                          Metode Pengiriman
+                        </p>
+                      </div>
+                      <p className="font-semibold text-[#5a6c5b] text-sm">
+                        {transaction.shipping_method}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Est: {transaction.estimated_delivery}
+                      </p>
+                      {transaction.shipping_tracking_number && (
+                        <p className="text-xs text-[#5a6c5b] mt-2 font-mono font-bold">
+                          Resi: {transaction.shipping_tracking_number}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Payment Info */}
+                  <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
+                          <CreditCard className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">
+                            Pembayaran
+                          </p>
+                          <p className="font-semibold text-[#5a6c5b] text-sm">
+                            {payment?.payment_type ? payment.payment_type.replace(/_/g, " ").toUpperCase() : "Midtrans"}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 ${
+                        transactionData.paymentStatus === "settlement" || transactionData.paymentStatus === "capture" || transactionData.paymentStatus === "paid"
+                          ? "bg-green-100 text-green-700"
+                          : transactionData.paymentStatus === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}>
+                        {transactionData.paymentStatus === "settlement" || transactionData.paymentStatus === "capture" || transactionData.paymentStatus === "paid" ? (
+                          <>
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            Dibayar
+                          </>
+                        ) : transactionData.paymentStatus === "pending" ? (
+                          <>
+                            <Clock className="h-3.5 w-3.5" />
+                            Menunggu Pembayaran
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            {transactionData.paymentStatus}
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Price Summary */}
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Subtotal</span>
+                        <span className="font-bold text-[#5a6c5b]">
+                          Rp {transaction.subtotal.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Ongkir</span>
+                        <span className="font-bold text-[#5a6c5b]">
+                          {transaction.shipping_cost === 0 ? "GRATIS" : `Rp ${transaction.shipping_cost.toLocaleString("id-ID")}`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t-2 border-gray-300">
+                        <span className="font-bold text-[#5a6c5b]">Total</span>
+                        <span className="text-xl font-bold text-[#5a6c5b]">
+                          Rp {transactionData.total.toLocaleString("id-ID")}
                         </span>
                       </div>
                     </div>
                   </div>
-                </motion.div>
-              )}
+                </div>
+              </motion.div>
             </div>
 
             {/* Sidebar - Right */}
@@ -258,30 +580,32 @@ function OrderSuccessContent() {
                   Tindakan
                 </h3>
                 <div className="space-y-3">
+                  {/* Cetak PDF Invoice */}
                   <button
-                    onClick={() => setShowInvoice(true)}
-                    disabled={!orderData}
-                    className="group w-full py-3.5 bg-[#A3AF87] text-white rounded-xl text-sm font-bold hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleDownloadPDF}
+                    className="group w-full py-3.5 bg-[#A3AF87] text-white rounded-xl text-sm font-bold hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2"
                   >
-                    <FileText className="h-5 w-5" />
-                    Lihat & Cetak Invoice
+                    <Download className="h-5 w-5" />
+                    Cetak PDF Invoice
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </button>
 
+                  {/* Lanjut Belanja */}
                   <Link
-                    href="/transaction"
+                    href="/market/products"
                     className="group w-full py-3.5 border-2 border-[#A3AF87] text-[#5a6c5b] rounded-xl text-sm font-bold hover:bg-[#A3AF87]/10 transition-all text-center flex items-center justify-center gap-2"
                   >
                     <ShoppingBag className="h-5 w-5" />
-                    Lihat Pesanan Saya
+                    Lanjut Belanja
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
 
+                  {/* Lihat Semua Pesanan */}
                   <Link
-                    href="/market/products"
+                    href="/transaction"
                     className="block w-full py-3 text-gray-500 text-sm text-center hover:text-[#5a6c5b] font-medium transition-colors"
                   >
-                    Lanjut Belanja
+                    Lihat Semua Pesanan
                   </Link>
                 </div>
               </motion.div>
@@ -297,51 +621,91 @@ function OrderSuccessContent() {
                   Langkah Selanjutnya
                 </h3>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-bold text-[#5a6c5b]">
-                        1
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#5a6c5b]">
-                        Selesaikan Pembayaran
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Bayar sebelum batas waktu habis
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-bold text-[#5a6c5b]">
-                        2
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#5a6c5b]">
-                        Konfirmasi Otomatis
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Pesanan diproses setelah pembayaran
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-bold text-[#5a6c5b]">
-                        3
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#5a6c5b]">
-                        Pesanan Dikirim
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Lacak pengiriman di halaman transaksi
-                      </p>
-                    </div>
-                  </div>
+                  {transactionData.paymentStatus === "pending" ? (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-orange-700">1</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                            Selesaikan Pembayaran
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Bayar sebelum batas waktu {payment?.expiry_time && new Date(payment.expiry_time).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#5a6c5b]">2</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                            Konfirmasi Otomatis
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Halaman akan update otomatis setelah pembayaran terverifikasi
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#5a6c5b]">3</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                            Pesanan Diproses
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Pesanan akan diproses dan dikirim ke alamat Anda
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="h-4 w-4 text-green-700" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                            Pembayaran Diterima
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Pesanan Anda sedang diproses
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#5a6c5b]">2</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                            Pesanan Dikemas
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Kami sedang menyiapkan pesanan Anda
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#5a6c5b]">3</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                            Pesanan Dikirim
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Lacak pengiriman di halaman transaksi
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
 

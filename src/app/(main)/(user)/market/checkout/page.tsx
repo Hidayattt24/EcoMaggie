@@ -26,6 +26,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getUserAddresses, createAddress, type CreateAddressData } from "@/lib/api/address.actions";
 import { getCheckoutData, type CheckoutProduct } from "@/lib/api/checkout.actions";
 import { getShippingOptions, transformCartToBiteshipItems, type ShippingOption } from "@/lib/api/biteship.actions";
+import { createPaymentTransaction } from "@/lib/api/payment.actions";
+import { snapClient } from "@/lib/midtrans/snap-client";
 import AddressFormFields from "@/components/auth/AddressFormFields";
 
 // Types
@@ -69,6 +71,7 @@ function CheckoutContent() {
   const [selectedShipping, setSelectedShipping] = useState<string>("");
   const [selectedPayment, setSelectedPayment] = useState<string>("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [checkoutProducts, setCheckoutProducts] = useState<CheckoutProduct[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -331,25 +334,11 @@ function CheckoutContent() {
 
   const paymentMethods: PaymentMethod[] = [
     {
-      id: "va",
-      name: "Virtual Account",
-      description: "Transfer bank",
-      icon: Building2,
-      logos: ["BCA", "BNI", "Mandiri", "Permata"],
-    },
-    {
-      id: "ewallet",
-      name: "E-Wallet",
-      description: "Dompet digital",
-      icon: Wallet,
-      logos: ["OVO", "GoPay", "Dana", "ShopeePay"],
-    },
-    {
-      id: "qris",
-      name: "QRIS",
-      description: "Scan QR code",
-      icon: Smartphone,
-      logos: ["QRIS"],
+      id: "midtrans",
+      name: "Midtrans Payment",
+      description: "Semua metode pembayaran tersedia",
+      icon: CreditCard,
+      logos: ["Credit Card", "VA", "E-Wallet", "QRIS"],
     },
   ];
 
@@ -378,25 +367,91 @@ function CheckoutContent() {
     else if (currentStep === 2 && canProceedToStep3) setCurrentStep(3);
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
+    if (!selectedAddress || !selectedShipping || !selectedPayment) {
+      alert("Silakan lengkapi data pembayaran");
+      return;
+    }
+
     setIsProcessingPayment(true);
-    setTimeout(() => {
-      const orderId = "ECO" + Date.now();
-      localStorage.setItem(
-        "lastOrder",
-        JSON.stringify({
-          orderId,
-          products: checkoutProducts,
-          subtotal: subtotal,
-          total,
-          address: selectedAddress,
-          shipping: shippingMethods.find((m) => m.id === selectedShipping),
-          payment: paymentMethods.find((m) => m.id === selectedPayment),
-          date: new Date().toISOString(),
-        })
+    setPaymentError(null);
+
+    try {
+      console.log("🔄 Creating payment transaction...");
+
+      // Get selected shipping method
+      const shippingMethod = shippingOptions.find((m) => m.id === selectedShipping);
+      if (!shippingMethod) {
+        throw new Error("Metode pengiriman tidak ditemukan");
+      }
+
+      // Get user email from Supabase
+      const supabase = await import("@/lib/supabase/client").then(m => m.createClient());
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user?.email) {
+        throw new Error("Email user tidak ditemukan");
+      }
+
+      // Prepare payment data
+      const paymentData = {
+        checkoutProducts,
+        shippingAddress: selectedAddress,
+        shippingMethod: {
+          id: shippingMethod.id,
+          name: shippingMethod.courierName,
+          courierCode: shippingMethod.courierCode,
+          serviceCode: shippingMethod.serviceCode,
+          price: shippingMethod.price,
+          estimatedDays: shippingMethod.estimatedDays,
+        },
+        customerEmail: user.email,
+        subtotal,
+        shippingCost,
+        total,
+      };
+
+      console.log("📦 Payment data:", paymentData);
+
+      // Create payment transaction and get Snap token
+      const result = await createPaymentTransaction(paymentData);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || "Gagal membuat transaksi pembayaran");
+      }
+
+      console.log("✅ Snap token received:", result.data.snapToken);
+
+      // Save order ID for callbacks
+      const createdOrderId = result.data.orderId;
+
+      // Use snapClient to open payment popup (auto-loads Snap.js if needed)
+      await snapClient.pay(result.data.snapToken, {
+        onSuccess: (paymentResult) => {
+          console.log("✅ Payment success:", paymentResult);
+          router.push(`/market/orders/success?orderId=${createdOrderId}`);
+        },
+        onPending: (paymentResult) => {
+          console.log("⏳ Payment pending:", paymentResult);
+          router.push(`/market/orders/success?orderId=${createdOrderId}`);
+        },
+        onError: (paymentResult) => {
+          console.error("❌ Payment error:", paymentResult);
+          setPaymentError("Pembayaran gagal. Silakan coba lagi.");
+          setIsProcessingPayment(false);
+        },
+        onClose: () => {
+          console.log("⚠️ Payment popup closed");
+          setIsProcessingPayment(false);
+        },
+      });
+    } catch (error) {
+      console.error("❌ Payment error:", error);
+      setPaymentError(
+        error instanceof Error ? error.message : "Terjadi kesalahan saat memproses pembayaran"
       );
-      router.push(`/market/orders/success?orderId=${orderId}`);
-    }, 2000);
+      setIsProcessingPayment(false);
+    }
   };
 
   // Loading state
@@ -461,14 +516,15 @@ function CheckoutContent() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <>
+      <div
+        className="min-h-screen"
+        style={{
+          background:
+            "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Back Button - Mobile Only */}
         <button
           onClick={() => router.back()}
@@ -1005,20 +1061,46 @@ function CheckoutContent() {
                     </div>
                   </div>
 
-                  {/* Doku Badge */}
-                  <div className="flex items-center gap-3 p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100/50 border-2 border-[#5a6c5b]/20 rounded-xl sm:rounded-2xl mb-6 shadow-md">
-                    <div className="p-2 sm:p-2.5 bg-gradient-to-br from-[#A3AF87] to-[#95a17a]/90 rounded-xl shadow-lg">
-                      <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                  {/* Midtrans Badge */}
+                  <div className="flex items-center gap-3 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 border-2 border-blue-200 rounded-xl sm:rounded-2xl mb-6 shadow-md">
+                    <div className="p-2 sm:p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                      <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
-                    <div>
-                      <p className="font-bold text-[#5a6c5b]">
-                        Powered by Doku
+                    <div className="flex-1">
+                      <p className="font-bold text-blue-900">
+                        Powered by Midtrans
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/70 font-medium mt-0.5">
+                      <p className="text-xs text-blue-700 font-medium mt-0.5">
                         Pembayaran aman dan terpercaya
                       </p>
                     </div>
+                    <img
+                      src="https://midtrans.com/assets/images/logo-midtrans.png"
+                      alt="Midtrans"
+                      className="h-6 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none' }}
+                    />
                   </div>
+
+                  {/* Payment Error Alert */}
+                  {paymentError && (
+                    <div className="p-4 border-2 border-red-200 bg-red-50 rounded-xl mb-6">
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-white text-xs font-bold">!</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-red-600 text-sm font-medium">{paymentError}</p>
+                        </div>
+                        <button
+                          onClick={() => setPaymentError(null)}
+                          className="text-red-400 hover:text-red-600 transition-colors"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Payment Methods */}
                   <div className="space-y-3 sm:space-y-4">
@@ -1464,6 +1546,7 @@ function CheckoutContent() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

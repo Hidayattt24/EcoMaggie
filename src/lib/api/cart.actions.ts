@@ -795,3 +795,79 @@ export async function getCartProductIds(): Promise<ActionResponse<string[]>> {
     };
   }
 }
+
+/**
+ * Clear cart items by product IDs
+ * Used after successful checkout to remove purchased items from cart
+ */
+export async function clearCartByProductIds(
+  productIds: string[]
+): Promise<ActionResponse<void>> {
+  try {
+    const supabase = await createClient();
+
+    // Check authentication
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        message: "Anda harus login",
+        error: "Unauthorized",
+      };
+    }
+
+    if (!productIds || productIds.length === 0) {
+      return {
+        success: true,
+        message: "Tidak ada item untuk dihapus",
+      };
+    }
+
+    // Get user cart
+    const { data: cart, error: cartError } = await supabase
+      .from("carts")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (cartError || !cart) {
+      return {
+        success: true,
+        message: "Keranjang tidak ditemukan",
+      };
+    }
+
+    // Delete cart items by product IDs
+    const { error: deleteError } = await supabase
+      .from("cart_items")
+      .delete()
+      .eq("cart_id", cart.id)
+      .in("product_id", productIds);
+
+    if (deleteError) {
+      console.error("Clear cart by product IDs error:", deleteError);
+      return {
+        success: false,
+        message: "Gagal menghapus item dari keranjang",
+        error: deleteError.message,
+      };
+    }
+
+    revalidatePath("/market/cart");
+    return {
+      success: true,
+      message: `${productIds.length} item berhasil dihapus dari keranjang`,
+    };
+  } catch (error) {
+    console.error("Clear cart by product IDs error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan sistem",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}

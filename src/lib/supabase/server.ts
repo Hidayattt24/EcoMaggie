@@ -98,3 +98,22 @@ export async function getUserProfile() {
 
   return profile;
 }
+
+/**
+ * Create Service Role Client (Bypass RLS)
+ * ONLY use for server-side operations that need admin access
+ */
+export function createServiceClient() {
+  const { createClient } = require("@supabase/supabase-js");
+
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}

@@ -8,9 +8,11 @@ import {
   submitProductReview,
   checkWishlistStatus,
   toggleWishlist,
+  checkProductPurchaseStatus,
   type MarketProductDetail,
   type ProductReview,
   type ProductReviewsResponse,
+  type PurchaseStatus,
 } from "@/lib/api/product.actions";
 import { addToCart } from "@/lib/api/cart.actions";
 import { useToast } from "@/hooks/useToast";
@@ -89,6 +91,10 @@ export default function ProductDetailPage({ params }: PageProps) {
   // Cart states
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
+  // Purchase status for review eligibility
+  const [purchaseStatus, setPurchaseStatus] = useState<PurchaseStatus | null>(null);
+  const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
+
   // Fetch product data
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -157,6 +163,27 @@ export default function ProductDetailPage({ params }: PageProps) {
     }
     checkWishlist();
   }, [product?.id]);
+
+  // Check purchase status when switching to reviews tab
+  useEffect(() => {
+    async function checkPurchase() {
+      if (!product?.id || activeTab !== "reviews") return;
+      if (purchaseStatus !== null) return; // Already checked
+
+      setIsCheckingPurchase(true);
+      try {
+        const result = await checkProductPurchaseStatus(product.id);
+        if (result.success && result.data) {
+          setPurchaseStatus(result.data);
+        }
+      } catch (err) {
+        console.error("Error checking purchase status:", err);
+      } finally {
+        setIsCheckingPurchase(false);
+      }
+    }
+    checkPurchase();
+  }, [product?.id, activeTab, purchaseStatus]);
 
   // Handle add to cart
   const handleAddToCart = async () => {
@@ -957,129 +984,196 @@ export default function ProductDetailPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                {/* Write Review Form - With Photo Upload */}
-                <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h4 className="font-semibold text-sm text-[#5a6c5b] mb-3">
-                    Tulis Ulasan
-                  </h4>
-
-                  {/* Rating Select */}
-                  <div className="mb-3">
-                    <label className="text-xs text-gray-600 mb-1 block">
-                      Rating
-                    </label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setReviewRating(star)}
-                          className="focus:outline-none"
-                        >
-                          <svg
-                            className={`h-6 w-6 transition-colors ${
-                              star <= reviewRating
-                                ? "fill-yellow-400"
-                                : "fill-gray-300 hover:fill-yellow-200"
-                            }`}
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </button>
-                      ))}
+                {/* Write Review Form - Modern Design */}
+                <div className={`p-5 rounded-xl border-2 transition-all ${
+                  purchaseStatus?.canReview 
+                    ? "border-[#A3AF87] bg-gradient-to-br from-[#A3AF87]/5 to-white shadow-sm" 
+                    : "border-gray-200 bg-gray-50/50"
+                }`}>
+                  {isCheckingPurchase ? (
+                    <div className="flex items-center justify-center py-6">
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#A3AF87] border-t-transparent mr-2"></div>
+                      <span className="text-sm text-gray-500">Memeriksa status pembelian...</span>
                     </div>
-                  </div>
-
-                  {/* Review Text */}
-                  <div className="mb-3">
-                    <textarea
-                      value={reviewText}
-                      onChange={(e) => setReviewText(e.target.value)}
-                      placeholder="Bagikan pengalaman Anda dengan produk ini..."
-                      className="w-full p-2.5 text-sm border border-gray-200 rounded-lg focus:border-[#A3AF87] focus:ring-1 focus:ring-[#A3AF87] focus:outline-none resize-none"
-                      rows={3}
-                    />
-                  </div>
-
-                  {/* Photo Upload */}
-                  <div className="mb-3">
-                    <label className="text-xs text-gray-600 mb-1.5 block">
-                      Upload Foto (Maks 5)
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {reviewImages.map((img, index) => (
-                        <div
-                          key={index}
-                          className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200"
-                        >
-                          <img
-                            src={img}
-                            alt={`Review ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            onClick={() => removeReviewImage(index)}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
-                          >
-                            <svg
-                              className="w-3 h-3"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
+                  ) : purchaseStatus?.canReview ? (
+                    <>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-[#A3AF87] flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
                         </div>
-                      ))}
-                      {reviewImages.length < 5 && (
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-[#A3AF87] hover:text-[#A3AF87] transition-colors"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          <span className="text-[10px]">Foto</span>
-                        </button>
-                      )}
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </div>
-                  </div>
+                        <div>
+                          <h4 className="font-semibold text-[#5a6c5b]">Tulis Ulasan Anda</h4>
+                          <p className="text-xs text-[#5a6c5b]/70">Bagikan pengalaman Anda dengan produk ini</p>
+                        </div>
+                      </div>
 
-                  <button
-                    onClick={handleSubmitReview}
-                    disabled={isSubmittingReview || !reviewText.trim()}
-                    className="w-full py-2 bg-[#A3AF87] text-white text-sm font-medium rounded-lg hover:bg-[#95a17a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmittingReview ? "Mengirim..." : "Kirim Ulasan"}
-                  </button>
-                  <p className="text-xs text-gray-500 mt-2 text-center">
-                    * Anda hanya dapat memberikan ulasan setelah membeli produk
-                    ini
-                  </p>
+                      {/* Rating Select */}
+                      <div className="mb-4">
+                        <label className="text-sm font-medium text-[#5a6c5b] mb-2 block">
+                          Berikan Rating
+                        </label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => setReviewRating(star)}
+                              className="focus:outline-none transform hover:scale-110 transition-transform"
+                            >
+                              <svg
+                                className={`h-8 w-8 transition-colors ${
+                                  star <= reviewRating
+                                    ? "fill-yellow-400 drop-shadow-sm"
+                                    : "fill-gray-300 hover:fill-yellow-200"
+                                }`}
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                            </button>
+                          ))}
+                          <span className="ml-2 text-sm text-[#5a6c5b] self-center font-medium">
+                            {reviewRating === 5 ? "Sangat Bagus!" : reviewRating === 4 ? "Bagus" : reviewRating === 3 ? "Cukup" : reviewRating === 2 ? "Kurang" : "Buruk"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Review Text */}
+                      <div className="mb-4">
+                        <label className="text-sm font-medium text-[#5a6c5b] mb-2 block">
+                          Ulasan Anda
+                        </label>
+                        <textarea
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="Ceritakan pengalaman Anda menggunakan produk ini..."
+                          className="w-full p-3 text-sm border-2 border-gray-200 rounded-xl focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none resize-none transition-all text-[#5a6c5b] placeholder:text-gray-400"
+                          rows={4}
+                        />
+                      </div>
+
+                      {/* Photo Upload */}
+                      <div className="mb-4">
+                        <label className="text-sm font-medium text-[#5a6c5b] mb-2 block">
+                          Tambah Foto <span className="text-gray-400 font-normal">(Opsional, maks 3)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {reviewImages.map((img, index) => (
+                            <div
+                              key={index}
+                              className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-sm"
+                            >
+                              <img
+                                src={img}
+                                alt={`Review ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                onClick={() => removeReviewImage(index)}
+                                className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                              >
+                                <svg
+                                  className="w-3 h-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          ))}
+                          {reviewImages.length < 3 && (
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-[#A3AF87] hover:text-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all"
+                            >
+                              <svg
+                                className="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 4v16m8-8H4"
+                                />
+                              </svg>
+                              <span className="text-xs mt-1">Foto</span>
+                            </button>
+                          )}
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleSubmitReview}
+                        disabled={isSubmittingReview || !reviewText.trim()}
+                        className="w-full py-3 bg-[#A3AF87] text-white font-semibold rounded-xl hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex items-center justify-center gap-2"
+                      >
+                        {isSubmittingReview ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            <span>Mengirim...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            <span>Kirim Ulasan</span>
+                          </>
+                        )}
+                      </button>
+                    </>
+                  ) : purchaseStatus?.hasReviewed ? (
+                    <div className="text-center py-6">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <h4 className="font-semibold text-[#5a6c5b] mb-1">Terima Kasih!</h4>
+                      <p className="text-sm text-gray-500">Anda sudah memberikan ulasan untuk produk ini</p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-semibold text-[#5a6c5b] mb-1">Beli Dulu, Baru Review</h4>
+                      <p className="text-sm text-gray-500 mb-3">Anda hanya dapat memberikan ulasan setelah membeli produk ini</p>
+                      <button
+                        onClick={() => {
+                          const checkoutUrl = `/market/checkout?productId=${product.id}&qty=1`;
+                          router.push(checkoutUrl);
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white text-sm font-medium rounded-lg hover:bg-[#95a17a] transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        Beli Sekarang
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Reviews List - Compact with Photo Support */}

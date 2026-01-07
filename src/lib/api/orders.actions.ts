@@ -11,6 +11,15 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  sendOrderConfirmedWhatsApp,
+  sendOrderProcessingWhatsApp,
+  sendOrderShippedWhatsApp,
+  sendOrderReadyPickupWhatsApp,
+  sendOrderCancelledByFarmerWhatsApp,
+  sendOrderCancelledByCustomerToFarmerWhatsApp,
+  sendOrderCompletedWhatsApp,
+} from "@/lib/whatsapp/venusconnect";
 
 // ==========================================
 // HELPER: Record Sales to product_sales_history
@@ -666,6 +675,62 @@ export async function cancelOrderByCustomer(
     // Restore product stock
     await restoreProductStock(supabase, transaction.id);
 
+    // Send WhatsApp notification to farmer(s)
+    try {
+      const { data: transactionData } = await supabase
+        .from("transactions")
+        .select("customer_name")
+        .eq("id", transaction.id)
+        .single();
+
+      const { data: transactionItems } = await supabase
+        .from("transaction_items")
+        .select(`
+          product_id,
+          products (
+            farmer_id,
+            farmers (
+              farm_name,
+              users (name, phone)
+            )
+          )
+        `)
+        .eq("transaction_id", transaction.id);
+
+      // Get unique farmers
+      const farmerNotifications = new Map();
+      for (const item of transactionItems || []) {
+        const products = Array.isArray(item.products) ? item.products[0] : item.products;
+        const farmers = products?.farmers;
+        const farmerData = Array.isArray(farmers) ? farmers[0] : farmers;
+        const userData = farmerData?.users;
+        const userInfo = Array.isArray(userData) ? userData[0] : userData;
+
+        const farmerId = products?.farmer_id;
+        if (farmerId && !farmerNotifications.has(farmerId)) {
+          farmerNotifications.set(farmerId, {
+            name: userInfo?.name || "Farmer",
+            phone: userInfo?.phone,
+          });
+        }
+      }
+
+      // Send notification to each farmer
+      for (const [, farmerInfo] of farmerNotifications) {
+        if (farmerInfo.phone) {
+          await sendOrderCancelledByCustomerToFarmerWhatsApp(
+            farmerInfo.phone,
+            farmerInfo.name,
+            orderId,
+            transactionData?.customer_name || "Customer",
+            reason
+          ).catch((err) => console.error("WhatsApp notification failed:", err));
+        }
+      }
+    } catch (err) {
+      console.error("❌ [cancelOrderByCustomer] WhatsApp notification error:", err);
+    }
+
     console.log(`✅ [cancelOrderByCustomer] Order cancelled: ${orderId}`);
 
     return {
@@ -792,6 +857,20 @@ export async function cancelOrderByFarmer(
 
     // Restore product stock
     await restoreProductStock(supabase, transaction.id);
+
+    // Send WhatsApp notification to customer
+    try {
+      if (transaction.customer_phone) {
+        await sendOrderCancelledByFarmerWhatsApp(
+          transaction.customer_phone,
+          transaction.customer_name,
+          orderId,
+          reason
+        ).catch((err) => console.error("WhatsApp notification failed:", err));
+      }
+    } catch (err) {
+      console.error("❌ [cancelOrderByFarmer] WhatsApp notification error:", err);
+    }
 
     console.log(`✅ [cancelOrderByFarmer] Order cancelled: ${orderId}`);
 
@@ -997,6 +1076,73 @@ export async function updateOrderStatusByFarmer(
         note: getStatusNote(newStatus, additionalData),
         tracked_at: new Date().toISOString(),
       });
+
+      // Send WhatsApp notification to customer for status changes
+      try {
+        const { data: transactionData } = await supabase
+          .from("transactions")
+          .select("customer_name, customer_phone, estimated_delivery")
+          .eq("id", transaction.id)
+          .single();
+
+        if (transactionData?.customer_phone) {
+          const customerPhone = transactionData.customer_phone;
+          const customerName = transactionData.customer_name;
+
+          switch (newStatus) {
+            case "confirmed":
+              await sendOrderConfirmedWhatsApp(
+                customerPhone,
+                customerName,
+                orderId
+              ).catch((err) => console.error("WhatsApp notification failed:", err));
+              break;
+
+            case "processing":
+              await sendOrderProcessingWhatsApp(
+                customerPhone,
+                customerName,
+                orderId
+              ).catch((err) => console.error("WhatsApp notification failed:", err));
+              break;
+
+            case "ready_pickup":
+              await sendOrderReadyPickupWhatsApp(
+                customerPhone,
+                customerName,
+                orderId
+              ).catch((err) => console.error("WhatsApp notification failed:", err));
+              break;
+
+            case "shipped":
+              await sendOrderShippedWhatsApp(
+                customerPhone,
+                customerName,
+                orderId,
+                additionalData?.trackingNumber,
+                additionalData?.courierCode,
+                transactionData.estimated_delivery || undefined
+              ).catch((err) => console.error("WhatsApp notification failed:", err));
+              break;
+
+            case "delivered":
+              // Delivered status uses the same template as delivery notification
+              // We can reuse the existing sendDeliveryNotificationWhatsApp or create a new one
+              // For now, we'll skip this as it's typically auto-detected by courier
+              break;
+
+            case "completed":
+              await sendOrderCompletedWhatsApp(
+                customerPhone,
+                customerName,
+                orderId
+              ).catch((err) => console.error("WhatsApp notification failed:", err));
+              break;
+          }
+        }
+      } catch (err) {
+        console.error("❌ [updateOrderStatusByFarmer] WhatsApp notification error:", err);
+      }
     }
 
     console.log(`✅ [updateOrderStatusByFarmer] Order updated: ${orderId} -> ${newStatus}`);

@@ -14,6 +14,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { sendNewSupplyNotificationToFarmer } from "@/lib/whatsapp/venusconnect";
 
 // ==========================================
 // TYPES
@@ -322,9 +323,60 @@ export async function createSupply(
       completedAt: newSupply.completed_at,
     };
 
+    // Send WhatsApp notification to all farmers
+    console.log("📱 Sending WhatsApp notification to farmers...");
+    try {
+      // Get all farmers (users with FARMER role)
+      const { data: farmers } = await supabase
+        .from("users")
+        .select("id, name, phone, farmers(farm_name)")
+        .eq("role", "FARMER");
+
+      if (farmers && farmers.length > 0) {
+        // Get user data for supply details
+        const { data: userData } = await supabase
+          .from("users")
+          .select("name")
+          .eq("id", user.id)
+          .single();
+
+        const userName = userData?.name || "User";
+
+        // Send notification to each farmer
+        for (const farmer of farmers) {
+          if (farmer.phone) {
+            const farmerData = Array.isArray(farmer.farmers) ? farmer.farmers[0] : farmer.farmers;
+            const farmerName = farmer.name || farmerData?.farm_name || "Farmer";
+
+            const whatsappResult = await sendNewSupplyNotificationToFarmer(
+              farmer.phone,
+              farmerName,
+              transformedSupply.supplyNumber || "N/A",
+              userName,
+              transformedSupply.wasteType,
+              transformedSupply.estimatedWeight,
+              transformedSupply.pickupDate,
+              transformedSupply.pickupTimeRange || transformedSupply.pickupTimeSlot,
+              transformedSupply.pickupAddress
+            );
+
+            if (whatsappResult.success) {
+              console.log(`✅ WhatsApp sent to farmer: ${farmerName}`);
+            } else {
+              console.error(`⚠️ Failed to send WhatsApp to farmer ${farmerName}: ${whatsappResult.message}`);
+            }
+          }
+        }
+      }
+    } catch (whatsappError) {
+      console.error("⚠️ WhatsApp notification error:", whatsappError);
+      // Don't fail the supply creation if WhatsApp fails
+    }
+
     // Revalidate pages
     revalidatePath("/supply");
     revalidatePath("/supply/history");
+    revalidatePath("/farmer/supply-monitoring");
 
     return {
       success: true,

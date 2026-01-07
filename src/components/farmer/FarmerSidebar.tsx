@@ -45,9 +45,14 @@ const farmerLinks = [
     href: "/farmer/supply-monitoring",
     icon: <Recycle className="h-5 w-5 shrink-0" />,
   },
+  {
+    label: "Profile",
+    href: "/farmer/profile",
+    icon: <User className="h-5 w-5 shrink-0" />,
+  },
 ];
 
-// Bottom navigation links for mobile (main 4 items)
+// Bottom navigation links for mobile (main 4 items + profile)
 const mobileNavLinks = [
   {
     label: "Dashboard",
@@ -68,6 +73,11 @@ const mobileNavLinks = [
     label: "Supply",
     href: "/farmer/supply-monitoring",
     icon: <Recycle className="h-5 w-5" />,
+  },
+  {
+    label: "Profile",
+    href: "/farmer/profile",
+    icon: <User className="h-5 w-5" />,
   },
 ];
 

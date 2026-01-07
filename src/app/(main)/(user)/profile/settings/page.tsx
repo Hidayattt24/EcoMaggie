@@ -173,11 +173,15 @@ export default function ProfileSettings() {
   const handleSaveProfile = async () => {
     setIsSaving(true);
 
+    // Check if email is being changed
+    const emailChanged = profileData.email !== profile?.email;
+
     const updateData: UpdateProfileData = {
       name: profileData.name,
       phone: profileData.phone,
       userType: profileData.userType,
       avatar: imagePreview || undefined,
+      email: emailChanged ? profileData.email : undefined,
     };
 
     const result = await updateUserProfile(updateData);
@@ -185,10 +189,13 @@ export default function ProfileSettings() {
     if (result.success) {
       await Swal.fire({
         title: "Berhasil!",
-        text: result.message,
+        text: emailChanged 
+          ? "Profil berhasil diperbarui. Jika email diubah, silakan cek email baru untuk verifikasi."
+          : result.message,
         icon: "success",
         confirmButtonColor: "#A3AF87",
-        timer: 2000,
+        timer: emailChanged ? undefined : 2000,
+        showConfirmButton: emailChanged,
       });
       setIsEditMode(false);
       if (result.data) {
@@ -582,16 +589,28 @@ export default function ProfileSettings() {
                   <input
                     type="email"
                     value={profileData.email}
-                    disabled
-                    className="w-full px-4 py-3.5 pr-36 border-2 border-gray-200 rounded-xl transition-all bg-gray-50 text-gray-600 font-medium cursor-not-allowed"
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, email: e.target.value })
+                    }
+                    disabled={!isEditMode}
+                    className="w-full px-4 py-3.5 pr-36 border-2 border-gray-200 rounded-xl transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#5a6c5b] font-medium focus:ring-2 focus:ring-[#A3AF87] focus:border-[#A3AF87] group-hover:border-gray-300"
+                    placeholder="email@example.com"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 px-2 py-1 bg-green-50 rounded-lg">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-green-700">
-                      Terverifikasi
-                    </span>
-                  </div>
+                  {!isEditMode && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 px-2 py-1 bg-green-50 rounded-lg">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-700">
+                        Terverifikasi
+                      </span>
+                    </div>
+                  )}
                 </div>
+                {isEditMode && profileData.email !== profile?.email && (
+                  <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Email akan diubah. Verifikasi mungkin diperlukan.
+                  </p>
+                )}
               </div>
 
               {/* Nomor Telepon */}

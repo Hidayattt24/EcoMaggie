@@ -832,3 +832,84 @@ export async function transformCartToBiteshipItems(
   }));
 }
 
+
+
+/**
+ * Handle Biteship Webhook
+ * Process shipping status updates from Biteship
+ * @param payload - Webhook payload from Biteship
+ * @returns Processing result
+ */
+export async function handleBiteshipWebhook(
+  payload: any
+): Promise<ApiResponse<any>> {
+  try {
+    console.log("📦 [handleBiteshipWebhook] Processing webhook payload");
+
+    // Extract relevant data from webhook
+    const {
+      order_id,
+      waybill_id,
+      status,
+      courier_tracking_id,
+      courier_waybill_id,
+    } = payload;
+
+    if (!order_id && !waybill_id) {
+      console.warn("⚠️ [handleBiteshipWebhook] No order_id or waybill_id in payload");
+      return {
+        success: false,
+        message: "Missing order_id or waybill_id",
+      };
+    }
+
+    console.log("📋 [handleBiteshipWebhook] Webhook data:", {
+      order_id,
+      waybill_id,
+      status,
+      courier_tracking_id,
+      courier_waybill_id,
+    });
+
+    // Map Biteship status to our internal status
+    const statusMapping: Record<string, string> = {
+      confirmed: "PROCESSING",
+      allocated: "PROCESSING",
+      picking_up: "SHIPPED",
+      picked: "SHIPPED",
+      dropping_off: "SHIPPED",
+      delivered: "DELIVERED",
+      rejected: "CANCELLED",
+      cancelled: "CANCELLED",
+      on_hold: "PROCESSING",
+      courier_not_found: "PROCESSING",
+    };
+
+    const mappedStatus = statusMapping[status] || "PROCESSING";
+
+    console.log(`✅ [handleBiteshipWebhook] Status mapped: ${status} -> ${mappedStatus}`);
+
+    // Here you would typically update your order in the database
+    // For now, we just log and return success
+    // TODO: Implement database update when needed
+    // Example:
+    // await updateOrderShippingStatus(order_id, mappedStatus, waybill_id);
+
+    return {
+      success: true,
+      message: `Webhook processed: ${status} -> ${mappedStatus}`,
+      data: {
+        order_id,
+        waybill_id,
+        original_status: status,
+        mapped_status: mappedStatus,
+      },
+    };
+  } catch (error) {
+    console.error("❌ [handleBiteshipWebhook] Error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to process webhook",
+    };
+  }
+}

@@ -13,6 +13,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { UserSupply, SupplyStatus } from "@/lib/api/supply.actions";
+import {
+  sendSupplyPickupScheduledWhatsApp,
+  sendSupplyOnTheWayWhatsApp,
+  sendSupplyCompletedWhatsApp,
+} from "@/lib/whatsapp/venusconnect";
 
 // ==========================================
 // TYPES
@@ -357,6 +362,19 @@ export async function updateSupplyStatus(
       updatePayload.condition_photo_url = updateData.conditionPhotoUrl;
     }
 
+    // Get supply data with user info for WhatsApp notification
+    const { data: supplyData } = await supabase
+      .from("user_supplies")
+      .select(`
+        *,
+        users!user_supplies_user_id_fkey (
+          name,
+          phone
+        )
+      `)
+      .eq("id", updateData.supplyId)
+      .single();
+
     // Update supply
     const { error: updateError } = await supabase
       .from("user_supplies")
@@ -370,6 +388,53 @@ export async function updateSupplyStatus(
         message: "Gagal update supply status",
         error: updateError.message,
       };
+    }
+
+    // Send WhatsApp notification based on status
+    if (supplyData && supplyData.users) {
+      const userPhone = supplyData.users.phone;
+      const userName = supplyData.users.name;
+      const supplyNumber = supplyData.supply_number;
+
+      if (userPhone) {
+        try {
+          if (updateData.status === "SCHEDULED") {
+            // Send pickup scheduled notification
+            await sendSupplyPickupScheduledWhatsApp(
+              userPhone,
+              userName,
+              supplyNumber,
+              supplyData.pickup_date,
+              supplyData.pickup_time_range || supplyData.pickup_time_slot,
+              updateData.courierName
+            );
+            console.log(`✅ Sent SCHEDULED WhatsApp notification to ${userPhone}`);
+          } else if (updateData.status === "ON_THE_WAY") {
+            // Send on the way notification
+            await sendSupplyOnTheWayWhatsApp(
+              userPhone,
+              userName,
+              supplyNumber,
+              updateData.courierName || supplyData.courier_name || "Kurir",
+              updateData.courierPhone || supplyData.courier_phone,
+              updateData.estimatedArrival || supplyData.estimated_arrival
+            );
+            console.log(`✅ Sent ON_THE_WAY WhatsApp notification to ${userPhone}`);
+          } else if (updateData.status === "COMPLETED") {
+            // Send completed notification
+            await sendSupplyCompletedWhatsApp(
+              userPhone,
+              userName,
+              supplyNumber,
+              updateData.actualWeight || supplyData.actual_weight
+            );
+            console.log(`✅ Sent COMPLETED WhatsApp notification to ${userPhone}`);
+          }
+        } catch (whatsappError) {
+          console.error("⚠️ Failed to send WhatsApp notification:", whatsappError);
+          // Don't fail the update if WhatsApp notification fails
+        }
+      }
     }
 
     // Revalidate pages

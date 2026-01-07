@@ -1,10 +1,11 @@
 /**
  * API Route: Order Completed Notification
- * Sends notifications to farmer and customer when order is completed
+ * Sends WhatsApp notifications to customer when order is completed
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendOrderCompletedWhatsApp } from "@/lib/whatsapp/venusconnect";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,103 +34,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get farmer info from transaction items
-    const { data: items } = await supabase
-      .from("transaction_items")
-      .select(`
-        products(
-          farmer_id,
-          farmers(
-            farm_name,
-            users(email)
-          )
-        )
-      `)
-      .eq("transaction_id", transaction.id)
-      .limit(1);
+    console.log(`📱 [order-completed] Sending WhatsApp notification for order: ${transaction.order_id}`);
+    console.log(`   Customer: ${transaction.customer_name} (${transaction.customer_phone})`);
 
-    // Handle nested Supabase response with proper typing
-    const firstItem = items?.[0] as {
-      products?: {
-        farmer_id?: string;
-        farmers?: { farm_name?: string; users?: { email?: string } | { email?: string }[] } | 
-                  { farm_name?: string; users?: { email?: string } | { email?: string }[] }[];
-      } | {
-        farmer_id?: string;
-        farmers?: { farm_name?: string; users?: { email?: string } | { email?: string }[] } | 
-                  { farm_name?: string; users?: { email?: string } | { email?: string }[] }[];
-      }[];
-    } | undefined;
+    // Send WhatsApp notification to customer
+    let customerNotified = false;
+    if (transaction.customer_phone) {
+      const whatsappResult = await sendOrderCompletedWhatsApp(
+        transaction.customer_phone,
+        transaction.customer_name,
+        transaction.order_id
+      );
 
-    const productsData = firstItem?.products;
-    const product = Array.isArray(productsData) ? productsData[0] : productsData;
-    const farmersData = product?.farmers;
-    const farmer = Array.isArray(farmersData) ? farmersData[0] : farmersData;
-    const usersData = farmer?.users;
-    const user = Array.isArray(usersData) ? usersData[0] : usersData;
-    
-    const farmerEmail = user?.email;
-    const farmName = farmer?.farm_name;
-
-    console.log(`📧 [order-completed] Sending notifications for order: ${transaction.order_id}`);
-    console.log(`   Customer: ${transaction.customer_email}`);
-    console.log(`   Farmer: ${farmerEmail}`);
-
-    // TODO: Integrate with email service (Resend, SendGrid, etc.)
-    // For now, just log the notification
-
-    const notifications = {
-      customer: {
-        email: transaction.customer_email,
-        subject: `Pesanan ${transaction.order_id} Selesai - Terima Kasih!`,
-        message: `
-          Halo ${transaction.customer_name},
-          
-          Terima kasih telah berbelanja di EcoMaggie!
-          
-          Pesanan Anda dengan ID ${transaction.order_id} telah selesai.
-          
-          Kami sangat menghargai jika Anda berkenan memberikan ulasan untuk produk yang telah Anda beli.
-          Ulasan Anda sangat membantu petani lokal dan pembeli lainnya.
-          
-          Salam hangat,
-          Tim EcoMaggie
-        `,
-      },
-      farmer: farmerEmail ? {
-        email: farmerEmail,
-        subject: `Pesanan ${transaction.order_id} Selesai - Dana Akan Diteruskan`,
-        message: `
-          Halo ${farmName || "Petani EcoMaggie"},
-          
-          Kabar baik! Pesanan ${transaction.order_id} telah dikonfirmasi selesai oleh pembeli.
-          
-          Detail Pesanan:
-          - Total: Rp ${transaction.total_amount.toLocaleString("id-ID")}
-          - Pendapatan Bersih: Rp ${Math.round(transaction.subtotal * 0.95).toLocaleString("id-ID")}
-          
-          Dana akan diteruskan ke rekening Anda sesuai jadwal pencairan.
-          
-          Terima kasih telah menjadi bagian dari EcoMaggie!
-          
-          Salam,
-          Tim EcoMaggie
-        `,
-      } : null,
-    };
-
-    // Log notifications (replace with actual email sending)
-    console.log("📧 Customer notification:", notifications.customer.subject);
-    if (notifications.farmer) {
-      console.log("📧 Farmer notification:", notifications.farmer.subject);
+      if (whatsappResult.success) {
+        console.log(`✅ [order-completed] WhatsApp sent to customer`);
+        customerNotified = true;
+      } else {
+        console.error(`⚠️ [order-completed] Failed to send WhatsApp:`, whatsappResult.message);
+      }
+    } else {
+      console.warn(`⚠️ [order-completed] No phone number for customer`);
     }
 
     return NextResponse.json({
       success: true,
-      message: "Notifications queued",
+      message: "WhatsApp notification sent",
       data: {
-        customerNotified: true,
-        farmerNotified: !!notifications.farmer,
+        customerNotified,
       },
     });
   } catch (error) {

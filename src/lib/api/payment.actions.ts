@@ -8,6 +8,12 @@ import {
   mapMidtransStatus,
   normalizeOrderId,
 } from "@/lib/midtrans";
+import {
+  sendNewOrderNotificationToFarmer,
+  sendNewOrderPendingToFarmerWhatsApp,
+  sendOrderCreatedWhatsApp,
+  sendPaymentSuccessWhatsApp,
+} from "@/lib/whatsapp/venusconnect";
 // NOTE: Biteship Order API tidak digunakan (manual booking workflow)
 // Farmer akan booking courier manual dan input resi ke sistem
 
@@ -341,6 +347,77 @@ export async function createPaymentTransaction(
 
     console.log("✅ Payment transaction created successfully");
 
+    // Send WhatsApp notifications (fire and forget)
+    try {
+      // Send to customer
+      if (paymentData.shippingAddress.recipientPhone) {
+        await sendOrderCreatedWhatsApp(
+          paymentData.shippingAddress.recipientPhone,
+          paymentData.shippingAddress.recipientName,
+          orderId,
+          paymentData.total,
+          paymentData.checkoutProducts.length
+        ).catch((err) => console.error("WhatsApp notification to customer failed:", err));
+      }
+
+      // Send to farmer(s)
+      const { data: transactionItems } = await supabase
+        .from("transaction_items")
+        .select(`
+          product_id,
+          quantity,
+          unit_price,
+          products (
+            farmer_id,
+            farmers (
+              farm_name,
+              users (name, phone)
+            )
+          )
+        `)
+        .eq("transaction_id", transaction.id);
+
+      // Group by farmer
+      const farmerNotifications = new Map();
+      for (const item of transactionItems || []) {
+        const products = Array.isArray(item.products) ? item.products[0] : item.products;
+        const farmers = products?.farmers;
+        const farmerData = Array.isArray(farmers) ? farmers[0] : farmers;
+        const userData = farmerData?.users;
+        const userInfo = Array.isArray(userData) ? userData[0] : userData;
+
+        const farmerId = products?.farmer_id;
+        if (farmerId && !farmerNotifications.has(farmerId)) {
+          farmerNotifications.set(farmerId, {
+            name: userInfo?.name || "Farmer",
+            phone: userInfo?.phone,
+            itemCount: 0,
+          });
+        }
+
+        if (farmerId) {
+          const info = farmerNotifications.get(farmerId);
+          info.itemCount += item.quantity;
+        }
+      }
+
+      // Send notification to each farmer
+      for (const [, farmerInfo] of farmerNotifications) {
+        if (farmerInfo.phone) {
+          await sendNewOrderPendingToFarmerWhatsApp(
+            farmerInfo.phone,
+            farmerInfo.name,
+            orderId,
+            paymentData.shippingAddress.recipientName,
+            paymentData.total,
+            farmerInfo.itemCount
+          ).catch((err) => console.error("WhatsApp notification to farmer failed:", err));
+        }
+      }
+    } catch (err) {
+      console.error("❌ WhatsApp notification error:", err);
+    }
+
     return {
       success: true,
       message: "Transaksi pembayaran berhasil dibuat",
@@ -665,6 +742,94 @@ export async function handlePaymentNotification(
           } else {
             console.log("✅ [WEBHOOK] Cart items cleared successfully!");
           }
+        }
+
+        // Send WhatsApp notification to farmer(s)
+        console.log("📱 [WEBHOOK] Sending WhatsApp notification to farmer...");
+        try {
+          // Get unique farmers from transaction items
+          const { data: farmersData } = await supabase
+            .from("transaction_items")
+            .select(`
+              product_id,
+              products (
+                farmer_id,
+                farmers (
+                  farm_name,
+                  users (
+                    name,
+                    phone
+                  )
+                )
+              )
+            `)
+            .eq("transaction_id", transaction.id);
+
+          if (farmersData && farmersData.length > 0) {
+            // Group by farmer to send one notification per farmer
+            const farmerNotifications = new Map();
+
+            for (const item of farmersData) {
+              const product = Array.isArray(item.products) ? item.products[0] : item.products;
+              const farmerData = Array.isArray(product?.farmers) ? product.farmers[0] : product?.farmers;
+              const userData = Array.isArray(farmerData?.users) ? farmerData.users[0] : farmerData?.users;
+
+              if (farmerData && userData?.phone) {
+                const farmerId = product.farmer_id;
+                if (!farmerNotifications.has(farmerId)) {
+                  farmerNotifications.set(farmerId, {
+                    phone: userData.phone,
+                    name: userData.name || farmerData.farm_name || "Farmer",
+                    itemCount: 1,
+                  });
+                } else {
+                  farmerNotifications.get(farmerId).itemCount++;
+                }
+              }
+            }
+
+            // Send notification to each farmer
+            for (const [farmerId, farmerInfo] of farmerNotifications) {
+              const whatsappResult = await sendNewOrderNotificationToFarmer(
+                farmerInfo.phone,
+                farmerInfo.name,
+                transaction.order_id,
+                transaction.customer_name || "Customer",
+                transaction.total_amount,
+                farmerInfo.itemCount
+              );
+
+              if (whatsappResult.success) {
+                console.log(`✅ [WEBHOOK] WhatsApp sent to farmer: ${farmerInfo.name}`);
+              } else {
+                console.error(`⚠️ [WEBHOOK] Failed to send WhatsApp to farmer: ${whatsappResult.message}`);
+              }
+            }
+          }
+        } catch (whatsappError) {
+          console.error("⚠️ [WEBHOOK] WhatsApp notification error:", whatsappError);
+          // Don't fail the webhook if WhatsApp fails
+        }
+
+        // Send payment success notification to customer
+        console.log("📱 [WEBHOOK] Sending payment success notification to customer...");
+        try {
+          if (transaction.customer_phone && transaction.customer_name) {
+            const whatsappResult = await sendPaymentSuccessWhatsApp(
+              transaction.customer_phone,
+              transaction.customer_name,
+              transaction.order_id,
+              transaction.total_amount
+            );
+
+            if (whatsappResult.success) {
+              console.log("✅ [WEBHOOK] Payment success WhatsApp sent to customer");
+            } else {
+              console.error(`⚠️ [WEBHOOK] Failed to send payment success WhatsApp: ${whatsappResult.message}`);
+            }
+          }
+        } catch (whatsappError) {
+          console.error("⚠️ [WEBHOOK] Payment success WhatsApp error:", whatsappError);
         }
       }
     }

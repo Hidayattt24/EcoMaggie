@@ -11,6 +11,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 // ==========================================
@@ -39,6 +40,7 @@ export interface UserProfile {
 
 export interface UpdateProfileData {
   name?: string;
+  email?: string;
   phone?: string;
   userType?: string;
   avatar?: string; // base64 or URL
@@ -199,6 +201,10 @@ export async function updateUserProfile(
       updates.name = updateData.name.trim();
     }
 
+    if (updateData.email !== undefined) {
+      updates.email = updateData.email.trim();
+    }
+
     if (updateData.phone !== undefined) {
       // Validate phone format
       const phoneRegex = /^(08|62|\+62)[0-9]{8,13}$/;
@@ -225,6 +231,61 @@ export async function updateUserProfile(
       updates.avatar = updateData.avatar;
     }
 
+    // Update Supabase Auth (email, display name, phone) FIRST using Admin API
+    const authUpdates: { email?: string; phone?: string; user_metadata?: { name?: string; phone?: string } } = {};
+    
+    if (updateData.email !== undefined && updateData.email !== user.email) {
+      authUpdates.email = updateData.email;
+    }
+    
+    if (updateData.name !== undefined || updateData.phone !== undefined) {
+      authUpdates.user_metadata = {};
+      if (updateData.name !== undefined) {
+        authUpdates.user_metadata.name = updateData.name.trim();
+      }
+      if (updateData.phone !== undefined) {
+        authUpdates.user_metadata.phone = updateData.phone;
+      }
+    }
+    
+    // Also update phone at auth level if provided
+    if (updateData.phone !== undefined) {
+      // Format phone for Supabase Auth (needs E.164 format: +62xxx)
+      let formattedPhone = updateData.phone;
+      if (formattedPhone.startsWith('08')) {
+        formattedPhone = '+62' + formattedPhone.substring(1);
+      } else if (formattedPhone.startsWith('62')) {
+        formattedPhone = '+' + formattedPhone;
+      } else if (!formattedPhone.startsWith('+')) {
+        formattedPhone = '+' + formattedPhone;
+      }
+      authUpdates.phone = formattedPhone;
+    }
+
+    if (Object.keys(authUpdates).length > 0) {
+      try {
+        const adminClient = createAdminClient();
+        const { error: authUpdateError } = await adminClient.auth.admin.updateUserById(
+          user.id,
+          authUpdates
+        );
+
+        if (authUpdateError) {
+          console.error("Update auth error:", authUpdateError);
+          return {
+            success: false,
+            message: "Gagal update data. Email mungkin sudah digunakan oleh akun lain.",
+          };
+        }
+      } catch (adminError) {
+        console.error("Admin client error:", adminError);
+        return {
+          success: false,
+          message: "Gagal update data. Silakan coba lagi.",
+        };
+      }
+    }
+
     // Update profile in database
     const { data: updatedProfile, error: updateError } = await supabase
       .from("users")
@@ -235,6 +296,28 @@ export async function updateUserProfile(
 
     if (updateError) {
       console.error("Profile update error:", updateError);
+      // Rollback auth changes if database update fails
+      if (Object.keys(authUpdates).length > 0) {
+        try {
+          const adminClient = createAdminClient();
+          const rollbackData: { email?: string; phone?: string; user_metadata?: { name?: string; phone?: string } } = {};
+          if (authUpdates.email && user.email) {
+            rollbackData.email = user.email;
+          }
+          if (authUpdates.phone && user.phone) {
+            rollbackData.phone = user.phone;
+          }
+          if (authUpdates.user_metadata) {
+            rollbackData.user_metadata = { 
+              name: user.user_metadata?.name,
+              phone: user.user_metadata?.phone 
+            };
+          }
+          await adminClient.auth.admin.updateUserById(user.id, rollbackData);
+        } catch (rollbackError) {
+          console.error("Rollback auth error:", rollbackError);
+        }
+      }
       return {
         success: false,
         message: "Gagal memperbarui profil",

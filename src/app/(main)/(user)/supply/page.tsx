@@ -18,7 +18,6 @@ import {
   AlertTriangle,
   Leaf,
   Users,
-  Scale,
   MapPinOff,
   Info,
   Sparkles,
@@ -339,6 +338,12 @@ export default function SupplyPage() {
                       href="/supply/input"
                       className="group relative bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all overflow-hidden"
                     >
+                      {/* Animated pulse indicator */}
+                      <div className="absolute -top-1 -right-1 w-4 h-4 z-20">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-75 animate-ping"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-white shadow-lg"></span>
+                      </div>
+                      
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
                       <div className="relative">
@@ -360,8 +365,14 @@ export default function SupplyPage() {
 
                     <Link
                       href="/supply/history"
-                      className="group bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-lg transition-all"
+                      className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-lg transition-all"
                     >
+                      {/* Animated pulse indicator */}
+                      <div className="absolute -top-1 -right-1 w-4 h-4 z-20">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-[#A3AF87] opacity-75 animate-ping"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-[#A3AF87] shadow-lg"></span>
+                      </div>
+                      
                       <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#A3AF87]/10 transition-colors">
                         <History className="h-7 w-7 text-gray-600 group-hover:text-[#A3AF87] transition-colors" />
                       </div>
@@ -452,10 +463,10 @@ export default function SupplyPage() {
               })}
             </motion.div>
 
-            {/* Impact Info */}
+            {/* Impact Info - Mobile only */}
             <motion.div
               variants={itemVariants}
-              className="bg-gradient-to-br from-[#A3AF87]/5 to-[#95a17a]/10 rounded-2xl p-5 border border-[#A3AF87]/10"
+              className="lg:hidden bg-gradient-to-br from-[#A3AF87]/5 to-[#95a17a]/10 rounded-2xl p-5 border border-[#A3AF87]/10"
             >
               <div className="flex items-center gap-3 mb-3">
                 <Globe className="h-5 w-5 text-[#A3AF87]" />
@@ -576,6 +587,69 @@ export default function SupplyPage() {
                     </div>
                   );
                 })}
+              </div>
+            </motion.div>
+
+            {/* Impact Info - Desktop only */}
+            <motion.div
+              variants={itemVariants}
+              className="hidden lg:block bg-gradient-to-br from-[#A3AF87]/5 to-[#95a17a]/10 rounded-2xl p-6 border border-[#A3AF87]/10"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Globe className="h-5 w-5 text-[#A3AF87]" />
+                <h3 className="font-semibold text-gray-900">
+                  Dampak untuk Bumi
+                </h3>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Setiap kilogram sampah organik yang Anda sumbangkan membantu
+                mengurangi emisi gas rumah kaca dan mendukung pertanian
+                berkelanjutan. Bersama kita wujudkan lingkungan yang lebih
+                bersih.
+              </p>
+            </motion.div>
+
+            {/* FAQ / Tips Section */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Info className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-gray-900">Tips Menyimpan Sampah Organik</h3>
+              </div>
+              <div className="space-y-3">
+                {[
+                  {
+                    title: "Pisahkan dari Sampah Anorganik",
+                    desc: "Pastikan sampah organik tidak tercampur dengan plastik, kaca, atau logam.",
+                  },
+                  {
+                    title: "Simpan di Wadah Tertutup",
+                    desc: "Gunakan wadah tertutup untuk menghindari bau dan serangga.",
+                  },
+                  {
+                    title: "Tiriskan Air Berlebih",
+                    desc: "Kurangi kadar air pada sampah untuk mencegah pembusukan cepat.",
+                  },
+                ].map((tip, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 bg-white/60 rounded-xl p-3 border border-blue-100/50"
+                  >
+                    <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 text-sm">
+                        {tip.title}
+                      </h4>
+                      <p className="text-xs text-gray-600 mt-0.5">{tip.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </motion.div>
           </motion.div>

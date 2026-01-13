@@ -68,8 +68,46 @@ function VerifyEmailContent() {
     : "****";
 
   const openEmailApp = () => {
-    // Try to open default email app
-    window.location.href = "mailto:";
+    // Detect email provider and redirect to appropriate web client
+    if (!email) {
+      // Fallback to Gmail if no email detected
+      window.open("https://mail.google.com/", "_blank");
+      return;
+    }
+
+    const emailLower = email.toLowerCase();
+
+    // Gmail
+    if (emailLower.includes("@gmail.com")) {
+      window.open("https://mail.google.com/", "_blank");
+    }
+    // Yahoo Mail
+    else if (
+      emailLower.includes("@yahoo.com") ||
+      emailLower.includes("@yahoo.co.id")
+    ) {
+      window.open("https://mail.yahoo.com/", "_blank");
+    }
+    // Outlook / Hotmail
+    else if (
+      emailLower.includes("@outlook.com") ||
+      emailLower.includes("@hotmail.com") ||
+      emailLower.includes("@live.com")
+    ) {
+      window.open("https://outlook.live.com/", "_blank");
+    }
+    // iCloud Mail
+    else if (emailLower.includes("@icloud.com")) {
+      window.open("https://www.icloud.com/mail", "_blank");
+    }
+    // Proton Mail
+    else if (emailLower.includes("@proton.me") || emailLower.includes("@protonmail.com")) {
+      window.open("https://mail.proton.me/", "_blank");
+    }
+    // Default fallback to Gmail (most common)
+    else {
+      window.open("https://mail.google.com/", "_blank");
+    }
   };
 
   return (

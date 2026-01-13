@@ -23,13 +23,21 @@ function LoginForm() {
   // Check if user just verified their email
   useEffect(() => {
     const verified = searchParams.get("verified");
+    const error = searchParams.get("error");
+    const message = searchParams.get("message");
+
     if (verified === "true") {
       success(
         "Email Terverifikasi!",
         "Akun Anda berhasil diverifikasi. Silakan login."
       );
+    } else if (error === "verification_failed") {
+      showError(
+        "Verifikasi Gagal",
+        message || "Link verifikasi tidak valid atau sudah kedaluwarsa. Silakan minta link baru."
+      );
     }
-  }, [searchParams, success]);
+  }, [searchParams, success, showError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

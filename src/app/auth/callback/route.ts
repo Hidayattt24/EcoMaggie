@@ -2,7 +2,7 @@
  * Auth Callback Route Handler
  * ===========================================
  * Handles email verification callback from Supabase
- * Exchanges the code for a session and redirects to login
+ * Exchanges the code for email verification WITHOUT auto-login
  */
 
 import { createClient } from "@/lib/supabase/server";
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient();
 
-    // Exchange code for session
+    // Exchange code for session (this verifies the email)
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
@@ -31,10 +31,13 @@ export async function GET(request: Request) {
 
     // Success - redirect based on type
     if (type === "recovery" || type === "reset") {
-      // Password reset - redirect to reset password page
+      // Password reset - keep session and redirect to reset password page
       return NextResponse.redirect(`${origin}/reset-password`);
     } else {
-      // Email verification (signup) - redirect to login
+      // Email verification (signup) - sign out and redirect to login
+      // This ensures user must login manually after verification
+      await supabase.auth.signOut();
+
       return NextResponse.redirect(`${origin}/login?verified=true`);
     }
   }

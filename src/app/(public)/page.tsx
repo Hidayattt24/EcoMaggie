@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import NavbarLandingPage from "@/components/landing/NavbarLandingPage";
 import HeroSection from "@/components/landing/HeroSection";
 import StatisticsSection from "@/components/landing/StatisticsSection";
@@ -8,6 +9,7 @@ import DampakSection from "@/components/landing/DampakSection";
 import TestimoniSection from "@/components/landing/TestimoniSection";
 import FooterSection from "@/components/landing/FooterSection";
 import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
+import EmailVerificationRedirect from "@/components/EmailVerificationRedirect";
 
 export const metadata: Metadata = {
   title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
@@ -39,6 +41,11 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="relative">
+      {/* Email Verification Auto-Redirect Handler */}
+      <Suspense fallback={null}>
+        <EmailVerificationRedirect />
+      </Suspense>
+
       {/* Navbar Fixed */}
       <NavbarLandingPage />
 

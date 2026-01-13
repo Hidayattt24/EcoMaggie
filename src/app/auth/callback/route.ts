@@ -11,6 +11,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const type = requestUrl.searchParams.get("type");
   const origin = requestUrl.origin;
 
   // If there's a code, exchange it for a session
@@ -28,8 +29,14 @@ export async function GET(request: Request) {
       );
     }
 
-    // Success - redirect to login with verified flag
-    return NextResponse.redirect(`${origin}/login?verified=true`);
+    // Success - redirect based on type
+    if (type === "recovery" || type === "reset") {
+      // Password reset - redirect to reset password page
+      return NextResponse.redirect(`${origin}/reset-password`);
+    } else {
+      // Email verification (signup) - redirect to login
+      return NextResponse.redirect(`${origin}/login?verified=true`);
+    }
   }
 
   // No code provided, redirect to login

@@ -198,15 +198,85 @@ export default function SupplyHistoryPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-600">Memuat...</p>
-        </motion.div>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+          {/* Header Skeleton */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse" />
+              <div>
+                <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse mb-2" />
+                <div className="h-4 w-64 bg-gray-200 rounded-lg animate-pulse" />
+              </div>
+            </div>
+            <div className="hidden lg:flex items-center gap-3 ml-auto">
+              <div className="w-40 h-16 bg-gray-200 rounded-xl animate-pulse" />
+              <div className="w-40 h-16 bg-gray-200 rounded-xl animate-pulse" />
+            </div>
+          </div>
+
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-5 xl:col-span-4">
+              {/* Search & Filter Skeleton */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+                <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse mb-5" />
+                <div className="flex gap-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-10 flex-1 bg-gray-200 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              </div>
+
+              {/* List Skeleton */}
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse" />
+                      <div className="flex-1 space-y-3">
+                        <div className="h-5 w-3/4 bg-gray-200 rounded-lg animate-pulse" />
+                        <div className="h-4 w-1/2 bg-gray-200 rounded-lg animate-pulse" />
+                        <div className="flex gap-2">
+                          <div className="h-7 w-20 bg-gray-200 rounded-lg animate-pulse" />
+                          <div className="h-7 w-24 bg-gray-200 rounded-lg animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="lg:col-span-7 xl:col-span-8">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                {/* Header Skeleton */}
+                <div className="bg-gray-200 p-6 animate-pulse">
+                  <div className="h-6 w-32 bg-gray-300 rounded-lg mb-4" />
+                  <div className="h-8 w-48 bg-gray-300 rounded-lg mb-6" />
+                  <div className="grid grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i}>
+                        <div className="h-4 w-16 bg-gray-300 rounded-lg mb-2 animate-pulse" />
+                        <div className="h-6 w-24 bg-gray-300 rounded-lg animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Content Skeleton */}
+                <div className="p-6 space-y-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+                  ))}
+                  <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

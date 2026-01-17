@@ -19,6 +19,7 @@ import {
   type WishlistItem,
 } from "@/lib/api/product.actions";
 import Swal from "sweetalert2";
+import { ProductCardSkeleton } from "@/components/ui/Skeleton";
 
 // Category display names mapping
 const categoryDisplayNames: Record<string, string> = {
@@ -241,9 +242,36 @@ export default function WishlistPage() {
     return (
       <div className="min-h-screen bg-white pb-6 lg:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mb-4"></div>
-            <p className="text-gray-600">Memuat wishlist...</p>
+          {/* Back Button Skeleton - Mobile Only */}
+          <div className="lg:hidden mb-4">
+            <div className="w-28 h-10 bg-gray-200 rounded-lg animate-pulse" />
+          </div>
+
+          {/* Header Skeleton */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse" />
+                <div>
+                  <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse mb-2" />
+                  <div className="h-4 w-32 bg-gray-200 rounded-lg animate-pulse" />
+                </div>
+              </div>
+              <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
+                <div className="flex-1 sm:flex-none h-16 w-40 bg-gray-200 rounded-xl animate-pulse" />
+                <div className="flex-1 sm:flex-none h-16 w-40 bg-gray-200 rounded-xl animate-pulse" />
+              </div>
+            </div>
+
+            {/* Action Bar Skeleton */}
+            <div className="h-16 w-full bg-gray-100 rounded-xl animate-pulse" />
+          </div>
+
+          {/* Product Grid Skeleton */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            {[...Array(10)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         </div>
       </div>

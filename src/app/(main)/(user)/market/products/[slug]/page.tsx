@@ -17,6 +17,7 @@ import {
 import { addToCart } from "@/lib/api/cart.actions";
 import { useToast } from "@/hooks/useToast";
 import Toast from "@/components/ui/Toast";
+import { ProductDetailSkeleton } from "@/components/ui/Skeleton";
 
 // Category display names mapping
 const categoryDisplayNames: Record<string, string> = {
@@ -331,10 +332,9 @@ export default function ProductDetailPage({ params }: PageProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat produk...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <ProductDetailSkeleton />
         </div>
       </div>
     );

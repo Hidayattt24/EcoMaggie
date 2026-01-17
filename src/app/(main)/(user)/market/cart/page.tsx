@@ -25,6 +25,7 @@ import {
   type CartItem,
 } from "@/lib/api/cart.actions";
 import { getFeaturedProducts } from "@/lib/api/product.actions";
+import { CartItemSkeleton } from "@/components/ui/Skeleton";
 import Swal from "sweetalert2";
 
 export default function CartPage() {
@@ -232,10 +233,16 @@ export default function CartPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat keranjang...</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="mb-6">
+            <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse" />
+          </div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <CartItemSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );

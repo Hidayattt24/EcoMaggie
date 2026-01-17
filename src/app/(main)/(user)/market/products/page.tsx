@@ -69,7 +69,7 @@ export default function MarketProductsPage() {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cartProductIds, setCartProductIds] = useState<string[]>([]);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState<string | null>(
-    null
+    null,
   );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -152,7 +152,7 @@ export default function MarketProductsPage() {
 
       if (result.success && result.data) {
         const transformedProducts = result.data.products.map(
-          transformToCardProduct
+          transformToCardProduct,
         );
         setProducts(transformedProducts);
         setTotalProducts(result.data.total);
@@ -196,7 +196,7 @@ export default function MarketProductsPage() {
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
-        : [...prev, category]
+        : [...prev, category],
     );
   };
 
@@ -248,7 +248,7 @@ export default function MarketProductsPage() {
 
   // Get display categories with proper names
   const displayCategories = categories.map(
-    (cat) => categoryDisplayNames[cat] || cat
+    (cat) => categoryDisplayNames[cat] || cat,
   );
 
   return (
@@ -259,13 +259,13 @@ export default function MarketProductsPage() {
         onClose={() => setIsFilterOpen(false)}
         categories={displayCategories}
         selectedCategories={selectedCategories.map(
-          (cat) => categoryDisplayNames[cat] || cat
+          (cat) => categoryDisplayNames[cat] || cat,
         )}
         onToggleCategory={(displayName) => {
           // Find original category key
           const originalKey =
             Object.entries(categoryDisplayNames).find(
-              ([, v]) => v === displayName
+              ([, v]) => v === displayName,
             )?.[0] || displayName;
           toggleCategory(originalKey);
         }}
@@ -290,12 +290,12 @@ export default function MarketProductsPage() {
             <FilterSidebar
               categories={displayCategories}
               selectedCategories={selectedCategories.map(
-                (cat) => categoryDisplayNames[cat] || cat
+                (cat) => categoryDisplayNames[cat] || cat,
               )}
               onToggleCategory={(displayName) => {
                 const originalKey =
                   Object.entries(categoryDisplayNames).find(
-                    ([, v]) => v === displayName
+                    ([, v]) => v === displayName,
                   )?.[0] || displayName;
                 toggleCategory(originalKey);
               }}
@@ -620,7 +620,7 @@ export default function MarketProductsPage() {
                       >
                         {text}
                       </motion.button>
-                    )
+                    ),
                   )}
                 </motion.div>
 

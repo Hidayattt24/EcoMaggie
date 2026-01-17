@@ -102,7 +102,7 @@ export default function WishlistPage() {
       const response = await removeFromWishlist(productId);
       if (response.success) {
         setWishlistItems((prev) =>
-          prev.filter((i) => i.productId !== productId)
+          prev.filter((i) => i.productId !== productId),
         );
         setSelectedItems((prev) => prev.filter((id) => id !== productId));
         Swal.fire({
@@ -188,7 +188,7 @@ export default function WishlistPage() {
 
   const addSelectedToCart = () => {
     const selectedProducts = wishlistItems.filter((item) =>
-      selectedItems.includes(item.productId)
+      selectedItems.includes(item.productId),
     );
     if (selectedProducts.length === 0) {
       Swal.fire({
@@ -210,7 +210,7 @@ export default function WishlistPage() {
 
   const checkoutSelected = () => {
     const selectedProducts = wishlistItems.filter((item) =>
-      selectedItems.includes(item.productId)
+      selectedItems.includes(item.productId),
     );
     if (selectedProducts.length === 0) {
       Swal.fire({
@@ -227,7 +227,7 @@ export default function WishlistPage() {
 
   const totalValue = wishlistItems.reduce(
     (sum, item) => sum + item.finalPrice,
-    0
+    0,
   );
 
   const selectedTotalValue = wishlistItems

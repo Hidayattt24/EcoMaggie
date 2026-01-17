@@ -44,7 +44,7 @@ export default function Home() {
     <div className="relative">
       {/* Remove hash from URL on load */}
       <HashRemover />
-      
+
       {/* Email Verification Auto-Redirect Handler */}
       <Suspense fallback={null}>
         <EmailVerificationRedirect />
@@ -70,18 +70,17 @@ export default function Home() {
         {/* Solutions - Supply Connect & Maggot Market */}
         <SolusiSection />
 
-         {/* Statistics showcasing platform impact */}
+        {/* Statistics showcasing platform impact */}
         <StatisticsSection />
 
         {/* Environmental Impact - Sustainability Benefits */}
         <DampakSection />
 
-         {/* Statistics showcasing platform impact */}
+        {/* Statistics showcasing platform impact */}
         <StatisticsSection />
 
         {/* Customer Testimonials */}
         <TestimoniSection />
-
       </main>
 
       {/* Footer with Contact Information */}

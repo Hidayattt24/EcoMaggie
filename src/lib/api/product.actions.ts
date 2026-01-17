@@ -119,7 +119,7 @@ async function getCurrentFarmerId(): Promise<string | null> {
 // ===========================================
 
 export async function createProduct(
-  formData: ProductFormData
+  formData: ProductFormData,
 ): Promise<ActionResponse<Product>> {
   try {
     const supabase = await createClient();
@@ -255,7 +255,7 @@ export async function getMyProducts(): Promise<ActionResponse<Product[]>> {
         *,
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("farmer_id", farmerId)
       .is("deleted_at", null)
@@ -271,7 +271,7 @@ export async function getMyProducts(): Promise<ActionResponse<Product[]>> {
     }
 
     const transformedProducts = (products || []).map((p) =>
-      transformProduct(p)
+      transformProduct(p),
     );
 
     return {
@@ -294,7 +294,7 @@ export async function getMyProducts(): Promise<ActionResponse<Product[]>> {
 // ===========================================
 
 export async function getProductBySlug(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<Product>> {
   try {
     const supabase = await createClient();
@@ -365,7 +365,7 @@ export async function getProductBySlug(
 
 export async function updateProduct(
   slug: string,
-  formData: Partial<ProductFormData>
+  formData: Partial<ProductFormData>,
 ): Promise<ActionResponse<Product>> {
   try {
     const supabase = await createClient();
@@ -482,7 +482,7 @@ export async function updateProduct(
         *,
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .single();
 
@@ -522,7 +522,7 @@ export async function updateProduct(
 // ===========================================
 
 export async function deleteProduct(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<void>> {
   try {
     const supabase = await createClient();
@@ -594,7 +594,7 @@ export async function deleteProduct(
 // ===========================================
 
 export async function hardDeleteProduct(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<void>> {
   try {
     const supabase = await createClient();
@@ -690,7 +690,7 @@ export async function getProductAnalytics(): Promise<
         rating,
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("farmer_id", farmerId)
       .is("deleted_at", null);
@@ -785,7 +785,7 @@ export async function getProductAnalytics(): Promise<
 // ===========================================
 
 export async function getTopProducts(
-  limit: number = 3
+  limit: number = 3,
 ): Promise<ActionResponse<Product[]>> {
   try {
     const supabase = await createClient();
@@ -806,7 +806,7 @@ export async function getTopProducts(
         *,
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("farmer_id", farmerId)
       .is("deleted_at", null)
@@ -823,7 +823,7 @@ export async function getTopProducts(
     }
 
     const transformedProducts = (products || []).map((p) =>
-      transformProduct(p)
+      transformProduct(p),
     );
 
     return {
@@ -869,7 +869,7 @@ export async function getLowStockProducts(): Promise<
         *,
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("farmer_id", farmerId)
       .is("deleted_at", null)
@@ -886,11 +886,11 @@ export async function getLowStockProducts(): Promise<
 
     // Filter products where stock <= low_stock_threshold (client-side)
     const lowStockProducts = (products || []).filter(
-      (p) => p.stock <= (p.low_stock_threshold || 10)
+      (p) => p.stock <= (p.low_stock_threshold || 10),
     );
 
     const transformedProducts = lowStockProducts.map((p) =>
-      transformProduct(p)
+      transformProduct(p),
     );
 
     return {
@@ -914,7 +914,7 @@ export async function getLowStockProducts(): Promise<
 // views_count column removed - keeping functions for backward compatibility
 
 export async function incrementViewCount(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<void>> {
   return {
     success: true,
@@ -923,7 +923,7 @@ export async function incrementViewCount(
 }
 
 export async function incrementProductViews(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse> {
   return {
     success: true,
@@ -975,7 +975,9 @@ function transformProduct(dbProduct: Record<string, unknown>): Product {
 }
 
 // Transform with separate counts (for getProductBySlug)
-function transformProductWithCounts(dbProduct: Record<string, unknown>): Product {
+function transformProductWithCounts(
+  dbProduct: Record<string, unknown>,
+): Product {
   const price = Number(dbProduct.price) || 0;
   const discountPercent = Number(dbProduct.discount_percent) || 0;
   const finalPrice = Math.round(price * (1 - discountPercent / 100));
@@ -1036,7 +1038,7 @@ export type SalesTrendSummary = {
 
 export async function getProductSalesTrend(
   productId: string,
-  days: number = 7
+  days: number = 7,
 ): Promise<ActionResponse<SalesTrendSummary>> {
   try {
     const supabase = await createClient();
@@ -1070,8 +1072,18 @@ export async function getProductSalesTrend(
     const today = new Date();
     const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
     const monthNames = [
-      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-      "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
     ];
 
     // Initialize empty trend data
@@ -1098,7 +1110,8 @@ export async function getProductSalesTrend(
     // Get completed/paid transactions that contain this product
     const { data: transactionItems, error: itemsError } = await supabase
       .from("transaction_items")
-      .select(`
+      .select(
+        `
         quantity,
         subtotal,
         transaction_id,
@@ -1108,7 +1121,8 @@ export async function getProductSalesTrend(
           paid_at,
           created_at
         )
-      `)
+      `,
+      )
       .eq("product_id", productId);
 
     if (itemsError) {
@@ -1117,13 +1131,22 @@ export async function getProductSalesTrend(
 
     // Process transaction items and group by date
     if (transactionItems && transactionItems.length > 0) {
-      const salesByDate = new Map<string, { quantity: number; revenue: number; orders: Set<string> }>();
+      const salesByDate = new Map<
+        string,
+        { quantity: number; revenue: number; orders: Set<string> }
+      >();
 
       transactionItems.forEach((item: any) => {
         const transaction = item.transactions;
-        
+
         // Only count paid/completed transactions
-        const validStatuses = ["paid", "shipped", "delivered", "completed", "ready_pickup"];
+        const validStatuses = [
+          "paid",
+          "shipped",
+          "delivered",
+          "completed",
+          "ready_pickup",
+        ];
         if (!transaction || !validStatuses.includes(transaction.status)) {
           return;
         }
@@ -1140,7 +1163,11 @@ export async function getProductSalesTrend(
 
         // Aggregate sales
         if (!salesByDate.has(dateStr)) {
-          salesByDate.set(dateStr, { quantity: 0, revenue: 0, orders: new Set() });
+          salesByDate.set(dateStr, {
+            quantity: 0,
+            revenue: 0,
+            orders: new Set(),
+          });
         }
 
         const dayData = salesByDate.get(dateStr)!;
@@ -1166,7 +1193,7 @@ export async function getProductSalesTrend(
     const avgPerDay = Math.round(totalSales / days);
     const salesValues = salesTrend.map((d) => d.quantitySold);
     const maxSales = Math.max(...salesValues, 0);
-    const minSales = Math.min(...salesValues.filter(v => v > 0), 0);
+    const minSales = Math.min(...salesValues.filter((v) => v > 0), 0);
     const maxSalesDay =
       salesTrend.find((d) => d.quantitySold === maxSales)?.dayName || "-";
     const hasData = totalSales > 0;
@@ -1206,7 +1233,7 @@ export type ProductRevenueStats = {
 };
 
 export async function getProductTotalRevenue(
-  productId: string
+  productId: string,
 ): Promise<ActionResponse<ProductRevenueStats>> {
   try {
     const supabase = await createClient();
@@ -1239,7 +1266,8 @@ export async function getProductTotalRevenue(
     // Query directly from transactions and transaction_items (ALL TIME)
     const { data: transactionItems, error: itemsError } = await supabase
       .from("transaction_items")
-      .select(`
+      .select(
+        `
         quantity,
         subtotal,
         transaction_id,
@@ -1248,7 +1276,8 @@ export async function getProductTotalRevenue(
           status,
           paid_at
         )
-      `)
+      `,
+      )
       .eq("product_id", productId);
 
     let totalRevenue = 0;
@@ -1258,9 +1287,15 @@ export async function getProductTotalRevenue(
     if (!itemsError && transactionItems && transactionItems.length > 0) {
       transactionItems.forEach((item: any) => {
         const transaction = item.transactions;
-        
+
         // Only count paid/completed transactions
-        const validStatuses = ["paid", "shipped", "delivered", "completed", "ready_pickup"];
+        const validStatuses = [
+          "paid",
+          "shipped",
+          "delivered",
+          "completed",
+          "ready_pickup",
+        ];
         if (!transaction || !validStatuses.includes(transaction.status)) {
           return;
         }
@@ -1298,7 +1333,7 @@ export async function recordProductSale(
   productId: string,
   quantity: number,
   revenue: number,
-  saleDate?: string
+  saleDate?: string,
 ): Promise<ActionResponse<void>> {
   try {
     const supabase = await createClient();
@@ -1342,7 +1377,7 @@ export async function recordProductSale(
       },
       {
         onConflict: "product_id,sale_date",
-      }
+      },
     );
 
     if (error) {
@@ -1449,7 +1484,7 @@ export type MarketProductsResponse = {
 // ===========================================
 
 function transformMarketProduct(
-  dbProduct: Record<string, unknown>
+  dbProduct: Record<string, unknown>,
 ): MarketProduct {
   const price = Number(dbProduct.price) || 0;
   const discountPercent = Number(dbProduct.discount_percent) || 0;
@@ -1498,7 +1533,7 @@ function transformMarketProduct(
 // ===========================================
 
 export async function getMarketProducts(
-  filters: MarketProductFilters = {}
+  filters: MarketProductFilters = {},
 ): Promise<ActionResponse<MarketProductsResponse>> {
   try {
     const supabase = await createClient();
@@ -1526,7 +1561,7 @@ export async function getMarketProducts(
         reviews:reviews(count),
         wishlists:wishlists(count)
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("status", "active")
       .eq("is_active", true)
@@ -1549,7 +1584,7 @@ export async function getMarketProducts(
     // Apply search filter
     if (search && search.trim()) {
       query = query.or(
-        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`
+        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`,
       );
     }
 
@@ -1589,7 +1624,7 @@ export async function getMarketProducts(
     }
 
     const transformedProducts = (products || []).map((p) =>
-      transformMarketProduct(p as Record<string, unknown>)
+      transformMarketProduct(p as Record<string, unknown>),
     );
 
     const total = count || 0;
@@ -1621,7 +1656,7 @@ export async function getMarketProducts(
 // ===========================================
 
 export async function getMarketProductBySlug(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<MarketProduct>> {
   try {
     const supabase = await createClient();
@@ -1634,7 +1669,7 @@ export async function getMarketProductBySlug(
         farmers!inner(id, farm_name, location, rating, is_verified),
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("slug", slug)
       .eq("status", "active")
@@ -1671,7 +1706,7 @@ export async function getMarketProductBySlug(
 
 export async function getProductsByCategory(
   category: string,
-  limit: number = 8
+  limit: number = 8,
 ): Promise<ActionResponse<MarketProduct[]>> {
   try {
     const supabase = await createClient();
@@ -1684,7 +1719,7 @@ export async function getProductsByCategory(
         farmers!inner(id, farm_name, location, rating, is_verified),
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("category", category)
       .eq("status", "active")
@@ -1704,7 +1739,7 @@ export async function getProductsByCategory(
     }
 
     const transformedProducts = (products || []).map((p) =>
-      transformMarketProduct(p as Record<string, unknown>)
+      transformMarketProduct(p as Record<string, unknown>),
     );
 
     return {
@@ -1727,7 +1762,7 @@ export async function getProductsByCategory(
 // ===========================================
 
 export async function getFeaturedProducts(
-  limit: number = 8
+  limit: number = 8,
 ): Promise<ActionResponse<MarketProduct[]>> {
   try {
     const supabase = await createClient();
@@ -1740,7 +1775,7 @@ export async function getFeaturedProducts(
         farmers!inner(id, farm_name, location, rating, is_verified),
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("status", "active")
       .eq("is_active", true)
@@ -1759,7 +1794,7 @@ export async function getFeaturedProducts(
     }
 
     const transformedProducts = (products || []).map((p) =>
-      transformMarketProduct(p as Record<string, unknown>)
+      transformMarketProduct(p as Record<string, unknown>),
     );
 
     return {
@@ -1783,7 +1818,7 @@ export async function getFeaturedProducts(
 
 export async function searchProducts(
   query: string,
-  limit: number = 20
+  limit: number = 20,
 ): Promise<ActionResponse<MarketProduct[]>> {
   try {
     const supabase = await createClient();
@@ -1806,7 +1841,7 @@ export async function searchProducts(
         farmers!inner(id, farm_name, location, rating, is_verified),
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("status", "active")
       .eq("is_active", true)
@@ -1826,7 +1861,7 @@ export async function searchProducts(
     }
 
     const transformedProducts = (products || []).map((p) =>
-      transformMarketProduct(p as Record<string, unknown>)
+      transformMarketProduct(p as Record<string, unknown>),
     );
 
     return {
@@ -1933,7 +1968,7 @@ export type ProductReviewsResponse = {
 export async function getProductReviews(
   productId: string,
   limit: number = 10,
-  offset: number = 0
+  offset: number = 0,
 ): Promise<ActionResponse<ProductReviewsResponse>> {
   try {
     const supabase = await createClient();
@@ -1949,7 +1984,7 @@ export async function getProductReviews(
         images,
         created_at,
         users:user_id(name, avatar)
-      `
+      `,
       )
       .eq("product_id", productId)
       .order("created_at", { ascending: false })
@@ -2044,7 +2079,7 @@ export type SubmitReviewData = {
 };
 
 export async function submitProductReview(
-  data: SubmitReviewData
+  data: SubmitReviewData,
 ): Promise<ActionResponse<ProductReview>> {
   try {
     const supabase = await createClient();
@@ -2123,7 +2158,7 @@ export async function submitProductReview(
         images,
         created_at,
         users:user_id(name, avatar)
-      `
+      `,
       )
       .single();
 
@@ -2209,7 +2244,7 @@ export type MarketProductDetail = MarketProduct & {
 };
 
 export async function getMarketProductDetail(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<MarketProductDetail>> {
   try {
     const supabase = await createClient();
@@ -2223,7 +2258,7 @@ export async function getMarketProductDetail(
         farmers!inner(id, user_id, farm_name, location, rating, is_verified, created_at),
         reviews:reviews(count),
         wishlists:wishlists(count)
-      `
+      `,
       )
       .eq("slug", slug)
       .eq("status", "active")
@@ -2266,7 +2301,7 @@ export async function getMarketProductDetail(
 
     // Transform product
     const baseProduct = transformMarketProduct(
-      product as Record<string, unknown>
+      product as Record<string, unknown>,
     );
 
     return {
@@ -2376,7 +2411,7 @@ export async function getUserWishlist(): Promise<
           farmers!inner(id, farm_name, location, is_verified),
           reviews:reviews(count)
         )
-      `
+      `,
       )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
@@ -2461,7 +2496,7 @@ export async function getUserWishlist(): Promise<
  * Add product to wishlist
  */
 export async function addToWishlist(
-  productId: string
+  productId: string,
 ): Promise<ActionResponse<{ id: string }>> {
   try {
     const supabase = await createClient();
@@ -2555,7 +2590,7 @@ export async function addToWishlist(
  * Remove product from wishlist
  */
 export async function removeFromWishlist(
-  productId: string
+  productId: string,
 ): Promise<ActionResponse> {
   try {
     const supabase = await createClient();
@@ -2611,7 +2646,7 @@ export async function removeFromWishlist(
  * Toggle product in wishlist (add if not exists, remove if exists)
  */
 export async function toggleWishlist(
-  productId: string
+  productId: string,
 ): Promise<ActionResponse<{ isWishlisted: boolean }>> {
   try {
     const supabase = await createClient();
@@ -2685,7 +2720,7 @@ export async function toggleWishlist(
  * Check if product is in user's wishlist
  */
 export async function checkWishlistStatus(
-  productId: string
+  productId: string,
 ): Promise<ActionResponse<{ isWishlisted: boolean }>> {
   try {
     const supabase = await createClient();
@@ -2836,7 +2871,7 @@ export type PurchaseStatus = {
  * User can only review if they have purchased and payment is completed
  */
 export async function checkProductPurchaseStatus(
-  productId: string
+  productId: string,
 ): Promise<ActionResponse<PurchaseStatus>> {
   try {
     const supabase = await createClient();
@@ -2861,7 +2896,8 @@ export async function checkProductPurchaseStatus(
     // Check if user has purchased this product (status = 'paid')
     const { data: purchaseData, error: purchaseError } = await supabase
       .from("transaction_items")
-      .select(`
+      .select(
+        `
         id,
         transaction_id,
         transactions!inner(
@@ -2871,7 +2907,8 @@ export async function checkProductPurchaseStatus(
           status,
           paid_at
         )
-      `)
+      `,
+      )
       .eq("product_id", productId)
       .eq("transactions.user_id", user.id)
       .eq("transactions.status", "paid")

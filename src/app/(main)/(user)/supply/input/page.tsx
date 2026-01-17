@@ -123,7 +123,8 @@ export default function SupplyInputPage() {
     useDefaultAddress();
 
   // Get clean default address
-  const defaultAddress = defaultAddressData?.fullAddress || "Belum ada alamat terdaftar";
+  const defaultAddress =
+    defaultAddressData?.fullAddress || "Belum ada alamat terdaftar";
   const defaultAddressId = defaultAddressData?.id || null;
 
   const [step, setStep] = useState(1);
@@ -219,7 +220,8 @@ export default function SupplyInputPage() {
 
     try {
       // Import the actions
-      const { createSupply, uploadSupplyMedia } = await import("@/lib/api/supply.actions");
+      const { createSupply, uploadSupplyMedia } =
+        await import("@/lib/api/supply.actions");
 
       let uploadedPhotoUrl: string | undefined;
 
@@ -234,7 +236,7 @@ export default function SupplyInputPage() {
           console.error("Photo upload failed:", photoResult.error);
           showError(
             "Upload Gagal",
-            "Gagal mengupload foto: " + photoResult.error
+            "Gagal mengupload foto: " + photoResult.error,
           );
           setIsSubmitting(false);
           return;
@@ -247,7 +249,8 @@ export default function SupplyInputPage() {
         estimatedWeight: formData.weight,
         photoUrl: uploadedPhotoUrl,
         pickupAddress: useCustomAddress ? customAddress : defaultAddress,
-        pickupAddressId: (useCustomAddress ? undefined : defaultAddressId) || undefined,
+        pickupAddressId:
+          (useCustomAddress ? undefined : defaultAddressId) || undefined,
         pickupDate: formData.date,
         pickupTimeSlot: formData.timeSlot,
         notes: formData.notes || undefined,
@@ -263,27 +266,25 @@ export default function SupplyInputPage() {
         setIsSuccess(true);
         success(
           "Permintaan Berhasil!",
-          "Supply pickup Anda telah berhasil didaftarkan"
+          "Supply pickup Anda telah berhasil didaftarkan",
         );
       } else {
         console.error("Create supply error:", result);
         showError(
           "Gagal Membuat Supply",
-          result.message || "Gagal membuat supply request"
+          result.message || "Gagal membuat supply request",
         );
       }
     } catch (error) {
       console.error("Submit error:", error);
-      showError(
-        "Terjadi Kesalahan",
-        "Terjadi kesalahan saat mengirim data"
-      );
+      showError("Terjadi Kesalahan", "Terjadi kesalahan saat mengirim data");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const canProceedStep1 = formData.wasteType && formData.weight && formData.photo;
+  const canProceedStep1 =
+    formData.wasteType && formData.weight && formData.photo;
   const canProceedStep2 = formData.date && formData.timeSlot;
 
   // Loading state
@@ -452,7 +453,8 @@ export default function SupplyInputPage() {
                   Jenis
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {wasteTypeNames[successData.wasteType] || successData.wasteType}
+                  {wasteTypeNames[successData.wasteType] ||
+                    successData.wasteType}
                 </span>
               </div>
 
@@ -463,7 +465,8 @@ export default function SupplyInputPage() {
                   Berat
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {weightLabels[successData.estimatedWeight] || successData.estimatedWeight}
+                  {weightLabels[successData.estimatedWeight] ||
+                    successData.estimatedWeight}
                 </span>
               </div>
 
@@ -537,524 +540,142 @@ export default function SupplyInputPage() {
 
       <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
-        >
-          <button
-            onClick={() => (step > 1 ? setStep(step - 1) : router.back())}
-            className="p-2.5 bg-white rounded-xl shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-              Input Sampah Organik
-            </h1>
-            <p className="text-sm text-gray-500">
-              Langkah {step} dari 2
-            </p>
-          </div>
-          <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl border border-green-200">
-            <MapPin className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-700">
-              Lokasi Terverifikasi
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Progress Bar */}
-        <div className="flex gap-2 mb-8 max-w-xl">
-          <div
-            className={`flex-1 h-2 rounded-full transition-colors ${
-              step >= 1 ? "bg-[#A3AF87]" : "bg-gray-200"
-            }`}
-          />
-          <div
-            className={`flex-1 h-2 rounded-full transition-colors ${
-              step >= 2 ? "bg-[#A3AF87]" : "bg-gray-200"
-            }`}
-          />
-        </div>
-
-        {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          {/* Left Column - Form */}
+          {/* Header */}
           <motion.div
-            key={step}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-7 xl:col-span-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 mb-8"
           >
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:p-8">
-              <AnimatePresence mode="wait">
-                {/* Step 1: Data Sampah */}
-                {step === 1 && (
-                  <motion.div
-                    key="step1"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-8"
-                  >
-                    {/* Waste Type */}
-                    <div>
-                      <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Jenis Sampah Organik
-                      </label>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-                        {wasteTypes.map((type) => {
-                          const Icon = type.icon;
-                          const isSelected = formData.wasteType === type.id;
-                          return (
-                            <motion.button
-                              key={type.id}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() =>
-                                setFormData({ ...formData, wasteType: type.id })
-                              }
-                              className={`p-4 lg:p-5 rounded-2xl border-2 text-left transition-all ${
-                                isSelected
-                                  ? "border-[#A3AF87] bg-[#A3AF87]/5 shadow-md"
-                                  : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm`
-                              }`}
-                            >
-                              <div
-                                className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${type.color}`}
-                              >
-                                <Icon className="h-6 w-6" />
-                              </div>
-                              <p
-                                className={`font-semibold text-sm lg:text-base ${
-                                  isSelected
-                                    ? "text-[#A3AF87]"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {type.name}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {type.desc}
-                              </p>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </div>
+            <button
+              onClick={() => (step > 1 ? setStep(step - 1) : router.back())}
+              className="p-2.5 bg-white rounded-xl shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-600" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                Input Sampah Organik
+              </h1>
+              <p className="text-sm text-gray-500">Langkah {step} dari 2</p>
+            </div>
+            <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl border border-green-200">
+              <MapPin className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-700">
+                Lokasi Terverifikasi
+              </span>
+            </div>
+          </motion.div>
 
-                    {/* Weight */}
-                    <div>
-                      <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Perkiraan Berat Sampah
-                      </label>
-                      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
-                        {weightOptions.map((option) => {
-                          const isSelected = formData.weight === option.value;
-                          return (
-                            <motion.button
-                              key={option.value}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() =>
-                                setFormData({
-                                  ...formData,
-                                  weight: option.value,
-                                })
-                              }
-                              className={`p-4 rounded-xl text-center transition-all ${
-                                isSelected
-                                  ? "bg-[#A3AF87] text-white shadow-lg"
-                                  : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-                              }`}
-                            >
-                              <p className="font-bold text-lg">
-                                {option.label}
-                              </p>
-                              <p
-                                className={`text-xs mt-1 ${
-                                  isSelected ? "text-white/80" : "text-gray-500"
-                                }`}
-                              >
-                                {option.desc}
-                              </p>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </div>
+          {/* Progress Bar */}
+          <div className="flex gap-2 mb-8 max-w-xl">
+            <div
+              className={`flex-1 h-2 rounded-full transition-colors ${
+                step >= 1 ? "bg-[#A3AF87]" : "bg-gray-200"
+              }`}
+            />
+            <div
+              className={`flex-1 h-2 rounded-full transition-colors ${
+                step >= 2 ? "bg-[#A3AF87]" : "bg-gray-200"
+              }`}
+            />
+          </div>
 
-                    {/* Photo/Video Upload */}
-                    <div>
-                      <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Foto Sampah{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <MediaUploader
-                        onPhotoChange={handlePhotoChange}
-                        photoPreview={previewUrl}
-                      />
-                    </div>
-
-                    {/* Continue Button - Full Width */}
-                    <motion.button
-                      whileHover={{ scale: canProceedStep1 ? 1.01 : 1 }}
-                      whileTap={{ scale: canProceedStep1 ? 0.99 : 1 }}
-                      onClick={() => setStep(2)}
-                      disabled={!canProceedStep1}
-                      className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
-                        canProceedStep1
-                          ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      }`}
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* Left Column - Form */}
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:col-span-7 xl:col-span-8"
+            >
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:p-8">
+                <AnimatePresence mode="wait">
+                  {/* Step 1: Data Sampah */}
+                  {step === 1 && (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="space-y-8"
                     >
-                      Lanjutkan ke Jadwal
-                      <ChevronRight className="h-5 w-5" />
-                    </motion.button>
-                  </motion.div>
-                )}
-
-                {/* Step 2: Schedule */}
-                {step === 2 && (
-                  <motion.div
-                    key="step2"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-8"
-                  >
-                    {/* Address */}
-                    <div>
-                      <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Alamat Pickup
-                      </label>
-
-                      {/* Default Address */}
-                      {!useCustomAddress && (
-                        <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                          <div className="flex items-start gap-4">
-                            <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                              <MapPin className="h-6 w-6 text-[#A3AF87]" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Alamat Default
-                              </p>
-                              <p className="text-gray-900 font-medium">
-                                {defaultAddress}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setUseCustomAddress(true);
-                                  setCustomAddress("");
-                                  setFormData({
-                                    ...formData,
-                                    address: "",
-                                    addressId: null,
-                                  });
-                                }}
-                                className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline flex items-center gap-1"
-                              >
-                                <MapPin className="h-3.5 w-3.5" />
-                                Gunakan alamat lain
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Custom Address Input */}
-                      {useCustomAddress && (
-                        <div className="space-y-4">
-                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border-2 border-blue-200">
-                            <div className="flex items-start gap-4">
-                              <div className="p-3 bg-blue-100 rounded-xl">
-                                <MapPin className="h-6 w-6 text-blue-600" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm font-semibold text-blue-900 mb-2">
-                                  Alamat Kustom
-                                </p>
-                                <textarea
-                                  value={customAddress}
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    setCustomAddress(value);
-                                    setFormData({
-                                      ...formData,
-                                      address: value,
-                                      addressId: null,
-                                    });
-                                  }}
-                                  placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
-                                  rows={3}
-                                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 focus:border-blue-400 focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
-                                />
-                                <div className="flex items-center gap-3 mt-3">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setUseCustomAddress(false);
-                                      setCustomAddress("");
-                                      if (defaultAddressData) {
-                                        setFormData({
-                                          ...formData,
-                                          address: defaultAddressData.fullAddress,
-                                          addressId: defaultAddressData.id,
-                                        });
-                                      }
-                                    }}
-                                    className="text-sm text-gray-600 font-medium hover:text-gray-900 flex items-center gap-1"
-                                  >
-                                    <X className="h-3.5 w-3.5" />
-                                    Gunakan alamat default
-                                  </button>
-                                  {customAddress && (
-                                    <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                                      <CheckCircle className="h-3.5 w-3.5" />
-                                      Alamat tersimpan
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Info */}
-                          <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                            <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                            <p className="text-xs text-amber-800">
-                              Pastikan alamat yang Anda masukkan berada di Kota
-                              Banda Aceh dan mudah diakses untuk pickup.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Date & Time Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Date Picker Custom */}
+                      {/* Waste Type */}
                       <div>
                         <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Tanggal Pickup
+                          Jenis Sampah Organik
                         </label>
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => setShowDatePicker(!showDatePicker)}
-                            className="w-full px-5 py-4 bg-gradient-to-r from-[#A3AF87]/5 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-2xl text-left hover:border-[#A3AF87] transition-all group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#A3AF87]/20 rounded-xl group-hover:bg-[#A3AF87]/30 transition-colors">
-                                <Calendar className="h-5 w-5 text-[#A3AF87]" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm text-gray-600 font-medium">
-                                  Pilih Tanggal
-                                </p>
-                                <p className="text-base font-semibold text-gray-900">
-                                  {formatDateDisplay(formData.date)}
-                                </p>
-                              </div>
-                              <ChevronRight
-                                className={`h-5 w-5 text-[#A3AF87] transition-transform ${
-                                  showDatePicker ? "rotate-90" : ""
-                                }`}
-                              />
-                            </div>
-                          </button>
-
-                          {/* Custom Date Picker Dropdown */}
-                          {showDatePicker && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="absolute z-50 mt-2 w-full bg-white border-2 border-[#A3AF87]/30 rounded-2xl shadow-2xl p-5"
-                            >
-                              {/* Month Navigator */}
-                              <div className="flex items-center justify-between mb-4">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setCurrentMonth(
-                                      new Date(
-                                        currentMonth.getFullYear(),
-                                        currentMonth.getMonth() - 1
-                                      )
-                                    )
-                                  }
-                                  className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
-                                >
-                                  <ChevronLeft className="h-5 w-5 text-[#A3AF87]" />
-                                </button>
-                                <p className="font-bold text-gray-900">
-                                  {currentMonth.toLocaleDateString("id-ID", {
-                                    month: "long",
-                                    year: "numeric",
-                                  })}
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setCurrentMonth(
-                                      new Date(
-                                        currentMonth.getFullYear(),
-                                        currentMonth.getMonth() + 1
-                                      )
-                                    )
-                                  }
-                                  className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
-                                >
-                                  <ChevronRight className="h-5 w-5 text-[#A3AF87]" />
-                                </button>
-                              </div>
-
-                              {/* Days Header */}
-                              <div className="grid grid-cols-7 gap-1 mb-2">
-                                {[
-                                  "Min",
-                                  "Sen",
-                                  "Sel",
-                                  "Rab",
-                                  "Kam",
-                                  "Jum",
-                                  "Sab",
-                                ].map((day) => (
-                                  <div
-                                    key={day}
-                                    className="text-center text-xs font-semibold text-gray-500 py-2"
-                                  >
-                                    {day}
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* Calendar Days */}
-                              <div className="grid grid-cols-7 gap-1">
-                                {Array.from({
-                                  length:
-                                    getDaysInMonth(currentMonth)
-                                      .startingDayOfWeek,
-                                }).map((_, i) => (
-                                  <div
-                                    key={`empty-${i}`}
-                                    className="aspect-square"
-                                  />
-                                ))}
-                                {Array.from({
-                                  length:
-                                    getDaysInMonth(currentMonth).daysInMonth,
-                                }).map((_, i) => {
-                                  const day = i + 1;
-                                  const dateStr = new Date(
-                                    currentMonth.getFullYear(),
-                                    currentMonth.getMonth(),
-                                    day
-                                  )
-                                    .toISOString()
-                                    .split("T")[0];
-                                  const isSelected = formData.date === dateStr;
-                                  const isToday =
-                                    dateStr ===
-                                    new Date().toISOString().split("T")[0];
-                                  const isPast =
-                                    new Date(dateStr) <
-                                    new Date(
-                                      new Date().toISOString().split("T")[0]
-                                    );
-
-                                  return (
-                                    <button
-                                      key={day}
-                                      type="button"
-                                      onClick={() =>
-                                        !isPast && handleDateSelect(day)
-                                      }
-                                      disabled={isPast}
-                                      className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
-                                        isPast
-                                          ? "text-gray-300 cursor-not-allowed"
-                                          : isSelected
-                                          ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] text-white shadow-lg scale-105"
-                                          : isToday
-                                          ? "bg-[#A3AF87]/10 text-[#A3AF87] border-2 border-[#A3AF87]/30"
-                                          : "hover:bg-[#A3AF87]/5 text-gray-700"
-                                      }`}
-                                    >
-                                      {day}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                              {/* Today Button */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const today = new Date();
-                                  setCurrentMonth(today);
-                                  handleDateSelect(today.getDate());
-                                }}
-                                className="w-full mt-4 py-2.5 bg-[#A3AF87]/10 text-[#A3AF87] font-semibold rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
-                              >
-                                Hari Ini
-                              </button>
-                            </motion.div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Time Slot - Icon Based */}
-                      <div>
-                        <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Waktu Pickup
-                        </label>
-                        <div className="grid grid-cols-3 gap-3">
-                          {timeSlots.map((slot) => {
-                            const isSelected = formData.timeSlot === slot.id;
-                            const IconComponent = slot.icon;
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                          {wasteTypes.map((type) => {
+                            const Icon = type.icon;
+                            const isSelected = formData.wasteType === type.id;
                             return (
                               <motion.button
-                                key={slot.id}
-                                type="button"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                key={type.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={() =>
                                   setFormData({
                                     ...formData,
-                                    timeSlot: slot.id,
+                                    wasteType: type.id,
                                   })
                                 }
-                                className={`p-4 rounded-2xl transition-all group ${
+                                className={`p-4 lg:p-5 rounded-2xl border-2 text-left transition-all ${
                                   isSelected
-                                    ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-xl border-2 border-[#A3AF87]"
-                                    : "bg-white border-2 border-gray-200 hover:border-[#A3AF87]/50 hover:shadow-lg"
+                                    ? "border-[#A3AF87] bg-[#A3AF87]/5 shadow-md"
+                                    : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm`
                                 }`}
                               >
                                 <div
-                                  className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center transition-all ${
-                                    isSelected
-                                      ? "bg-white/20"
-                                      : "bg-gray-50 group-hover:bg-[#A3AF87]/10"
-                                  }`}
+                                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${type.color}`}
                                 >
-                                  <IconComponent
-                                    className={`h-6 w-6 ${
-                                      isSelected ? "text-white" : slot.color
-                                    }`}
-                                  />
+                                  <Icon className="h-6 w-6" />
                                 </div>
                                 <p
-                                  className={`font-bold text-sm ${
-                                    isSelected ? "text-white" : "text-gray-900"
+                                  className={`font-semibold text-sm lg:text-base ${
+                                    isSelected
+                                      ? "text-[#A3AF87]"
+                                      : "text-gray-900"
                                   }`}
                                 >
-                                  {slot.label}
+                                  {type.name}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {type.desc}
+                                </p>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Weight */}
+                      <div>
+                        <label className="block text-base font-semibold text-gray-900 mb-4">
+                          Perkiraan Berat Sampah
+                        </label>
+                        <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+                          {weightOptions.map((option) => {
+                            const isSelected = formData.weight === option.value;
+                            return (
+                              <motion.button
+                                key={option.value}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() =>
+                                  setFormData({
+                                    ...formData,
+                                    weight: option.value,
+                                  })
+                                }
+                                className={`p-4 rounded-xl text-center transition-all ${
+                                  isSelected
+                                    ? "bg-[#A3AF87] text-white shadow-lg"
+                                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                }`}
+                              >
+                                <p className="font-bold text-lg">
+                                  {option.label}
                                 </p>
                                 <p
                                   className={`text-xs mt-1 ${
@@ -1063,238 +684,630 @@ export default function SupplyInputPage() {
                                       : "text-gray-500"
                                   }`}
                                 >
-                                  {slot.time}
+                                  {option.desc}
                                 </p>
                               </motion.button>
                             );
                           })}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Notes */}
-                    <div>
-                      <label className="block text-base font-semibold text-gray-900 mb-4">
-                        Catatan untuk Kurir{" "}
-                        <span className="font-normal text-gray-400">
-                          (opsional)
-                        </span>
-                      </label>
-                      <textarea
-                        value={formData.notes}
-                        onChange={(e) =>
-                          setFormData({ ...formData, notes: e.target.value })
-                        }
-                        placeholder="Contoh: Sampah di depan pagar, warna kantong hitam..."
-                        rows={3}
-                        className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all resize-none text-gray-900"
-                      />
-                    </div>
+                      {/* Photo/Video Upload */}
+                      <div>
+                        <label className="block text-base font-semibold text-gray-900 mb-4">
+                          Foto Sampah <span className="text-red-500">*</span>
+                        </label>
+                        <MediaUploader
+                          onPhotoChange={handlePhotoChange}
+                          photoPreview={previewUrl}
+                        />
+                      </div>
 
-                    {/* Submit Button - Full Width */}
-                    <motion.button
-                      whileHover={{
-                        scale: canProceedStep2 && !isSubmitting ? 1.01 : 1,
-                      }}
-                      whileTap={{
-                        scale: canProceedStep2 && !isSubmitting ? 0.99 : 1,
-                      }}
-                      onClick={handleSubmit}
-                      disabled={!canProceedStep2 || isSubmitting}
-                      className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
-                        canProceedStep2 && !isSubmitting
-                          ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      }`}
+                      {/* Continue Button - Full Width */}
+                      <motion.button
+                        whileHover={{ scale: canProceedStep1 ? 1.01 : 1 }}
+                        whileTap={{ scale: canProceedStep1 ? 0.99 : 1 }}
+                        onClick={() => setStep(2)}
+                        disabled={!canProceedStep1}
+                        className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
+                          canProceedStep1
+                            ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        Lanjutkan ke Jadwal
+                        <ChevronRight className="h-5 w-5" />
+                      </motion.button>
+                    </motion.div>
+                  )}
+
+                  {/* Step 2: Schedule */}
+                  {step === 2 && (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="space-y-8"
                     >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          Memproses...
-                        </>
-                      ) : (
-                        <>
-                          <Leaf className="h-5 w-5" />
-                          Konfirmasi Pickup
-                        </>
-                      )}
-                    </motion.button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
+                      {/* Address */}
+                      <div>
+                        <label className="block text-base font-semibold text-gray-900 mb-4">
+                          Alamat Pickup
+                        </label>
 
-          {/* Right Column - Info Panel */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-5 xl:col-span-4 space-y-6"
-          >
-            {/* Summary Card */}
-            <div className="bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-2xl p-6 text-white shadow-lg">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Package className="h-5 w-5" />
-                </div>
-                <h3 className="font-bold text-lg">Ringkasan Input</h3>
+                        {/* Default Address */}
+                        {!useCustomAddress && (
+                          <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
+                                <MapPin className="h-6 w-6 text-[#A3AF87]" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm text-gray-500 mb-1">
+                                  Alamat Default
+                                </p>
+                                <p className="text-gray-900 font-medium">
+                                  {defaultAddress}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setUseCustomAddress(true);
+                                    setCustomAddress("");
+                                    setFormData({
+                                      ...formData,
+                                      address: "",
+                                      addressId: null,
+                                    });
+                                  }}
+                                  className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline flex items-center gap-1"
+                                >
+                                  <MapPin className="h-3.5 w-3.5" />
+                                  Gunakan alamat lain
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Custom Address Input */}
+                        {useCustomAddress && (
+                          <div className="space-y-4">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border-2 border-blue-200">
+                              <div className="flex items-start gap-4">
+                                <div className="p-3 bg-blue-100 rounded-xl">
+                                  <MapPin className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-semibold text-blue-900 mb-2">
+                                    Alamat Kustom
+                                  </p>
+                                  <textarea
+                                    value={customAddress}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      setCustomAddress(value);
+                                      setFormData({
+                                        ...formData,
+                                        address: value,
+                                        addressId: null,
+                                      });
+                                    }}
+                                    placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
+                                    rows={3}
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 focus:border-blue-400 focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
+                                  />
+                                  <div className="flex items-center gap-3 mt-3">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setUseCustomAddress(false);
+                                        setCustomAddress("");
+                                        if (defaultAddressData) {
+                                          setFormData({
+                                            ...formData,
+                                            address:
+                                              defaultAddressData.fullAddress,
+                                            addressId: defaultAddressData.id,
+                                          });
+                                        }
+                                      }}
+                                      className="text-sm text-gray-600 font-medium hover:text-gray-900 flex items-center gap-1"
+                                    >
+                                      <X className="h-3.5 w-3.5" />
+                                      Gunakan alamat default
+                                    </button>
+                                    {customAddress && (
+                                      <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                                        <CheckCircle className="h-3.5 w-3.5" />
+                                        Alamat tersimpan
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                              <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                              <p className="text-xs text-amber-800">
+                                Pastikan alamat yang Anda masukkan berada di
+                                Kota Banda Aceh dan mudah diakses untuk pickup.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Date & Time Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Date Picker Custom */}
+                        <div>
+                          <label className="block text-base font-semibold text-gray-900 mb-4">
+                            Tanggal Pickup
+                          </label>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setShowDatePicker(!showDatePicker)}
+                              className="w-full px-5 py-4 bg-gradient-to-r from-[#A3AF87]/5 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-2xl text-left hover:border-[#A3AF87] transition-all group"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-[#A3AF87]/20 rounded-xl group-hover:bg-[#A3AF87]/30 transition-colors">
+                                  <Calendar className="h-5 w-5 text-[#A3AF87]" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm text-gray-600 font-medium">
+                                    Pilih Tanggal
+                                  </p>
+                                  <p className="text-base font-semibold text-gray-900">
+                                    {formatDateDisplay(formData.date)}
+                                  </p>
+                                </div>
+                                <ChevronRight
+                                  className={`h-5 w-5 text-[#A3AF87] transition-transform ${
+                                    showDatePicker ? "rotate-90" : ""
+                                  }`}
+                                />
+                              </div>
+                            </button>
+
+                            {/* Custom Date Picker Dropdown */}
+                            {showDatePicker && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute z-50 mt-2 w-full bg-white border-2 border-[#A3AF87]/30 rounded-2xl shadow-2xl p-5"
+                              >
+                                {/* Month Navigator */}
+                                <div className="flex items-center justify-between mb-4">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setCurrentMonth(
+                                        new Date(
+                                          currentMonth.getFullYear(),
+                                          currentMonth.getMonth() - 1,
+                                        ),
+                                      )
+                                    }
+                                    className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                  >
+                                    <ChevronLeft className="h-5 w-5 text-[#A3AF87]" />
+                                  </button>
+                                  <p className="font-bold text-gray-900">
+                                    {currentMonth.toLocaleDateString("id-ID", {
+                                      month: "long",
+                                      year: "numeric",
+                                    })}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setCurrentMonth(
+                                        new Date(
+                                          currentMonth.getFullYear(),
+                                          currentMonth.getMonth() + 1,
+                                        ),
+                                      )
+                                    }
+                                    className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                  >
+                                    <ChevronRight className="h-5 w-5 text-[#A3AF87]" />
+                                  </button>
+                                </div>
+
+                                {/* Days Header */}
+                                <div className="grid grid-cols-7 gap-1 mb-2">
+                                  {[
+                                    "Min",
+                                    "Sen",
+                                    "Sel",
+                                    "Rab",
+                                    "Kam",
+                                    "Jum",
+                                    "Sab",
+                                  ].map((day) => (
+                                    <div
+                                      key={day}
+                                      className="text-center text-xs font-semibold text-gray-500 py-2"
+                                    >
+                                      {day}
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Calendar Days */}
+                                <div className="grid grid-cols-7 gap-1">
+                                  {Array.from({
+                                    length:
+                                      getDaysInMonth(currentMonth)
+                                        .startingDayOfWeek,
+                                  }).map((_, i) => (
+                                    <div
+                                      key={`empty-${i}`}
+                                      className="aspect-square"
+                                    />
+                                  ))}
+                                  {Array.from({
+                                    length:
+                                      getDaysInMonth(currentMonth).daysInMonth,
+                                  }).map((_, i) => {
+                                    const day = i + 1;
+                                    const dateStr = new Date(
+                                      currentMonth.getFullYear(),
+                                      currentMonth.getMonth(),
+                                      day,
+                                    )
+                                      .toISOString()
+                                      .split("T")[0];
+                                    const isSelected =
+                                      formData.date === dateStr;
+                                    const isToday =
+                                      dateStr ===
+                                      new Date().toISOString().split("T")[0];
+                                    const isPast =
+                                      new Date(dateStr) <
+                                      new Date(
+                                        new Date().toISOString().split("T")[0],
+                                      );
+
+                                    return (
+                                      <button
+                                        key={day}
+                                        type="button"
+                                        onClick={() =>
+                                          !isPast && handleDateSelect(day)
+                                        }
+                                        disabled={isPast}
+                                        className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
+                                          isPast
+                                            ? "text-gray-300 cursor-not-allowed"
+                                            : isSelected
+                                              ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] text-white shadow-lg scale-105"
+                                              : isToday
+                                                ? "bg-[#A3AF87]/10 text-[#A3AF87] border-2 border-[#A3AF87]/30"
+                                                : "hover:bg-[#A3AF87]/5 text-gray-700"
+                                        }`}
+                                      >
+                                        {day}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Today Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const today = new Date();
+                                    setCurrentMonth(today);
+                                    handleDateSelect(today.getDate());
+                                  }}
+                                  className="w-full mt-4 py-2.5 bg-[#A3AF87]/10 text-[#A3AF87] font-semibold rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
+                                >
+                                  Hari Ini
+                                </button>
+                              </motion.div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Time Slot - Icon Based */}
+                        <div>
+                          <label className="block text-base font-semibold text-gray-900 mb-4">
+                            Waktu Pickup
+                          </label>
+                          <div className="grid grid-cols-3 gap-3">
+                            {timeSlots.map((slot) => {
+                              const isSelected = formData.timeSlot === slot.id;
+                              const IconComponent = slot.icon;
+                              return (
+                                <motion.button
+                                  key={slot.id}
+                                  type="button"
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    setFormData({
+                                      ...formData,
+                                      timeSlot: slot.id,
+                                    })
+                                  }
+                                  className={`p-4 rounded-2xl transition-all group ${
+                                    isSelected
+                                      ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-xl border-2 border-[#A3AF87]"
+                                      : "bg-white border-2 border-gray-200 hover:border-[#A3AF87]/50 hover:shadow-lg"
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center transition-all ${
+                                      isSelected
+                                        ? "bg-white/20"
+                                        : "bg-gray-50 group-hover:bg-[#A3AF87]/10"
+                                    }`}
+                                  >
+                                    <IconComponent
+                                      className={`h-6 w-6 ${
+                                        isSelected ? "text-white" : slot.color
+                                      }`}
+                                    />
+                                  </div>
+                                  <p
+                                    className={`font-bold text-sm ${
+                                      isSelected
+                                        ? "text-white"
+                                        : "text-gray-900"
+                                    }`}
+                                  >
+                                    {slot.label}
+                                  </p>
+                                  <p
+                                    className={`text-xs mt-1 ${
+                                      isSelected
+                                        ? "text-white/80"
+                                        : "text-gray-500"
+                                    }`}
+                                  >
+                                    {slot.time}
+                                  </p>
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      <div>
+                        <label className="block text-base font-semibold text-gray-900 mb-4">
+                          Catatan untuk Kurir{" "}
+                          <span className="font-normal text-gray-400">
+                            (opsional)
+                          </span>
+                        </label>
+                        <textarea
+                          value={formData.notes}
+                          onChange={(e) =>
+                            setFormData({ ...formData, notes: e.target.value })
+                          }
+                          placeholder="Contoh: Sampah di depan pagar, warna kantong hitam..."
+                          rows={3}
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all resize-none text-gray-900"
+                        />
+                      </div>
+
+                      {/* Submit Button - Full Width */}
+                      <motion.button
+                        whileHover={{
+                          scale: canProceedStep2 && !isSubmitting ? 1.01 : 1,
+                        }}
+                        whileTap={{
+                          scale: canProceedStep2 && !isSubmitting ? 0.99 : 1,
+                        }}
+                        onClick={handleSubmit}
+                        disabled={!canProceedStep2 || isSubmitting}
+                        className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
+                          canProceedStep2 && !isSubmitting
+                            ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Memproses...
+                          </>
+                        ) : (
+                          <>
+                            <Leaf className="h-5 w-5" />
+                            Konfirmasi Pickup
+                          </>
+                        )}
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-white/20">
-                  <span className="text-white/70">Jenis Sampah</span>
-                  <span className="font-medium">
-                    {wasteTypes.find((t) => t.id === formData.wasteType)
-                      ?.name || "-"}
-                  </span>
+            </motion.div>
+
+            {/* Right Column - Info Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-5 xl:col-span-4 space-y-6"
+            >
+              {/* Summary Card */}
+              <div className="bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-2xl p-6 text-white shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Package className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-bold text-lg">Ringkasan Input</h3>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-white/20">
-                  <span className="text-white/70">Perkiraan Berat</span>
-                  <span className="font-medium">
-                    {weightOptions.find((w) => w.value === formData.weight)
-                      ?.label || "-"}
-                  </span>
-                </div>
-                {formData.date && (
+                <div className="space-y-3">
                   <div className="flex items-center justify-between py-2 border-b border-white/20">
-                    <span className="text-white/70">Tanggal Pickup</span>
+                    <span className="text-white/70">Jenis Sampah</span>
                     <span className="font-medium">
-                      {new Date(formData.date).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {wasteTypes.find((t) => t.id === formData.wasteType)
+                        ?.name || "-"}
                     </span>
                   </div>
-                )}
-                {formData.timeSlot && (
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-white/70">Waktu Pickup</span>
+                  <div className="flex items-center justify-between py-2 border-b border-white/20">
+                    <span className="text-white/70">Perkiraan Berat</span>
                     <span className="font-medium">
-                      {timeSlots.find((t) => t.id === formData.timeSlot)?.time}
+                      {weightOptions.find((w) => w.value === formData.weight)
+                        ?.label || "-"}
                     </span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Guide Card */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Info className="h-5 w-5 text-blue-600" />
-                </div>
-                <h3 className="font-bold text-gray-900">Panduan Setor</h3>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  "Pisahkan sampah organik dari sampah lainnya",
-                  "Masukkan ke dalam kantong atau wadah tertutup",
-                  "Letakkan di tempat yang mudah dijangkau kurir",
-                  "Pastikan sampah tidak tercampur plastik/logam",
-                ].map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#A3AF87]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-[#A3AF87]">
-                        {index + 1}
+                  {formData.date && (
+                    <div className="flex items-center justify-between py-2 border-b border-white/20">
+                      <span className="text-white/70">Tanggal Pickup</span>
+                      <span className="font-medium">
+                        {new Date(formData.date).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600">{item}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Impact Stats */}
-            <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-                  <Sparkles className="h-5 w-5 text-[#A3AF87]" />
-                </div>
-                <h3 className="font-bold text-gray-900">Dampak Anda</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                {impactStats.map((stat, index) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100"
-                    >
-                      <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-                        <Icon className="h-4 w-4 text-[#A3AF87]" />
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-gray-900">
-                          {stat.value}
-                        </p>
-                        <p className="text-xs text-gray-500">{stat.label}</p>
-                      </div>
+                  )}
+                  {formData.timeSlot && (
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-white/70">Waktu Pickup</span>
+                      <span className="font-medium">
+                        {
+                          timeSlots.find((t) => t.id === formData.timeSlot)
+                            ?.time
+                        }
+                      </span>
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Pickup Map - Banda Aceh */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm overflow-hidden">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-lg shadow-sm">
-                  <MapPin className="h-5 w-5 text-white" />
+              {/* Guide Card */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Info className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <h3 className="font-bold text-gray-900">Panduan Setor</h3>
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">Lokasi Pickup</h3>
-                  <p className="text-xs text-gray-500">Banda Aceh, NAD</p>
+                <ul className="space-y-3">
+                  {[
+                    "Pisahkan sampah organik dari sampah lainnya",
+                    "Masukkan ke dalam kantong atau wadah tertutup",
+                    "Letakkan di tempat yang mudah dijangkau kurir",
+                    "Pastikan sampah tidak tercampur plastik/logam",
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-[#A3AF87]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-[#A3AF87]">
+                          {index + 1}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">{item}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Impact Stats */}
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                    <Sparkles className="h-5 w-5 text-[#A3AF87]" />
+                  </div>
+                  <h3 className="font-bold text-gray-900">Dampak Anda</h3>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {impactStats.map((stat, index) => {
+                    const Icon = stat.icon;
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100"
+                      >
+                        <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                          <Icon className="h-4 w-4 text-[#A3AF87]" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-gray-900">
+                            {stat.value}
+                          </p>
+                          <p className="text-xs text-gray-500">{stat.label}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              
-              {/* Modern Map Embed */}
-              <div className="relative rounded-xl overflow-hidden border-2 border-gray-100 shadow-inner">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127334.89283826!2d95.24!3d5.55!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3040377ae63dbbed%3A0x3039d80b220cb90!2sBanda%20Aceh%2C%20Aceh!5e0!3m2!1sen!2sid!4v1234567890"
-                  width="100%"
-                  height="200"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="grayscale-[30%]"
-                />
-                
-                {/* Overlay to prevent interaction */}
-                <div 
-                  className="absolute inset-0 bg-[#A3AF87]/20 pointer-events-auto"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(163, 175, 135, 0.15) 0%, rgba(163, 175, 135, 0.25) 100%)'
-                  }}
-                />
-                
-                {/* Overlay badge */}
-                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-gray-200 z-10">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-xs font-semibold text-gray-700">
-                      Area Layanan Aktif
-                    </span>
+
+              {/* Pickup Map - Banda Aceh */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm overflow-hidden">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-lg shadow-sm">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">Lokasi Pickup</h3>
+                    <p className="text-xs text-gray-500">Banda Aceh, NAD</p>
+                  </div>
+                </div>
+
+                {/* Modern Map Embed */}
+                <div className="relative rounded-xl overflow-hidden border-2 border-gray-100 shadow-inner">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127334.89283826!2d95.24!3d5.55!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3040377ae63dbbed%3A0x3039d80b220cb90!2sBanda%20Aceh%2C%20Aceh!5e0!3m2!1sen!2sid!4v1234567890"
+                    width="100%"
+                    height="200"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="grayscale-[30%]"
+                  />
+
+                  {/* Overlay to prevent interaction */}
+                  <div
+                    className="absolute inset-0 bg-[#A3AF87]/20 pointer-events-auto"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(163, 175, 135, 0.15) 0%, rgba(163, 175, 135, 0.25) 100%)",
+                    }}
+                  />
+
+                  {/* Overlay badge */}
+                  <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-gray-200 z-10">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-xs font-semibold text-gray-700">
+                        Area Layanan Aktif
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address Info */}
+                <div className="mt-4 p-3 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-[#A3AF87] flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {useCustomAddress && customAddress
+                        ? customAddress
+                        : defaultAddress}
+                    </p>
                   </div>
                 </div>
               </div>
-              
-              {/* Address Info */}
-              <div className="mt-4 p-3 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-[#A3AF87] flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-gray-600 leading-relaxed">
-                    {useCustomAddress && customAddress
-                      ? customAddress
-                      : defaultAddress}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
-      </div>
       </div>
     </>
   );

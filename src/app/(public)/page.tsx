@@ -63,17 +63,25 @@ export default function Home() {
 
         {/* About EcoMaggie - Mission and Vision */}
         <TentangSection />
-        
+
         {/* Statistics showcasing platform impact */}
         <StatisticsSection />
+
         {/* Solutions - Supply Connect & Maggot Market */}
         <SolusiSection />
 
+         {/* Statistics showcasing platform impact */}
+        <StatisticsSection />
+
         {/* Environmental Impact - Sustainability Benefits */}
         <DampakSection />
+      
+       {/* Statistics showcasing platform impact */}
+        <StatisticsSection />
 
         {/* Customer Testimonials */}
         <TestimoniSection />
+
       </main>
 
       {/* Footer with Contact Information */}

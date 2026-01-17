@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Package, ShoppingCart } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function SolusiSection() {
   const [isVisible, setIsVisible] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -24,337 +28,267 @@ export default function SolusiSection() {
     return () => observer.disconnect();
   }, []);
 
+  const solutions = [
+    {
+      id: "maggot-market",
+      title: "Maggot Market",
+      subtitle: "Marketplace Produk Maggot",
+      description:
+        "Platform jual-beli produk maggot BSF (Black Soldier Fly) untuk pakan ternak berkualitas tinggi. Hubungkan peternak maggot dengan pembeli dari seluruh Indonesia dengan harga transparan, sistem verifikasi kualitas, dan pengiriman terpercaya.",
+      image: "/assets/landing/solusi/maggot-market.svg",
+      borderColor: "#A3AF87",
+      buttonColor: "#A3AF87",
+      buttonHoverColor: "#8d9975",
+      buttonText: "Ayo Mulai Petualangan dengan Maggot Market",
+      href: "/market",
+    },
+    {
+      id: "supply-connect",
+      title: "Supply Connect",
+      subtitle: "Pengelolaan Sampah Organik",
+      description:
+        "Sistem penghubung antara penghasil sampah organik dengan petani maggot. Kelola limbah organik Anda dengan mudah melalui penjadwalan pengambilan, tracking real-time, dan verifikasi kualitas untuk mendukung budidaya maggot yang berkelanjutan.",
+      image: "/assets/landing/solusi/supply-connect.svg",
+      borderColor: "#303646",
+      buttonColor: "#303646",
+      buttonHoverColor: "#435664",
+      buttonText: "Ayo Mulai Petualangan dengan Supply Connect",
+      href: "/supply",
+    },
+  ];
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % solutions.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + solutions.length) % solutions.length);
+  };
+
   return (
     <section
       id="solusi-section"
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center overflow-hidden py-20 lg:py-32"
-      style={{ background: "#A3AF87" }}
+      className="flex items-center justify-center overflow-hidden py-12 lg:py-20 bg-white"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <div
-              className={`inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 transition-all duration-700 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <span
+              className="inline-block px-4 py-2 rounded-full text-sm font-medium mb-4"
               style={{
-                border: "2px solid",
-                borderColor: "rgba(163, 175, 135, 0.2)",
+                backgroundColor: "rgba(163, 175, 135, 0.1)",
+                color: "#5a6c5b",
               }}
             >
-              <span className="relative flex h-2 w-2">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: "#A3AF87" }}
-                ></span>
-                <span
-                  className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: "#A3AF87" }}
-                ></span>
-              </span>
-              <span
-                className="text-sm font-semibold poppins-semibold"
-                style={{ color: "#A3AF87" }}
-              >
-                Solusi Kami
-              </span>
-            </div>
+              Solusi Kami
+            </span>
             <h2
-              className={`text-4xl md:text-5xl font-bold mb-4 poppins-bold transition-all duration-700 delay-100 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
+              className="text-3xl lg:text-4xl font-bold mb-3"
               style={{ color: "#303646" }}
             >
-              Dipercaya oleh Masyarakat
+              Dua Platform, Satu Ekosistem
             </h2>
-            <p
-              className={`text-lg md:text-xl max-w-2xl mx-auto poppins-regular transition-all duration-700 delay-200 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-              style={{ color: "#303646" }}
-            >
-              Solusi Menyeluruh Tanpa Ribet
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Solusi terintegrasi untuk pengelolaan sampah organik dan
+              perdagangan produk maggot
             </p>
+          </motion.div>
+
+          {/* Desktop Grid View */}
+          <div className="hidden lg:grid lg:grid-cols-2 gap-8">
+            {solutions.map((solution, index) => (
+              <motion.div
+                key={solution.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                className="group relative rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500"
+              >
+                {/* Background Image with Overlay */}
+                <div className="relative h-[500px]">
+                  <Image
+                    src={solution.image}
+                    alt={solution.title}
+                    fill
+                    className="object-cover"
+                  />
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+
+                  {/* Colored Border */}
+                  <div
+                    className="absolute inset-0 rounded-3xl"
+                    style={{
+                      border: `4px solid ${solution.borderColor}`,
+                    }}
+                  />
+                </div>
+
+                {/* Content Overlay */}
+                <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                  {/* Title */}
+                  <div>
+                    <h3 className="text-white text-3xl lg:text-4xl font-bold leading-tight mb-1">
+                      {solution.title}
+                    </h3>
+                    <p className="text-white/80 text-lg font-medium">
+                      {solution.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Description & CTA */}
+                  <div className="space-y-6">
+                    {/* Glass Card Description */}
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                      <p className="text-white text-sm leading-relaxed">
+                        {solution.description}
+                      </p>
+                    </div>
+
+                    {/* CTA Button - Full Width */}
+                    <Link
+                      href={solution.href}
+                      className="flex items-center justify-center gap-2 w-full px-6 py-4 text-white rounded-full font-semibold transition-all duration-300 hover:gap-3 group/btn"
+                      style={{
+                        backgroundColor: solution.buttonColor,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          solution.buttonHoverColor;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          solution.buttonColor;
+                      }}
+                    >
+                      <span>{solution.buttonText}</span>
+                      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Supply Connect Card */}
-            <div
-              className={`group relative bg-white rounded-3xl p-8 lg:p-10 transition-all duration-700 delay-150 ease-out hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-8"
-              }`}
-            >
-              {/* Background Decorative Elements */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-green-100/40 to-emerald-100/40 rounded-full blur-3xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-green-50/50 to-transparent rounded-full blur-2xl translate-y-10 -translate-x-10 group-hover:scale-150 transition-transform duration-700" />
-
-              {/* Content */}
-              <div className="relative z-10">
-                {/* Icon Circle */}
-                <div
-                  className="absolute top-0 right-0 w-14 h-14 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
-                  style={{ borderColor: "var(--brand-sage-light)" }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--accent-green)";
-                    e.currentTarget.style.transform =
-                      "rotate(12deg) scale(1.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor =
-                      "var(--brand-sage-light)";
-                    e.currentTarget.style.transform = "rotate(0deg) scale(1)";
-                  }}
-                >
-                  <Package
-                    className="w-7 h-7 transition-colors duration-300"
-                    style={{ color: "var(--text-secondary)" }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = "var(--accent-green)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = "var(--text-secondary)";
-                    }}
-                  />
-                </div>
-
-                {/* Card Header */}
-                <div className="mb-6 pr-16">
-                  <h3
-                    className="text-2xl lg:text-3xl poppins-bold mb-3"
-                    style={{ color: "#303646" }}
+          {/* Mobile Slider View */}
+          <div className="lg:hidden relative">
+            <div className="overflow-hidden">
+              <div
+                className="flex transition-transform duration-500 ease-out"
+                style={{
+                  transform: `translateX(-${currentSlide * 100}%)`,
+                }}
+              >
+                {solutions.map((solution) => (
+                  <div
+                    key={solution.id}
+                    className="w-full flex-shrink-0 px-2"
                   >
-                    Supply Connect
-                  </h3>
-                  <p
-                    className="poppins-regular text-sm lg:text-base leading-relaxed"
-                    style={{ color: "#5a6c5b" }}
-                  >
-                    Menghubungkan penghasil sampah organik dengan petani maggot
-                  </p>
-                </div>
+                    <div className="group relative rounded-3xl overflow-hidden shadow-xl">
+                      {/* Background Image with Overlay */}
+                      <div className="relative h-[500px]">
+                        <Image
+                          src={solution.image}
+                          alt={solution.title}
+                          fill
+                          className="object-cover"
+                        />
+                        {/* Dark Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
-                {/* Image Placeholder */}
-                <div
-                  className="relative w-full h-48 lg:h-56 rounded-2xl mb-6 flex items-center justify-center overflow-hidden shadow-lg transition-shadow duration-500"
-                  style={{
-                    backgroundColor: "rgba(163, 175, 135, 0.1)",
-                    border: "1px solid rgba(163, 175, 135, 0.2)",
-                  }}
-                >
-                  <div className="text-center p-6 relative z-10">
-                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
-                      <Package
-                        className="w-10 h-10"
-                        style={{ color: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-semibold text-sm"
-                      style={{ color: "#303646" }}
-                    >
-                      Supply Chain Integration
-                    </p>
-                  </div>
-                </div>
+                        {/* Colored Border */}
+                        <div
+                          className="absolute inset-0 rounded-3xl"
+                          style={{
+                            border: `4px solid ${solution.borderColor}`,
+                          }}
+                        />
+                      </div>
 
-                {/* Features List */}
-                <div className="space-y-3.5">
-                  <div className="flex items-start gap-3 group/item">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: "rgba(163, 175, 135, 0.3)" }}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: "#A3AF87" }}
-                      />
+                      {/* Content Overlay */}
+                      <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                        {/* Title */}
+                        <div>
+                          <h3 className="text-white text-2xl font-bold leading-tight mb-1">
+                            {solution.title}
+                          </h3>
+                          <p className="text-white/80 text-base font-medium">
+                            {solution.subtitle}
+                          </p>
+                        </div>
+
+                        {/* Description & CTA */}
+                        <div className="space-y-4">
+                          {/* Glass Card Description */}
+                          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
+                            <p className="text-white text-sm leading-relaxed">
+                              {solution.description}
+                            </p>
+                          </div>
+
+                          {/* CTA Button - Full Width */}
+                          <Link
+                            href={solution.href}
+                            className="flex items-center justify-center gap-2 w-full px-6 py-3 text-white rounded-full font-semibold transition-all duration-300"
+                            style={{
+                              backgroundColor: solution.buttonColor,
+                            }}
+                          >
+                            <span className="text-sm">{solution.buttonText}</span>
+                            <ArrowRight className="w-5 h-5" />
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                    <p
-                      className="poppins-regular text-sm lg:text-base leading-relaxed"
-                      style={{ color: "#303646" }}
-                    >
-                      Pengumpulan sampah organik terjadwal
-                    </p>
                   </div>
-                  <div className="flex items-start gap-3 group/item">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: "rgba(163, 175, 135, 0.3)" }}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-regular text-sm lg:text-base leading-relaxed"
-                      style={{ color: "#303646" }}
-                    >
-                      Sistem tracking dan monitoring real-time
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3 group/item">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: "rgba(163, 175, 135, 0.3)" }}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-regular text-sm lg:text-base leading-relaxed"
-                      style={{ color: "#303646" }}
-                    >
-                      Verifikasi kualitas sampah organik
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Maggot Market Card */}
-            <div
-              className={`group relative rounded-3xl p-8 lg:p-10 transition-all duration-700 delay-300 ease-out hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-8"
-              }`}
-              style={{ backgroundColor: "#FDF8D4" }}
-            >
-              {/* Background Decorative Elements */}
-              <div
-                className="absolute top-0 left-0 w-40 h-40 rounded-full blur-3xl -translate-y-10 -translate-x-10 group-hover:scale-150 transition-transform duration-700"
-                style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
-              />
-              <div
-                className="absolute bottom-0 right-0 w-36 h-36 rounded-full blur-2xl translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"
-                style={{ backgroundColor: "rgba(163, 175, 135, 0.08)" }}
-              />
+            {/* Slider Controls */}
+            <div className="flex items-center justify-center gap-4 mt-6">
+              {/* Previous Button */}
+              <button
+                onClick={prevSlide}
+                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-700" />
+              </button>
 
-              {/* Content */}
-              <div className="relative z-10">
-                {/* Icon Circle */}
-                <div
-                  className="absolute top-0 right-0 w-14 h-14 bg-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
-                  style={{
-                    border: "2px solid",
-                    borderColor: "rgba(163, 175, 135, 0.3)",
-                  }}
-                >
-                  <ShoppingCart
-                    className="w-7 h-7"
-                    style={{ color: "#A3AF87" }}
+              {/* Indicators */}
+              <div className="flex gap-2">
+                {solutions.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      currentSlide === index
+                        ? "w-8 bg-[#A3AF87]"
+                        : "w-2 bg-gray-300"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
                   />
-                </div>
-
-                {/* Card Header */}
-                <div className="mb-6 pr-16">
-                  <h3
-                    className="text-2xl lg:text-3xl poppins-bold mb-3"
-                    style={{ color: "#303646" }}
-                  >
-                    Maggot Market
-                  </h3>
-                  <p
-                    className="poppins-regular text-sm lg:text-base leading-relaxed"
-                    style={{ color: "#5a6c5b" }}
-                  >
-                    Marketplace produk maggot untuk pakan ternak berkualitas
-                  </p>
-                </div>
-
-                {/* Image Placeholder */}
-                <div
-                  className="relative w-full h-48 lg:h-56 rounded-2xl mb-6 flex items-center justify-center overflow-hidden shadow-lg transition-shadow duration-500"
-                  style={{
-                    backgroundColor: "rgba(163, 175, 135, 0.1)",
-                    border: "1px solid rgba(163, 175, 135, 0.2)",
-                  }}
-                >
-                  <div className="text-center p-6 relative z-10">
-                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
-                      <ShoppingCart
-                        className="w-10 h-10"
-                        style={{ color: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-semibold text-sm"
-                      style={{ color: "#303646" }}
-                    >
-                      Digital Marketplace
-                    </p>
-                  </div>
-                </div>
-
-                {/* Features List */}
-                <div className="space-y-3.5">
-                  <div className="flex items-start gap-3 group/item">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: "rgba(163, 175, 135, 0.3)" }}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-regular text-sm lg:text-base leading-relaxed"
-                      style={{ color: "#303646" }}
-                    >
-                      Jual beli maggot segar dan kering
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3 group/item">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: "rgba(163, 175, 135, 0.3)" }}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-regular text-sm lg:text-base leading-relaxed"
-                      style={{ color: "#303646" }}
-                    >
-                      Harga transparan dan kompetitif
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3 group/item">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: "rgba(163, 175, 135, 0.3)" }}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: "#A3AF87" }}
-                      />
-                    </div>
-                    <p
-                      className="poppins-regular text-sm lg:text-base leading-relaxed"
-                      style={{ color: "#303646" }}
-                    >
-                      Pengiriman ke seluruh Indonesia
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
+
+              {/* Next Button */}
+              <button
+                onClick={nextSlide}
+                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-6 h-6 text-gray-700" />
+              </button>
             </div>
           </div>
         </div>

@@ -66,7 +66,6 @@ export default function TentangSection() {
                   transition={{ duration: 0.7 }}
                   className="absolute inset-0"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#A3AF87]/20 to-transparent z-10" />
                   <Image
                     src={image.src}
                     alt={image.caption}
@@ -74,19 +73,27 @@ export default function TentangSection() {
                     className="object-cover"
                   />
                   
-                  {/* Caption Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 z-20 p-6 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
-                    <motion.p
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+                  
+                  {/* Green Border */}
+                  <div className="absolute inset-0 border-4 border-[#A3AF87] rounded-3xl" />
+                  
+                  {/* Caption Overlay with Glass Effect */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 p-6">
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{
                         opacity: currentIndex === idx ? 1 : 0,
                         y: currentIndex === idx ? 0 : 20,
                       }}
                       transition={{ delay: 0.3, duration: 0.5 }}
-                      className="text-white text-sm md:text-base font-medium leading-relaxed"
+                      className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20"
                     >
-                      {image.caption}
-                    </motion.p>
+                      <p className="text-white text-sm md:text-base font-medium leading-relaxed">
+                        {image.caption}
+                      </p>
+                    </motion.div>
                   </div>
                 </motion.div>
               ))}

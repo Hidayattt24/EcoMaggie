@@ -1,7 +1,7 @@
 "use client";
 
 export default function StatisticsSection() {
-  const text = "UBAH LIMBAH JADI RUPIAH BERSAMA ECO-MAGGIE";
+  const text = "ECOMAGGIE";
 
   return (
     <section className="relative py-8 overflow-hidden bg-warna-2">

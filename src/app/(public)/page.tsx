@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import NavbarLandingPage from "@/components/landing/NavbarLandingPage";
 import HeroSection from "@/components/landing/HeroSection";
-import StatisticsSection from "@/components/landing/StatisticsSection";
+import Headline from "@/components/landing/Headline";
 import TentangSection from "@/components/landing/TentangSection";
 import SolusiSection from "@/components/landing/SolusiSection";
 import DampakSection from "@/components/landing/DampakSection";
@@ -11,12 +11,15 @@ import FooterSection from "@/components/landing/FooterSection";
 import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
 import EmailVerificationRedirect from "@/components/EmailVerificationRedirect";
 import HashRemover from "@/components/landing/HashRemover";
+import LoadingScreen from "@/components/landing/LoadingScreen";
 
 export const metadata: Metadata = {
-  title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
+  title: "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
   description:
-    "Platform digital untuk pengelolaan sampah organik dan budidaya maggot BSF di Indonesia. Hubungkan penghasil sampah dengan peternak maggot untuk ekonomi sirkular berkelanjutan. Solusi ramah lingkungan berbasis teknologi.",
+    "Tahukah Anda sampah organik bisa jadi sumber penghasilan? EcoMaggie menghubungkan penghasil limbah dengan peternak maggot BSF untuk ciptakan passive income. Sudah 500+ mitra sukses! Apakah Anda siap bergabung dalam revolusi ekonomi sirkular Indonesia?",
   keywords: [
+    "ubah sampah jadi uang",
+    "passive income dari sampah",
     "pengelolaan sampah organik",
     "budidaya maggot",
     "maggot BSF",
@@ -26,11 +29,13 @@ export const metadata: Metadata = {
     "platform sampah organik",
     "supply connect",
     "maggot market",
+    "bisnis maggot",
+    "penghasilan dari limbah",
   ],
   openGraph: {
-    title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
+    title: "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
     description:
-      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Ciptakan ekonomi sirkular berkelanjutan.",
+      "Tahukah Anda sampah organik bisa jadi sumber penghasilan? Bergabunglah dengan 500+ mitra sukses yang sudah menghasilkan passive income dari sampah. Mulai transformasi Anda hari ini!",
     url: "https://eco-maggie.vercel.app",
     type: "website",
   },
@@ -42,6 +47,9 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="relative">
+      {/* Loading Screen */}
+      <LoadingScreen />
+
       {/* Remove hash from URL on load */}
       <HashRemover />
 
@@ -58,26 +66,46 @@ export default function Home() {
         {/* Hero Section - Introduction to EcoMaggie */}
         <HeroSection />
 
-        {/* Statistics showcasing platform impact */}
-        <StatisticsSection />
+        {/* Headline 1 - Value Proposition */}
+        <Headline
+          text="TRANSFORMASI SAMPAH JADI PROFIT"
+          backgroundColor="#fdf8d4"
+          textColor="#303646"
+          dotColor="#ebfba8"
+        />
 
         {/* About EcoMaggie - Mission and Vision */}
         <TentangSection />
 
-        {/* Statistics showcasing platform impact */}
-        <StatisticsSection />
+        {/* Headline 2 - Partnership Growth */}
+        <Headline
+          text="BERGABUNG DENGAN 500+ MITRA SUKSES"
+          backgroundColor="#a3af87"
+          textColor="#ffffff"
+          dotColor="#ebfba8"
+        />
 
         {/* Solutions - Supply Connect & Maggot Market */}
         <SolusiSection />
 
-        {/* Statistics showcasing platform impact */}
-        <StatisticsSection />
+        {/* Headline 3 - Call to Action */}
+        <Headline
+          text="MULAI HASILKAN PASSIVE INCOME HARI INI"
+          backgroundColor="#435664"
+          textColor="#ffffff"
+          dotColor="#ebfba8"
+        />
 
         {/* Environmental Impact - Sustainability Benefits */}
         <DampakSection />
 
-        {/* Statistics showcasing platform impact */}
-        <StatisticsSection />
+        {/* Headline 4 - Environmental Impact */}
+        <Headline
+          text="BERSAMA MENCIPTAKAN INDONESIA LEBIH HIJAU"
+          backgroundColor="#303646"
+          textColor="#ffffff"
+          dotColor="#ebfba8"
+        />
 
         {/* Customer Testimonials */}
         <TestimoniSection />

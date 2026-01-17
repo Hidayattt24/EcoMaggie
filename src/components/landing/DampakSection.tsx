@@ -122,7 +122,7 @@ export default function DampakSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: false, amount: 0.3 }}
           transition={{ duration: 0.6 }}
-          className="relative w-full h-[600px] lg:h-[700px]"
+          className="relative w-full h-[700px] lg:h-[800px]"
         >
           {/* Background Images - Instant Change, No Animation */}
           <div className="absolute inset-0">
@@ -138,7 +138,10 @@ export default function DampakSection() {
                   alt={`Dampak EcoMaggie ${index + 1}`}
                   fill
                   className="object-cover"
-                  priority={index === 0}
+                  loading="lazy"
+                  quality={80}
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4="
                 />
                 {/* Dark Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />

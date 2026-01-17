@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://eco-maggie.vercel.app"),
   title: {
     default:
-      "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
+      "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
     template: "%s | EcoMaggie",
   },
   description:
-    "Platform digital untuk pengelolaan sampah organik dan budidaya maggot BSF di Indonesia. Hubungkan penghasil sampah dengan peternak maggot untuk ekonomi sirkular berkelanjutan. Solusi ramah lingkungan berbasis teknologi.",
+    "Tahukah Anda sampah organik bisa jadi sumber penghasilan? EcoMaggie menghubungkan penghasil limbah dengan peternak maggot BSF untuk ciptakan passive income. Sudah 500+ mitra sukses! Apakah Anda siap bergabung dalam revolusi ekonomi sirkular Indonesia?",
   keywords: [
     "pengelolaan sampah organik",
     "budidaya maggot",
@@ -64,9 +64,9 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: "https://eco-maggie.vercel.app",
     siteName: "EcoMaggie",
-    title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
+    title: "EcoMaggie - Menghubungkan Solusi Limbah dengan Budidaya Maggot",
     description:
-      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Ciptakan ekonomi sirkular berkelanjutan bersama EcoMaggie.",
+      "EcoMaggie adalah platform jembatan antara penghasil limbah organik dan petani maggot. Kami menciptakan rantai pasok yang stabil, efisien, dan berkelanjutan untuk ekonomi sirkular yang lebih baik.",
     images: [
       {
         url: "/og-image.jpg",
@@ -78,9 +78,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
+    title:
+      "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
     description:
-      "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Solusi ramah lingkungan untuk ekonomi sirkular berkelanjutan.",
+      "Apakah Anda tahu limbah organik bisa jadi sumber penghasilan? 500+ mitra sudah sukses! Waktunya Anda bergabung dalam revolusi ekonomi sirkular Indonesia bersama EcoMaggie.",
     images: ["/og-image.jpg"],
     creator: "@ecomaggie",
   },

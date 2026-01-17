@@ -47,11 +47,12 @@
   --color-bg-cream-soft: var(--bg-cream-soft);
   --color-bg-sage-soft: var(--bg-sage-soft);
 
-  /* Warna 1-4 for Tailwind Utilities */
+  /* Warna 1-5 for Tailwind Utilities */
   --color-warna-1: var(--warna-1);
   --color-warna-2: var(--warna-2);
   --color-warna-3: var(--warna-3);
   --color-warna-4: var(--warna-4);
+  --color-warna-5: var(--warna-5);
 }
 
 @media (prefers-color-scheme: dark) {

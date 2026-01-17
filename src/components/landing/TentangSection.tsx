@@ -71,6 +71,10 @@ export default function TentangSection() {
                     alt={image.caption}
                     fill
                     className="object-cover"
+                    loading="lazy"
+                    quality={80}
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4="
                   />
                   
                   {/* Dark Overlay */}

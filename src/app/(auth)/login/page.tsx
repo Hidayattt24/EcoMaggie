@@ -92,22 +92,21 @@ function LoginForm() {
       <div
         className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
         style={{
-          background:
-            "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+          backgroundColor: "#fdf8d4",
         }}
       >
         <div className="w-full max-w-lg">
           {/* Card */}
           <div
             className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
-            style={{ borderTop: "4px solid #A3AF87" }}
+            style={{ borderTop: "4px solid #435664" }}
           >
           {/* Decorative corner */}
           <div
-            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full"
             style={{
-              background:
-                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.2), transparent)",
+              backgroundColor: "#ebfba8",
+              opacity: 0.15,
             }}
           ></div>
 
@@ -116,7 +115,7 @@ function LoginForm() {
             <Link href="/" className="inline-block">
               <div
                 className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
-                style={{ backgroundColor: "#A3AF87" }}
+                style={{ backgroundColor: "#303646" }}
               >
                 <Image
                   src="/icon.svg"
@@ -129,7 +128,7 @@ function LoginForm() {
             </Link>
             <h1
               className="text-xl sm:text-2xl font-bold poppins-bold mt-3 sm:mt-4"
-              style={{ color: "#A3AF87" }}
+              style={{ color: "#435664" }}
             >
               Masuk ke Akun
             </h1>
@@ -154,7 +153,7 @@ function LoginForm() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  style={{ color: "#A3AF87" }}
+                  style={{ color: "#a3af87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -178,10 +177,10 @@ function LoginForm() {
                   }
                   className="block w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
                   style={
-                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    { "--tw-ring-color": "#a3af87" } as React.CSSProperties
                   }
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.borderColor = "#A3AF87")
+                    (e.currentTarget.style.borderColor = "#a3af87")
                   }
                   onMouseLeave={(e) =>
                     !document.activeElement ||
@@ -220,7 +219,7 @@ function LoginForm() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  style={{ color: "#A3AF87" }}
+                  style={{ color: "#a3af87" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -244,10 +243,10 @@ function LoginForm() {
                   }
                   className="block w-full pl-10 sm:pl-11 pr-11 sm:pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 poppins-regular shadow-sm"
                   style={
-                    { "--tw-ring-color": "#A3AF87" } as React.CSSProperties
+                    { "--tw-ring-color": "#a3af87" } as React.CSSProperties
                   }
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.borderColor = "#A3AF87")
+                    (e.currentTarget.style.borderColor = "#a3af87")
                   }
                   onMouseLeave={(e) =>
                     !document.activeElement ||
@@ -321,9 +320,9 @@ function LoginForm() {
               <Link
                 href="/forgot-password"
                 className="text-sm font-medium transition-colors poppins-medium"
-                style={{ color: "#A3AF87" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#5a6c5b")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#A3AF87")}
+                style={{ color: "#a3af87" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#435664")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#a3af87")}
               >
                 Lupa kata sandi?
               </Link>
@@ -354,8 +353,8 @@ function LoginForm() {
               className="w-full flex justify-center items-center gap-2 py-2.5 sm:py-3 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-sm sm:text-base text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
               style={
                 {
-                  backgroundColor: "#A3AF87",
-                  "--tw-ring-color": "#A3AF87",
+                  backgroundColor: "#435664",
+                  "--tw-ring-color": "#435664",
                 } as React.CSSProperties
               }
               onMouseEnter={(e) =>
@@ -419,8 +418,8 @@ function LoginForm() {
               className="inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-lg border-2 transition-all duration-200 poppins-semibold"
               style={{
                 backgroundColor: "rgba(163, 175, 135, 0.1)",
-                color: "#A3AF87",
-                borderColor: "#A3AF87",
+                color: "#a3af87",
+                borderColor: "#a3af87",
               }}
               onMouseEnter={(e) => (
                 (e.currentTarget.style.backgroundColor =
@@ -486,19 +485,18 @@ function LoginLoading() {
     <div
       className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
       style={{
-        background:
-          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+        backgroundColor: "#fdf8d4",
       }}
     >
       <div className="w-full max-w-lg">
         <div
           className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
-          style={{ borderTop: "4px solid #A3AF87" }}
+          style={{ borderTop: "4px solid #435664" }}
         >
           <div className="flex items-center justify-center py-12">
             <div
               className="animate-spin h-8 w-8 border-4 border-t-transparent rounded-full"
-              style={{ borderColor: "#A3AF87", borderTopColor: "transparent" }}
+              style={{ borderColor: "#435664", borderTopColor: "transparent" }}
             ></div>
           </div>
         </div>

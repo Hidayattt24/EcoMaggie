@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#fdf8d4" }}>
       <AnimatePresence mode="wait">
         {isSubmitted ? (
           // Success State

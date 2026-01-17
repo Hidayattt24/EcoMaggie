@@ -195,22 +195,21 @@ export default function RegisterPage() {
     <div
       className="min-h-screen flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12"
       style={{
-        background:
-          "linear-gradient(to bottom right, #FDF8D4 0%, #ffffff 50%, #FDF8D4 100%)",
+        backgroundColor: "#fdf8d4",
       }}
     >
       <div className="w-full max-w-2xl">
         {/* Card */}
         <div
           className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 relative overflow-hidden"
-          style={{ borderTop: "4px solid #A3AF87" }}
+          style={{ borderTop: "4px solid #435664" }}
         >
           {/* Decorative corner */}
           <div
-            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-50"
+            className="absolute top-0 right-0 w-32 h-32 rounded-bl-full"
             style={{
-              background:
-                "linear-gradient(to bottom right, rgba(163, 175, 135, 0.2), transparent)",
+              backgroundColor: "#ebfba8",
+              opacity: 0.15,
             }}
           ></div>
 
@@ -219,7 +218,7 @@ export default function RegisterPage() {
             <Link href="/" className="inline-block">
               <div
                 className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl p-2 hover:scale-105 transition-transform duration-300 shadow-lg"
-                style={{ backgroundColor: "#A3AF87" }}
+                style={{ backgroundColor: "#303646" }}
               >
                 <Image
                   src="/icon.svg"
@@ -232,7 +231,7 @@ export default function RegisterPage() {
             </Link>
             <h1
               className="text-xl sm:text-2xl font-bold poppins-bold mt-3 sm:mt-4"
-              style={{ color: "#A3AF87" }}
+              style={{ color: "#435664" }}
             >
               Daftar Akun
             </h1>
@@ -1135,17 +1134,21 @@ export default function RegisterPage() {
                 className="w-full flex justify-center items-center gap-2 py-2.5 sm:py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm sm:text-base text-white hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold"
                 style={
                   {
-                    backgroundColor: "#A3AF87",
-                    "--tw-ring-color": "#A3AF87",
+                    backgroundColor: "#435664",
+                    "--tw-ring-color": "#435664",
                   } as React.CSSProperties
                 }
                 onMouseEnter={(e) =>
                   !isLoading &&
-                  (e.currentTarget.style.backgroundColor = "#5a6c5b")
+                  ((e.currentTarget.style.transform = "scale(1.02)"),
+                  (e.currentTarget.style.boxShadow =
+                    "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"))
                 }
                 onMouseLeave={(e) =>
                   !isLoading &&
-                  (e.currentTarget.style.backgroundColor = "#A3AF87")
+                  ((e.currentTarget.style.transform = "scale(1)"),
+                  (e.currentTarget.style.boxShadow =
+                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"))
                 }
               >
                 {isLoading ? (
@@ -1209,16 +1212,23 @@ export default function RegisterPage() {
           <div className="text-center">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 border-2 rounded-xl hover:text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200 poppins-semibold text-xs sm:text-sm bg-white"
-              style={{ borderColor: "#A3AF87", color: "#A3AF87" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#A3AF87";
-                e.currentTarget.style.color = "white";
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-lg border-2 transition-all duration-200 poppins-semibold"
+              style={{
+                backgroundColor: "rgba(163, 175, 135, 0.1)",
+                color: "#a3af87",
+                borderColor: "#a3af87",
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "white";
-                e.currentTarget.style.color = "#A3AF87";
-              }}
+              onMouseEnter={(e) => (
+                (e.currentTarget.style.backgroundColor =
+                  "rgba(163, 175, 135, 0.2)"),
+                (e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)")
+              )}
+              onMouseLeave={(e) => (
+                (e.currentTarget.style.backgroundColor =
+                  "rgba(163, 175, 135, 0.1)"),
+                (e.currentTarget.style.boxShadow = "")
+              )}
             >
               <svg
                 className="w-4 h-4"

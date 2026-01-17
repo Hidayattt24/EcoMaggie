@@ -10,6 +10,7 @@ import TestimoniSection from "@/components/landing/TestimoniSection";
 import FooterSection from "@/components/landing/FooterSection";
 import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
 import EmailVerificationRedirect from "@/components/EmailVerificationRedirect";
+import HashRemover from "@/components/landing/HashRemover";
 
 export const metadata: Metadata = {
   title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
@@ -41,6 +42,9 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="relative">
+      {/* Remove hash from URL on load */}
+      <HashRemover />
+      
       {/* Email Verification Auto-Redirect Handler */}
       <Suspense fallback={null}>
         <EmailVerificationRedirect />
@@ -59,7 +63,9 @@ export default function Home() {
 
         {/* About EcoMaggie - Mission and Vision */}
         <TentangSection />
-
+        
+        {/* Statistics showcasing platform impact */}
+        <StatisticsSection />
         {/* Solutions - Supply Connect & Maggot Market */}
         <SolusiSection />
 

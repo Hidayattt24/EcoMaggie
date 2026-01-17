@@ -1,242 +1,212 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { TrendingUp, Users, Leaf } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Recycle, Users, Leaf } from "lucide-react";
+
+const carouselImages = [
+  {
+    src: "/assets/landing/tentang/image-1.svg",
+    caption: "Tim EcoMaggie - Bersama Membangun Masa Depan Berkelanjutan",
+  },
+  {
+    src: "/assets/landing/tentang/image-2.svg",
+    caption: "Petani Maggot Lokal - Mengubah Limbah Menjadi Berkah",
+  },
+  {
+    src: "/assets/landing/tentang/image-3.svg",
+    caption: "Proses Budidaya - Teknologi Modern untuk Hasil Maksimal",
+  },
+  {
+    src: "/assets/landing/tentang/image-4.svg",
+    caption: "Produk Berkualitas - Dari Alam untuk Kehidupan",
+  },
+];
 
 export default function TentangSection() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [activeCard, setActiveCard] = useState<number | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
-        });
-      },
-      { threshold: 0.2 }
-    );
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % carouselImages.length);
+    }, 4000);
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
+    return () => clearInterval(interval);
   }, []);
-
-  const features = [
-    {
-      title: "Puluhan Kilogram / Hari",
-      description:
-        "Potensi sampah organik yang dapat dikelola secara berkelanjutan.",
-      gradient: "from-green-400 to-emerald-600",
-      icon: TrendingUp,
-    },
-    {
-      title: "Kolaborasi Multi Pihak",
-      description:
-        "Mendukung kerja sama antara masyarakat, petani, dan mitra lapangan.",
-      gradient: "from-emerald-400 to-teal-600",
-      icon: Users,
-    },
-    {
-      title: "Solusi Berkelanjutan",
-      description:
-        "Pendekatan ramah lingkungan berbasis teknologi dan pemberdayaan masyarakat.",
-      gradient: "from-teal-400 to-green-600",
-      icon: Leaf,
-    },
-  ];
 
   return (
     <section
       id="tentang-section"
-      ref={sectionRef}
-      className="relative min-h-screen flex items-center bg-white py-20 lg:py-32 overflow-hidden"
+      className="relative py-20 bg-white overflow-hidden"
     >
-      {/* Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full">
-        <div className="absolute top-20 right-10 w-96 h-96 bg-green-200/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-emerald-200/10 rounded-full blur-3xl" />
-      </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 transition-all duration-700 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-            style={{
-              border: "2px solid",
-              borderColor: "rgba(163, 175, 135, 0.2)",
-            }}
+      <div className="container mx-auto px-4">
+        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+          {/* Left: Auto-scrolling Carousel */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative"
           >
-            <span className="relative flex h-2 w-2">
-              <span
-                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                style={{ backgroundColor: "#A3AF87" }}
-              ></span>
-              <span
-                className="relative inline-flex rounded-full h-2 w-2"
-                style={{ backgroundColor: "#A3AF87" }}
-              ></span>
-            </span>
-            <span
-              className="text-sm font-semibold poppins-semibold"
-              style={{ color: "#A3AF87" }}
-            >
-              Tentang Kami
-            </span>
-          </div>
-          <h2
-            className={`text-4xl md:text-5xl font-bold mb-4 poppins-bold transition-all duration-700 delay-100 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-            style={{ color: "#A3AF87" }}
-          >
-            Dipercaya oleh Masyarakat
-          </h2>
-          <p
-            className={`text-lg md:text-xl max-w-2xl mx-auto poppins-regular transition-all duration-700 delay-200 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-            style={{ color: "#5a6c5b" }}
-          >
-            EcoMaggie memanfaatkan teknologi untuk mendukung pengelolaan sampah
-            organik yang lebih efisien, berkelanjutan dan berdampak bagi
-            lingkungan serta masyarakat.
-          </p>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-16">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className={`group relative transition-all duration-700 ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-8"
-              }`}
-              style={{ transitionDelay: `${300 + index * 150}ms` }}
-              onMouseEnter={() => setActiveCard(index)}
-              onMouseLeave={() => setActiveCard(null)}
-            >
-              <div
-                className="relative h-full bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden"
-                style={{
-                  borderColor:
-                    activeCard === index ? "#A3AF87" : "rgb(243, 244, 246)",
-                }}
-              >
-                {/* Icon */}
-                <div className="relative mb-6">
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"
-                    style={{ backgroundColor: "rgba(163, 175, 135, 0.2)" }}
-                  >
-                    <feature.icon
-                      className="w-8 h-8"
-                      style={{ color: "#A3AF87" }}
-                    />
-                  </div>
-                </div>
-
-                {/* Content */}
-                <h3
-                  className="relative text-xl lg:text-2xl poppins-bold mb-3"
-                  style={{ color: "#303646" }}
-                >
-                  {feature.title}
-                </h3>
-                <p
-                  className="relative poppins-regular text-sm lg:text-base leading-relaxed"
-                  style={{ color: "#5a6c5b" }}
-                >
-                  {feature.description}
-                </p>
-
-                {/* Hover Indicator */}
-                <div
-                  className="absolute bottom-0 left-0 h-1 transition-all duration-500"
-                  style={{
-                    backgroundColor: "#A3AF87",
-                    width: activeCard === index ? "100%" : "0",
+            {/* Main Carousel Container */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3]">
+              {/* Images */}
+              {carouselImages.map((image, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: currentIndex === idx ? 1 : 0,
+                    scale: currentIndex === idx ? 1 : 1.1,
                   }}
-                />
-              </div>
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-0"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#A3AF87]/20 to-transparent z-10" />
+                  <Image
+                    src={image.src}
+                    alt={image.caption}
+                    fill
+                    className="object-cover"
+                  />
+                  
+                  {/* Caption Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 p-6 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
+                    <motion.p
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{
+                        opacity: currentIndex === idx ? 1 : 0,
+                        y: currentIndex === idx ? 0 : 20,
+                      }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                      className="text-white text-sm md:text-base font-medium leading-relaxed"
+                    >
+                      {image.caption}
+                    </motion.p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Mission Statement */}
-        <div
-          className={`relative bg-white rounded-3xl p-8 lg:p-12 shadow-xl transition-all duration-700 delay-500 ${
-            isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-          }`}
-          style={{
-            border: "2px solid",
-            borderColor: "rgba(163, 175, 135, 0.2)",
-          }}
-        >
-          <div className="text-center max-w-4xl mx-auto">
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-              style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
-            >
-              <Leaf className="w-4 h-4" style={{ color: "#A3AF87" }} />
-              <span
-                className="text-sm poppins-semibold"
-                style={{ color: "#A3AF87" }}
-              >
-                Misi Kami
+            {/* Carousel Indicators */}
+            <div className="flex justify-center gap-2 mt-6">
+              {carouselImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    currentIndex === idx
+                      ? "w-8 bg-[#A3AF87]"
+                      : "w-2 bg-[#A3AF87]/30 hover:bg-[#A3AF87]/50"
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Right: Content */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <div className="inline-block">
+              <span className="px-4 py-2 bg-[#A3AF87]/10 text-[#5a6c5b] rounded-full text-sm font-medium">
+                Tentang Kami
               </span>
             </div>
-            <h3
-              className="text-2xl lg:text-3xl poppins-bold mb-4"
-              style={{ color: "#303646" }}
-            >
-              Mengubah Sampah Organik Menjadi Nilai Berkelanjutan
-            </h3>
-            <p
-              className="poppins-regular text-base lg:text-lg leading-relaxed mb-6"
-              style={{ color: "#5a6c5b" }}
-            >
-              EcoMaggie menghubungkan penghasil sampah organik dengan petani
-              maggot, menciptakan ekosistem sirkular yang menguntungkan
-              lingkungan dan masyarakat. Melalui platform digital, kami
-              memfasilitasi pengelolaan sampah yang efisien dan menghasilkan
-              produk bernilai ekonomi tinggi.
+
+            <h2 className="text-4xl lg:text-5xl font-bold text-[#2d3e2f] leading-tight">
+              Solusi Cerdas Kelola Limbah,{" "}
+              <span className="text-[#A3AF87]">Berdayakan Petani Lokal</span>
+            </h2>
+
+            <p className="text-lg text-gray-600 leading-relaxed">
+              &quot;Di Banda Aceh, sampah organik bukan lagi masalah, melainkan
+              potensi. EcoMaggie adalah platform yang menyederhanakan cara kita
+              mengelola limbah dengan menghubungkan langsung sumber sampah ke
+              tangan petani maggot.&quot;
             </p>
-            {/* <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                <span className="text-gray-700 poppins-medium text-sm">
-                  Ekonomi Sirkular
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span className="text-gray-700 poppins-medium text-sm">
-                  Pemberdayaan Masyarakat
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full">
-                <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                <span className="text-gray-700 poppins-medium text-sm">
-                  Ramah Lingkungan
-                </span>
-              </div>
-            </div> */}
-          </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  icon: Recycle,
+                  title: "Kelola Limbah Organik",
+                  desc: "Ubah sampah menjadi sumber daya berharga",
+                },
+                {
+                  icon: Users,
+                  title: "Dukung Petani Lokal",
+                  desc: "Berdayakan ekonomi petani maggot",
+                },
+                {
+                  icon: Leaf,
+                  title: "Jaga Lingkungan",
+                  desc: "Kurangi jejak karbon dan limbah TPA",
+                },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 + idx * 0.1 }}
+                  className="flex items-start gap-4 p-5 rounded-xl border border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-sm transition-all"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-[#A3AF87]/10 flex items-center justify-center flex-shrink-0">
+                    <item.icon className="w-6 h-6 text-[#A3AF87]" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-[#2d3e2f] mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="w-full"
+            >
+              <Link
+                href="/market"
+                className="group inline-flex items-center justify-center gap-3 w-full px-8 py-4 poppins-semibold text-white text-base lg:text-lg transition-all duration-300 hover:scale-105"
+                style={{
+                  borderRadius: "15px",
+                  background: "#303646",
+                  boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                }}
+              >
+                <span>Jelajahi</span>
+                <svg
+                  className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>

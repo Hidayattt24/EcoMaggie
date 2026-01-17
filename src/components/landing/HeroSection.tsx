@@ -2,27 +2,33 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { TextAnimate } from "@/components/ui/text-animate";
+import { useState, useEffect } from "react";
+
+const backgroundImages = [
+  {
+    src: "/assets/landing/landing-page.svg",
+    alt: "EcoMaggie - Platform Pengelolaan Sampah Organik",
+  },
+  {
+    src: "/assets/landing/landing-page-2.svg",
+    alt: "EcoMaggie - Budidaya Maggot BSF",
+  },
+  {
+    src: "/assets/landing/landing-page-3.svg",
+    alt: "EcoMaggie - Ekonomi Sirkular",
+  },
+];
 
 export default function HeroSection() {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
-        });
-      },
-      { threshold: 0.3 }
-    );
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 5000); // Change image every 5 seconds
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
+    return () => clearInterval(interval);
   }, []);
 
   const scrollToNext = () => {
@@ -33,275 +39,146 @@ export default function HeroSection() {
   return (
     <section
       id="beranda-section"
-      ref={sectionRef}
       className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {/* Background Image */}
+      {/* Background Image Carousel with Minimalist Overlay */}
       <div className="absolute inset-0 z-0">
-        {/* Desktop Image */}
-        <Image
-          src="/assets/landing/beranda.svg"
-          alt="Platform EcoMaggie - Pengelolaan Sampah Organik dan Budidaya Maggot BSF untuk Ekonomi Sirkular Berkelanjutan"
-          fill
-          className="hidden lg:block object-cover brightness-75"
-          priority
-          fetchPriority="high"
-          quality={90}
-        />
-        {/* Mobile Image */}
-        <Image
-          src="/assets/landing/beranda-mobile.svg"
-          alt="EcoMaggie - Solusi Digital Pengelolaan Sampah Organik dan Budidaya Maggot di Indonesia"
-          fill
-          className="lg:hidden object-cover brightness-75"
-          priority
-          fetchPriority="high"
-          quality={90}
-        />
-        {/* Gradient Overlay */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(253, 248, 212, 0.00) 0%, rgba(163, 175, 135, 0.95) 100%)",
-          }}
-        />
+        {backgroundImages.map((image, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentImageIndex ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              className="object-cover"
+              priority={index === 0}
+              quality={90}
+            />
+          </div>
+        ))}
+        {/* Minimalist Business Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full py-20 lg:py-0 px-4 sm:px-6 lg:px-0">
-        <div className="max-w-4xl text-left mx-auto lg:mx-0 lg:ml-[135px]">
-          {/* Badge */}
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 backdrop-blur-xl rounded-full mb-4 sm:mb-6 transition-all duration-1000 shadow-lg ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-            style={{
-              background: "rgba(255, 255, 255, 0.95)",
-              border: "2px solid rgba(163, 175, 135, 0.3)",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <div
-              className="w-2.5 h-2.5 rounded-full animate-pulse"
+      {/* Content Container - Responsive */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-24 sm:py-28 md:py-32 lg:py-36">
+        {/* Content - Text */}
+        <div className="space-y-4 sm:space-y-6 lg:space-y-8 max-w-4xl">
+          {/* Main Heading with Animation - Responsive */}
+          <div className="space-y-1 sm:space-y-2">
+            <TextAnimate
+              text="Dari Maggot Kecil,"
+              type="whipIn"
+              delay={0}
+              as="h1"
+              className="poppins-semibold text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[64px]"
               style={{
-                background: "linear-gradient(135deg, #A3AF87 0%, #5a6c5b 100%)",
-                boxShadow: "0 0 10px rgba(163, 175, 135, 0.6)",
+                fontWeight: 600,
+                lineHeight: 1.2,
               }}
-            ></div>
-            <span
-              className="text-xs sm:text-sm poppins-semibold"
+            />
+            <TextAnimate
+              text="Lahir Perubahan Besar"
+              type="whipIn"
+              delay={0.3}
+              as="h1"
+              className="poppins-semibold text-warna-5 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[64px]"
               style={{
-                color: "#0A2710",
-                textShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+                fontWeight: 600,
+                lineHeight: 1.2,
               }}
-            >
-              Platform Digital Pengelolaan Sampah Organik
-            </span>
+            />
           </div>
 
-          {/* Main Heading */}
-          <h1
-            className={`text-white mb-4 sm:mb-5 poppins-bold leading-tight text-3xl sm:text-4xl md:text-5xl lg:text-[52px] transition-all duration-1000 delay-150 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
+          {/* Description with Animation - Responsive */}
+          <TextAnimate
+            text="EcoMaggie menghubungkan penghasil sampah organik dengan petani maggot melalui platform digital untuk menciptakan solusi pengelolaan limbah yang berkelanjutan dan bernilai ekonomi."
+            type="whipIn"
+            delay={0.6}
+            as="p"
+            className="poppins-medium text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl max-w-full sm:max-w-2xl lg:max-w-[815px]"
             style={{
-              textShadow:
-                "0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3)",
+              fontWeight: 500,
+              lineHeight: 1.6,
             }}
-          >
-            Dari Maggot Kecil,
-            <br />
-            Lahir Perubahan Besar
-          </h1>
+          />
 
-          {/* Description */}
-          <p
-            className={`text-white mb-6 sm:mb-8 poppins-medium max-w-2xl lg:mx-0 leading-relaxed text-sm sm:text-base lg:text-lg transition-all duration-1000 delay-300 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-            style={{
-              textShadow:
-                "0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            EcoMaggie menghubungkan penghasil sampah organik dengan petani
-            maggot melalui platform digital untuk menciptakan solusi pengelolaan
-            limbah yang berkelanjutan dan bernilai ekonomi.
-          </p>
-
-          {/* Stats */}
-          <div
-            className={`flex flex-wrap justify-start gap-3 sm:gap-4 mb-6 sm:mb-8 transition-all duration-700 delay-300 ease-out ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-          >
-            <div
-              className="flex items-center gap-3 px-4 py-2.5 sm:px-5 sm:py-3 backdrop-blur-xl rounded-xl hover:scale-105 transition-transform duration-300"
-              style={{
-                background: "rgba(255, 255, 255, 0.95)",
-                border: "2px solid rgba(163, 175, 135, 0.3)",
-                boxShadow:
-                  "0 4px 20px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(163, 175, 135, 0.1)",
-              }}
-            >
-              <div
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #A3AF87 0%, #5a6c5b 100%)",
-                  boxShadow: "0 4px 12px rgba(163, 175, 135, 0.4)",
-                }}
-              >
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  style={{ color: "white" }}
-                >
-                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-              </div>
-              <span
-                className="text-xs sm:text-sm poppins-bold"
-                style={{
-                  color: "#0A2710",
-                  textShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-                }}
-              >
-                100+ Partner
-              </span>
-            </div>
-            <div
-              className="flex items-center gap-3 px-4 py-2.5 sm:px-5 sm:py-3 backdrop-blur-xl rounded-xl hover:scale-105 transition-transform duration-300"
-              style={{
-                background: "rgba(255, 255, 255, 0.95)",
-                border: "2px solid rgba(163, 175, 135, 0.3)",
-                boxShadow:
-                  "0 4px 20px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(163, 175, 135, 0.1)",
-              }}
-            >
-              <div
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #A3AF87 0%, #5a6c5b 100%)",
-                  boxShadow: "0 4px 12px rgba(163, 175, 135, 0.4)",
-                }}
-              >
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  style={{ color: "white" }}
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <span
-                className="text-xs sm:text-sm poppins-bold"
-                style={{
-                  color: "#0A2710",
-                  textShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-                }}
-              >
-                Tersedia 24/7
-              </span>
-            </div>
-          </div>
-
-          {/* CTA Button */}
-          <div
-            className={`flex justify-start transition-all duration-700 delay-400 ease-out ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-          >
+          {/* CTA Buttons - Responsive */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
+            {/* Jelajahi Button */}
             <button
               onClick={scrollToNext}
-              className="group relative inline-flex items-center justify-center gap-3 px-7 py-3.5 sm:px-9 sm:py-4 poppins-bold rounded-full transition-all duration-300 hover:shadow-2xl hover:scale-105 text-sm sm:text-base"
+              className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 poppins-semibold text-white text-sm sm:text-base lg:text-lg transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               style={{
-                background: "rgba(255, 255, 255, 0.98)",
-                color: "#0A2710",
-                border: "2px solid rgba(163, 175, 135, 0.4)",
-                boxShadow:
-                  "0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5)",
+                borderRadius: "15px",
+                background: "#A3AF87",
+                boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
               }}
             >
-              <span style={{ textShadow: "0 1px 2px rgba(0, 0, 0, 0.05)" }}>
-                Jelajahi EcoMaggie
-              </span>
-              <span
-                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-white rounded-full group-hover:translate-x-1 transition-all duration-300"
-                style={{
-                  background: "linear-gradient(135deg, #A3AF87 0%, #5a6c5b 100%)",
-                  boxShadow: "0 4px 12px rgba(163, 175, 135, 0.5)",
-                }}
+              <span>Jelajahi</span>
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth={3}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </span>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
             </button>
+
+            {/* Hubungi Button */}
+            <Link
+              href="/contact"
+              className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 poppins-semibold text-warna-1 text-sm sm:text-base lg:text-lg transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+              style={{
+                borderRadius: "15px",
+                background: "#303646",
+                boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+              }}
+            >
+              <span>Hubungi</span>
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-        <button
-          onClick={scrollToNext}
-          className="flex flex-col items-center gap-2 text-white hover:text-white/90 transition-all duration-300 hover:scale-110"
-          aria-label="Scroll ke section selanjutnya"
-          style={{
-            textShadow: "0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          <span className="text-sm poppins-semibold">Scroll untuk lanjut</span>
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{
-              background: "rgba(255, 255, 255, 0.2)",
-              backdropFilter: "blur(10px)",
-              border: "2px solid rgba(255, 255, 255, 0.3)",
-            }}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 14l-7 7m0 0l-7-7m7 7V3"
-              />
-            </svg>
-          </div>
-        </button>
+      {/* Image Indicators - Minimalist */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {backgroundImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImageIndex(index)}
+            className={`transition-all duration-300 rounded-full ${
+              index === currentImageIndex
+                ? "w-8 h-2 bg-warna-5"
+                : "w-2 h-2 bg-white/50 hover:bg-white/80"
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
       </div>
     </section>
   );

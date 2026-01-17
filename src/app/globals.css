@@ -21,6 +21,13 @@
   /* Background Variants */
   --bg-cream-soft: #fffef5;
   --bg-sage-soft: #f0f2ec;
+
+  /* Custom Color Variables - Warna 1-4 */
+  --warna-1: #fdf8d4;
+  --warna-2: #a3af87;
+  --warna-3: #435664;
+  --warna-4: #303646;
+  --warna-5: #ebfba8;
 }
 
 @theme inline {
@@ -39,6 +46,12 @@
   --color-text-muted: var(--text-muted);
   --color-bg-cream-soft: var(--bg-cream-soft);
   --color-bg-sage-soft: var(--bg-sage-soft);
+
+  /* Warna 1-4 for Tailwind Utilities */
+  --color-warna-1: var(--warna-1);
+  --color-warna-2: var(--warna-2);
+  --color-warna-3: var(--warna-3);
+  --color-warna-4: var(--warna-4);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,7 +64,11 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-poppins),
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 /* Hide Scrollbar untuk Horizontal Scroll */
@@ -111,9 +128,21 @@ body {
   scrollbar-color: var(--brand-sage) #f1f1f1;
 }
 
-/* Smooth Scrolling */
+/* Smooth Scrolling with Enhanced Animation */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 100px; /* Offset untuk navbar fixed */
+}
+
+/* Smooth scroll untuk semua anchor links */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  * {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Animation keyframes untuk landing page */
@@ -131,6 +160,21 @@ html {
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out forwards;
   opacity: 0;
+}
+
+/* Infinite Scroll Animation - Moving Left */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
+  will-change: transform;
 }
 
 .animation-delay-200 {

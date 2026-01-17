@@ -75,8 +75,8 @@ export default function Home() {
 
         {/* Environmental Impact - Sustainability Benefits */}
         <DampakSection />
-      
-       {/* Statistics showcasing platform impact */}
+
+         {/* Statistics showcasing platform impact */}
         <StatisticsSection />
 
         {/* Customer Testimonials */}

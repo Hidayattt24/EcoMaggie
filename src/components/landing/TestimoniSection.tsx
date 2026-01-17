@@ -1,242 +1,142 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Quote, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Marquee } from "@/components/ui/marquee";
+import { Star } from "lucide-react";
 
-interface Testimonial {
-  id: number;
-  name: string;
-  role: string;
-  location: string;
-  content: string;
-  rating: number;
-  avatar: string;
-}
-
-const testimonials: Testimonial[] = [
+const reviews = [
   {
-    id: 1,
     name: "Budi Santoso",
     role: "Peternak Maggot",
-    location: "Bandung, Jawa Barat",
-    content:
-      "EcoMaggie membantu saya mendapatkan pasokan sampah organik berkualitas secara konsisten. Produksi maggot meningkat 300% dalam 6 bulan!",
+    location: "Bandung",
+    body: "EcoMaggie membantu saya mendapatkan pasokan sampah organik berkualitas secara konsisten. Produksi maggot meningkat 300% dalam 6 bulan!",
+    img: "BS",
     rating: 5,
-    avatar: "BS",
   },
   {
-    id: 2,
     name: "Siti Rahayu",
     role: "Pengusaha Restoran",
-    location: "Jakarta Selatan",
-    content:
-      "Sebelumnya limbah dapur kami jadi masalah. Sekarang semua terkelola dengan baik melalui EcoMaggie. Bahkan ada nilai tambah dari sistem ini!",
+    location: "Jakarta",
+    body: "Sebelumnya limbah dapur kami jadi masalah. Sekarang semua terkelola dengan baik melalui EcoMaggie. Bahkan ada nilai tambah dari sistem ini!",
+    img: "SR",
     rating: 5,
-    avatar: "SR",
   },
   {
-    id: 3,
     name: "Ahmad Fauzi",
     role: "Ketua RT 05",
-    location: "Depok, Jawa Barat",
-    content:
-      "Program ini mengubah cara warga kami memandang sampah organik. Lingkungan jadi lebih bersih dan warga dapat edukasi tentang ekonomi sirkular.",
+    location: "Depok",
+    body: "Program ini mengubah cara warga kami memandang sampah organik. Lingkungan jadi lebih bersih dan warga dapat edukasi tentang ekonomi sirkular.",
+    img: "AF",
     rating: 5,
-    avatar: "AF",
   },
   {
-    id: 4,
     name: "Dewi Kusuma",
-    role: "Pemilik Pasar Tradisional",
-    location: "Bogor, Jawa Barat",
-    content:
-      "Sampah sayuran dan buah yang biasanya menumpuk kini tersalurkan produktif. Pasar kami jadi contoh pengelolaan limbah organik yang berkelanjutan.",
+    role: "Pemilik Pasar",
+    location: "Bogor",
+    body: "Sampah pasar yang tadinya menumpuk sekarang jadi berkah. Terima kasih EcoMaggie sudah memfasilitasi pengelolaan limbah organik kami.",
+    img: "DK",
     rating: 5,
-    avatar: "DK",
+  },
+  {
+    name: "Rudi Hartono",
+    role: "Petani Organik",
+    location: "Cianjur",
+    body: "Maggot dari EcoMaggie kualitasnya bagus untuk pakan ayam kampung saya. Harga terjangkau dan pengiriman cepat!",
+    img: "RH",
+    rating: 5,
+  },
+  {
+    name: "Linda Wijaya",
+    role: "Pengelola Hotel",
+    location: "Bandung",
+    body: "Kerjasama dengan EcoMaggie membantu hotel kami mencapai target sustainability. Limbah organik terkelola dengan profesional.",
+    img: "LW",
+    rating: 5,
   },
 ];
 
+const firstRow = reviews.slice(0, reviews.length / 2);
+const secondRow = reviews.slice(reviews.length / 2);
+
+const ReviewCard = ({
+  img,
+  name,
+  role,
+  location,
+  body,
+  rating,
+}: {
+  img: string;
+  name: string;
+  role: string;
+  location: string;
+  body: string;
+  rating: number;
+}) => {
+  return (
+    <figure
+      className={cn(
+        "relative h-full w-80 cursor-pointer overflow-hidden rounded-2xl border p-6",
+        "border-[#A3AF87]/20 bg-white hover:bg-[#A3AF87]/5 transition-all duration-300",
+        "shadow-md hover:shadow-xl"
+      )}
+    >
+      <div className="flex flex-row items-center gap-3 mb-4">
+        {/* Avatar */}
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+          style={{ backgroundColor: "#A3AF87" }}
+        >
+          {img}
+        </div>
+        <div className="flex flex-col">
+          <figcaption className="text-base font-semibold text-[#303646]">
+            {name}
+          </figcaption>
+          <p className="text-sm text-[#5a6c5b]">{role}</p>
+          <p className="text-xs text-gray-500">{location}</p>
+        </div>
+      </div>
+
+      {/* Rating Stars */}
+      <div className="flex gap-1 mb-3">
+        {Array.from({ length: rating }).map((_, i) => (
+          <Star
+            key={i}
+            className="w-4 h-4 fill-yellow-400 text-yellow-400"
+          />
+        ))}
+      </div>
+
+      {/* Review Text */}
+      <blockquote className="text-sm text-gray-700 leading-relaxed">
+        &quot;{body}&quot;
+      </blockquote>
+    </figure>
+  );
+};
+
 export default function TestimoniSection() {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section
       id="testimoni-section"
-      ref={sectionRef}
-      className="min-h-screen flex items-center justify-center overflow-hidden relative"
-      style={{
-        background:
-          "linear-gradient(to bottom, #ffffff 0%, #ffffff 70%, #FDF8D4 100%)",
-      }}
+      className="relative py-16 lg:py-20 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
     >
-      {/* Decorative Elements */}
-      <div
-        className="absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl"
-        style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
-      ></div>
-      <div
-        className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl"
-        style={{ backgroundColor: "rgba(163, 175, 135, 0.08)" }}
-      ></div>
+      <div className="relative flex w-full flex-col items-center justify-center">
+        <Marquee pauseOnHover className="[--duration:40s]">
+          {firstRow.map((review) => (
+            <ReviewCard key={review.name} {...review} />
+          ))}
+        </Marquee>
+        <Marquee reverse pauseOnHover className="[--duration:40s]">
+          {secondRow.map((review) => (
+            <ReviewCard key={review.name} {...review} />
+          ))}
+        </Marquee>
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <div
-              className={`inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 transition-all duration-700 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
-              style={{
-                border: "2px solid",
-                borderColor: "rgba(163, 175, 135, 0.2)",
-              }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: "var(--brand-sage)" }}
-                ></span>
-                <span
-                  className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: "var(--brand-sage)" }}
-                ></span>
-              </span>
-              <span
-                className="text-sm font-semibold poppins-semibold"
-                style={{ color: "#A3AF87" }}
-              >
-                Testimoni Pengguna
-              </span>
-            </div>
-
-            <h2
-              className={`text-4xl md:text-5xl font-bold mb-4 poppins-bold transition-all duration-700 delay-100 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
-              style={{ color: "var(--brand-sage)" }}
-            >
-              Dipercaya oleh Masyarakat
-            </h2>
-            <p
-              className={`text-lg md:text-xl text-gray-600 max-w-2xl mx-auto poppins-regular transition-all duration-700 delay-200 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-            >
-              Cerita sukses dari para petani maggot, pengusaha, dan masyarakat
-              yang telah bergabung dengan EcoMaggie
-            </p>
-          </div>
-
-          {/* Testimonial Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={testimonial.id}
-                className={`group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 ${
-                  isVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-6"
-                }`}
-                style={{
-                  transitionDelay: `${300 + index * 100}ms`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor =
-                    "rgba(163, 175, 135, 0.3)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgb(243, 244, 246)";
-                }}
-              >
-                {/* Quote Icon */}
-                <div className="mb-6">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom right, var(--brand-sage), var(--accent-green))",
-                    }}
-                  >
-                    <Quote className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-
-                {/* Rating Stars */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-
-                {/* Content */}
-                <p className="text-gray-700 text-base leading-relaxed mb-6 poppins-regular">
-                  "{testimonial.content}"
-                </p>
-
-                {/* User Info */}
-                <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold poppins-semibold"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom right, var(--brand-sage), var(--accent-green))",
-                    }}
-                  >
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 poppins-semibold">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 poppins-regular">
-                      {testimonial.role}
-                    </p>
-                    <p className="text-xs text-gray-500 poppins-regular">
-                      {testimonial.location}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA Section */}
-          <div
-            className={`mt-16 text-center transition-all duration-700 delay-700 ease-out ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-6"
-            }`}
-          ></div>
-        </div>
+        {/* Gradient Overlays */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white to-transparent"></div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-gray-50 to-transparent"></div>
       </div>
     </section>
   );

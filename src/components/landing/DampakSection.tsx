@@ -1,19 +1,28 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import {
   Leaf,
   TrendingDown,
   Users,
-  MapPin,
   Package,
-  Recycle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function DampakSection() {
   const [isVisible, setIsVisible] = useState(false);
   const [percentageCount, setPercentageCount] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
+
+  const images = [
+    "/assets/landing/landing-page.svg",
+    "/assets/landing/landing-page-2.svg",
+    "/assets/landing/landing-page-3.svg",
+  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -56,54 +65,47 @@ export default function DampakSection() {
     return () => clearInterval(timer);
   }, [isVisible]);
 
+  // Auto slide images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   const stats = [
     {
       value: "500+",
       unit: "kg",
       label: "Sampah Organik Terkelola",
       icon: Package,
-      gradient: "from-green-500 to-emerald-600",
-      delay: "delay-150",
     },
     {
       value: "1.2",
       unit: "ton CO₂",
       label: "Emisi Dicegah",
       icon: TrendingDown,
-      gradient: "from-emerald-500 to-teal-600",
-      delay: "delay-200",
-    },
-    {
-      value: "100%",
-      unit: "",
-      label: "Pasokan Stabil untuk Petani",
-      icon: Recycle,
-      gradient: "from-teal-500 to-green-600",
-      delay: "delay-250",
     },
     {
       value: "150+",
       unit: "",
       label: "Penghasil Sampah Aktif",
       icon: Users,
-      gradient: "from-green-500 to-emerald-600",
-      delay: "delay-300",
     },
     {
       value: "60+",
       unit: "",
       label: "Mitra Petani Maggot",
       icon: Leaf,
-      gradient: "from-emerald-500 to-teal-600",
-      delay: "delay-350",
-    },
-    {
-      value: "5",
-      unit: "",
-      label: "Kota/Kabupaten Terlayani",
-      icon: MapPin,
-      gradient: "from-teal-500 to-green-600",
-      delay: "delay-400",
     },
   ];
 
@@ -111,202 +113,163 @@ export default function DampakSection() {
     <section
       id="dampak-section"
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center bg-white overflow-hidden py-20 lg:py-32 relative"
+      className="py-0 bg-white overflow-hidden"
     >
-      {/* Background Decorative Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-100/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-100/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="text-center mb-16 lg:mb-20">
-            <div
-              className={`inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 transition-all duration-700 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
-              style={{
-                border: "2px solid",
-                borderColor: "rgba(163, 175, 135, 0.2)",
-              }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: "#A3AF87" }}
-                ></span>
-                <span
-                  className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: "#A3AF87" }}
-                ></span>
-              </span>
-              <span
-                className="text-sm font-semibold poppins-semibold"
-                style={{ color: "#A3AF87" }}
+      <div className="w-full">
+        {/* Full Width Image Container */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: false, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="relative w-full h-[600px] lg:h-[700px]"
+        >
+          {/* Background Images - Instant Change, No Animation */}
+          <div className="absolute inset-0">
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 ${
+                  currentImageIndex === index ? "block" : "hidden"
+                }`}
               >
-                Dampak Positif
-              </span>
-            </div>
-
-            <h2
-              className={`text-4xl md:text-5xl font-bold mb-4 poppins-bold transition-all duration-700 delay-100 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
-              style={{ color: "#A3AF87" }}
-            >
-              Dipercaya oleh Masyarakat
-            </h2>
-
-            <p
-              className={`text-lg md:text-xl max-w-2xl mx-auto poppins-regular transition-all duration-700 delay-200 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-              style={{ color: "#5a6c5b" }}
-            >
-              EcoMaggie mengubah limbah organik menjadi nilai ekonomi —
-              mengalihkan sampah dari TPA, mengurangi emisi, menghemat sumber
-              daya, dan menggerakkan ekonomi lokal melalui budidaya maggot.
-            </p>
+                <Image
+                  src={image}
+                  alt={`Dampak EcoMaggie ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                />
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
+              </div>
+            ))}
           </div>
 
-          {/* Main Content Grid: Progress Left, Stats Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left: Circular Progress */}
-            <div
-              className={`flex items-center justify-center transition-all duration-700 delay-300 ease-out ${
-                isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"
-              }`}
-            >
-              <div className="relative">
-                <div className="relative w-72 h-72 lg:w-96 lg:h-96">
-                  <svg
-                    className="w-full h-full -rotate-90"
-                    viewBox="0 0 200 200"
-                  >
-                    {/* Background Track */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="85"
-                      fill="none"
-                      stroke="#E5E7EB"
-                      strokeWidth="14"
-                    />
-                    {/* Progress Circle - Solid Sage */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="85"
-                      fill="none"
-                      stroke="#A3AF87"
-                      strokeWidth="14"
-                      strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 85}`}
-                      strokeDashoffset={`${
-                        2 * Math.PI * 85 * (1 - percentageCount / 100)
-                      }`}
-                      className="transition-all duration-1000 ease-out drop-shadow-lg"
-                    />
-                  </svg>
+          {/* Navigation Arrows - Hidden on Mobile */}
+          <button
+            onClick={prevImage}
+            className="hidden lg:block absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+          <button
+            onClick={nextImage}
+            className="hidden lg:block absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
 
-                  {/* Center Content */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="relative">
-                      <div
-                        className="text-7xl lg:text-8xl poppins-bold"
-                        style={{ color: "#A3AF87" }}
-                      >
-                        {percentageCount}%
+          {/* Content Overlay */}
+          <div className="absolute inset-0 z-10">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full">
+              <div className="max-w-7xl mx-auto h-full flex flex-col justify-between py-8 lg:py-12">
+                {/* Top: Main Stat - 80% */}
+                <motion.div
+                  initial={{ opacity: 0, y: -30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="flex justify-center lg:justify-start"
+                >
+                  <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 lg:p-8 border border-white/20">
+                    <div className="flex items-center gap-4 lg:gap-6">
+                      {/* Circular Progress */}
+                      <div className="relative w-24 h-24 lg:w-32 lg:h-32 flex-shrink-0">
+                        <svg
+                          className="w-full h-full -rotate-90"
+                          viewBox="0 0 100 100"
+                        >
+                          {/* Background Track */}
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="42"
+                            fill="none"
+                            stroke="rgba(255, 255, 255, 0.2)"
+                            strokeWidth="8"
+                          />
+                          {/* Progress Circle */}
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="42"
+                            fill="none"
+                            stroke="#A3AF87"
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                            strokeDasharray={`${2 * Math.PI * 42}`}
+                            strokeDashoffset={`${
+                              2 * Math.PI * 42 * (1 - percentageCount / 100)
+                            }`}
+                            className="transition-all duration-1000 ease-out"
+                          />
+                        </svg>
+                        {/* Center Text */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-3xl lg:text-4xl font-bold text-white">
+                            {percentageCount}%
+                          </span>
+                        </div>
                       </div>
-                      <div
-                        className="absolute -top-6 -right-6 w-14 h-14 rounded-full flex items-center justify-center animate-pulse"
-                        style={{ backgroundColor: "rgba(163, 175, 135, 0.2)" }}
-                      >
-                        <Leaf
-                          className="w-7 h-7"
-                          style={{ color: "#A3AF87" }}
-                        />
+
+                      {/* Text */}
+                      <div>
+                        <p className="text-white text-xl lg:text-2xl font-bold leading-tight">
+                          Penghasil Sampah
+                        </p>
+                        <p className="text-white/80 text-lg lg:text-xl font-medium">
+                          Beralih ke EcoMaggie
+                        </p>
                       </div>
-                    </div>
-                    <div
-                      className="text-base lg:text-lg poppins-semibold text-center mt-4 px-8"
-                      style={{ color: "#303646" }}
-                    >
-                      Penghasil Sampah
-                      <br />
-                      Beralih ke EcoMaggie
                     </div>
                   </div>
+                </motion.div>
+
+                {/* Bottom: Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                  {stats.map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: false, amount: 0.3 }}
+                      transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                      className="bg-white/10 backdrop-blur-md rounded-2xl p-4 lg:p-5 border border-white/20 hover:bg-white/15 transition-all duration-300"
+                    >
+                      {/* Icon */}
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                        style={{ backgroundColor: "#A3AF87" }}
+                      >
+                        <stat.icon className="w-5 h-5 text-white" />
+                      </div>
+
+                      {/* Value */}
+                      <div className="mb-1">
+                        <span className="text-2xl lg:text-3xl font-bold text-white">
+                          {stat.value}
+                        </span>
+                        {stat.unit && (
+                          <span className="text-sm lg:text-base font-semibold text-white/80 ml-1">
+                            {stat.unit}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Label */}
+                      <p className="text-white/90 text-xs lg:text-sm font-medium leading-tight">
+                        {stat.label}
+                      </p>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </div>
-
-            {/* Right: Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
-              {stats.map((stat, index) => (
-                <div
-                  key={index}
-                  className={`group relative bg-white rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-2xl transition-all duration-700 ease-out hover:scale-105 border overflow-hidden ${
-                    stat.delay
-                  } ${
-                    isVisible
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-8"
-                  }`}
-                  style={{ borderColor: "rgba(163, 175, 135, 0.2)" }}
-                >
-                  {/* Background Gradient Overlay */}
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
-                    style={{ backgroundColor: "#A3AF87" }}
-                  />
-
-                  {/* Icon */}
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
-                    style={{ backgroundColor: "#A3AF87" }}
-                  >
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-
-                  {/* Value */}
-                  <div className="relative mb-2">
-                    <span
-                      className="text-4xl lg:text-5xl poppins-bold"
-                      style={{ color: "#A3AF87" }}
-                    >
-                      {stat.value}
-                    </span>
-                    {stat.unit && (
-                      <span
-                        className="text-lg lg:text-xl poppins-semibold ml-1"
-                        style={{ color: "#5a6c5b" }}
-                      >
-                        {stat.unit}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Label */}
-                  <p
-                    className="poppins-regular text-sm lg:text-base leading-relaxed relative"
-                    style={{ color: "#303646" }}
-                  >
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

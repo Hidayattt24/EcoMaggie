@@ -9,7 +9,9 @@ import {
   Check,
   AlertCircle,
   ImageIcon,
+  Loader2,
 } from "lucide-react";
+import { compressImage, needsCompression } from "@/utils/imageCompression";
 
 interface MediaUploaderProps {
   onPhotoChange: (file: File | null, previewUrl: string | null) => void;
@@ -25,6 +27,7 @@ export default function MediaUploader({
   const [showModal, setShowModal] = useState(false);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   
   const photoInputRef = useRef<HTMLInputElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
@@ -55,30 +58,59 @@ export default function MediaUploader({
   };
 
   // Capture photo from camera
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (!cameraVideoRef.current || !canvasRef.current) return;
 
-    const video = cameraVideoRef.current;
-    const canvas = canvasRef.current;
-    
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw video frame to canvas
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Convert canvas to blob
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-          const previewUrl = URL.createObjectURL(blob);
-          onPhotoChange(file, previewUrl);
-          closeCamera();
+    setIsCompressing(true);
+    try {
+      const video = cameraVideoRef.current;
+      const canvas = canvasRef.current;
+
+      // Set canvas size (resize if too large)
+      let width = video.videoWidth;
+      let height = video.videoHeight;
+      const maxDimension = 1920;
+
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = (height / width) * maxDimension;
+          width = maxDimension;
+        } else {
+          width = (width / height) * maxDimension;
+          height = maxDimension;
         }
-      }, "image/jpeg", 0.9);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw video frame to canvas
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, width, height);
+
+        // Convert canvas to blob with compression
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            let file = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
+            
+            // Compress if needed
+            if (needsCompression(file)) {
+              console.log("Compressing camera photo...");
+              file = await compressImage(file);
+            }
+            
+            const previewUrl = URL.createObjectURL(file);
+            onPhotoChange(file, previewUrl);
+            closeCamera();
+          }
+          setIsCompressing(false);
+        }, "image/jpeg", 0.8);
+      }
+    } catch (error) {
+      console.error("Error capturing photo:", error);
+      alert("Gagal mengambil foto. Silakan coba lagi.");
+      setIsCompressing(false);
     }
   };
 
@@ -92,20 +124,35 @@ export default function MediaUploader({
   };
 
   // Handle photo upload from gallery
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Ukuran foto maksimal 5MB");
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran foto maksimal 10MB");
         return;
       }
-      
-      const reader = new FileReader();
-      reader.onload = () => {
-        onPhotoChange(file, reader.result as string);
-        setShowModal(false);
-      };
-      reader.readAsDataURL(file);
+
+      setIsCompressing(true);
+      try {
+        // Compress image using utility
+        let processedFile = file;
+        if (needsCompression(file)) {
+          console.log("Compressing uploaded photo...");
+          processedFile = await compressImage(file);
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          onPhotoChange(processedFile, reader.result as string);
+          setShowModal(false);
+          setIsCompressing(false);
+        };
+        reader.readAsDataURL(processedFile);
+      } catch (error) {
+        console.error("Error processing photo:", error);
+        alert("Gagal memproses foto. Silakan coba lagi.");
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -313,10 +360,20 @@ export default function MediaUploader({
             <div className="p-6 bg-black/90 backdrop-blur-sm">
               <button
                 onClick={capturePhoto}
-                className="w-full py-4 bg-gradient-to-r from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl font-bold text-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                disabled={isCompressing}
+                className="w-full py-4 bg-gradient-to-r from-[#A3AF87] to-[#8a9b73] text-white rounded-2xl font-bold text-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Camera className="h-6 w-6" />
-                Ambil Foto
+                {isCompressing ? (
+                  <>
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="h-6 w-6" />
+                    Ambil Foto
+                  </>
+                )}
               </button>
             </div>
           </motion.div>

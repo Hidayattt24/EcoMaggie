@@ -6,6 +6,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { createServerClient } from "@supabase/ssr";
 
 // Routes yang memerlukan authentication
 const protectedRoutes = [
@@ -20,8 +21,17 @@ const protectedRoutes = [
 // Routes khusus untuk authenticated users yang belum login
 const authRoutes = ["/login", "/register", "/forgot-password", "/otp"];
 
-// Routes khusus untuk farmer
-const farmerRoutes = ["/farmer"];
+// Routes khusus untuk FARMER role
+const farmerOnlyRoutes = ["/farmer"];
+
+// Routes khusus untuk USER role
+const userOnlyRoutes = [
+  "/market",
+  "/profile",
+  "/supply",
+  "/transaction",
+  "/wishlist",
+];
 
 export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
@@ -35,8 +45,13 @@ export async function middleware(request: NextRequest) {
   // Check if current route is auth route
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
-  // Check if current route is farmer route
-  const isFarmerRoute = farmerRoutes.some((route) =>
+  // Check if current route is farmer-only route
+  const isFarmerOnlyRoute = farmerOnlyRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  // Check if current route is user-only route
+  const isUserOnlyRoute = userOnlyRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
@@ -47,17 +62,51 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Redirect authenticated users from auth routes to home/dashboard
-  if (isAuthRoute && user) {
-    // TODO: Check user role and redirect accordingly
-    return NextResponse.redirect(new URL("/market", request.url));
-  }
+  // For authenticated users, get their role from database
+  if (user) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
 
-  // Additional check for farmer routes
-  // Note: Full role validation should be done in the page/API
-  if (isFarmerRoute && user) {
-    // User metadata check can be added here if available
-    // For now, let the page handle role validation
+    // Get user role from database
+    const { data: userData } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const userRole = userData?.role || "USER";
+
+    // Redirect authenticated users from auth routes to their dashboard
+    if (isAuthRoute) {
+      const dashboardUrl =
+        userRole === "FARMER" ? "/farmer/dashboard" : "/market/products";
+      return NextResponse.redirect(new URL(dashboardUrl, request.url));
+    }
+
+    // Role-based access control
+    // FARMER trying to access USER-only routes
+    if (userRole === "FARMER" && isUserOnlyRoute) {
+      return NextResponse.redirect(new URL("/farmer/dashboard", request.url));
+    }
+
+    // USER trying to access FARMER-only routes
+    if (userRole === "USER" && isFarmerOnlyRoute) {
+      return NextResponse.redirect(new URL("/market/products", request.url));
+    }
   }
 
   return supabaseResponse;

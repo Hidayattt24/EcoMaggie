@@ -40,6 +40,20 @@ import { useDefaultAddress } from "@/hooks/useDefaultAddress";
 import MediaUploader from "@/components/supply/MediaUploader";
 import { useToast } from "@/hooks/useToast";
 import Toast from "@/components/ui/Toast";
+import dynamic from "next/dynamic";
+
+// Import LocationPicker dynamically to avoid SSR issues with Leaflet
+const LocationPicker = dynamic(() => import("@/components/supply/LocationPicker"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-2xl border-2 border-[#A3AF87]/20 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-3" />
+        <p className="text-sm text-gray-600 font-medium">Memuat peta...</p>
+      </div>
+    </div>
+  ),
+});
 
 const wasteTypes = [
   {
@@ -137,6 +151,8 @@ export default function SupplyInputPage() {
     timeSlot: "",
     notes: "",
     photo: null as File | null,
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -215,6 +231,15 @@ export default function SupplyInputPage() {
     setPreviewUrl(preview);
   };
 
+  const handleLocationSelect = (lat: number, lng: number, address: string) => {
+    setFormData({
+      ...formData,
+      latitude: lat,
+      longitude: lng,
+      address: address || formData.address,
+    });
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
@@ -253,6 +278,8 @@ export default function SupplyInputPage() {
           (useCustomAddress ? undefined : defaultAddressId) || undefined,
         pickupDate: formData.date,
         pickupTimeSlot: formData.timeSlot,
+        pickupLatitude: formData.latitude || undefined,
+        pickupLongitude: formData.longitude || undefined,
         notes: formData.notes || undefined,
       };
 
@@ -287,18 +314,130 @@ export default function SupplyInputPage() {
     formData.wasteType && formData.weight && formData.photo;
   const canProceedStep2 = formData.date && formData.timeSlot;
 
-  // Loading state
+  // Loading state with skeleton
   if (isLoading || isLoadingAddress) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-600">Memuat...</p>
-        </motion.div>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+          {/* Header Skeleton */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse" />
+            <div className="flex-1">
+              <div className="h-8 w-56 bg-gray-200 rounded-lg animate-pulse mb-2" />
+              <div className="h-4 w-32 bg-gray-200 rounded-lg animate-pulse" />
+            </div>
+            <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl">
+              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+            </div>
+          </div>
+
+          {/* Progress Bar Skeleton */}
+          <div className="flex gap-2 mb-8 max-w-xl">
+            <div className="flex-1 h-2 bg-gray-200 rounded-full animate-pulse" />
+            <div className="flex-1 h-2 bg-gray-200 rounded-full animate-pulse" />
+          </div>
+
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* Left Column - Form Skeleton */}
+            <div className="lg:col-span-7 xl:col-span-8">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:p-8">
+                <div className="space-y-8">
+                  {/* Section 1 */}
+                  <div>
+                    <div className="h-6 w-48 bg-gray-200 rounded-lg animate-pulse mb-4" />
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="p-4 lg:p-5 rounded-2xl border-2 border-gray-100 bg-white">
+                          <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse mb-3" />
+                          <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-2" />
+                          <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 2 */}
+                  <div>
+                    <div className="h-6 w-56 bg-gray-200 rounded-lg animate-pulse mb-4" />
+                    <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-gray-100">
+                          <div className="h-6 w-16 bg-gray-200 rounded animate-pulse mb-1" />
+                          <div className="h-3 w-12 bg-gray-200 rounded animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 3 - Photo */}
+                  <div>
+                    <div className="h-6 w-32 bg-gray-200 rounded-lg animate-pulse mb-4" />
+                    <div className="w-full aspect-video bg-gray-200 rounded-2xl animate-pulse" />
+                  </div>
+
+                  {/* Button Skeleton */}
+                  <div className="h-14 w-full bg-gray-200 rounded-2xl animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Info Panel Skeleton */}
+            <div className="lg:col-span-5 xl:col-span-4 space-y-6">
+              {/* Summary Card Skeleton */}
+              <div className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl p-6 animate-pulse">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-400 rounded-lg" />
+                  <div className="h-6 w-32 bg-gray-400 rounded" />
+                </div>
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center justify-between py-2">
+                      <div className="h-4 w-24 bg-gray-400 rounded" />
+                      <div className="h-4 w-16 bg-gray-400 rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Guide Card Skeleton */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse" />
+                  <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse" />
+                      <div className="flex-1 h-4 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Impact Stats Skeleton */}
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse" />
+                  <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100">
+                      <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -730,115 +869,156 @@ export default function SupplyInputPage() {
                       exit={{ opacity: 0 }}
                       className="space-y-8"
                     >
-                      {/* Address */}
-                      <div>
-                        <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Alamat Pickup
-                        </label>
+                      {/* Address & Location Section - Redesigned */}
+                      <div className="space-y-6">
+                        {/* Section Header */}
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">
+                            Lokasi Penjemputan
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Tentukan alamat dan titik lokasi untuk memudahkan kurir menemukan sampah Anda
+                          </p>
+                        </div>
 
-                        {/* Default Address */}
-                        {!useCustomAddress && (
-                          <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                            <div className="flex items-start gap-4">
-                              <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                                <MapPin className="h-6 w-6 text-[#A3AF87]" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm text-gray-500 mb-1">
-                                  Alamat Default
-                                </p>
-                                <p className="text-gray-900 font-medium">
-                                  {defaultAddress}
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setUseCustomAddress(true);
-                                    setCustomAddress("");
-                                    setFormData({
-                                      ...formData,
-                                      address: "",
-                                      addressId: null,
-                                    });
-                                  }}
-                                  className="text-sm text-[#A3AF87] font-medium mt-2 hover:underline flex items-center gap-1"
-                                >
-                                  <MapPin className="h-3.5 w-3.5" />
-                                  Gunakan alamat lain
-                                </button>
-                              </div>
+                        {/* Step 1: Address Selection */}
+                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-200">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-8 h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                              1
                             </div>
+                            <h4 className="font-bold text-gray-900">Pilih Alamat</h4>
                           </div>
-                        )}
 
-                        {/* Custom Address Input */}
-                        {useCustomAddress && (
-                          <div className="space-y-4">
-                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border-2 border-blue-200">
-                              <div className="flex items-start gap-4">
-                                <div className="p-3 bg-blue-100 rounded-xl">
-                                  <MapPin className="h-6 w-6 text-blue-600" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-sm font-semibold text-blue-900 mb-2">
-                                    Alamat Kustom
-                                  </p>
-                                  <textarea
-                                    value={customAddress}
-                                    onChange={(e) => {
-                                      const value = e.target.value;
-                                      setCustomAddress(value);
-                                      setFormData({
-                                        ...formData,
-                                        address: value,
-                                        addressId: null,
-                                      });
-                                    }}
-                                    placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
-                                    rows={3}
-                                    className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 focus:border-blue-400 focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
-                                  />
-                                  <div className="flex items-center gap-3 mt-3">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setUseCustomAddress(false);
-                                        setCustomAddress("");
-                                        if (defaultAddressData) {
-                                          setFormData({
-                                            ...formData,
-                                            address:
-                                              defaultAddressData.fullAddress,
-                                            addressId: defaultAddressData.id,
-                                          });
-                                        }
-                                      }}
-                                      className="text-sm text-gray-600 font-medium hover:text-gray-900 flex items-center gap-1"
-                                    >
-                                      <X className="h-3.5 w-3.5" />
-                                      Gunakan alamat default
-                                    </button>
-                                    {customAddress && (
-                                      <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                                        <CheckCircle className="h-3.5 w-3.5" />
-                                        Alamat tersimpan
-                                      </span>
-                                    )}
+                          {/* Default Address Option */}
+                          {!useCustomAddress && (
+                            <div className="space-y-3">
+                              <div className="bg-white rounded-xl p-4 border-2 border-[#A3AF87] shadow-sm">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
+                                    <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <p className="text-xs font-semibold text-[#A3AF87]">
+                                        ALAMAT TERPILIH
+                                      </p>
+                                      <CheckCircle className="h-4 w-4 text-[#A3AF87]" />
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-medium">
+                                      {defaultAddress}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
+                              
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setUseCustomAddress(true);
+                                  setCustomAddress("");
+                                  setFormData({
+                                    ...formData,
+                                    address: "",
+                                    addressId: null,
+                                  });
+                                }}
+                                className="w-full py-3 px-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all flex items-center justify-center gap-2"
+                              >
+                                <MapPin className="h-4 w-4" />
+                                Gunakan Alamat Lain
+                              </button>
                             </div>
+                          )}
 
-                            {/* Info */}
-                            <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                              <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                              <p className="text-xs text-amber-800">
-                                Pastikan alamat yang Anda masukkan berada di
-                                Kota Banda Aceh dan mudah diakses untuk pickup.
-                              </p>
+                          {/* Custom Address Input */}
+                          {useCustomAddress && (
+                            <div className="space-y-3">
+                              <textarea
+                                value={customAddress}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setCustomAddress(value);
+                                  setFormData({
+                                    ...formData,
+                                    address: value,
+                                    addressId: null,
+                                  });
+                                }}
+                                placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
+                                rows={3}
+                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#A3AF87] focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
+                              />
+                              
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setUseCustomAddress(false);
+                                    setCustomAddress("");
+                                    if (defaultAddressData) {
+                                      setFormData({
+                                        ...formData,
+                                        address: defaultAddressData.fullAddress,
+                                        addressId: defaultAddressData.id,
+                                      });
+                                    }
+                                  }}
+                                  className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                >
+                                  <X className="h-4 w-4" />
+                                  Batal
+                                </button>
+                                
+                                {customAddress && (
+                                  <div className="flex-1 py-2.5 px-4 bg-green-50 text-green-700 rounded-xl font-medium text-sm flex items-center justify-center gap-2">
+                                    <CheckCircle className="h-4 w-4" />
+                                    Tersimpan
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Step 2: Pin Location (Recommended) */}
+                        <div className="bg-gradient-to-br from-[#A3AF87]/5 to-white rounded-2xl p-6 border-2 border-[#A3AF87]/30">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                2
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-gray-900">
+                                  Tandai Titik Lokasi di Peta
+                                </h4>
+                                <p className="text-xs text-gray-600 mt-0.5">
+                                  Direkomendasikan untuk akurasi pickup
+                                </p>
+                              </div>
+                            </div>
+                            <div className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+                              REKOMENDASI
                             </div>
                           </div>
-                        )}
+
+                          {/* Info Box */}
+                          <div className="mb-4 flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                            <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-blue-900">
+                              <span className="font-semibold">Mengapa perlu?</span> Titik lokasi yang presisi membantu kurir menemukan lokasi penjemputan dengan cepat dan tepat.
+                            </p>
+                          </div>
+
+                          <LocationPicker
+                            onLocationSelect={handleLocationSelect}
+                            initialLat={formData.latitude || undefined}
+                            initialLng={formData.longitude || undefined}
+                            defaultAddress={
+                              useCustomAddress ? customAddress : defaultAddress
+                            }
+                          />
+                        </div>
                       </div>
 
                       {/* Date & Time Grid */}

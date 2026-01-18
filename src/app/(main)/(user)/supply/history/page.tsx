@@ -29,9 +29,27 @@ import {
   UserCircle,
   AlertCircle,
   Recycle,
+  Trash2,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { getUserSupplies, type UserSupply } from "@/lib/api/supply.actions";
+import DeleteSupplyModal from "@/components/supply/DeleteSupplyModal";
+import dynamic from "next/dynamic";
+
+// Import MapViewer dynamically to avoid SSR issues with Leaflet
+const MapViewer = dynamic(() => import("@/components/supply/MapViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[300px] bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-2xl border-2 border-[#A3AF87]/20 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-3" />
+        <p className="text-sm text-gray-600 font-medium">Memuat peta...</p>
+      </div>
+    </div>
+  ),
+});
 
 // Map database waste types to display labels
 const wasteTypeLabels: Record<string, string> = {
@@ -95,6 +113,8 @@ interface TransformedSupply {
   pickupDate: string | null;
   pickupTime: string | null;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   notes: string | null;
   courier: {
     name: string;
@@ -121,6 +141,11 @@ export default function SupplyHistoryPage() {
   const [isLoadingSupplies, setIsLoadingSupplies] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // State for delete functionality
+  const [selectedSupplies, setSelectedSupplies] = useState<Set<string>>(new Set());
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+
   // Fetch supplies from database
   useEffect(() => {
     async function fetchSupplies() {
@@ -136,7 +161,7 @@ export default function SupplyHistoryPage() {
           // Transform database data to component format
           const transformed: TransformedSupply[] = response.data.map((supply) => {
             const weightValue = parseInt(supply.estimatedWeight);
-            
+
             return {
               id: supply.id,
               supplyNumber: supply.supplyNumber,
@@ -147,6 +172,8 @@ export default function SupplyHistoryPage() {
               pickupDate: supply.pickupDate,
               pickupTime: supply.pickupTimeRange,
               address: supply.pickupAddress,
+              latitude: supply.pickupLatitude,
+              longitude: supply.pickupLongitude,
               notes: supply.notes,
               courier: supply.courierName && supply.courierPhone
                 ? {
@@ -180,6 +207,87 @@ export default function SupplyHistoryPage() {
     fetchSupplies();
   }, [isSupplyConnectAvailable, locationLoading]);
 
+  // Handle selection toggle
+  const toggleSelection = (id: string) => {
+    const newSelection = new Set(selectedSupplies);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedSupplies(newSelection);
+  };
+
+  // Handle select all
+  const toggleSelectAll = () => {
+    const deletableSupplies = filteredSupply.filter(
+      (s) => s.status === "completed"
+    );
+    
+    if (selectedSupplies.size === deletableSupplies.length) {
+      setSelectedSupplies(new Set());
+    } else {
+      setSelectedSupplies(new Set(deletableSupplies.map((s) => s.id)));
+    }
+  };
+
+  // Handle delete
+  const handleDeleteClick = () => {
+    if (selectedSupplies.size > 0) {
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  // Handle delete success
+  const handleDeleteSuccess = () => {
+    setSelectedSupplies(new Set());
+    setIsSelectionMode(false);
+    // Refresh data
+    const fetchSupplies = async () => {
+      setIsLoadingSupplies(true);
+      try {
+        const response = await getUserSupplies();
+        if (response.success && response.data) {
+          const transformed: TransformedSupply[] = response.data.map((supply) => {
+            const weightValue = parseInt(supply.estimatedWeight);
+            return {
+              id: supply.id,
+              supplyNumber: supply.supplyNumber,
+              date: supply.createdAt,
+              weight: weightValue,
+              type: wasteTypeLabels[supply.wasteType] || supply.wasteType,
+              status: mapDatabaseStatus(supply.status),
+              pickupDate: supply.pickupDate,
+              pickupTime: supply.pickupTimeRange,
+              address: supply.pickupAddress,
+              latitude: supply.pickupLatitude,
+              longitude: supply.pickupLongitude,
+              notes: supply.notes,
+              courier: supply.courierName && supply.courierPhone
+                ? {
+                    name: supply.courierName,
+                    phone: supply.courierPhone,
+                    photo: null,
+                  }
+                : null,
+              farmer: null,
+              photo: supply.photoUrl,
+            };
+          });
+          setSupplyHistory(transformed);
+          if (transformed.length > 0 && !selectedItem) {
+            setSelectedItem(transformed[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching supplies:", err);
+      } finally {
+        setIsLoadingSupplies(false);
+      }
+    };
+    fetchSupplies();
+  };
+
   const filteredSupply = supplyHistory.filter((item) => {
     const matchesTab = activeTab === "all" || item.status === activeTab;
     const matchesSearch =
@@ -187,6 +295,10 @@ export default function SupplyHistoryPage() {
       item.supplyNumber.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  const deletableCount = filteredSupply.filter(
+    (s) => s.status === "completed"
+  ).length;
 
   const totalWeight = supplyHistory.reduce((acc, item) => acc + item.weight, 0);
   const completedCount = supplyHistory.filter(
@@ -402,6 +514,33 @@ export default function SupplyHistoryPage() {
 
           {/* Stats Cards - Desktop */}
           <div className="hidden lg:flex items-center gap-3 ml-auto">
+            {/* Delete Mode Toggle */}
+            {deletableCount > 0 && (
+              <button
+                onClick={() => {
+                  setIsSelectionMode(!isSelectionMode);
+                  setSelectedSupplies(new Set());
+                }}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+                  isSelectionMode
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-white border-2 border-gray-200 text-gray-700 hover:border-red-300 hover:bg-red-50"
+                }`}
+              >
+                {isSelectionMode ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Batal
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Hapus Riwayat
+                  </>
+                )}
+              </button>
+            )}
+
             <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/20">
               <div className="p-1.5 bg-[#A3AF87]/20 rounded-lg">
                 <Recycle className="h-4 w-4 text-[#A3AF87]" />
@@ -426,6 +565,49 @@ export default function SupplyHistoryPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Selection Mode Actions Bar */}
+        <AnimatePresence>
+          {isSelectionMode && selectedSupplies.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl p-4 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <CheckSquare className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">
+                      {selectedSupplies.size} supply dipilih
+                    </p>
+                    <p className="text-white/80 text-xs">
+                      Siap untuk dihapus
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedSupplies(new Set())}
+                    className="px-4 py-2 bg-white/20 text-white rounded-xl font-semibold text-sm hover:bg-white/30 transition-colors"
+                  >
+                    Batal Pilih
+                  </button>
+                  <button
+                    onClick={handleDeleteClick}
+                    className="px-4 py-2 bg-white text-red-600 rounded-xl font-semibold text-sm hover:bg-gray-100 transition-colors flex items-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Hapus ({selectedSupplies.size})
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Grid Layout - Master-Detail */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -553,92 +735,119 @@ export default function SupplyHistoryPage() {
                       statusConfig[item.status as keyof typeof statusConfig];
                     const StatusIcon = status.icon;
                     const isSelected = selectedItem?.id === item.id;
+                    const isChecked = selectedSupplies.has(item.id);
+                    const isDeletable = item.status === "completed";
 
                     return (
-                      <motion.button
+                      <motion.div
                         key={item.id}
                         layout
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        onClick={() => setSelectedItem(item)}
-                        className={`w-full text-left bg-white rounded-2xl p-4 border-2 transition-all group ${
+                        className={`relative w-full bg-white rounded-2xl p-4 border-2 transition-all group ${
                           isSelected
                             ? "border-[#A3AF87] shadow-lg shadow-[#A3AF87]/10 bg-gradient-to-br from-[#A3AF87]/5 to-white"
                             : "border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-md"
                         }`}
                       >
-                        <div className="flex items-start gap-4">
-                          {/* Icon with gradient background */}
-                          <div className={`relative p-3 rounded-xl transition-all ${
-                            isSelected 
-                              ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-lg shadow-[#A3AF87]/20" 
-                              : `${status.iconBg} group-hover:scale-105`
-                          }`}>
-                            <Recycle
-                              className={`h-5 w-5 ${
-                                isSelected ? "text-white" : status.iconColor
-                              }`}
-                            />
-                            {/* Status dot badge */}
-                            <span
-                              className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${status.dotColor}`}
-                            />
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            {/* Header */}
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <div className="flex-1 min-w-0">
-                                <h3
-                                  className={`font-bold text-base truncate mb-0.5 ${
-                                    isSelected
-                                      ? "text-[#A3AF87]"
-                                      : "text-gray-900"
-                                  }`}
-                                >
-                                  {item.type}
-                                </h3>
-                                <p className="text-xs text-gray-500 font-medium">
-                                  {item.supplyNumber}
-                                </p>
-                              </div>
-                              <ChevronRight className={`h-5 w-5 flex-shrink-0 transition-all ${
+                        <div className="flex items-start gap-3">
+                          {/* Checkbox for selection mode */}
+                          {isSelectionMode && isDeletable && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSelection(item.id);
+                              }}
+                              className="flex-shrink-0 mt-1"
+                            >
+                              {isChecked ? (
+                                <CheckSquare className="h-5 w-5 text-red-500" />
+                              ) : (
+                                <Square className="h-5 w-5 text-gray-400 hover:text-red-500 transition-colors" />
+                              )}
+                            </button>
+                          )}
+
+                          {/* Item Content */}
+                          <button
+                            onClick={() => !isSelectionMode && setSelectedItem(item)}
+                            className="flex-1 text-left"
+                            disabled={isSelectionMode}
+                          >
+                            <div className="flex items-start gap-4">
+                              {/* Icon with gradient background */}
+                              <div className={`relative p-3 rounded-xl transition-all ${
                                 isSelected 
-                                  ? "text-[#A3AF87] translate-x-1" 
-                                  : "text-gray-300 group-hover:text-gray-400"
-                              }`} />
-                            </div>
-                            
-                            {/* Info badges */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
-                                <Scale className="h-3.5 w-3.5 text-gray-400" />
-                                <span className="text-xs font-semibold text-gray-700">
-                                  {weightLabels[item.weight.toString()] || `${item.weight} kg`}
-                                </span>
+                                  ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-lg shadow-[#A3AF87]/20" 
+                                  : `${status.iconBg} group-hover:scale-105`
+                              }`}>
+                                <Recycle
+                                  className={`h-5 w-5 ${
+                                    isSelected ? "text-white" : status.iconColor
+                                  }`}
+                                />
+                                {/* Status dot badge */}
+                                <span
+                                  className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${status.dotColor}`}
+                                />
                               </div>
-                              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
-                                <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                                <span className="text-xs font-semibold text-gray-700">
-                                  {new Date(item.date).toLocaleDateString(
-                                    "id-ID",
-                                    {
-                                      day: "numeric",
-                                      month: "short",
-                                    }
-                                  )}
-                                </span>
+                              
+                              <div className="flex-1 min-w-0">
+                                {/* Header */}
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div className="flex-1 min-w-0">
+                                    <h3
+                                      className={`font-bold text-base truncate mb-0.5 ${
+                                        isSelected
+                                          ? "text-[#A3AF87]"
+                                          : "text-gray-900"
+                                      }`}
+                                    >
+                                      {item.type}
+                                    </h3>
+                                    <p className="text-xs text-gray-500 font-medium">
+                                      {item.supplyNumber}
+                                    </p>
+                                  </div>
+                                  <ChevronRight className={`h-5 w-5 flex-shrink-0 transition-all ${
+                                    isSelected 
+                                      ? "text-[#A3AF87] translate-x-1" 
+                                      : "text-gray-300 group-hover:text-gray-400"
+                                  }`} />
+                                </div>
+                                
+                                {/* Info badges */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
+                                    <Scale className="h-3.5 w-3.5 text-gray-400" />
+                                    <span className="text-xs font-semibold text-gray-700">
+                                      {weightLabels[item.weight.toString()] || `${item.weight} kg`}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
+                                    <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                    <span className="text-xs font-semibold text-gray-700">
+                                      {new Date(item.date).toLocaleDateString(
+                                        "id-ID",
+                                        {
+                                          day: "numeric",
+                                          month: "short",
+                                        }
+                                      )}
+                                    </span>
+                                  </div>
+                                  <span
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${status.color}`}
+                                  >
+                                    {status.label}
+                                  </span>
+                                </div>
                               </div>
-                              <span
-                                className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${status.color}`}
-                              >
-                                {status.label}
-                              </span>
                             </div>
-                          </div>
+                          </button>
                         </div>
-                      </motion.button>
+                      </motion.div>
                     );
                   })
                 )}
@@ -746,6 +955,22 @@ export default function SupplyHistoryPage() {
                         )}
                       </div>
                     </div>
+
+                    {/* Map Location */}
+                    {selectedItem.latitude && selectedItem.longitude && (
+                      <div className="border border-gray-100 rounded-xl p-4">
+                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-[#A3AF87]" />
+                          Lokasi Penjemputan
+                        </h3>
+                        <MapViewer
+                          latitude={selectedItem.latitude}
+                          longitude={selectedItem.longitude}
+                          address={selectedItem.address}
+                          markerLabel="Lokasi Penjemputan"
+                        />
+                      </div>
+                    )}
 
                     {/* Photo/Video */}
                     {selectedItem.photo && (
@@ -1000,6 +1225,17 @@ export default function SupplyHistoryPage() {
             </AnimatePresence>
           </motion.div>
         </div>
+
+        {/* Delete Supply Modal */}
+        <DeleteSupplyModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          supplyIds={Array.from(selectedSupplies)}
+          supplyNumbers={Array.from(selectedSupplies).map(
+            (id) => supplyHistory.find((s) => s.id === id)?.supplyNumber || ""
+          )}
+          onSuccess={handleDeleteSuccess}
+        />
       </div>
     </div>
   );

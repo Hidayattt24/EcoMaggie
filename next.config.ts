@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    serverActions: {
+      bodySizeLimit: "5mb", // Increased from default 1MB to handle image uploads
+    },
   },
   // Production optimization
   reactStrictMode: true,

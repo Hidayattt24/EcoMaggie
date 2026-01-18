@@ -149,6 +149,8 @@ export async function getFarmerSupplyOrders(
       photoUrl: supply.photo_url,
       pickupAddress: supply.pickup_address,
       pickupAddressId: supply.pickup_address_id,
+      pickupLatitude: supply.pickup_latitude,
+      pickupLongitude: supply.pickup_longitude,
       pickupDate: supply.pickup_date,
       pickupTimeSlot: supply.pickup_time_slot,
       pickupTimeRange: supply.pickup_time_range,
@@ -258,6 +260,8 @@ export async function getFarmerSupplyById(
       photoUrl: supply.photo_url,
       pickupAddress: supply.pickup_address,
       pickupAddressId: supply.pickup_address_id,
+      pickupLatitude: supply.pickup_latitude,
+      pickupLongitude: supply.pickup_longitude,
       pickupDate: supply.pickup_date,
       pickupTimeSlot: supply.pickup_time_slot,
       pickupTimeRange: supply.pickup_time_range,
@@ -534,13 +538,24 @@ export async function getFarmerSupplyStatistics(): Promise<
 // GET SUPPLY DAILY TREND (FOR CHART)
 // ==========================================
 
-export async function getSupplyDailyTrend(): Promise<
-  ActionResponse<{
-    date: string;
-    supplyCount: number;
-    totalWeightKg: number;
-  }[]>
-> {
+export type SupplyTrendResponse = {
+  date: string;
+  supplyCount: number;
+  totalWeightKg: number;
+}[];
+
+export type SupplyTrendWithGrowth = {
+  data: SupplyTrendResponse;
+  growthPercentage: number;
+  currentTotal: number;
+  previousTotal: number;
+};
+
+export async function getSupplyDailyTrend(
+  days: number = 7,
+  startDate?: string,
+  endDate?: string
+): Promise<ActionResponse<SupplyTrendWithGrowth>> {
   try {
     const supabase = await createClient();
 
@@ -573,10 +588,42 @@ export async function getSupplyDailyTrend(): Promise<
       };
     }
 
-    // Get trend data from view
-    const { data: trendData, error: fetchError } = await supabase
+    // Calculate date ranges (current + previous for comparison)
+    let currentStartDate: Date;
+    let currentEndDate: Date;
+    let previousStartDate: Date;
+    let previousEndDate: Date;
+
+    if (startDate && endDate) {
+      // Custom range mode
+      currentStartDate = new Date(startDate);
+      currentEndDate = new Date(endDate);
+      const daysDiff = Math.ceil((currentEndDate.getTime() - currentStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+      // Previous period (same duration before start date)
+      previousEndDate = new Date(currentStartDate);
+      previousEndDate.setDate(previousEndDate.getDate() - 1);
+      previousStartDate = new Date(previousEndDate);
+      previousStartDate.setDate(previousStartDate.getDate() - daysDiff + 1);
+    } else {
+      // Preset days mode
+      currentEndDate = new Date();
+      currentStartDate = new Date();
+      currentStartDate.setDate(currentStartDate.getDate() - (days - 1));
+
+      // Previous period (same number of days before current period)
+      previousEndDate = new Date(currentStartDate);
+      previousEndDate.setDate(previousEndDate.getDate() - 1);
+      previousStartDate = new Date(previousEndDate);
+      previousStartDate.setDate(previousStartDate.getDate() - days + 1);
+    }
+
+    // Get trend data from view for BOTH periods
+    const { data: allTrendData, error: fetchError } = await supabase
       .from("supply_daily_trend")
       .select("*")
+      .gte("date", previousStartDate.toISOString().split("T")[0])
+      .lte("date", currentEndDate.toISOString().split("T")[0])
       .order("date", { ascending: true });
 
     if (fetchError) {
@@ -588,17 +635,47 @@ export async function getSupplyDailyTrend(): Promise<
       };
     }
 
-    // Transform data
-    const transformedData = (trendData || []).map((item: any) => ({
-      date: item.date,
-      supplyCount: item.supply_count || 0,
-      totalWeightKg: item.total_weight_kg || 0,
-    }));
+    // Separate current and previous period data
+    const currentData: SupplyTrendResponse = [];
+    let currentTotal = 0;
+    let previousTotal = 0;
+
+    (allTrendData || []).forEach((item: any) => {
+      const itemDate = new Date(item.date);
+      const weightKg = item.total_weight_kg || 0;
+
+      // Check if in current period
+      if (itemDate >= currentStartDate && itemDate <= currentEndDate) {
+        currentData.push({
+          date: item.date,
+          supplyCount: item.supply_count || 0,
+          totalWeightKg: weightKg,
+        });
+        currentTotal += weightKg;
+      }
+      // Check if in previous period
+      else if (itemDate >= previousStartDate && itemDate <= previousEndDate) {
+        previousTotal += weightKg;
+      }
+    });
+
+    // Calculate growth percentage
+    let growthPercentage = 0;
+    if (previousTotal > 0) {
+      growthPercentage = ((currentTotal - previousTotal) / previousTotal) * 100;
+    } else if (currentTotal > 0) {
+      growthPercentage = 100; // 100% growth if previous was 0
+    }
 
     return {
       success: true,
       message: "Data trend berhasil dimuat",
-      data: transformedData,
+      data: {
+        data: currentData,
+        growthPercentage: Math.round(growthPercentage * 10) / 10, // Round to 1 decimal
+        currentTotal: Math.round(currentTotal),
+        previousTotal: Math.round(previousTotal),
+      },
     };
   } catch (error) {
     console.error("Get trend error:", error);

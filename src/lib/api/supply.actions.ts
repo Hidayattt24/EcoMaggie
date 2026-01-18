@@ -37,6 +37,8 @@ export interface UserSupply {
   photoUrl: string | null;
   pickupAddress: string;
   pickupAddressId: string | null;
+  pickupLatitude: number | null;
+  pickupLongitude: number | null;
   pickupDate: string;
   pickupTimeSlot: string;
   pickupTimeRange: string | null;
@@ -66,6 +68,8 @@ export interface CreateSupplyData {
   pickupAddressId?: string;
   pickupDate: string;
   pickupTimeSlot: string;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
   notes?: string;
 }
 
@@ -276,6 +280,8 @@ export async function createSupply(
       photo_url: supplyData.photoUrl || null,
       pickup_address: supplyData.pickupAddress,
       pickup_address_id: supplyData.pickupAddressId || null,
+      pickup_latitude: supplyData.pickupLatitude || null,
+      pickup_longitude: supplyData.pickupLongitude || null,
       pickup_date: supplyData.pickupDate,
       pickup_time_slot: supplyData.pickupTimeSlot,
       pickup_time_range: getTimeRangeFromSlot(supplyData.pickupTimeSlot),
@@ -309,6 +315,8 @@ export async function createSupply(
       photoUrl: newSupply.photo_url,
       pickupAddress: newSupply.pickup_address,
       pickupAddressId: newSupply.pickup_address_id,
+      pickupLatitude: newSupply.pickup_latitude,
+      pickupLongitude: newSupply.pickup_longitude,
       pickupDate: newSupply.pickup_date,
       pickupTimeSlot: newSupply.pickup_time_slot,
       pickupTimeRange: newSupply.pickup_time_range,
@@ -443,6 +451,8 @@ export async function getUserSupplies(): Promise<
       photoUrl: supply.photo_url,
       pickupAddress: supply.pickup_address,
       pickupAddressId: supply.pickup_address_id,
+      pickupLatitude: supply.pickup_latitude,
+      pickupLongitude: supply.pickup_longitude,
       pickupDate: supply.pickup_date,
       pickupTimeSlot: supply.pickup_time_slot,
       pickupTimeRange: supply.pickup_time_range,
@@ -523,6 +533,8 @@ export async function getSupplyById(
       photoUrl: supply.photo_url,
       pickupAddress: supply.pickup_address,
       pickupAddressId: supply.pickup_address_id,
+      pickupLatitude: supply.pickup_latitude,
+      pickupLongitude: supply.pickup_longitude,
       pickupDate: supply.pickup_date,
       pickupTimeSlot: supply.pickup_time_slot,
       pickupTimeRange: supply.pickup_time_range,
@@ -630,6 +642,217 @@ export async function cancelSupply(
     return {
       success: false,
       message: "Terjadi kesalahan saat membatalkan supply",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ==========================================
+// DELETE SUPPLY (Only for COMPLETED/CANCELLED)
+// ==========================================
+
+export async function deleteSupply(
+  supplyId: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        message: "Anda harus login untuk menghapus supply",
+        error: "Unauthorized",
+      };
+    }
+
+    // Check if supply exists and belongs to user
+    const { data: supply, error: checkError } = await supabase
+      .from("user_supplies")
+      .select("status, photo_url")
+      .eq("id", supplyId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (checkError || !supply) {
+      return {
+        success: false,
+        message: "Supply tidak ditemukan",
+        error: checkError?.message || "Not found",
+      };
+    }
+
+    // Only allow deletion of COMPLETED or CANCELLED supplies
+    if (!["COMPLETED", "CANCELLED"].includes(supply.status)) {
+      return {
+        success: false,
+        message: "Hanya supply yang sudah selesai atau dibatalkan yang dapat dihapus",
+        error: "Invalid status",
+      };
+    }
+
+    // Delete photo from storage if exists
+    if (supply.photo_url) {
+      try {
+        const urlParts = supply.photo_url.split('/');
+        const bucketPath = urlParts.slice(urlParts.indexOf('supply-media') + 1).join('/');
+        
+        await supabase.storage
+          .from('supply-media')
+          .remove([bucketPath]);
+      } catch (storageError) {
+        console.error("Error deleting photo:", storageError);
+        // Continue with deletion even if photo deletion fails
+      }
+    }
+
+    // Delete supply
+    const { error: deleteError } = await supabase
+      .from("user_supplies")
+      .delete()
+      .eq("id", supplyId)
+      .eq("user_id", user.id);
+
+    if (deleteError) {
+      console.error("Delete supply error:", deleteError);
+      return {
+        success: false,
+        message: "Gagal menghapus supply",
+        error: deleteError.message,
+      };
+    }
+
+    // Revalidate pages
+    revalidatePath("/supply/history");
+    revalidatePath("/supply");
+
+    return {
+      success: true,
+      message: "Supply berhasil dihapus",
+    };
+  } catch (error) {
+    console.error("Delete supply error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat menghapus supply",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ==========================================
+// DELETE MULTIPLE SUPPLIES (Bulk Delete)
+// ==========================================
+
+export async function deleteMultipleSupplies(
+  supplyIds: string[]
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        message: "Anda harus login untuk menghapus supply",
+        error: "Unauthorized",
+      };
+    }
+
+    if (!supplyIds || supplyIds.length === 0) {
+      return {
+        success: false,
+        message: "Tidak ada supply yang dipilih",
+        error: "No supplies selected",
+      };
+    }
+
+    // Check all supplies belong to user and are deletable
+    const { data: supplies, error: checkError } = await supabase
+      .from("user_supplies")
+      .select("id, status, photo_url")
+      .in("id", supplyIds)
+      .eq("user_id", user.id);
+
+    if (checkError || !supplies) {
+      return {
+        success: false,
+        message: "Gagal memverifikasi supply",
+        error: checkError?.message || "Not found",
+      };
+    }
+
+    // Check if all supplies are deletable
+    const undeletableSupplies = supplies.filter(
+      (s) => !["COMPLETED", "CANCELLED"].includes(s.status)
+    );
+
+    if (undeletableSupplies.length > 0) {
+      return {
+        success: false,
+        message: "Beberapa supply tidak dapat dihapus karena masih aktif",
+        error: "Invalid status",
+      };
+    }
+
+    // Delete photos from storage
+    const photoUrls = supplies
+      .filter((s) => s.photo_url)
+      .map((s) => s.photo_url);
+
+    for (const photoUrl of photoUrls) {
+      try {
+        const urlParts = photoUrl!.split('/');
+        const bucketPath = urlParts.slice(urlParts.indexOf('supply-media') + 1).join('/');
+        
+        await supabase.storage
+          .from('supply-media')
+          .remove([bucketPath]);
+      } catch (storageError) {
+        console.error("Error deleting photo:", storageError);
+        // Continue with deletion even if photo deletion fails
+      }
+    }
+
+    // Delete supplies
+    const { error: deleteError } = await supabase
+      .from("user_supplies")
+      .delete()
+      .in("id", supplyIds)
+      .eq("user_id", user.id);
+
+    if (deleteError) {
+      console.error("Delete supplies error:", deleteError);
+      return {
+        success: false,
+        message: "Gagal menghapus supply",
+        error: deleteError.message,
+      };
+    }
+
+    // Revalidate pages
+    revalidatePath("/supply/history");
+    revalidatePath("/supply");
+
+    return {
+      success: true,
+      message: `${supplyIds.length} supply berhasil dihapus`,
+    };
+  } catch (error) {
+    console.error("Delete supplies error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat menghapus supply",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }

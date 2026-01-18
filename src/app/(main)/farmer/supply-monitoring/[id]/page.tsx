@@ -377,30 +377,181 @@ export default function SupplyMonitoringDetailPage({
               )}
             </motion.div>
 
-            {/* Pickup Location */}
+            {/* Pickup Location - Enhanced Modern Design */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border-2 border-gray-100 p-6"
+              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-100 p-6 shadow-lg"
             >
-              <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-[#A3AF87]" />
-                Lokasi Penjemputan
-              </h3>
-
-              <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/20">
-                <p className="text-[#303646] font-medium">{supply.pickupAddress}</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-[#303646] text-lg flex items-center gap-2">
+                  <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] rounded-xl">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  Lokasi Penjemputan
+                </h3>
+                
+                {/* Quick Action Badge */}
+                {supply.pickupLatitude && supply.pickupLongitude && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-semibold text-green-700">GPS Ready</span>
+                  </div>
+                )}
               </div>
 
+              {/* Address Card */}
+              <div className="mb-4 p-5 bg-white rounded-xl border-2 border-[#A3AF87]/20 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#A3AF87]/10 rounded-lg flex-shrink-0">
+                    <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wide">Alamat Lengkap</p>
+                    <p className="text-[#303646] font-medium leading-relaxed">{supply.pickupAddress}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* GPS Coordinates & Navigation Section */}
+              {supply.pickupLatitude && supply.pickupLongitude ? (
+                <div className="space-y-4">
+                  {/* Coordinates Display - Modern Card */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-xs font-bold text-blue-900 uppercase tracking-wide">Koordinat GPS</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-blue-200/50">
+                        <p className="text-[10px] text-blue-600 font-semibold mb-1 uppercase">Latitude</p>
+                        <p className="text-sm font-mono font-bold text-blue-900">
+                          {supply.pickupLatitude.toFixed(6)}
+                        </p>
+                      </div>
+                      <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-blue-200/50">
+                        <p className="text-[10px] text-blue-600 font-semibold mb-1 uppercase">Longitude</p>
+                        <p className="text-sm font-mono font-bold text-blue-900">
+                          {supply.pickupLongitude.toFixed(6)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation Buttons - Enhanced */}
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Primary: Google Maps */}
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${supply.pickupLatitude},${supply.pickupLongitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-xl p-4 font-semibold hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      {/* Animated Background */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      <div className="relative flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-bold">Buka Google Maps</p>
+                            <p className="text-xs text-blue-100">Navigasi GPS langsung ke lokasi</p>
+                          </div>
+                        </div>
+                        <svg className="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </div>
+                    </a>
+
+                    {/* Secondary: Copy Coordinates */}
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${supply.pickupLatitude},${supply.pickupLongitude}`);
+                        // You can add a toast notification here
+                      }}
+                      className="group flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-[#A3AF87]/10 transition-colors">
+                          <svg className="h-5 w-5 text-gray-600 group-hover:text-[#A3AF87]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-bold">Salin Koordinat</p>
+                          <p className="text-xs text-gray-500">Copy untuk aplikasi lain</p>
+                        </div>
+                      </div>
+                      <svg className="h-5 w-5 text-gray-400 group-hover:text-[#A3AF87]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Info Box - Driver Tips */}
+                  <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative flex items-start gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-green-900 mb-1">💡 Tips untuk Driver</p>
+                        <p className="text-xs text-green-800 leading-relaxed">
+                          Gunakan navigasi GPS untuk akurasi maksimal. Pastikan GPS aktif dan koneksi internet stabil untuk petunjuk arah real-time.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* No GPS Warning - Enhanced */
+                <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 border-2 border-amber-200">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative flex items-start gap-4">
+                    <div className="p-3 bg-amber-100 rounded-xl flex-shrink-0">
+                      <svg className="h-6 w-6 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-amber-900 mb-2">⚠️ Koordinat GPS Tidak Tersedia</p>
+                      <p className="text-xs text-amber-800 leading-relaxed mb-3">
+                        User tidak menyertakan titik koordinat lokasi. Gunakan alamat di atas untuk navigasi manual atau hubungi user untuk konfirmasi lokasi yang lebih detail.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1 bg-amber-200 rounded-full">
+                          <div className="h-full w-1/3 bg-amber-500 rounded-full" />
+                        </div>
+                        <span className="text-xs font-semibold text-amber-700">Akurasi: Rendah</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Schedule Info */}
               {supply.pickupDate && (
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Tanggal Pickup
-                    </p>
-                    <p className="font-semibold text-[#303646]">
+                <div className="grid md:grid-cols-2 gap-4 mt-6">
+                  <div className="group p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl border border-purple-200 hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-purple-100 rounded-lg group-hover:scale-110 transition-transform">
+                        <Calendar className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <p className="text-xs text-purple-600 font-bold uppercase tracking-wide">Tanggal Pickup</p>
+                    </div>
+                    <p className="font-bold text-purple-900 text-sm">
                       {new Date(supply.pickupDate).toLocaleDateString("id-ID", {
                         weekday: "long",
                         day: "numeric",
@@ -409,12 +560,15 @@ export default function SupplyMonitoringDetailPage({
                       })}
                     </p>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Waktu Pickup
-                    </p>
-                    <p className="font-semibold text-[#303646]">
+                  
+                  <div className="group p-4 bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-xl border border-pink-200 hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-pink-100 rounded-lg group-hover:scale-110 transition-transform">
+                        <Clock className="h-4 w-4 text-pink-600" />
+                      </div>
+                      <p className="text-xs text-pink-600 font-bold uppercase tracking-wide">Waktu Pickup</p>
+                    </div>
+                    <p className="font-bold text-pink-900 text-sm">
                       {supply.pickupTimeRange || supply.pickupTimeSlot}
                     </p>
                   </div>

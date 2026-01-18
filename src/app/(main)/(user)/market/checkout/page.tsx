@@ -32,6 +32,7 @@ import { getShippingOptions, transformCartToBiteshipItems, type ShippingOption }
 import { createPaymentTransaction } from "@/lib/api/payment.actions";
 import { snapClient } from "@/lib/midtrans/snap-client";
 import AddressFormFields from "@/components/auth/AddressFormFields";
+import { CheckoutSkeleton } from "@/components/checkout/CheckoutSkeleton";
 
 // Types
 interface Address {
@@ -455,16 +456,7 @@ function CheckoutContent() {
 
   // Loading state
   if (isLoadingData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
-      }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
-          <p className="text-[#5a6c5b] font-medium">Memuat data checkout...</p>
-        </div>
-      </div>
-    );
+    return <CheckoutSkeleton />;
   }
 
   // Error state
@@ -1686,18 +1678,7 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center" style={{
-          background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
-        }}>
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3AF87] mx-auto mb-4"></div>
-            <p className="text-[#5a6c5b] font-medium">Memuat halaman checkout...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<CheckoutSkeleton />}>
       <CheckoutContent />
     </Suspense>
   );

@@ -23,15 +23,26 @@ import { CancelOrderModal } from "@/components/farmer/orders/CancelOrderModal";
 import { StatsTile } from "@/components/farmer/orders/StatsTile";
 import { RevenueTile } from "@/components/farmer/orders/RevenueTile";
 import { OrderTableRow } from "@/components/farmer/orders/OrderTableRow";
-import { StatsTileSkeleton, RevenueTileSkeleton, TableRowSkeleton } from "@/components/farmer/orders/SkeletonComponents";
+import {
+  StatsTileSkeleton,
+  RevenueTileSkeleton,
+  TableRowSkeleton,
+} from "@/components/farmer/orders/SkeletonComponents";
 import { exportOrdersToExcel, type OrderExportData } from "@/utils/exportExcel";
 
 // ============================================
 // TYPES
 // ============================================
 type OrderStatus =
-  | "pending" | "paid" | "confirmed" | "processing"
-  | "ready_pickup" | "shipped" | "delivered" | "completed" | "cancelled";
+  | "pending"
+  | "paid"
+  | "confirmed"
+  | "processing"
+  | "ready_pickup"
+  | "shipped"
+  | "delivered"
+  | "completed"
+  | "cancelled";
 
 type ShippingType = "ecomaggie-delivery" | "self-pickup" | "expedition";
 
@@ -81,8 +92,14 @@ const statusLabels: Record<OrderStatus, string> = {
 function detectShippingType(shippingMethod: string | null): ShippingType {
   if (!shippingMethod) return "expedition";
   const method = shippingMethod.toLowerCase();
-  if (method.includes("ecomaggie") || method.includes("delivery") || method.includes("motor")) return "ecomaggie-delivery";
-  if (method.includes("pickup") || method.includes("ambil")) return "self-pickup";
+  if (
+    method.includes("ecomaggie") ||
+    method.includes("delivery") ||
+    method.includes("motor")
+  )
+    return "ecomaggie-delivery";
+  if (method.includes("pickup") || method.includes("ambil"))
+    return "self-pickup";
   return "expedition";
 }
 
@@ -112,7 +129,11 @@ const transformDbOrderToOrder = (dbOrder: DbOrder): Order => {
     shippingType,
     expeditionName: dbOrder.shipping_courier?.toUpperCase(),
     trackingNumber: dbOrder.shipping_tracking_number || undefined,
-    date: new Date(dbOrder.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+    date: new Date(dbOrder.created_at).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
     createdAt: dbOrder.created_at,
     customer: { name: dbOrder.customer_name, phone: dbOrder.customer_phone },
     shippingAddress: { city, province },
@@ -136,7 +157,8 @@ export default function FarmerOrdersPage() {
 
   // Cancel modal state
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const [selectedOrderForCancel, setSelectedOrderForCancel] = useState<Order | null>(null);
+  const [selectedOrderForCancel, setSelectedOrderForCancel] =
+    useState<Order | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -160,23 +182,40 @@ export default function FarmerOrdersPage() {
     }
   };
 
-  const handleOpenCancelModal = useCallback((order: Order, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedOrderForCancel(order);
-    setCancelModalOpen(true);
-  }, []);
+  const handleOpenCancelModal = useCallback(
+    (order: Order, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setSelectedOrderForCancel(order);
+      setCancelModalOpen(true);
+    },
+    [],
+  );
 
   // Calculate stats with growth comparison
   const stats = useMemo(() => {
     const total = orders.length;
-    const needsAction = orders.filter((o) => ["paid", "confirmed", "processing"].includes(o.status)).length;
-    const processing = orders.filter((o) => ["processing", "ready_pickup"].includes(o.status)).length;
+    const needsAction = orders.filter((o) =>
+      ["paid", "confirmed", "processing"].includes(o.status),
+    ).length;
+    const processing = orders.filter((o) =>
+      ["processing", "ready_pickup"].includes(o.status),
+    ).length;
     const shipped = orders.filter((o) => o.status === "shipped").length;
-    const completed = orders.filter((o) => ["delivered", "completed"].includes(o.status)).length;
+    const completed = orders.filter((o) =>
+      ["delivered", "completed"].includes(o.status),
+    ).length;
     const cancelled = orders.filter((o) => o.status === "cancelled").length;
 
     const paidOrders = orders.filter((o) =>
-      ["paid", "confirmed", "processing", "ready_pickup", "shipped", "delivered", "completed"].includes(o.status)
+      [
+        "paid",
+        "confirmed",
+        "processing",
+        "ready_pickup",
+        "shipped",
+        "delivered",
+        "completed",
+      ].includes(o.status),
     );
     const totalRevenue = paidOrders.reduce((sum, o) => sum + o.netEarnings, 0);
     const totalSales = paidOrders.reduce((sum, o) => sum + o.totalPrice, 0);
@@ -198,7 +237,8 @@ export default function FarmerOrdersPage() {
       return orderDate >= previous30DaysStart && orderDate < last30DaysStart;
     });
 
-    const orderGrowth = currentPeriodOrders.length - previousPeriodOrders.length;
+    const orderGrowth =
+      currentPeriodOrders.length - previousPeriodOrders.length;
 
     return {
       total,
@@ -222,13 +262,19 @@ export default function FarmerOrdersPage() {
 
     // Apply filter
     if (filter === "needs_action") {
-      filtered = filtered.filter((o) => ["paid", "confirmed", "processing"].includes(o.status));
+      filtered = filtered.filter((o) =>
+        ["paid", "confirmed", "processing"].includes(o.status),
+      );
     } else if (filter === "processing") {
-      filtered = filtered.filter((o) => ["processing", "ready_pickup"].includes(o.status));
+      filtered = filtered.filter((o) =>
+        ["processing", "ready_pickup"].includes(o.status),
+      );
     } else if (filter === "shipped") {
       filtered = filtered.filter((o) => o.status === "shipped");
     } else if (filter === "completed") {
-      filtered = filtered.filter((o) => ["delivered", "completed"].includes(o.status));
+      filtered = filtered.filter((o) =>
+        ["delivered", "completed"].includes(o.status),
+      );
     } else if (filter === "cancelled") {
       filtered = filtered.filter((o) => o.status === "cancelled");
     }
@@ -240,7 +286,7 @@ export default function FarmerOrdersPage() {
         (order) =>
           order.orderId.toLowerCase().includes(query) ||
           order.customer.name.toLowerCase().includes(query) ||
-          order.products.some((p) => p.name.toLowerCase().includes(query))
+          order.products.some((p) => p.name.toLowerCase().includes(query)),
       );
     }
 
@@ -248,7 +294,8 @@ export default function FarmerOrdersPage() {
     filtered.sort((a, b) => {
       let comparison = 0;
       if (sortBy === "date") {
-        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        comparison =
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       } else {
         comparison = a.totalPrice - b.totalPrice;
       }
@@ -267,8 +314,12 @@ export default function FarmerOrdersPage() {
       totalItems: order.totalItems,
       totalPrice: order.totalPrice,
       netEarnings: order.netEarnings,
-      shippingType: order.shippingType === "ecomaggie-delivery" ? "Eco-Maggie Delivery" :
-                    order.shippingType === "self-pickup" ? "Ambil di Toko" : "Ekspedisi Reguler",
+      shippingType:
+        order.shippingType === "ecomaggie-delivery"
+          ? "Eco-Maggie Delivery"
+          : order.shippingType === "self-pickup"
+            ? "Ambil di Toko"
+            : "Ekspedisi Reguler",
       status: statusLabels[order.status],
       date: order.date,
       city: order.shippingAddress.city,
@@ -283,9 +334,14 @@ export default function FarmerOrdersPage() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#303646] mb-2">Gagal Memuat Pesanan</h2>
+          <h2 className="text-2xl font-bold text-[#303646] mb-2">
+            Gagal Memuat Pesanan
+          </h2>
           <p className="text-gray-500 mb-6">{error}</p>
-          <button onClick={loadOrders} className="px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-bold hover:bg-[#8a9a6e] transition-colors">
+          <button
+            onClick={loadOrders}
+            className="px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-bold hover:bg-[#8a9a6e] transition-colors"
+          >
             Coba Lagi
           </button>
         </div>
@@ -298,11 +354,19 @@ export default function FarmerOrdersPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {/* Header */}
-          <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-8">
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="mb-8"
+          >
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h1 className="text-3xl font-bold text-[#303646]">Pesanan Saya</h1>
-                <p className="text-gray-600 mt-1">Monitor dan kelola pesanan dari customer</p>
+                <h1 className="text-3xl font-bold text-[#303646]">
+                  Pesanan Saya
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Monitor dan kelola pesanan dari customer
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -312,19 +376,27 @@ export default function FarmerOrdersPage() {
                   title="Export ke Excel"
                 >
                   <Download className="h-4 w-4" />
-                  <span className="text-sm font-medium hidden sm:inline">Export Excel</span>
+                  <span className="text-sm font-medium hidden sm:inline">
+                    Export Excel
+                  </span>
                 </button>
                 <button
                   onClick={loadOrders}
                   disabled={isLoading}
                   className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl hover:border-[#A3AF87] transition-colors disabled:opacity-50"
                 >
-                  <RefreshCw className={`h-4 w-4 text-gray-600 ${isLoading ? "animate-spin" : ""}`} />
-                  <span className="text-sm font-medium text-gray-700 hidden sm:inline">Refresh</span>
+                  <RefreshCw
+                    className={`h-4 w-4 text-gray-600 ${isLoading ? "animate-spin" : ""}`}
+                  />
+                  <span className="text-sm font-medium text-gray-700 hidden sm:inline">
+                    Refresh
+                  </span>
                 </button>
                 <div className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 rounded-xl">
                   <Activity className="h-5 w-5 text-[#A3AF87] animate-pulse" />
-                  <span className="text-sm font-medium text-[#5a6c5b]">Live</span>
+                  <span className="text-sm font-medium text-[#5a6c5b]">
+                    Live
+                  </span>
                 </div>
               </div>
             </div>
@@ -336,7 +408,11 @@ export default function FarmerOrdersPage() {
             {isLoading ? <StatsTileSkeleton /> : <StatsTile stats={stats} />}
 
             {/* Tile 2: Revenue Summary */}
-            {isLoading ? <RevenueTileSkeleton /> : <RevenueTile stats={stats} />}
+            {isLoading ? (
+              <RevenueTileSkeleton />
+            ) : (
+              <RevenueTile stats={stats} />
+            )}
           </div>
 
           {/* Real-time Orders Table */}
@@ -352,8 +428,12 @@ export default function FarmerOrdersPage() {
                   <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-[#303646]">Real-time Incoming Orders</h3>
-                  <p className="text-xs text-gray-500">Data pesanan terbaru dari customer</p>
+                  <h3 className="font-bold text-sm sm:text-base text-[#303646]">
+                    Real-time Incoming Orders
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Data pesanan terbaru dari customer
+                  </p>
                 </div>
               </div>
 
@@ -361,29 +441,51 @@ export default function FarmerOrdersPage() {
               <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-xl p-1.5 overflow-x-auto w-full sm:w-auto">
                 {[
                   { value: "all", label: "Semua", count: stats.total },
-                  { value: "needs_action", label: "Tindakan", count: stats.needsAction },
-                  { value: "processing", label: "Diproses", count: stats.processing },
+                  {
+                    value: "needs_action",
+                    label: "Tindakan",
+                    count: stats.needsAction,
+                  },
+                  {
+                    value: "processing",
+                    label: "Diproses",
+                    count: stats.processing,
+                  },
                   { value: "shipped", label: "Dikirim", count: stats.shipped },
-                  { value: "completed", label: "Selesai", count: stats.completed },
-                  { value: "cancelled", label: "Batal", count: stats.cancelled },
+                  {
+                    value: "completed",
+                    label: "Selesai",
+                    count: stats.completed,
+                  },
+                  {
+                    value: "cancelled",
+                    label: "Batal",
+                    count: stats.cancelled,
+                  },
                 ].map((tab) => (
                   <button
                     key={tab.value}
                     onClick={() => setFilter(tab.value)}
                     className={`relative px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
-                      filter === tab.value ? "bg-white text-[#303646] shadow-md" : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                      filter === tab.value
+                        ? "bg-white text-[#303646] shadow-md"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
                     }`}
                   >
                     <span className="flex items-center gap-2">
                       {tab.label}
                       {tab.count > 0 && (
-                        <span className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-bold rounded-full ${
-                          tab.value === "needs_action" || tab.value === "cancelled" 
-                            ? "bg-red-500 text-white shadow-sm shadow-red-200" 
-                            : tab.value === "shipped" || tab.value === "completed"
-                            ? "bg-[#A3AF87] text-white shadow-sm shadow-[#A3AF87]/30"
-                            : "bg-gray-500 text-white"
-                        }`}>
+                        <span
+                          className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-bold rounded-full ${
+                            tab.value === "needs_action" ||
+                            tab.value === "cancelled"
+                              ? "bg-red-500 text-white shadow-sm shadow-red-200"
+                              : tab.value === "shipped" ||
+                                  tab.value === "completed"
+                                ? "bg-[#A3AF87] text-white shadow-sm shadow-[#A3AF87]/30"
+                                : "bg-gray-500 text-white"
+                          }`}
+                        >
                           {tab.count}
                         </span>
                       )}
@@ -408,9 +510,7 @@ export default function FarmerOrdersPage() {
               <div className="flex gap-2">
                 {/* Custom Sort Dropdown with Green Color Palette */}
                 <div className="relative group">
-                  <button
-                    className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#A3AF87]/15 to-[#A3AF87]/5 border-2 border-[#A3AF87]/40 rounded-xl hover:border-[#A3AF87] hover:shadow-md hover:shadow-[#A3AF87]/10 transition-all"
-                  >
+                  <button className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#A3AF87]/15 to-[#A3AF87]/5 border-2 border-[#A3AF87]/40 rounded-xl hover:border-[#A3AF87] hover:shadow-md hover:shadow-[#A3AF87]/10 transition-all">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 bg-[#A3AF87]/20 rounded-lg flex items-center justify-center">
                         {sortBy === "date" ? (
@@ -425,44 +525,58 @@ export default function FarmerOrdersPage() {
                     </div>
                     <ChevronDown className="h-4 w-4 text-[#5a6c5b] group-hover:rotate-180 transition-transform" />
                   </button>
-                  
+
                   {/* Dropdown Menu */}
                   <div className="absolute top-full left-0 mt-2 w-full min-w-[160px] bg-white rounded-xl border-2 border-[#A3AF87]/30 shadow-lg shadow-[#A3AF87]/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
                     <div className="p-2">
                       <button
                         onClick={() => setSortBy("date")}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                          sortBy === "date" ? "bg-[#A3AF87]/15 text-[#5a6c5b]" : "hover:bg-gray-50 text-gray-700"
+                          sortBy === "date"
+                            ? "bg-[#A3AF87]/15 text-[#5a6c5b]"
+                            : "hover:bg-gray-50 text-gray-700"
                         }`}
                       >
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "date" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}>
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "date" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}
+                        >
                           <Calendar className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Tanggal</span>
-                        {sortBy === "date" && <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />}
+                        {sortBy === "date" && (
+                          <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />
+                        )}
                       </button>
                       <button
                         onClick={() => setSortBy("price")}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                          sortBy === "price" ? "bg-[#A3AF87]/15 text-[#5a6c5b]" : "hover:bg-gray-50 text-gray-700"
+                          sortBy === "price"
+                            ? "bg-[#A3AF87]/15 text-[#5a6c5b]"
+                            : "hover:bg-gray-50 text-gray-700"
                         }`}
                       >
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "price" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}>
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "price" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}
+                        >
                           <Banknote className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Harga</span>
-                        {sortBy === "price" && <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />}
+                        {sortBy === "price" && (
+                          <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Sort Order Button */}
                 <button
-                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                  onClick={() =>
+                    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                  }
                   className={`px-4 py-3 rounded-xl border-2 transition-all flex items-center gap-2 ${
-                    sortOrder === "desc" 
-                      ? "bg-[#A3AF87] border-[#A3AF87] text-white shadow-md shadow-[#A3AF87]/30" 
+                    sortOrder === "desc"
+                      ? "bg-[#A3AF87] border-[#A3AF87] text-white shadow-md shadow-[#A3AF87]/30"
                       : "bg-white border-[#A3AF87]/40 text-[#5a6c5b] hover:border-[#A3AF87] hover:shadow-md"
                   }`}
                   title={sortOrder === "desc" ? "Terbaru dulu" : "Terlama dulu"}
@@ -481,23 +595,45 @@ export default function FarmerOrdersPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b-2 border-gray-100">
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">ID & Waktu</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Customer</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Produk</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Pengiriman</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Total</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Status</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">Aksi</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      ID & Waktu
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      Customer
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      Produk
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      Pengiriman
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      Total
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      Status
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                      Aksi
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <>{[1, 2, 3, 4, 5].map((i) => <TableRowSkeleton key={i} />)}</>
+                    <>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <TableRowSkeleton key={i} />
+                      ))}
+                    </>
                   ) : filteredOrders.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-12 text-center">
                         <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-500">{searchQuery ? "Tidak ada pesanan yang cocok" : "Tidak ada pesanan"}</p>
+                        <p className="text-gray-500">
+                          {searchQuery
+                            ? "Tidak ada pesanan yang cocok"
+                            : "Tidak ada pesanan"}
+                        </p>
                       </td>
                     </tr>
                   ) : (
@@ -520,7 +656,10 @@ export default function FarmerOrdersPage() {
       {/* Cancel Order Modal */}
       <CancelOrderModal
         isOpen={cancelModalOpen}
-        onClose={() => { setCancelModalOpen(false); setSelectedOrderForCancel(null); }}
+        onClose={() => {
+          setCancelModalOpen(false);
+          setSelectedOrderForCancel(null);
+        }}
         onSuccess={loadOrders}
         orderId={selectedOrderForCancel?.orderId || ""}
         customerName={selectedOrderForCancel?.customer.name || ""}

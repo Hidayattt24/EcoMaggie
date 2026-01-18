@@ -29,6 +29,7 @@ import { TransactionDetailItem } from "@/components/user/transaction/Transaction
 import { generateInvoicePDF } from "@/utils/generateInvoicePDF";
 import { getCustomerOrderDetail, confirmOrderReceivedByCustomer } from "@/lib/api/orders.actions";
 import type { Order as DbOrder } from "@/lib/api/orders.actions";
+import { OrderDetailSkeleton } from "@/components/user/orders/OrdersSkeleton";
 
 // ============================================
 // TYPES
@@ -468,16 +469,7 @@ export default function OrderDetailPage({
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/10 via-white to-[#A3AF87]/5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#A3AF87]/20 border-t-[#A3AF87] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm text-[#5a6c5b] font-medium">
-            Memuat detail pesanan...
-          </p>
-        </div>
-      </div>
-    );
+    return <OrderDetailSkeleton />;
   }
 
   if (error || !order) {

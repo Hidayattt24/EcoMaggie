@@ -26,6 +26,13 @@ export type SalesDataPoint = {
   amount: number;
 };
 
+export type SalesChartResponse = {
+  data: SalesDataPoint[];
+  growthPercentage: number; // Positive or negative percentage
+  currentTotal: number;
+  previousTotal: number;
+};
+
 export type TopProduct = {
   id: string;
   name: string;
@@ -221,24 +228,91 @@ export async function getFarmerDashboardStats(): Promise<DashboardStats> {
 }
 
 /**
- * Get sales chart data for last 7 days
+ * Get sales chart data for specified date range with growth calculation
  * Shows revenue from all PAID transactions (not just delivered)
  * Because revenue is recognized when customer pays, not when delivered
+ *
+ * @param days - Number of days to fetch (default: 7)
+ * @param startDate - Optional custom start date (YYYY-MM-DD)
+ * @param endDate - Optional custom end date (YYYY-MM-DD)
+ * @returns Sales data with growth percentage (compared to previous period)
  */
-export async function getSalesChartData(): Promise<SalesDataPoint[]> {
+export async function getSalesChartData(
+  days: number = 7,
+  startDate?: string,
+  endDate?: string
+): Promise<SalesChartResponse> {
   const farmerId = await getCurrentFarmerId();
-  if (!farmerId) return [];
+  if (!farmerId) {
+    return {
+      data: [],
+      growthPercentage: 0,
+      currentTotal: 0,
+      previousTotal: 0,
+    };
+  }
 
   const supabase = await createClient();
 
-  // Get last 7 days
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - i));
-    return date.toISOString().split("T")[0];
-  });
+  // Calculate date ranges (current + previous for comparison)
+  let currentDateRange: string[];
+  let previousDateRange: string[];
+  let currentMinDate: Date;
+  let currentMaxDate: Date;
+  let previousMinDate: Date;
+  let previousMaxDate: Date;
 
-  // Get transaction IDs with farmer's products in the last 7 days
+  if (startDate && endDate) {
+    // Custom range mode
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    currentDateRange = Array.from({ length: daysDiff }, (_, i) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() + i);
+      return date.toISOString().split("T")[0];
+    });
+
+    // Previous period (same duration before start date)
+    previousDateRange = Array.from({ length: daysDiff }, (_, i) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() - daysDiff + i);
+      return date.toISOString().split("T")[0];
+    });
+
+    currentMinDate = start;
+    currentMaxDate = end;
+    previousMinDate = new Date(start);
+    previousMinDate.setDate(previousMinDate.getDate() - daysDiff);
+    previousMaxDate = new Date(start);
+    previousMaxDate.setDate(previousMaxDate.getDate() - 1);
+  } else {
+    // Preset days mode
+    currentDateRange = Array.from({ length: days }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - 1 - i));
+      return date.toISOString().split("T")[0];
+    });
+
+    // Previous period (same number of days before current period)
+    previousDateRange = Array.from({ length: days }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (days * 2 - 1 - i));
+      return date.toISOString().split("T")[0];
+    });
+
+    currentMinDate = new Date();
+    currentMinDate.setDate(currentMinDate.getDate() - (days - 1));
+    currentMaxDate = new Date();
+
+    previousMinDate = new Date();
+    previousMinDate.setDate(previousMinDate.getDate() - (days * 2 - 1));
+    previousMaxDate = new Date();
+    previousMaxDate.setDate(previousMaxDate.getDate() - days);
+  }
+
+  // Get transaction IDs with farmer's products
   const { data: transactionIds } = await supabase
     .from("transaction_items")
     .select(
@@ -252,45 +326,72 @@ export async function getSalesChartData(): Promise<SalesDataPoint[]> {
     .eq("products.farmer_id", farmerId);
 
   if (!transactionIds || transactionIds.length === 0) {
-    return last7Days.map((date) => ({ date, amount: 0 }));
+    return {
+      data: currentDateRange.map((date) => ({ date, amount: 0 })),
+      growthPercentage: 0,
+      currentTotal: 0,
+      previousTotal: 0,
+    };
   }
 
   const uniqueTransactionIds = [...new Set(transactionIds.map((item: any) => item.transaction_id))];
 
-  // Fetch transactions from last 7 days
-  // Include all paid transactions (paid, shipped, delivered, completed)
-  const { data: transactions } = await supabase
+  // Fetch transactions for BOTH current and previous periods
+  const { data: allTransactions } = await supabase
     .from("transactions")
     .select("created_at, subtotal, status, paid_at")
     .in("id", uniqueTransactionIds)
-    .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-    .in("status", ["paid", "shipped", "delivered", "completed"]); // All paid statuses
+    .gte("created_at", previousMinDate.toISOString())
+    .lte("created_at", new Date(currentMaxDate.getTime() + 24 * 60 * 60 * 1000).toISOString())
+    .in("status", ["paid", "shipped", "delivered", "completed", "confirmed", "processing"]);
 
-  // Group by date
-  const salesByDate: Record<string, number> = {};
-  last7Days.forEach((date) => {
-    salesByDate[date] = 0;
+  // Group by date for current period
+  const currentSalesByDate: Record<string, number> = {};
+  currentDateRange.forEach((date) => {
+    currentSalesByDate[date] = 0;
   });
 
-  if (transactions) {
-    transactions.forEach((transaction) => {
+  // Track previous period total
+  let previousTotal = 0;
+
+  if (allTransactions) {
+    allTransactions.forEach((transaction) => {
       // Use paid_at date if available, otherwise use created_at
       const dateToUse = transaction.paid_at || transaction.created_at;
       const date = new Date(dateToUse).toISOString().split("T")[0];
-      
-      if (salesByDate[date] !== undefined) {
-        // Calculate net earning (after 5% platform fee)
-        const netEarning = transaction.subtotal - (transaction.subtotal * 0.05);
-        // Count all paid transactions (revenue recognized at payment)
-        salesByDate[date] += netEarning;
+      const netEarning = transaction.subtotal - (transaction.subtotal * 0.05);
+
+      // Check if in current period
+      if (currentSalesByDate[date] !== undefined) {
+        currentSalesByDate[date] += netEarning;
+      }
+      // Check if in previous period
+      else if (previousDateRange.includes(date)) {
+        previousTotal += netEarning;
       }
     });
   }
 
-  return last7Days.map((date) => ({
-    date,
-    amount: Math.round(salesByDate[date]),
-  }));
+  // Calculate current total
+  const currentTotal = Object.values(currentSalesByDate).reduce((sum, val) => sum + val, 0);
+
+  // Calculate growth percentage
+  let growthPercentage = 0;
+  if (previousTotal > 0) {
+    growthPercentage = ((currentTotal - previousTotal) / previousTotal) * 100;
+  } else if (currentTotal > 0) {
+    growthPercentage = 100; // 100% growth if previous was 0
+  }
+
+  return {
+    data: currentDateRange.map((date) => ({
+      date,
+      amount: Math.round(currentSalesByDate[date]),
+    })),
+    growthPercentage: Math.round(growthPercentage * 10) / 10, // Round to 1 decimal
+    currentTotal: Math.round(currentTotal),
+    previousTotal: Math.round(previousTotal),
+  };
 }
 
 /**

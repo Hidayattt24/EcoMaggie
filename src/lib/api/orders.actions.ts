@@ -195,6 +195,7 @@ interface ApiResponse<T> {
 /**
  * Get all orders for farmer
  * @returns List of orders containing farmer's products
+ * OPTIMIZED: Uses efficient join query to reduce database calls
  */
 export async function getFarmerOrders(): Promise<ApiResponse<Order[]>> {
   try {
@@ -229,18 +230,15 @@ export async function getFarmerOrders(): Promise<ApiResponse<Order[]>> {
       };
     }
 
-    // Get all transactions that contain farmer's products
-    // First, get all transaction IDs that have farmer's products
+    // OPTIMIZED: Get unique transaction IDs using inner join
     const { data: transactionIds, error: transactionIdsError } = await supabase
       .from("transaction_items")
-      .select(
-        `
+      .select(`
         transaction_id,
         products!inner(
           farmer_id
         )
-      `
-      )
+      `)
       .eq("products.farmer_id", farmer.id);
 
     if (transactionIdsError) {
@@ -261,7 +259,34 @@ export async function getFarmerOrders(): Promise<ApiResponse<Order[]>> {
       };
     }
 
-    // Fetch full transaction data
+    // OPTIMIZED: Fetch all transaction items in ONE query using 'in' filter
+    const { data: allItems, error: itemsError } = await supabase
+      .from("transaction_items")
+      .select(
+        `
+        id,
+        transaction_id,
+        product_id,
+        product_name,
+        product_image,
+        unit_price,
+        quantity,
+        subtotal,
+        unit,
+        products(
+          slug,
+          name,
+          images
+        )
+      `
+      )
+      .in("transaction_id", uniqueTransactionIds);
+
+    if (itemsError) {
+      console.error("❌ [getFarmerOrders] Error fetching items:", itemsError);
+    }
+
+    // OPTIMIZED: Fetch transactions with all details in ONE query
     const { data: transactions, error: transactionsError } = await supabase
       .from("transactions")
       .select(
@@ -297,36 +322,20 @@ export async function getFarmerOrders(): Promise<ApiResponse<Order[]>> {
       };
     }
 
-    // Fetch transaction items for each transaction
-    const ordersWithItems = await Promise.all(
-      (transactions || []).map(async (transaction) => {
-        const { data: items } = await supabase
-          .from("transaction_items")
-          .select(
-            `
-            id,
-            product_id,
-            product_name,
-            product_image,
-            unit_price,
-            quantity,
-            subtotal,
-            unit,
-            products(
-              slug,
-              name,
-              images
-            )
-          `
-          )
-          .eq("transaction_id", transaction.id);
+    // OPTIMIZED: Group items by transaction_id using Map for O(n) complexity
+    const itemsByTransactionId = new Map<string, any[]>();
+    (allItems || []).forEach((item) => {
+      if (!itemsByTransactionId.has(item.transaction_id)) {
+        itemsByTransactionId.set(item.transaction_id, []);
+      }
+      itemsByTransactionId.get(item.transaction_id)!.push(item);
+    });
 
-        return {
-          ...transaction,
-          items: items || [],
-        };
-      })
-    );
+    // OPTIMIZED: Map transactions with their items without async operations
+    const ordersWithItems = (transactions || []).map((transaction) => ({
+      ...transaction,
+      items: itemsByTransactionId.get(transaction.id) || [],
+    }));
 
     console.log(`✅ [getFarmerOrders] Found ${ordersWithItems.length} orders`);
 

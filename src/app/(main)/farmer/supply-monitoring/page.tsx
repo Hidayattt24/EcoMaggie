@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import {
   Package,
   TrendingUp,
+  TrendingDown,
   MapPin,
   Clock,
   Scale,
@@ -448,6 +449,7 @@ export default function SupplyMonitoringPage() {
   );
   const [mounted, setMounted] = useState(false);
   const [trendData, setTrendData] = useState<any[]>([]);
+  const [growthPercentage, setGrowthPercentage] = useState<number>(0);
   const [isLoadingTrend, setIsLoadingTrend] = useState(true);
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -471,23 +473,35 @@ export default function SupplyMonitoringPage() {
     fetchSupplies();
   }, []);
 
-  // Fetch trend data
+  // Fetch trend data - OPTIMIZED: Re-fetch when date range changes
   useEffect(() => {
     async function fetchTrend() {
       setIsLoadingTrend(true);
       try {
-        const response = await getSupplyDailyTrend();
+        let response;
+        if (useCustomRange && customRange.start && customRange.end) {
+          // Use custom date range
+          response = await getSupplyDailyTrend(undefined, customRange.start, customRange.end);
+        } else {
+          // Use preset days
+          const days = datePresets[selectedPreset].days;
+          response = await getSupplyDailyTrend(days);
+        }
+
         if (response.success && response.data) {
-          setTrendData(response.data);
+          setTrendData(response.data.data);
+          setGrowthPercentage(response.data.growthPercentage);
         }
       } catch (error) {
         console.error("Error fetching trend:", error);
+        setTrendData([]);
+        setGrowthPercentage(0);
       } finally {
         setIsLoadingTrend(false);
       }
     }
     fetchTrend();
-  }, []);
+  }, [selectedPreset, useCustomRange, customRange.start, customRange.end]); // Re-fetch when filter changes
 
   useEffect(() => {
     setMounted(true);
@@ -794,12 +808,28 @@ export default function SupplyMonitoringPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
-                  <TrendingUp className="h-4 w-4 text-emerald-600" />
-                  <span className="text-xs font-semibold text-emerald-600">
-                    +8.2%
-                  </span>
-                </div>
+                {/* Dynamic Growth Badge */}
+                {!isLoadingTrend && growthPercentage !== 0 && (
+                  <div
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                      growthPercentage > 0 ? "bg-emerald-50" : "bg-red-50"
+                    }`}
+                  >
+                    {growthPercentage > 0 ? (
+                      <TrendingUp className="h-4 w-4 text-emerald-600" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-red-600" />
+                    )}
+                    <span
+                      className={`text-xs font-semibold ${
+                        growthPercentage > 0 ? "text-emerald-600" : "text-red-600"
+                      }`}
+                    >
+                      {growthPercentage > 0 ? "+" : ""}
+                      {growthPercentage.toFixed(1)}%
+                    </span>
+                  </div>
+                )}
 
                 <div className="relative" ref={dropdownRef}>
                   <button

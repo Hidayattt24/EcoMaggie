@@ -12,13 +12,14 @@ import {
 } from "recharts";
 import {
   TrendingUp,
+  TrendingDown,
   Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { getSalesChartData } from "@/lib/api/farmer-dashboard.actions";
-import type { SalesDataPoint } from "@/lib/api/farmer-dashboard.actions";
+import type { SalesDataPoint, SalesChartResponse } from "@/lib/api/farmer-dashboard.actions";
 
 const formatRupiah = (value: number) => {
   if (value >= 1000000) {
@@ -208,6 +209,7 @@ export default function SalesChart() {
   );
   const [mounted, setMounted] = useState(false);
   const [salesData, setSalesData] = useState<any[]>([]);
+  const [growthPercentage, setGrowthPercentage] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -216,14 +218,27 @@ export default function SalesChart() {
     setMounted(true);
   }, []);
 
-  // Fetch sales data
+  // Fetch sales data - OPTIMIZED: Re-fetch when date range changes
   useEffect(() => {
     async function fetchSalesData() {
       try {
         setIsLoading(true);
-        const data = await getSalesChartData();
+
+        let response: SalesChartResponse;
+        if (useCustomRange && customRange.start && customRange.end) {
+          // Use custom date range
+          response = await getSalesChartData(undefined, customRange.start, customRange.end);
+        } else {
+          // Use preset days
+          const days = datePresets[selectedPreset].days;
+          response = await getSalesChartData(days);
+        }
+
+        // Set growth percentage
+        setGrowthPercentage(response.growthPercentage);
+
         // Transform data for chart
-        const transformedData = data.map((item) => ({
+        const transformedData = response.data.map((item) => ({
           date: new Date(item.date).toLocaleDateString("id-ID", {
             day: "numeric",
             month: "short",
@@ -237,13 +252,14 @@ export default function SalesChart() {
         console.error("Error fetching sales data:", error);
         // Set empty data on error
         setSalesData([]);
+        setGrowthPercentage(0);
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchSalesData();
-  }, []);
+  }, [selectedPreset, useCustomRange, customRange.start, customRange.end]); // Re-fetch when filter changes
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -317,13 +333,32 @@ export default function SalesChart() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Trend Badge */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
-            <TrendingUp className="h-4 w-4 text-emerald-600" />
-            <span className="text-xs font-semibold text-emerald-600">
-              +12.5%
-            </span>
-          </div>
+          {/* Trend Badge - Dynamic */}
+          {!isLoading && growthPercentage !== 0 && (
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                growthPercentage > 0
+                  ? "bg-emerald-50"
+                  : "bg-red-50"
+              }`}
+            >
+              {growthPercentage > 0 ? (
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-red-600" />
+              )}
+              <span
+                className={`text-xs font-semibold ${
+                  growthPercentage > 0
+                    ? "text-emerald-600"
+                    : "text-red-600"
+                }`}
+              >
+                {growthPercentage > 0 ? "+" : ""}
+                {growthPercentage.toFixed(1)}%
+              </span>
+            </div>
+          )}
 
           {/* Date Picker Trigger */}
           <div className="relative" ref={dropdownRef}>

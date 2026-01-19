@@ -73,6 +73,7 @@ export default function MobileFilterPanel({
               >
                 <svg
                   className="h-4 w-4"
+                  style={{ color: "#a3af87" } as React.CSSProperties}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -148,6 +149,7 @@ export default function MobileFilterPanel({
               >
                 <svg
                   className="h-4 w-4"
+                  style={{ color: "#a3af87" } as React.CSSProperties}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -184,12 +186,12 @@ export default function MobileFilterPanel({
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                     style={
                       {
-                        background: `linear-gradient(to right, #A3AF87 0%, #A3AF87 ${
+                        background: `linear-gradient(to right, #435664 0%, #435664 ${
                           (minPrice / 200000) * 100
                         }%, #e5e7eb ${
                           (minPrice / 200000) * 100
                         }%, #e5e7eb 100%)`,
-                        accentColor: "#A3AF87",
+                        accentColor: "#435664",
                       } as React.CSSProperties
                     }
                   />
@@ -209,10 +211,10 @@ export default function MobileFilterPanel({
                       {
                         background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
                           (maxPrice / 200000) * 100
-                        }%, #A3AF87 ${
+                        }%, #435664 ${
                           (maxPrice / 200000) * 100
-                        }%, #A3AF87 100%)`,
-                        accentColor: "#A3AF87",
+                        }%, #435664 100%)`,
+                        accentColor: "#435664",
                       } as React.CSSProperties
                     }
                   />
@@ -228,6 +230,7 @@ export default function MobileFilterPanel({
               >
                 <svg
                   className="h-4 w-4"
+                  style={{ color: "#a3af87" } as React.CSSProperties}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -307,7 +310,7 @@ export default function MobileFilterPanel({
             <button
               onClick={onClose}
               className="w-full py-3 text-white rounded-lg font-semibold text-sm shadow-md active:scale-95 transition-transform"
-              style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+              style={{ backgroundColor: "#435664" } as React.CSSProperties}
             >
               Terapkan Filter
             </button>

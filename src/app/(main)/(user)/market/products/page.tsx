@@ -253,7 +253,7 @@ export default function MarketProductsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Mobile Filter Overlay */}
       <MobileFilterPanel
         isOpen={isFilterOpen}
@@ -314,8 +314,8 @@ export default function MarketProductsPage() {
             {/* Mobile Filter Button */}
             <button
               onClick={() => setIsFilterOpen(true)}
-              className="lg:hidden w-full mb-3 px-4 py-2.5 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform"
-              style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+              className="lg:hidden w-full mb-3 px-4 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform"
+              style={{ backgroundColor: "#fdf8d4", color: "#303646" } as React.CSSProperties}
             >
               <svg
                 className="h-5 w-5"
@@ -332,7 +332,13 @@ export default function MarketProductsPage() {
               </svg>
               Filter & Urutkan
               {(selectedCategories.length > 0 || searchQuery) && (
-                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                <span
+                  className="px-2 py-0.5 rounded-full text-xs font-bold"
+                  style={{
+                    backgroundColor: "#ebfba8",
+                    color: "#303646",
+                  }}
+                >
                   {selectedCategories.length + (searchQuery ? 1 : 0)}
                 </span>
               )}
@@ -343,7 +349,7 @@ export default function MarketProductsPage() {
               <div className="flex items-center gap-2 text-sm">
                 <div
                   className="h-8 w-8 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+                  style={{ backgroundColor: "#435664" } as React.CSSProperties}
                 >
                   <svg
                     className="h-4 w-4 text-white"
@@ -359,7 +365,7 @@ export default function MarketProductsPage() {
                     />
                   </svg>
                 </div>
-                <span className="text-gray-700">
+                <span style={{ color: "#303646" } as React.CSSProperties}>
                   {isLoading ? (
                     "Memuat..."
                   ) : (
@@ -367,20 +373,20 @@ export default function MarketProductsPage() {
                       Menampilkan{" "}
                       <span
                         className="font-bold"
-                        style={{ color: "#5a6c5b" } as React.CSSProperties}
+                        style={{ color: "#435664" } as React.CSSProperties}
                       >
                         {products.length}
                       </span>{" "}
                       dari{" "}
                       <span
                         className="font-semibold"
-                        style={{ color: "#5a6c5b" } as React.CSSProperties}
+                        style={{ color: "#303646" } as React.CSSProperties}
                       >
                         {totalProducts}
                       </span>{" "}
                       <span
                         style={{
-                          color: "rgba(90, 108, 91, 0.7)",
+                          color: "#a3af87",
                         }}
                       >
                         produk
@@ -404,9 +410,13 @@ export default function MarketProductsPage() {
                     <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z" />
                   </svg>
                 </button>
-                <button className="p-2 bg-white border border-gray-200 rounded-lg">
+                <button
+                  className="p-2 bg-white rounded-lg"
+                  style={{ border: "2px solid #435664" } as React.CSSProperties}
+                >
                   <svg
                     className="h-4 w-4"
+                    style={{ color: "#435664" } as React.CSSProperties}
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -427,10 +437,20 @@ export default function MarketProductsPage() {
 
             {/* Error State */}
             {error && !isLoading && (
-              <div className="text-center py-16 bg-white rounded-2xl">
-                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-red-100 flex items-center justify-center">
+              <div
+                className="text-center py-16 rounded-2xl"
+                style={{
+                  backgroundColor: "#fdf8d4",
+                  border: "2px solid #ebfba8",
+                }}
+              >
+                <div
+                  className="mx-auto mb-4 h-16 w-16 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "rgba(235, 251, 168, 0.3)" }}
+                >
                   <svg
-                    className="h-8 w-8 text-red-500"
+                    className="h-8 w-8"
+                    style={{ color: "#435664" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -443,10 +463,15 @@ export default function MarketProductsPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <h3
+                  className="text-lg font-semibold mb-2"
+                  style={{ color: "#303646" }}
+                >
                   Terjadi Kesalahan
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">{error}</p>
+                <p className="text-sm mb-4" style={{ color: "#435664" }}>
+                  {error}
+                </p>
                 <button
                   onClick={() => fetchProducts()}
                   className="px-4 py-2 text-white rounded-lg font-semibold text-sm"
@@ -486,7 +511,11 @@ export default function MarketProductsPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="text-center py-16 bg-white rounded-2xl"
+                className="text-center py-16 rounded-2xl"
+                style={{
+                  backgroundColor: "#fdf8d4",
+                  border: "2px solid #ebfba8",
+                }}
               >
                 {/* Animated Search Icon */}
                 <motion.div
@@ -503,7 +532,7 @@ export default function MarketProductsPage() {
                   {/* Magnifying Glass */}
                   <motion.svg
                     className="mx-auto h-24 w-24"
-                    style={{ color: "rgba(163, 175, 135, 0.3)" }}
+                    style={{ color: "#435664" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -528,15 +557,15 @@ export default function MarketProductsPage() {
                   {[...Array(3)].map((_, i) => (
                     <motion.div
                       key={i}
-                      className="absolute text-2xl"
+                      className="absolute text-2xl font-bold"
                       style={{
-                        color: "rgba(163, 175, 135, 0.4)",
+                        color: "#a3af87",
                         left: `${30 + i * 20}%`,
                         top: `${20 + i * 10}%`,
                       }}
                       animate={{
                         y: [0, -10, 0],
-                        opacity: [0.2, 0.6, 0.2],
+                        opacity: [0.3, 0.7, 0.3],
                       }}
                       transition={{
                         duration: 2,
@@ -551,7 +580,7 @@ export default function MarketProductsPage() {
 
                 {/* Animated Title */}
                 <motion.h3
-                  className="text-lg font-semibold mb-2"
+                  className="text-lg font-bold mb-2"
                   style={{ color: "#303646" }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -563,7 +592,7 @@ export default function MarketProductsPage() {
                 {/* Animated Description */}
                 <motion.p
                   className="text-sm mb-6"
-                  style={{ color: "rgba(90, 108, 91, 0.7)" }}
+                  style={{ color: "#435664" }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
@@ -622,12 +651,17 @@ export default function MarketProductsPage() {
                       key={i}
                       className="absolute w-2 h-2 rounded-full"
                       style={{
-                        backgroundColor: "#A3AF87",
+                        backgroundColor:
+                          i === 0
+                            ? "#ebfba8"
+                            : i === 1
+                              ? "#a3af87"
+                              : "#435664",
                         left: `calc(50% - 20px + ${i * 20}px)`,
                       }}
                       animate={{
                         y: [0, -15, 0],
-                        opacity: [0.3, 1, 0.3],
+                        opacity: [0.4, 1, 0.4],
                       }}
                       transition={{
                         duration: 1.5,

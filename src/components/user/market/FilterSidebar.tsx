@@ -30,7 +30,7 @@ export default function FilterSidebar({
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
         <div
           className="h-8 w-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: "#A3AF87" } as React.CSSProperties}
+          style={{ backgroundColor: "#435664" } as React.CSSProperties}
         >
           <svg
             className="h-4 w-4 text-white"
@@ -62,6 +62,7 @@ export default function FilterSidebar({
         >
           <svg
             className="h-3.5 w-3.5"
+            style={{ color: "#a3af87" } as React.CSSProperties}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -76,6 +77,7 @@ export default function FilterSidebar({
           <span>Jenis Produk</span>
           <svg
             className="h-3 w-3 ml-auto"
+            style={{ color: "#435664" } as React.CSSProperties}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -155,6 +157,7 @@ export default function FilterSidebar({
         >
           <svg
             className="h-3.5 w-3.5"
+            style={{ color: "#a3af87" } as React.CSSProperties}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -169,6 +172,7 @@ export default function FilterSidebar({
           <span>Rentang Harga</span>
           <svg
             className="h-3 w-3 ml-auto"
+            style={{ color: "#435664" } as React.CSSProperties}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -204,10 +208,10 @@ export default function FilterSidebar({
               className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={
                 {
-                  background: `linear-gradient(to right, #A3AF87 0%, #A3AF87 ${
+                  background: `linear-gradient(to right, #435664 0%, #435664 ${
                     (minPrice / 200000) * 100
                   }%, #e5e7eb ${(minPrice / 200000) * 100}%, #e5e7eb 100%)`,
-                  accentColor: "#A3AF87",
+                  accentColor: "#435664",
                 } as React.CSSProperties
               }
             />
@@ -227,8 +231,8 @@ export default function FilterSidebar({
                 {
                   background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${
                     (maxPrice / 200000) * 100
-                  }%, #A3AF87 ${(maxPrice / 200000) * 100}%, #A3AF87 100%)`,
-                  accentColor: "#A3AF87",
+                  }%, #435664 ${(maxPrice / 200000) * 100}%, #435664 100%)`,
+                  accentColor: "#435664",
                 } as React.CSSProperties
               }
             />
@@ -244,6 +248,7 @@ export default function FilterSidebar({
         >
           <svg
             className="h-3.5 w-3.5"
+            style={{ color: "#a3af87" } as React.CSSProperties}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -258,6 +263,7 @@ export default function FilterSidebar({
           <span>Urutkan</span>
           <svg
             className="h-3 w-3 ml-auto"
+            style={{ color: "#435664" } as React.CSSProperties}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

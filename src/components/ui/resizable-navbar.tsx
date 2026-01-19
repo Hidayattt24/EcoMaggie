@@ -40,10 +40,11 @@ export const NavBody = ({
       className={cn(
         "hidden lg:flex items-center justify-between gap-4 rounded-full border px-6 py-3 transition-all duration-300",
         isScrolled
-          ? "border-gray-200 bg-white/95 shadow-lg backdrop-blur-md"
-          : "border-gray-200 bg-white shadow-md",
+          ? "border-gray-200 shadow-lg backdrop-blur-md"
+          : "border-gray-200 shadow-md",
         className
       )}
+      style={{ backgroundColor: "#fdf8d4" }}
     >
       {children}
     </motion.div>
@@ -70,7 +71,7 @@ export const NavItems = ({
             href={item.link}
             className={cn(
               "relative flex items-center gap-2 text-sm font-medium transition-all",
-              isActive ? "text-[#A3AF87]" : "text-gray-700 hover:text-[#A3AF87]"
+              isActive ? "text-[#435664]" : "text-gray-700 hover:text-[#435664]"
             )}
           >
             {item.icon}
@@ -79,7 +80,7 @@ export const NavItems = ({
             {isActive && (
               <div
                 className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full"
-                style={{ backgroundColor: "#A3AF87" }}
+                style={{ backgroundColor: "#435664" }}
               />
             )}
           </Link>

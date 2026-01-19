@@ -958,17 +958,19 @@ export default function SupplyHistoryPage() {
 
                     {/* Map Location */}
                     {selectedItem.latitude && selectedItem.longitude && (
-                      <div className="border border-gray-100 rounded-xl p-4">
+                      <div className="border border-gray-100 rounded-xl p-4 relative" style={{ isolation: 'isolate' }}>
                         <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-[#435664]" />
                           Lokasi Penjemputan
                         </h3>
-                        <MapViewer
-                          latitude={selectedItem.latitude}
-                          longitude={selectedItem.longitude}
-                          address={selectedItem.address}
-                          markerLabel="Lokasi Penjemputan"
-                        />
+                        <div className="relative" style={{ zIndex: 0 }}>
+                          <MapViewer
+                            latitude={selectedItem.latitude}
+                            longitude={selectedItem.longitude}
+                            address={selectedItem.address}
+                            markerLabel="Lokasi Penjemputan"
+                          />
+                        </div>
                       </div>
                     )}
 

@@ -98,10 +98,10 @@ export default function MapViewer({
   return (
     <div className="w-full space-y-3">
       {/* Map Container */}
-      <div className="relative rounded-2xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-lg">
+      <div className="relative rounded-2xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-lg" style={{ isolation: 'isolate' }}>
         {/* Marker Label Overlay */}
         {markerLabel && (
-          <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border-2 border-[#A3AF87]/20">
+          <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border-2 border-[#A3AF87]/20">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-[#A3AF87]" />
               <span className="text-xs font-semibold text-gray-700">
@@ -112,7 +112,7 @@ export default function MapViewer({
         )}
 
         {/* Map */}
-        <div style={{ height: "250px", width: "100%", zIndex: 1 }}>
+        <div style={{ height: "250px", width: "100%", position: "relative", zIndex: 0 }}>
           <MapContainer
             center={[latitude, longitude]}
             zoom={15}
@@ -121,7 +121,7 @@ export default function MapViewer({
             zoomControl={true}
             doubleClickZoom={false}
             touchZoom={false}
-            style={{ height: "100%", width: "100%" }}
+            style={{ height: "100%", width: "100%", zIndex: 0 }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

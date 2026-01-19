@@ -24,6 +24,10 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isLoading) return;
+    
     setError("");
 
     if (!email.trim()) {
@@ -348,15 +352,27 @@ export default function ForgotPasswordPage() {
                   variants={itemVariants}
                   type="submit"
                   disabled={isLoading || !email.trim()}
-                  className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 poppins-semibold hover:shadow-xl hover:scale-[1.02]"
-                  style={{ backgroundColor: "#A3AF87" }}
+                  onClick={(e) => {
+                    if (isLoading || !email.trim()) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return false;
+                    }
+                  }}
+                  className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed poppins-semibold hover:shadow-xl hover:scale-[1.02]"
+                  style={{
+                    backgroundColor: "#A3AF87",
+                    pointerEvents: (isLoading || !email.trim()) ? "none" : "auto"
+                  }}
                   onMouseEnter={(e) => {
                     if (!isLoading && email.trim()) {
                       e.currentTarget.style.backgroundColor = "#8a9a70";
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#A3AF87";
+                    if (!isLoading) {
+                      e.currentTarget.style.backgroundColor = "#A3AF87";
+                    }
                   }}
                 >
                   {isLoading ? (

@@ -870,42 +870,42 @@ export default function SupplyInputPage() {
                       className="space-y-8"
                     >
                       {/* Address & Location Section - Redesigned */}
-                      <div className="space-y-6">
+                      <div className="space-y-4 sm:space-y-6">
                         {/* Section Header */}
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
                             Lokasi Penjemputan
                           </h3>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600">
                             Tentukan alamat dan titik lokasi untuk memudahkan kurir menemukan sampah Anda
                           </p>
                         </div>
 
                         {/* Step 1: Address Selection */}
-                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-200">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-8 h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-gray-200">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                               1
                             </div>
-                            <h4 className="font-bold text-gray-900">Pilih Alamat</h4>
+                            <h4 className="font-bold text-gray-900 text-sm sm:text-base">Pilih Alamat</h4>
                           </div>
 
                           {/* Default Address Option */}
                           {!useCustomAddress && (
-                            <div className="space-y-3">
-                              <div className="bg-white rounded-xl p-4 border-2 border-[#A3AF87] shadow-sm">
-                                <div className="flex items-start gap-3">
-                                  <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-                                    <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                            <div className="space-y-2 sm:space-y-3">
+                              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-[#A3AF87] shadow-sm">
+                                <div className="flex items-start gap-2 sm:gap-3">
+                                  <div className="p-1.5 sm:p-2 bg-[#A3AF87]/10 rounded-lg">
+                                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-[#A3AF87]" />
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <p className="text-xs font-semibold text-[#A3AF87]">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                      <p className="text-[10px] sm:text-xs font-semibold text-[#A3AF87]">
                                         ALAMAT TERPILIH
                                       </p>
-                                      <CheckCircle className="h-4 w-4 text-[#A3AF87]" />
+                                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-[#A3AF87]" />
                                     </div>
-                                    <p className="text-sm text-gray-900 font-medium">
+                                    <p className="text-xs sm:text-sm text-gray-900 font-medium break-words">
                                       {defaultAddress}
                                     </p>
                                   </div>
@@ -923,9 +923,9 @@ export default function SupplyInputPage() {
                                     addressId: null,
                                   });
                                 }}
-                                className="w-full py-3 px-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all flex items-center justify-center gap-2"
+                                className="w-full py-2.5 sm:py-3 px-3 sm:px-4 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-gray-700 font-medium text-xs sm:text-sm hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all flex items-center justify-center gap-2"
                               >
-                                <MapPin className="h-4 w-4" />
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 Gunakan Alamat Lain
                               </button>
                             </div>
@@ -933,7 +933,7 @@ export default function SupplyInputPage() {
 
                           {/* Custom Address Input */}
                           {useCustomAddress && (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                               <textarea
                                 value={customAddress}
                                 onChange={(e) => {
@@ -947,7 +947,7 @@ export default function SupplyInputPage() {
                                 }}
                                 placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
                                 rows={3}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#A3AF87] focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 border-gray-300 focus:border-[#A3AF87] focus:outline-none resize-none text-xs sm:text-sm text-gray-900 placeholder:text-gray-400"
                               />
                               
                               <div className="flex items-center gap-2">
@@ -964,15 +964,15 @@ export default function SupplyInputPage() {
                                       });
                                     }
                                   }}
-                                  className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                  className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
                                 >
-                                  <X className="h-4 w-4" />
+                                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                   Batal
                                 </button>
                                 
                                 {customAddress && (
-                                  <div className="flex-1 py-2.5 px-4 bg-green-50 text-green-700 rounded-xl font-medium text-sm flex items-center justify-center gap-2">
-                                    <CheckCircle className="h-4 w-4" />
+                                  <div className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 bg-green-50 text-green-700 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2">
+                                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     Tersimpan
                                   </div>
                                 )}
@@ -982,30 +982,30 @@ export default function SupplyInputPage() {
                         </div>
 
                         {/* Step 2: Pin Location (Recommended) */}
-                        <div className="bg-gradient-to-br from-[#A3AF87]/5 to-white rounded-2xl p-6 border-2 border-[#A3AF87]/30">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        <div className="bg-gradient-to-br from-[#A3AF87]/5 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#A3AF87]/30">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                                 2
                               </div>
                               <div>
-                                <h4 className="font-bold text-gray-900">
+                                <h4 className="font-bold text-gray-900 text-sm sm:text-base">
                                   Tandai Titik Lokasi di Peta
                                 </h4>
-                                <p className="text-xs text-gray-600 mt-0.5">
+                                <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
                                   Direkomendasikan untuk akurasi pickup
                                 </p>
                               </div>
                             </div>
-                            <div className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+                            <div className="px-2.5 sm:px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] sm:text-xs font-bold self-start">
                               REKOMENDASI
                             </div>
                           </div>
 
                           {/* Info Box */}
-                          <div className="mb-4 flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                            <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-blue-900">
+                          <div className="mb-3 sm:mb-4 flex items-start gap-2 p-2.5 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl border border-blue-200">
+                            <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-[10px] sm:text-xs text-blue-900">
                               <span className="font-semibold">Mengapa perlu?</span> Titik lokasi yang presisi membantu kurir menemukan lokasi penjemputan dengan cepat dan tepat.
                             </p>
                           </div>

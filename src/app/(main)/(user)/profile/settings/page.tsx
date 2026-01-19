@@ -369,13 +369,13 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8f9f5] via-white to-[#f0f2ed] pb-20 lg:pb-6">
+    <div className="min-h-screen bg-white pb-20 lg:pb-6">
       {/* Image Crop Modal */}
       {showCropModal && imageToCrop && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden max-h-[95vh] flex flex-col">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#A3AF87] to-[#5a6c5b] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-[#435664] to-[#303646] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
               <h3 className="text-lg sm:text-xl font-bold text-white">
                 Sesuaikan Foto Profil
               </h3>
@@ -432,7 +432,7 @@ export default function ProfileSettings() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <RotateCcw className="h-4 w-4 text-[#5a6c5b]" />
+                    <RotateCcw className="h-4 w-4 text-[#435664]" />
                     Rotasi
                   </label>
                   <span className="text-xs font-medium text-gray-500">
@@ -446,7 +446,7 @@ export default function ProfileSettings() {
                   step="1"
                   value={rotation}
                   onChange={(e) => setRotation(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#A3AF87]"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#435664]"
                 />
               </div>
 
@@ -460,7 +460,7 @@ export default function ProfileSettings() {
                 </button>
                 <button
                   onClick={createCroppedImage}
-                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#A3AF87] to-[#5a6c5b] text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <Check className="h-5 w-5" />
                   Terapkan
@@ -472,16 +472,16 @@ export default function ProfileSettings() {
       )}
 
       {/* Header */}
-      <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10">
+      <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10 lg:static">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
           <button
             onClick={() => router.back()}
             className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
-            <ArrowLeft className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-5 w-5 text-[#435664] group-hover:-translate-x-1 transition-transform" />
             <span className="text-sm font-medium text-gray-700">Kembali</span>
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
             Pengaturan Akun
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
@@ -492,9 +492,9 @@ export default function ProfileSettings() {
 
       <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-6">
         {/* Account Information Section */}
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+        <div className="bg-[#fdf8d4] rounded-3xl border border-[#435664]/20 shadow-xl overflow-hidden">
           {/* Card Header with Gradient */}
-          <div className="bg-gradient-to-r from-[#A3AF87] to-[#5a6c5b] px-6 py-5">
+          <div className="bg-gradient-to-r from-[#435664] to-[#303646] px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-white">Informasi Akun</h2>
@@ -505,7 +505,7 @@ export default function ProfileSettings() {
               {!isEditMode && (
                 <button
                   onClick={() => setIsEditMode(true)}
-                  className="px-5 py-2.5 bg-white text-[#5a6c5b] rounded-xl hover:shadow-lg transition-all text-sm font-semibold"
+                  className="px-5 py-2.5 bg-white text-[#435664] rounded-2xl hover:shadow-lg transition-all text-sm font-semibold"
                 >
                   Edit Profil
                 </button>
@@ -517,8 +517,8 @@ export default function ProfileSettings() {
             {/* Profile Picture */}
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-6 sm:mb-8">
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#A3AF87] to-[#5a6c5b] rounded-full blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b]">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#435664] to-[#303646] rounded-full blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl bg-gradient-to-br from-[#435664] to-[#303646]">
                   {imagePreview ? (
                     <img
                       src={imagePreview}
@@ -563,15 +563,15 @@ export default function ProfileSettings() {
                 )}
               </div>
               <div className="text-center sm:text-left flex-1">
-                <h3 className="font-bold text-xl sm:text-2xl text-[#5a6c5b] mb-1">
+                <h3 className="font-bold text-xl sm:text-2xl text-[#303646] mb-1">
                   {profileData.name}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 mb-2">
                   {profileData.email}
                 </p>
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-gradient-to-r from-[#A3AF87]/10 to-[#5a6c5b]/10 rounded-full">
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-[#fdf8d4] rounded-full border border-[#435664]/20">
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-[10px] sm:text-xs font-medium text-[#5a6c5b]">
+                  <span className="text-[10px] sm:text-xs font-medium text-[#435664]">
                     {profileData.userType === "UMKM" ? "UMKM" : "Rumah Tangga"}
                   </span>
                 </div>
@@ -595,7 +595,7 @@ export default function ProfileSettings() {
               {/* Nama Lengkap */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-[#A3AF87] rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Nama Lengkap
                 </label>
                 <input
@@ -605,7 +605,7 @@ export default function ProfileSettings() {
                     setProfileData({ ...profileData, name: e.target.value })
                   }
                   disabled={!isEditMode}
-                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-[#A3AF87] transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#5a6c5b] font-medium group-hover:border-gray-300"
+                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-[#435664] transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#303646] font-medium group-hover:border-gray-300"
                   placeholder="Masukkan nama lengkap"
                 />
               </div>
@@ -613,7 +613,7 @@ export default function ProfileSettings() {
               {/* Email */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-[#A3AF87] rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Email
                 </label>
                 <div className="relative">
@@ -624,7 +624,7 @@ export default function ProfileSettings() {
                       setProfileData({ ...profileData, email: e.target.value })
                     }
                     disabled={!isEditMode}
-                    className="w-full px-4 py-3.5 pr-36 border-2 border-gray-200 rounded-xl transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#5a6c5b] font-medium focus:ring-2 focus:ring-[#A3AF87] focus:border-[#A3AF87] group-hover:border-gray-300"
+                    className="w-full px-4 py-3.5 pr-36 border-2 border-gray-200 rounded-xl transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#303646] font-medium focus:ring-2 focus:ring-[#435664] focus:border-[#435664] group-hover:border-gray-300"
                     placeholder="email@example.com"
                   />
                   {!isEditMode && (
@@ -647,7 +647,7 @@ export default function ProfileSettings() {
               {/* Nomor Telepon */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-[#A3AF87] rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Nomor Telepon
                 </label>
                 <input
@@ -658,14 +658,14 @@ export default function ProfileSettings() {
                   }
                   disabled={!isEditMode}
                   placeholder="08xxxxxxxxxx"
-                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-[#A3AF87] transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#5a6c5b] font-medium group-hover:border-gray-300"
+                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-[#435664] transition-all disabled:bg-gray-50 disabled:text-gray-600 text-[#303646] font-medium group-hover:border-gray-300"
                 />
               </div>
 
               {/* Jenis Pengguna */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-[#A3AF87] rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Jenis Pengguna
                 </label>
 
@@ -674,7 +674,7 @@ export default function ProfileSettings() {
                   <label
                     className={`relative flex flex-col items-center p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl transition-all duration-300 ${
                       profileData.userType === "UMKM"
-                        ? "border-[#A3AF87] bg-gradient-to-br from-[#A3AF87]/10 to-[#5a6c5b]/5 shadow-lg ring-2 ring-[#A3AF87]/20"
+                        ? "border-[#435664] bg-white shadow-lg ring-2 ring-[#435664]/20"
                         : "border-gray-200 bg-white hover:shadow-md hover:border-gray-300"
                     } ${
                       !isEditMode
@@ -699,7 +699,7 @@ export default function ProfileSettings() {
                     <div
                       className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 transition-all duration-300 ${
                         profileData.userType === "UMKM"
-                          ? "bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] shadow-lg"
+                          ? "bg-gradient-to-br from-[#435664] to-[#303646] shadow-lg"
                           : "bg-gray-100"
                       }`}
                     >
@@ -724,7 +724,7 @@ export default function ProfileSettings() {
                     <span
                       className={`font-bold text-xs sm:text-sm ${
                         profileData.userType === "UMKM"
-                          ? "text-[#5a6c5b]"
+                          ? "text-[#303646]"
                           : "text-gray-500"
                       }`}
                     >
@@ -747,7 +747,7 @@ export default function ProfileSettings() {
                   <label
                     className={`relative flex flex-col items-center p-5 border-2 rounded-2xl transition-all duration-300 ${
                       profileData.userType === "Rumah Tangga"
-                        ? "border-[#A3AF87] bg-gradient-to-br from-[#A3AF87]/10 to-[#5a6c5b]/5 shadow-lg ring-2 ring-[#A3AF87]/20"
+                        ? "border-[#435664] bg-white shadow-lg ring-2 ring-[#435664]/20"
                         : "border-gray-200 bg-white hover:shadow-md hover:border-gray-300"
                     } ${
                       !isEditMode
@@ -772,7 +772,7 @@ export default function ProfileSettings() {
                     <div
                       className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 transition-all duration-300 ${
                         profileData.userType === "Rumah Tangga"
-                          ? "bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] shadow-lg"
+                          ? "bg-gradient-to-br from-[#435664] to-[#303646] shadow-lg"
                           : "bg-gray-100"
                       }`}
                     >
@@ -797,7 +797,7 @@ export default function ProfileSettings() {
                     <span
                       className={`font-bold text-xs sm:text-sm ${
                         profileData.userType === "Rumah Tangga"
-                          ? "text-[#5a6c5b]"
+                          ? "text-[#303646]"
                           : "text-gray-500"
                       }`}
                     >
@@ -825,7 +825,7 @@ export default function ProfileSettings() {
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="w-full sm:flex-1 px-6 py-3.5 bg-gradient-to-r from-[#A3AF87] to-[#5a6c5b] text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
+                  className="w-full sm:flex-1 px-6 py-3.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
                 >
                   {isSaving ? (
                     <>
@@ -861,8 +861,8 @@ export default function ProfileSettings() {
         </div>
 
         {/* Security Section */}
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5">
+        <div className="bg-[#fdf8d4] rounded-3xl border border-[#435664]/20 shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-[#435664] to-[#303646] px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl">
                 <Shield className="h-6 w-6 text-white" />
@@ -879,7 +879,7 @@ export default function ProfileSettings() {
               {/* Old Password */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Password Lama
                 </label>
                 <div className="relative">
@@ -893,7 +893,7 @@ export default function ProfileSettings() {
                         currentPassword: e.target.value,
                       })
                     }
-                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-700 font-medium"
+                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-[#435664] transition-all text-gray-700 font-medium"
                     placeholder="Masukkan password lama"
                   />
                   <button
@@ -913,7 +913,7 @@ export default function ProfileSettings() {
               {/* New Password */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Password Baru
                 </label>
                 <div className="relative">
@@ -927,7 +927,7 @@ export default function ProfileSettings() {
                         newPassword: e.target.value,
                       })
                     }
-                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-700 font-medium"
+                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-[#435664] transition-all text-gray-700 font-medium"
                     placeholder="Minimal 8 karakter"
                   />
                   <button
@@ -947,7 +947,7 @@ export default function ProfileSettings() {
               {/* Confirm Password */}
               <div className="group">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                  <div className="w-1 h-4 bg-[#435664] rounded-full"></div>
                   Konfirmasi Password Baru
                 </label>
                 <div className="relative">
@@ -961,7 +961,7 @@ export default function ProfileSettings() {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-700 font-medium"
+                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-[#435664] transition-all text-gray-700 font-medium"
                     placeholder="Konfirmasi password baru"
                   />
                   <button
@@ -990,7 +990,7 @@ export default function ProfileSettings() {
               <button
                 type="submit"
                 disabled={isChangingPassword}
-                className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold mt-6 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full px-6 py-3.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all font-semibold mt-6 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isChangingPassword ? (
                   <>

@@ -284,9 +284,9 @@ export default function WishlistPage() {
         {/* Back Button - Mobile Only */}
         <button
           onClick={() => router.back()}
-          className="lg:hidden flex items-center gap-2 mb-4 text-[#5a6c5b] hover:text-[#5a6c5b]/80 transition-colors"
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#435664] hover:text-[#303646] transition-colors"
         >
-          <div className="p-2 bg-white border-2 border-[#A3AF87]/30 rounded-lg hover:bg-[#A3AF87]/10 transition-colors">
+          <div className="p-2 bg-white border-2 border-[#435664]/30 rounded-lg hover:bg-[#435664]/10 transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </div>
           <span className="font-semibold text-sm">Kembali</span>
@@ -296,14 +296,14 @@ export default function WishlistPage() {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2.5 sm:p-3 bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-xl shadow-lg">
+              <div className="p-2.5 sm:p-3 bg-gradient-to-br from-[#435664] to-[#303646] rounded-xl shadow-lg">
                 <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white fill-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
                   Wishlist Saya
                 </h1>
-                <p className="text-xs sm:text-sm text-[#5a6c5b]/70 font-medium mt-0.5">
+                <p className="text-xs sm:text-sm text-[#435664] font-medium mt-0.5">
                   {wishlistItems.length} produk tersimpan
                 </p>
               </div>
@@ -311,27 +311,27 @@ export default function WishlistPage() {
 
             {wishlistItems.length > 0 && (
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-                <div className="px-4 py-2.5 bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-xl">
+                <div className="px-4 py-2.5 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-xl">
                   <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4 text-[#5a6c5b]" />
+                    <Package className="h-4 w-4 text-[#435664]" />
                     <div className="text-left">
-                      <p className="text-[10px] text-[#5a6c5b]/70 font-bold">
+                      <p className="text-[10px] text-[#435664] font-bold">
                         Stok Tersedia
                       </p>
-                      <p className="text-sm font-bold text-[#5a6c5b]">
+                      <p className="text-sm font-bold text-[#303646]">
                         {inStockCount} produk
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="px-4 py-2.5 bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-xl">
+                <div className="px-4 py-2.5 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-xl">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-[#5a6c5b]" />
+                    <TrendingUp className="h-4 w-4 text-[#435664]" />
                     <div className="text-left">
-                      <p className="text-[10px] text-[#5a6c5b]/70 font-bold">
+                      <p className="text-[10px] text-[#435664] font-bold">
                         Total Nilai
                       </p>
-                      <p className="text-sm font-bold text-[#5a6c5b]">
+                      <p className="text-sm font-bold text-[#303646]">
                         Rp {totalValue.toLocaleString("id-ID")}
                       </p>
                     </div>
@@ -346,7 +346,7 @@ export default function WishlistPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/5 border-2 border-[#A3AF87]/20 rounded-xl"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-xl"
             >
               <div className="flex items-center gap-3">
                 <label className="flex items-center gap-2 cursor-pointer group">
@@ -355,7 +355,7 @@ export default function WishlistPage() {
                       type="checkbox"
                       checked={selectedItems.length === wishlistItems.length}
                       onChange={toggleSelectAll}
-                      className="peer w-5 h-5 rounded-md border-2 border-[#A3AF87]/50 checked:bg-[#A3AF87] checked:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/30 cursor-pointer transition-all appearance-none"
+                      className="peer w-5 h-5 rounded-md border-2 border-[#435664] checked:bg-[#435664] checked:border-[#435664] focus:ring-2 focus:ring-[#435664]/30 cursor-pointer transition-all appearance-none"
                     />
                     <svg
                       className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
@@ -371,7 +371,7 @@ export default function WishlistPage() {
                       />
                     </svg>
                   </div>
-                  <span className="text-sm font-bold text-[#5a6c5b] group-hover:text-[#5a6c5b]/80">
+                  <span className="text-sm font-bold text-[#303646] group-hover:text-[#435664]">
                     Pilih Semua
                   </span>
                 </label>
@@ -379,7 +379,7 @@ export default function WishlistPage() {
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-full text-xs font-bold shadow-md"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#435664] to-[#303646] text-white rounded-full text-xs font-bold shadow-md"
                   >
                     <span>{selectedItems.length} dipilih</span>
                   </motion.div>
@@ -388,17 +388,17 @@ export default function WishlistPage() {
 
               {selectedItems.length > 0 && (
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <div className="hidden sm:flex items-center px-3 py-2 bg-white border-2 border-[#A3AF87]/30 rounded-lg">
-                    <span className="text-xs text-[#5a6c5b]/70 font-medium mr-2">
+                  <div className="hidden sm:flex items-center px-3 py-2 bg-white border-2 border-[#435664]/30 rounded-lg">
+                    <span className="text-xs text-[#435664] font-medium mr-2">
                       Total:
                     </span>
-                    <span className="text-sm font-bold text-[#5a6c5b]">
+                    <span className="text-sm font-bold text-[#303646]">
                       Rp {selectedTotalValue.toLocaleString("id-ID")}
                     </span>
                   </div>
                   <button
                     onClick={addSelectedToCart}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-[#A3AF87] text-[#5a6c5b] rounded-lg font-bold text-sm hover:bg-[#A3AF87]/10 transition-all"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-[#435664] text-[#435664] rounded-lg font-bold text-sm hover:bg-[#435664]/10 transition-all"
                   >
                     <ShoppingCart className="h-4 w-4" />
                     <span className="hidden sm:inline">
@@ -408,7 +408,7 @@ export default function WishlistPage() {
                   </button>
                   <button
                     onClick={checkoutSelected}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-lg font-bold text-sm hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-lg font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
                   >
                     <Package className="h-4 w-4" />
                     <span className="hidden sm:inline">Bayar Sekarang</span>
@@ -431,19 +431,19 @@ export default function WishlistPage() {
               exit={{ opacity: 0, y: -20 }}
               className="flex flex-col items-center justify-center py-16 sm:py-20"
             >
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4 border-[#A3AF87]/20">
-                <Heart className="h-12 w-12 sm:h-16 sm:w-16 text-[#A3AF87]/50" />
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4 border-[#435664]/20">
+                <Heart className="h-12 w-12 sm:h-16 sm:w-16 text-[#435664]" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b] mb-2 sm:mb-3 text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#303646] mb-2 sm:mb-3 text-center">
                 Wishlist Anda Kosong
               </h2>
-              <p className="text-sm sm:text-base text-[#5a6c5b]/70 mb-6 sm:mb-8 text-center max-w-md px-4">
+              <p className="text-sm sm:text-base text-[#435664] mb-6 sm:mb-8 text-center max-w-md px-4">
                 Simpan produk favorit Anda untuk memudahkan pembelian di
                 kemudian hari
               </p>
               <Link
                 href="/market/products"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-xl font-bold text-sm sm:text-base hover:shadow-xl hover:shadow-[#A3AF87]/30 transition-all"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-xl font-bold text-sm sm:text-base hover:shadow-xl hover:shadow-[#a3af87]/30 transition-all"
               >
                 <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                 Jelajahi Produk
@@ -642,17 +642,17 @@ export default function WishlistPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-br from-[#A3AF87]/20 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-xl sm:rounded-2xl"
+            className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-xl sm:rounded-2xl"
           >
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="p-2 bg-[#A3AF87] rounded-lg flex-shrink-0">
+              <div className="p-2 bg-[#435664] rounded-lg flex-shrink-0">
                 <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-bold text-[#5a6c5b] mb-1">
+                <h3 className="text-sm sm:text-base font-bold text-[#303646] mb-1">
                   Tips Wishlist
                 </h3>
-                <p className="text-xs sm:text-sm text-[#5a6c5b]/70 font-medium">
+                <p className="text-xs sm:text-sm text-[#435664] font-medium">
                   Pantau terus wishlist Anda! Kami akan memberitahu jika ada
                   perubahan harga atau stok produk favorit Anda.
                 </p>

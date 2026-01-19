@@ -368,7 +368,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           </p>
           <Link
             href="/market/products"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
           >
             <svg
               className="w-4 h-4"
@@ -445,7 +445,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           {/* Back Button */}
           <Link
             href="/market/products"
-            className="inline-flex items-center gap-1.5 mb-4 text-sm text-[#5a6c5b] hover:text-[#4a5c4b] transition-colors"
+            className="inline-flex items-center gap-1.5 mb-4 text-sm text-[#435664] hover:text-[#303646] transition-colors"
           >
             <svg
               className="h-4 w-4"
@@ -516,7 +516,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                         onClick={() => setSelectedImage(index)}
                         className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${
                           selectedImage === index
-                            ? "border-[#A3AF87]"
+                            ? "border-[#435664]"
                             : "border-transparent hover:border-gray-300"
                         }`}
                       >
@@ -539,11 +539,11 @@ export default function ProductDetailPage({ params }: PageProps) {
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#A3AF87]/20 text-[#5a6c5b]">
+                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#fdf8d4] text-[#435664] border border-[#435664]/20">
                         {categoryDisplay}
                       </span>
                       {product.farmer.isVerified && (
-                        <span className="flex items-center gap-1 text-xs text-[#5a6c5b]">
+                        <span className="flex items-center gap-1 text-xs text-[#435664]">
                           <svg
                             className="h-3 w-3"
                             fill="currentColor"
@@ -559,7 +559,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                         </span>
                       )}
                     </div>
-                    <h1 className="text-xl font-bold text-[#5a6c5b]">
+                    <h1 className="text-xl font-bold text-[#303646]">
                       {product.name}
                     </h1>
                   </div>
@@ -574,7 +574,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                     >
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
-                    <span className="text-sm font-semibold text-[#5a6c5b]">
+                    <span className="text-sm font-semibold text-[#303646]">
                       {product.rating.toFixed(1)}
                     </span>
                     <span className="text-xs text-gray-500">
@@ -602,9 +602,9 @@ export default function ProductDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* Price */}
-                <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-[#A3AF87]/10 to-transparent">
+                <div className="mb-3 p-3 rounded-lg bg-[#fdf8d4]">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-2xl font-bold text-[#5a6c5b]">
+                    <span className="text-2xl font-bold text-[#303646]">
                       Rp {product.finalPrice.toLocaleString("id-ID")}
                     </span>
                     {product.discountPercent > 0 && (
@@ -624,89 +624,92 @@ export default function ProductDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* Quantity & Actions */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-[#5a6c5b]">
-                      Jumlah:
-                    </span>
-                    <div className="flex items-center border border-gray-200 rounded-lg">
-                      <button
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors rounded-l-lg"
-                        disabled={product.stock === 0}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                <div className="space-y-3 mb-4">
+                  {/* Quantity Selector - Improved & Mobile Responsive */}
+                  <div className="bg-[#fdf8d4] p-3 sm:p-4 rounded-xl border border-[#435664]/20">
+                    <label className="block text-xs sm:text-sm font-semibold text-[#435664] mb-2 sm:mb-3">
+                      Jumlah Pembelian
+                    </label>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                      <div className="flex items-center justify-center border-2 border-[#435664]/30 rounded-xl overflow-hidden bg-white">
+                        <button
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          className="flex-1 sm:w-12 h-12 sm:h-12 flex items-center justify-center text-[#435664] hover:bg-[#fdf8d4] active:bg-[#435664] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={product.stock === 0}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M20 12H4"
-                          />
-                        </svg>
-                      </button>
-                      <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) =>
-                          setQuantity(
-                            Math.min(
-                              product.stock,
-                              Math.max(1, parseInt(e.target.value) || 1),
-                            ),
-                          )
-                        }
-                        className="w-12 h-8 text-center text-sm font-medium border-x border-gray-200 focus:outline-none text-[#A3AF87]"
-                        disabled={product.stock === 0}
-                      />
-                      <button
-                        onClick={() =>
-                          setQuantity(Math.min(product.stock, quantity + 1))
-                        }
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors rounded-r-lg"
-                        disabled={product.stock === 0}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          <svg
+                            className="w-6 h-6 sm:w-6 sm:h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth={3}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M20 12H4"
+                            />
+                          </svg>
+                        </button>
+                        <input
+                          type="number"
+                          value={quantity}
+                          onChange={(e) =>
+                            setQuantity(
+                              Math.min(
+                                product.stock,
+                                Math.max(1, parseInt(e.target.value) || 1),
+                              ),
+                            )
+                          }
+                          className="w-20 sm:w-20 h-12 sm:h-12 text-center text-xl sm:text-xl font-bold border-x-2 border-[#435664]/30 focus:outline-none focus:bg-[#fdf8d4] text-[#303646]"
+                          disabled={product.stock === 0}
+                        />
+                        <button
+                          onClick={() =>
+                            setQuantity(Math.min(product.stock, quantity + 1))
+                          }
+                          className="flex-1 sm:w-12 h-12 sm:h-12 flex items-center justify-center text-[#435664] hover:bg-[#fdf8d4] active:bg-[#435664] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={product.stock === 0}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 4v16m8-8H4"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-6 h-6 sm:w-6 sm:h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth={3}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="flex-1 text-left">
+                        <div className="text-xs text-gray-500 mb-1">Total Harga</div>
+                        <div className="text-2xl font-bold text-[#303646]">
+                          Rp {(product.finalPrice * quantity).toLocaleString("id-ID")}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm text-gray-500">
-                      ={" "}
-                      <span className="font-semibold text-[#5a6c5b]">
-                        Rp{" "}
-                        {(product.finalPrice * quantity).toLocaleString(
-                          "id-ID",
-                        )}
-                      </span>
-                    </span>
+                    <div className="mt-2 text-xs text-gray-500">
+                      Stok tersedia: <span className="font-semibold text-[#435664]">{product.stock} {product.unit}</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Action Buttons - With Animation */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     onClick={handleAddToCart}
-                    className="group flex-1 py-2.5 px-4 bg-[#A3AF87] text-white rounded-lg font-medium hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    className="group w-full sm:flex-1 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-[#a3af87]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     disabled={product.stock === 0 || isAddingToCart}
                   >
                     {isAddingToCart ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                         <span>Menambahkan...</span>
                       </>
                     ) : (
@@ -724,7 +727,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                           />
                         </svg>
-                        <span>Keranjang</span>
+                        <span>+ Keranjang</span>
                       </>
                     )}
                   </button>
@@ -734,7 +737,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                       const checkoutUrl = `/market/checkout?productId=${product.id}&qty=${quantity}`;
                       router.push(checkoutUrl);
                     }}
-                    className="group flex-1 py-2.5 px-4 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    className="group w-full sm:flex-1 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     disabled={product.stock === 0}
                   >
                     <svg
@@ -758,7 +761,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                 <div className="pt-3 border-t border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#435664] to-[#303646] flex items-center justify-center">
                         <svg
                           className="h-5 w-5 text-white"
                           fill="currentColor"
@@ -773,7 +776,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <p className="font-semibold text-sm text-[#5a6c5b]">
+                          <p className="font-semibold text-sm text-[#303646]">
                             {product.farmer.farmName}
                           </p>
                           {product.farmer.isVerified && (

@@ -340,10 +340,63 @@ export default function AddressesPage() {
   // Loading State
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#A3AF87] mx-auto" />
-          <p className="mt-4 text-gray-600">Memuat alamat...</p>
+      <div className="min-h-screen bg-white pb-20 lg:pb-6">
+        {/* Header Skeleton */}
+        <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10">
+          <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+            <div className="w-24 h-10 bg-gray-200 rounded-lg animate-pulse mb-3"></div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-8 sm:h-10 bg-gray-200 rounded-lg animate-pulse w-48"></div>
+                <div className="h-4 bg-gray-200 rounded-lg animate-pulse w-64"></div>
+              </div>
+              <div className="w-24 h-10 bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-4">
+          {/* Address Card Skeletons */}
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-[#fdf8d4] rounded-2xl border-2 border-[#435664]/20 p-4 sm:p-6"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-xl animate-pulse"></div>
+                  <div className="space-y-2">
+                    <div className="h-5 bg-white/60 rounded-lg animate-pulse w-32"></div>
+                    <div className="h-4 bg-white/40 rounded-lg animate-pulse w-20"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-white/40 rounded animate-pulse"></div>
+                  <div className="h-4 bg-white/60 rounded-lg animate-pulse w-40"></div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-white/40 rounded animate-pulse"></div>
+                  <div className="h-4 bg-white/60 rounded-lg animate-pulse w-32"></div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-4 h-4 bg-white/40 rounded animate-pulse mt-0.5"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-white/60 rounded-lg animate-pulse w-full"></div>
+                    <div className="h-4 bg-white/40 rounded-lg animate-pulse w-3/4"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mt-4">
+                <div className="flex-1 sm:flex-none h-10 bg-white/40 rounded-2xl animate-pulse w-32"></div>
+                <div className="flex-1 sm:flex-none h-10 bg-white/40 rounded-2xl animate-pulse w-20"></div>
+                <div className="flex-1 sm:flex-none h-10 bg-white/40 rounded-2xl animate-pulse w-20"></div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -352,18 +405,18 @@ export default function AddressesPage() {
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-6">
       {/* Header */}
-      <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10">
+      <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10 lg:static">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
           <button
             onClick={() => router.back()}
             className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
           >
-            <ArrowLeft className="h-5 w-5 text-[#5a6c5b] group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-5 w-5 text-[#435664] group-hover:-translate-x-1 transition-transform" />
             <span className="text-sm font-medium text-gray-700">Kembali</span>
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
                 Daftar Alamat
               </h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">
@@ -386,7 +439,7 @@ export default function AddressesPage() {
                   streetAddress: "",
                 });
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all shadow-sm active:scale-95"
             >
               <Plus className="h-5 w-5" />
               <span className="hidden sm:inline font-medium">Tambah</span>
@@ -407,10 +460,10 @@ export default function AddressesPage() {
             >
               <form
                 onSubmit={handleAddAddress}
-                className="bg-gradient-to-br from-[#A3AF87]/20 to-white rounded-2xl border-2 border-[#A3AF87]/30 p-4 sm:p-6 shadow-sm"
+                className="bg-[#fdf8d4] rounded-2xl border-2 border-[#435664]/30 p-4 sm:p-6 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-[#5a6c5b]">
+                  <h3 className="text-lg font-bold text-[#303646]">
                     {editingAddress ? "Edit Alamat" : "Tambah Alamat Baru"}
                   </h3>
                   <button
@@ -436,7 +489,7 @@ export default function AddressesPage() {
                       }
                       className={`w-full px-4 py-3 border-2 ${
                         formErrors.label ? "border-red-500" : "border-gray-200"
-                      } rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium`}
+                      } rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-transparent transition-all text-[#303646] font-medium`}
                       placeholder="Rumah, Kantor, dll"
                     />
                     {formErrors.label && (
@@ -463,7 +516,7 @@ export default function AddressesPage() {
                       }
                       className={`w-full px-4 py-3 border-2 ${
                         formErrors.recipientName ? "border-red-500" : "border-gray-200"
-                      } rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium`}
+                      } rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-transparent transition-all text-[#303646] font-medium`}
                       placeholder="Nama lengkap"
                     />
                     {formErrors.recipientName && (
@@ -490,7 +543,7 @@ export default function AddressesPage() {
                       }
                       className={`w-full px-4 py-3 border-2 ${
                         formErrors.recipientPhone ? "border-red-500" : "border-gray-200"
-                      } rounded-xl focus:ring-2 focus:ring-[#A3AF87] focus:border-transparent transition-all text-[#5a6c5b] font-medium`}
+                      } rounded-xl focus:ring-2 focus:ring-[#435664] focus:border-transparent transition-all text-[#303646] font-medium`}
                       placeholder="08xxxxxxxxxx"
                     />
                     {formErrors.recipientPhone && (
@@ -530,7 +583,7 @@ export default function AddressesPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="flex-1 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all font-medium active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all font-medium active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSaving ? (
                       <>
@@ -649,7 +702,7 @@ export default function AddressesPage() {
                       // Trigger reset to allow auto-select
                       setResetTrigger((prev) => prev + 1);
                     }}
-                    className="w-full px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all font-medium flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 bg-amber-500 text-white rounded-2xl hover:bg-amber-600 transition-all font-medium flex items-center justify-center gap-2"
                   >
                     <Plus className="h-5 w-5" />
                     Simpan Sebagai Alamat Pengiriman
@@ -667,7 +720,7 @@ export default function AddressesPage() {
             <p className="text-gray-500">Belum ada alamat tersimpan</p>
             <button
               onClick={() => setShowAddForm(true)}
-              className="mt-4 px-6 py-3 bg-[#A3AF87] text-white rounded-xl hover:bg-[#95a17a] transition-all font-medium"
+              className="mt-4 px-6 py-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all font-medium"
             >
               Tambah Alamat Pertama
             </button>
@@ -681,19 +734,19 @@ export default function AddressesPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-6 hover:border-[#A3AF87] hover:shadow-md transition-all"
+                className="bg-[#fdf8d4] rounded-2xl border-2 border-[#435664]/20 p-4 sm:p-6 hover:border-[#435664] hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-[#A3AF87]/20 rounded-xl">
-                      <MapPin className="h-5 w-5 text-[#5a6c5b]" />
+                    <div className="p-2 bg-white rounded-xl">
+                      <MapPin className="h-5 w-5 text-[#435664]" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 text-base sm:text-lg">
                         {address.label}
                       </h3>
                       {address.isDefault && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white text-xs font-bold rounded-full mt-1">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white text-xs font-bold rounded-full mt-1">
                           <Check className="h-3 w-3" />
                           Utama
                         </span>
@@ -738,20 +791,20 @@ export default function AddressesPage() {
                   {!address.isDefault && (
                     <button
                       onClick={() => handleSetPrimary(address.id)}
-                      className="flex-1 sm:flex-none px-4 py-2 bg-[#A3AF87]/20 text-[#5a6c5b] rounded-xl hover:bg-[#A3AF87]/30 transition-all font-medium text-sm active:scale-95"
+                      className="flex-1 sm:flex-none px-4 py-2 bg-white text-[#435664] rounded-2xl hover:bg-gray-50 transition-all font-medium text-sm active:scale-95 border border-[#435664]/30"
                     >
                       Jadikan Utama
                     </button>
                   )}
                   <button
                     onClick={() => handleEditAddress(address)}
-                    className="flex-1 sm:flex-none px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all font-medium text-sm active:scale-95"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-100 transition-all font-medium text-sm active:scale-95"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteAddress(address.id)}
-                    className="flex-1 sm:flex-none px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-medium text-sm active:scale-95"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-all font-medium text-sm active:scale-95"
                   >
                     Hapus
                   </button>

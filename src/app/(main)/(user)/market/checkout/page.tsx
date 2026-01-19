@@ -12,7 +12,6 @@ import {
   Plus,
   Store,
   Clock,
-  Building2,
   ShoppingBag,
   Bike,
   Minus,
@@ -462,19 +461,17 @@ function CheckoutContent() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
-      }}>
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
             <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">{error}</h2>
+          <h2 className="text-xl font-semibold text-[#303646] mb-2">{error}</h2>
           <button
             onClick={() => router.back()}
-            className="mt-4 px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+            className="mt-4 px-4 py-2 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all font-bold"
           >
             Kembali
           </button>
@@ -486,18 +483,16 @@ function CheckoutContent() {
   // No products state
   if (checkoutProducts.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
-      }}>
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md px-4">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <ShoppingBag className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#fdf8d4] flex items-center justify-center">
+            <ShoppingBag className="w-8 h-8 text-[#435664]" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Keranjang Kosong</h2>
-          <p className="text-gray-600 mb-4">Belum ada produk yang akan di-checkout</p>
+          <h2 className="text-xl font-semibold text-[#303646] mb-2">Keranjang Kosong</h2>
+          <p className="text-[#435664] mb-4">Belum ada produk yang akan di-checkout</p>
           <Link
             href="/market/products"
-            className="inline-block px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+            className="inline-block px-4 py-2 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all font-bold"
           >
             Belanja Sekarang
           </Link>
@@ -508,24 +503,15 @@ function CheckoutContent() {
 
   return (
     <>
-      <div
-        className="min-h-screen"
-        style={{
-          background:
-            "linear-gradient(to bottom right, rgba(163, 175, 135, 0.1), white, rgba(163, 175, 135, 0.05))",
-        }}
-      >
+      <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Back Button - Mobile Only */}
         <button
           onClick={() => router.back()}
-          className="lg:hidden flex items-center gap-2 mb-4 text-[#5a6c5b] hover:text-[#5a6c5b]/80 transition-colors"
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#435664] hover:text-[#303646] transition-colors"
         >
           <div
-            className="p-2 bg-white border-2 rounded-lg transition-colors"
-            style={{
-              borderColor: "rgba(163, 175, 135, 0.2)",
-            }}
+            className="p-2 bg-[#fdf8d4] border-2 border-[#435664]/20 rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </div>
@@ -536,27 +522,26 @@ function CheckoutContent() {
         <div className="mb-6 sm:mb-12">
           <Link
             href="/market/products"
-            className="hidden lg:inline-flex items-center gap-2 text-sm hover:text-[#5a6c5b] transition-colors mb-4 sm:mb-6 group"
-            style={{ color: "rgba(90, 108, 91, 0.7)" }}
+            className="hidden lg:inline-flex items-center gap-2 text-sm text-[#435664] hover:text-[#303646] transition-colors mb-4 sm:mb-6 group"
           >
             <ChevronRight className="h-4 w-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Kembali ke Produk</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
+            <div className="p-2 sm:p-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] rounded-xl shadow-lg">
               <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
                 Checkout
               </h1>
               {checkoutSource === "direct" && (
-                <p className="text-xs sm:text-sm text-[#5a6c5b]/70 mt-1 font-medium">
+                <p className="text-xs sm:text-sm text-[#435664] mt-1 font-medium">
                   Pembelian Langsung
                 </p>
               )}
               {checkoutSource === "cart" && (
-                <p className="text-xs sm:text-sm text-[#5a6c5b]/70 mt-1 font-medium">
+                <p className="text-xs sm:text-sm text-[#435664] mt-1 font-medium">
                   Dari Keranjang ({checkoutProducts.length} produk)
                 </p>
               )}
@@ -574,18 +559,9 @@ function CheckoutContent() {
                   <div
                     className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-sm font-bold transition-all ${
                       currentStep >= step.number
-                        ? "bg-[#A3AF87] text-white shadow-lg"
+                        ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white border-[#a3af87] shadow-lg shadow-[#a3af87]/30"
                         : "border-gray-200 bg-white text-gray-400 shadow-sm"
                     }`}
-                    style={
-                      currentStep >= step.number
-                        ? {
-                            borderColor: "#A3AF87",
-                            boxShadow:
-                              "0 10px 15px -3px rgba(163, 175, 135, 0.2)",
-                          }
-                        : {}
-                    }
                   >
                     {currentStep > step.number ? (
                       <Check className="h-6 w-6" strokeWidth={3} />
@@ -596,7 +572,7 @@ function CheckoutContent() {
                   <span
                     className={`text-xs mt-2.5 font-bold ${
                       currentStep >= step.number
-                        ? "text-[#5a6c5b]"
+                        ? "text-[#303646]"
                         : "text-gray-400"
                     }`}
                   >
@@ -608,7 +584,7 @@ function CheckoutContent() {
                     <div
                       className={`h-full transition-all rounded-full ${
                         currentStep > step.number
-                          ? "bg-[#A3AF87] shadow-sm"
+                          ? "bg-[#a3af87] shadow-sm"
                           : "bg-gray-200"
                       }`}
                     ></div>
@@ -625,31 +601,18 @@ function CheckoutContent() {
                 key={step.number}
                 className={`flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all ${
                   currentStep === step.number
-                    ? "bg-[#A3AF87] shadow-lg"
+                    ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] border-[#a3af87] shadow-lg shadow-[#a3af87]/30"
                     : currentStep > step.number
-                    ? "bg-white"
+                    ? "bg-[#fdf8d4] border-[#a3af87]/30"
                     : "border-gray-200 bg-white"
                 }`}
-                style={
-                  currentStep === step.number
-                    ? {
-                        borderColor: "#A3AF87",
-                        boxShadow: "0 10px 15px -3px rgba(163, 175, 135, 0.2)",
-                      }
-                    : currentStep > step.number
-                    ? {
-                        borderColor: "rgba(163, 175, 135, 0.3)",
-                        background: "rgba(163, 175, 135, 0.1)",
-                      }
-                    : {}
-                }
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                     currentStep === step.number
-                      ? "bg-white text-[#5a6c5b]"
+                      ? "bg-white text-[#435664]"
                       : currentStep > step.number
-                      ? "bg-[#A3AF87] text-white"
+                      ? "bg-[#a3af87] text-white"
                       : "bg-gray-100 text-gray-400"
                   }`}
                 >
@@ -664,7 +627,7 @@ function CheckoutContent() {
                     currentStep === step.number
                       ? "text-white"
                       : currentStep > step.number
-                      ? "text-[#5a6c5b]"
+                      ? "text-[#435664]"
                       : "text-gray-400"
                   }`}
                 >

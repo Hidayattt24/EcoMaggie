@@ -110,26 +110,26 @@ function transformDbOrderToTransaction(dbOrder: DbOrder): Transaction {
 // ============================================
 function TransactionSkeleton() {
   return (
-    <div className="bg-white border border-[#A3AF87]/20 rounded-2xl overflow-hidden animate-pulse shadow-sm">
-      <div className="p-4 border-b border-[#A3AF87]/10">
+    <div className="bg-[#fdf8d4] border border-[#435664]/20 rounded-2xl overflow-hidden animate-pulse shadow-sm">
+      <div className="p-4 border-b border-[#435664]/10">
         <div className="flex items-center justify-between mb-2">
-          <div className="h-4 bg-[#A3AF87]/20 rounded w-32" />
-          <div className="h-6 bg-[#A3AF87]/20 rounded w-24" />
+          <div className="h-4 bg-white/60 rounded w-32" />
+          <div className="h-6 bg-white/60 rounded w-24" />
         </div>
-        <div className="h-3 bg-[#A3AF87]/10 rounded w-24" />
+        <div className="h-3 bg-white/40 rounded w-24" />
       </div>
       <div className="p-4">
         <div className="flex gap-3">
-          <div className="w-20 h-20 bg-[#A3AF87]/10 rounded-xl" />
+          <div className="w-20 h-20 bg-white rounded-xl" />
           <div className="flex-1">
-            <div className="h-4 bg-[#A3AF87]/20 rounded w-3/4 mb-2" />
-            <div className="h-3 bg-[#A3AF87]/10 rounded w-1/2 mb-1" />
-            <div className="h-3 bg-[#A3AF87]/10 rounded w-1/4" />
+            <div className="h-4 bg-white/60 rounded w-3/4 mb-2" />
+            <div className="h-3 bg-white/40 rounded w-1/2 mb-1" />
+            <div className="h-3 bg-white/40 rounded w-1/4" />
           </div>
         </div>
       </div>
-      <div className="p-4 border-t border-[#A3AF87]/10">
-        <div className="h-10 bg-[#A3AF87]/10 rounded-xl" />
+      <div className="p-4 border-t border-[#435664]/10">
+        <div className="h-10 bg-white/40 rounded-xl" />
       </div>
     </div>
   );
@@ -209,17 +209,17 @@ export default function TransactionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 pb-20 lg:pb-6">
+    <div className="min-h-screen bg-white pb-20 lg:pb-6">
       {/* Header */}
-      <div className="bg-white border-b border-[#A3AF87]/20 shadow-sm">
+      <div className="bg-white border-b border-[#435664]/20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5 sm:mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2.5 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg shadow-[#A3AF87]/20">
+              <div className="p-2.5 sm:p-3 bg-gradient-to-br from-[#435664] to-[#303646] rounded-xl shadow-lg shadow-[#435664]/20">
                 <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#5a6c5b]">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#303646]">
                   Transaksi Saya
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
@@ -230,7 +230,7 @@ export default function TransactionPage() {
             <button
               onClick={handleRefresh}
               disabled={isLoading}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 hover:bg-[#A3AF87]/20 text-[#5a6c5b] text-sm font-medium rounded-xl transition-all disabled:opacity-50"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#435664]/10 hover:bg-[#435664]/20 text-[#435664] text-sm font-medium rounded-xl transition-all disabled:opacity-50"
             >
               <RefreshCw
                 className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
@@ -247,7 +247,7 @@ export default function TransactionPage() {
               placeholder="Cari ID pesanan, nama toko, atau produk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-12 py-3.5 border border-[#A3AF87]/30 rounded-xl text-sm text-[#5a6c5b] placeholder:text-gray-400 font-medium focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all bg-[#A3AF87]/5"
+              className="w-full pl-12 pr-12 py-3.5 border border-[#435664]/30 rounded-xl text-sm text-[#303646] placeholder:text-gray-400 font-medium focus:outline-none focus:border-[#435664] focus:ring-2 focus:ring-[#435664]/20 transition-all bg-white"
             />
             {searchQuery && (
               <button
@@ -288,7 +288,7 @@ export default function TransactionPage() {
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-500">
               Menampilkan{" "}
-              <span className="font-semibold text-[#5a6c5b]">
+              <span className="font-semibold text-[#303646]">
                 {filteredTransactions.length}
               </span>{" "}
               transaksi
@@ -317,10 +317,10 @@ export default function TransactionPage() {
               exit={{ opacity: 0, y: -20 }}
               className="flex flex-col items-center justify-center py-16 sm:py-24"
             >
-              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-2 border-[#A3AF87]/20">
-                <ShoppingBag className="h-14 w-14 sm:h-18 sm:w-18 text-[#A3AF87]/40" />
+              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-[#fdf8d4] rounded-full flex items-center justify-center mb-6 sm:mb-8 border-2 border-[#435664]/20">
+                <ShoppingBag className="h-14 w-14 sm:h-18 sm:w-18 text-[#435664]" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b] mb-2 sm:mb-3 text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#303646] mb-2 sm:mb-3 text-center">
                 {searchQuery
                   ? "Transaksi Tidak Ditemukan"
                   : "Belum Ada Transaksi"}
@@ -333,14 +333,14 @@ export default function TransactionPage() {
               {searchQuery ? (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="px-6 py-3 bg-[#A3AF87] text-white text-sm font-bold rounded-xl hover:bg-[#95a17a] transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white text-sm font-bold rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
                 >
                   Hapus Pencarian
                 </button>
               ) : (
                 <a
                   href="/market"
-                  className="px-6 py-3 bg-[#A3AF87] text-white text-sm font-bold rounded-xl hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white text-sm font-bold rounded-2xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
                 >
                   Mulai Belanja
                 </a>

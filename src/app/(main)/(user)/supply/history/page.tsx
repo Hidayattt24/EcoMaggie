@@ -521,44 +521,44 @@ export default function SupplyHistoryPage() {
                   setIsSelectionMode(!isSelectionMode);
                   setSelectedSupplies(new Set());
                 }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+                className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg ${
                   isSelectionMode
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : "bg-white border-2 border-gray-200 text-gray-700 hover:border-red-300 hover:bg-red-50"
+                    ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+                    : "bg-white border-2 border-red-200 text-red-600 hover:border-red-400 hover:bg-red-50"
                 }`}
               >
                 {isSelectionMode ? (
                   <>
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                     Batal
                   </>
                 ) : (
                   <>
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-5 w-5" />
                     Hapus Riwayat
                   </>
                 )}
               </button>
             )}
 
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/20">
-              <div className="p-1.5 bg-[#A3AF87]/20 rounded-lg">
-                <Recycle className="h-4 w-4 text-[#A3AF87]" />
+            <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-2xl border-2 border-[#435664] shadow-sm">
+              <div className="p-2 bg-[#435664]/20 rounded-xl">
+                <Recycle className="h-5 w-5 text-[#435664]" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Total Sampah</p>
-                <p className="text-sm font-bold text-[#5a6c5b]">
+                <p className="text-xs text-gray-500 font-medium">Total Sampah</p>
+                <p className="text-base font-bold text-[#435664]">
                   ~{totalWeight.toFixed(1)} kg
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-green-50 to-green-50/50 rounded-xl border border-green-200">
-              <div className="p-1.5 bg-green-100 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+            <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-green-50 to-green-50/50 rounded-2xl border-2 border-green-200 shadow-sm">
+              <div className="p-2 bg-green-100 rounded-xl">
+                <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Selesai</p>
-                <p className="text-sm font-bold text-green-700">
+                <p className="text-xs text-gray-500 font-medium">Selesai</p>
+                <p className="text-base font-bold text-green-700">
                   {completedCount} Supply
                 </p>
               </div>
@@ -592,15 +592,15 @@ export default function SupplyHistoryPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedSupplies(new Set())}
-                    className="px-4 py-2 bg-white/20 text-white rounded-xl font-semibold text-sm hover:bg-white/30 transition-colors"
+                    className="px-5 py-3 bg-white/20 text-white rounded-2xl font-bold text-sm hover:bg-white/30 transition-colors shadow-lg"
                   >
                     Batal Pilih
                   </button>
                   <button
                     onClick={handleDeleteClick}
-                    className="px-4 py-2 bg-white text-red-600 rounded-xl font-semibold text-sm hover:bg-gray-100 transition-colors flex items-center gap-2"
+                    className="px-5 py-3 bg-white text-red-600 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-5 w-5" />
                     Hapus ({selectedSupplies.size})
                   </button>
                 </div>
@@ -629,7 +629,7 @@ export default function SupplyHistoryPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari jenis sampah atau nomor supply..."
-                  className="w-full pl-12 pr-4 py-3.5 bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#A3AF87] focus:ring-4 focus:ring-[#A3AF87]/10 transition-all text-sm text-gray-900 placeholder:text-gray-400"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#435664] focus:ring-4 focus:ring-[#435664]/10 transition-all text-sm text-gray-900 placeholder:text-gray-400"
                 />
                 {searchQuery && (
                   <button
@@ -678,8 +678,8 @@ export default function SupplyHistoryPage() {
                       onClick={() => setActiveTab(tab.key as typeof activeTab)}
                       className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 border-2 ${
                         activeTab === tab.key
-                          ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] text-white border-[#A3AF87] shadow-lg shadow-[#A3AF87]/20"
-                          : "bg-white text-gray-600 border-gray-200 hover:border-[#A3AF87]/30 hover:bg-gray-50"
+                          ? "bg-gradient-to-br from-[#435664] to-[#303646] text-white border-[#435664] shadow-lg shadow-[#435664]/20"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-[#435664]/30 hover:bg-gray-50"
                       }`}
                     >
                       <TabIcon className={`h-4 w-4 ${activeTab === tab.key ? "text-white" : "text-gray-400"}`} />
@@ -722,9 +722,9 @@ export default function SupplyHistoryPage() {
                     {supplyHistory.length === 0 && (
                       <Link
                         href="/supply/input"
-                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#95a17a] transition-colors"
+                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold hover:from-[#8a9670] hover:to-[#7a8660] transition-all shadow-xl hover:shadow-2xl transform hover:scale-105"
                       >
-                        <Sparkles className="h-4 w-4" />
+                        <Sparkles className="h-5 w-5" />
                         Buat Supply Pertama
                       </Link>
                     )}
@@ -747,8 +747,8 @@ export default function SupplyHistoryPage() {
                         exit={{ opacity: 0, y: -10 }}
                         className={`relative w-full bg-white rounded-2xl p-4 border-2 transition-all group ${
                           isSelected
-                            ? "border-[#A3AF87] shadow-lg shadow-[#A3AF87]/10 bg-gradient-to-br from-[#A3AF87]/5 to-white"
-                            : "border-gray-100 hover:border-[#A3AF87]/30 hover:shadow-md"
+                            ? "border-[#435664] shadow-lg shadow-[#435664]/10 bg-gradient-to-br from-[#fdf8d4] to-white"
+                            : "border-gray-100 hover:border-[#435664]/30 hover:shadow-md"
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -779,7 +779,7 @@ export default function SupplyHistoryPage() {
                               {/* Icon with gradient background */}
                               <div className={`relative p-3 rounded-xl transition-all ${
                                 isSelected 
-                                  ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-lg shadow-[#A3AF87]/20" 
+                                  ? "bg-gradient-to-br from-[#435664] to-[#303646] shadow-lg shadow-[#435664]/20" 
                                   : `${status.iconBg} group-hover:scale-105`
                               }`}>
                                 <Recycle
@@ -800,7 +800,7 @@ export default function SupplyHistoryPage() {
                                     <h3
                                       className={`font-bold text-base truncate mb-0.5 ${
                                         isSelected
-                                          ? "text-[#A3AF87]"
+                                          ? "text-[#435664]"
                                           : "text-gray-900"
                                       }`}
                                     >
@@ -812,7 +812,7 @@ export default function SupplyHistoryPage() {
                                   </div>
                                   <ChevronRight className={`h-5 w-5 flex-shrink-0 transition-all ${
                                     isSelected 
-                                      ? "text-[#A3AF87] translate-x-1" 
+                                      ? "text-[#435664] translate-x-1" 
                                       : "text-gray-300 group-hover:text-gray-400"
                                   }`} />
                                 </div>
@@ -872,13 +872,13 @@ export default function SupplyHistoryPage() {
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
                 >
                   {/* Detail Header */}
-                  <div className="bg-gradient-to-br from-[#A3AF87] to-[#95a17a] p-6 text-white">
+                  <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] p-6 border-b-2 border-[#435664]">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <p className="text-white/70 text-sm mb-1">
+                        <p className="text-[#435664]/70 text-sm mb-1">
                           {selectedItem.supplyNumber}
                         </p>
-                        <h2 className="text-2xl font-bold">
+                        <h2 className="text-2xl font-bold text-[#303646]">
                           {selectedItem.type}
                         </h2>
                       </div>
@@ -898,16 +898,16 @@ export default function SupplyHistoryPage() {
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <p className="text-white/70 text-xs mb-1">Berat</p>
-                        <p className="font-bold text-lg">
+                        <p className="text-[#435664]/70 text-xs mb-1">Berat</p>
+                        <p className="font-bold text-lg text-[#303646]">
                           {weightLabels[selectedItem.weight.toString()] || `${selectedItem.weight} kg`}
                         </p>
                       </div>
                       <div>
-                        <p className="text-white/70 text-xs mb-1">
+                        <p className="text-[#435664]/70 text-xs mb-1">
                           Tanggal Input
                         </p>
-                        <p className="font-semibold">
+                        <p className="font-semibold text-[#303646]">
                           {new Date(selectedItem.date).toLocaleDateString(
                             "id-ID",
                             {
@@ -919,8 +919,8 @@ export default function SupplyHistoryPage() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-white/70 text-xs mb-1">Pickup</p>
-                        <p className="font-semibold">
+                        <p className="text-[#435664]/70 text-xs mb-1">Pickup</p>
+                        <p className="font-semibold text-[#303646]">
                           {selectedItem.pickupDate
                             ? new Date(
                                 selectedItem.pickupDate
@@ -938,8 +938,8 @@ export default function SupplyHistoryPage() {
                   <div className="p-6 space-y-6">
                     {/* Address */}
                     <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-                      <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-                        <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                      <div className="p-2 bg-[#435664]/10 rounded-lg">
+                        <MapPin className="h-5 w-5 text-[#435664]" />
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">
@@ -960,7 +960,7 @@ export default function SupplyHistoryPage() {
                     {selectedItem.latitude && selectedItem.longitude && (
                       <div className="border border-gray-100 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-[#A3AF87]" />
+                          <MapPin className="h-4 w-4 text-[#435664]" />
                           Lokasi Penjemputan
                         </h3>
                         <MapViewer
@@ -976,7 +976,7 @@ export default function SupplyHistoryPage() {
                     {selectedItem.photo && (
                       <div className="border border-gray-100 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <ImageIcon className="h-4 w-4 text-[#A3AF87]" />
+                          <ImageIcon className="h-4 w-4 text-[#435664]" />
                           Foto/Video Sampah
                         </h3>
                         <div className="relative w-full">
@@ -1005,7 +1005,7 @@ export default function SupplyHistoryPage() {
                     {/* Courier Info */}
                     <div className="border border-gray-100 rounded-xl p-4">
                       <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-[#A3AF87]" />
+                        <Truck className="h-4 w-4 text-[#435664]" />
                         Informasi Kurir
                       </h3>
                       
@@ -1028,7 +1028,7 @@ export default function SupplyHistoryPage() {
                             <div className="flex items-center gap-2">
                               <a
                                 href={`tel:${selectedItem.courier.phone}`}
-                                className="p-2.5 bg-[#A3AF87]/10 text-[#A3AF87] rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
+                                className="p-2.5 bg-[#435664]/10 text-[#435664] rounded-xl hover:bg-[#435664]/20 transition-colors"
                               >
                                 <Phone className="h-5 w-5" />
                               </a>
@@ -1077,7 +1077,7 @@ export default function SupplyHistoryPage() {
                     {selectedItem.farmer && (
                       <div className="border border-gray-100 rounded-xl p-4">
                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <TreePine className="h-4 w-4 text-[#A3AF87]" />
+                          <TreePine className="h-4 w-4 text-[#435664]" />
                           Disalurkan ke Peternak
                         </h3>
                         <div className="flex items-center gap-3">
@@ -1099,7 +1099,7 @@ export default function SupplyHistoryPage() {
                     {/* Timeline / Status */}
                     <div className="border border-gray-100 rounded-xl p-4">
                       <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <History className="h-4 w-4 text-[#A3AF87]" />
+                        <History className="h-4 w-4 text-[#435664]" />
                         Status Tracking
                       </h3>
                       <div className="space-y-4">
@@ -1145,7 +1145,7 @@ export default function SupplyHistoryPage() {
                               <div
                                 className={`w-3 h-3 rounded-full mt-1.5 ${
                                   step.completed
-                                    ? "bg-[#A3AF87]"
+                                    ? "bg-[#435664]"
                                     : "bg-gray-200"
                                 }`}
                               />
@@ -1153,7 +1153,7 @@ export default function SupplyHistoryPage() {
                                 <div
                                   className={`absolute top-4 left-1/2 -translate-x-1/2 w-0.5 h-8 ${
                                     step.completed
-                                      ? "bg-[#A3AF87]/30"
+                                      ? "bg-[#435664]/30"
                                       : "bg-gray-100"
                                   }`}
                                 />
@@ -1191,13 +1191,13 @@ export default function SupplyHistoryPage() {
                     <div className="flex gap-3">
                       <Link
                         href={`/supply/${selectedItem.id}`}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#95a17a] transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-[#A3AF87] to-[#8a9670] text-white rounded-2xl font-bold hover:from-[#8a9670] hover:to-[#7a8660] transition-all shadow-lg"
                       >
-                        <FileText className="h-4 w-4" />
+                        <FileText className="h-5 w-5" />
                         Lihat Detail Lengkap
                       </Link>
                       {selectedItem.status === "waiting" && (
-                        <button className="px-4 py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-colors">
+                        <button className="px-5 py-4 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-colors border-2 border-red-200">
                           <X className="h-5 w-5" />
                         </button>
                       )}

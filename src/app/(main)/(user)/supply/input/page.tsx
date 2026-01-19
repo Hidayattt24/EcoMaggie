@@ -718,12 +718,12 @@ export default function SupplyInputPage() {
           <div className="flex gap-2 mb-8 max-w-xl">
             <div
               className={`flex-1 h-2 rounded-full transition-colors ${
-                step >= 1 ? "bg-[#A3AF87]" : "bg-gray-200"
+                step >= 1 ? "bg-[#435664]" : "bg-gray-200"
               }`}
             />
             <div
               className={`flex-1 h-2 rounded-full transition-colors ${
-                step >= 2 ? "bg-[#A3AF87]" : "bg-gray-200"
+                step >= 2 ? "bg-[#435664]" : "bg-gray-200"
               }`}
             />
           </div>
@@ -770,7 +770,7 @@ export default function SupplyInputPage() {
                                 }
                                 className={`p-4 lg:p-5 rounded-2xl border-2 text-left transition-all ${
                                   isSelected
-                                    ? "border-[#A3AF87] bg-[#A3AF87]/5 shadow-md"
+                                    ? "border-[#435664] bg-[#435664]/5 shadow-md"
                                     : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm`
                                 }`}
                               >
@@ -782,7 +782,7 @@ export default function SupplyInputPage() {
                                 <p
                                   className={`font-semibold text-sm lg:text-base ${
                                     isSelected
-                                      ? "text-[#A3AF87]"
+                                      ? "text-[#435664]"
                                       : "text-gray-900"
                                   }`}
                                 >
@@ -818,7 +818,7 @@ export default function SupplyInputPage() {
                                 }
                                 className={`p-4 rounded-xl text-center transition-all ${
                                   isSelected
-                                    ? "bg-[#A3AF87] text-white shadow-lg"
+                                    ? "bg-[#435664] text-white shadow-lg"
                                     : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                                 }`}
                               >
@@ -859,7 +859,7 @@ export default function SupplyInputPage() {
                         disabled={!canProceedStep1}
                         className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                           canProceedStep1
-                            ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
+                            ? "bg-gradient-to-r from-[#435664] to-[#303646] text-white shadow-lg hover:shadow-xl"
                             : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
                       >
@@ -891,9 +891,9 @@ export default function SupplyInputPage() {
                         </div>
 
                         {/* Step 1: Address Selection */}
-                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-gray-200">
+                        <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#435664]">
                           <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#435664] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                               1
                             </div>
                             <h4 className="font-bold text-gray-900 text-sm sm:text-base">Pilih Alamat</h4>
@@ -991,10 +991,10 @@ export default function SupplyInputPage() {
                         </div>
 
                         {/* Step 2: Pin Location (Recommended) */}
-                        <div className="bg-gradient-to-br from-[#A3AF87]/5 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#A3AF87]/30">
+                        <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#435664]">
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4">
                             <div className="flex items-center gap-2 sm:gap-3">
-                              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#435664] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                                 2
                               </div>
                               <div>
@@ -1041,11 +1041,11 @@ export default function SupplyInputPage() {
                             <button
                               type="button"
                               onClick={() => setShowDatePicker(!showDatePicker)}
-                              className="w-full px-5 py-4 bg-gradient-to-r from-[#A3AF87]/5 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-2xl text-left hover:border-[#A3AF87] transition-all group"
+                              className="w-full px-5 py-4 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-2xl text-left hover:shadow-md transition-all group"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="p-2 bg-[#A3AF87]/20 rounded-xl group-hover:bg-[#A3AF87]/30 transition-colors">
-                                  <Calendar className="h-5 w-5 text-[#A3AF87]" />
+                                <div className="p-2 bg-[#435664]/20 rounded-xl group-hover:bg-[#435664]/30 transition-colors">
+                                  <Calendar className="h-5 w-5 text-[#435664]" />
                                 </div>
                                 <div className="flex-1">
                                   <p className="text-sm text-gray-600 font-medium">
@@ -1056,7 +1056,7 @@ export default function SupplyInputPage() {
                                   </p>
                                 </div>
                                 <ChevronRight
-                                  className={`h-5 w-5 text-[#A3AF87] transition-transform ${
+                                  className={`h-5 w-5 text-[#435664] transition-transform ${
                                     showDatePicker ? "rotate-90" : ""
                                   }`}
                                 />
@@ -1069,7 +1069,7 @@ export default function SupplyInputPage() {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="absolute z-50 mt-2 w-full bg-white border-2 border-[#A3AF87]/30 rounded-2xl shadow-2xl p-5"
+                                className="absolute z-50 mt-2 w-full bg-white border-2 border-[#435664] rounded-2xl shadow-2xl p-5"
                               >
                                 {/* Month Navigator */}
                                 <div className="flex items-center justify-between mb-4">
@@ -1083,9 +1083,9 @@ export default function SupplyInputPage() {
                                         ),
                                       )
                                     }
-                                    className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-[#fdf8d4] rounded-lg transition-colors"
                                   >
-                                    <ChevronLeft className="h-5 w-5 text-[#A3AF87]" />
+                                    <ChevronLeft className="h-5 w-5 text-[#435664]" />
                                   </button>
                                   <p className="font-bold text-gray-900">
                                     {currentMonth.toLocaleDateString("id-ID", {
@@ -1103,9 +1103,9 @@ export default function SupplyInputPage() {
                                         ),
                                       )
                                     }
-                                    className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-[#fdf8d4] rounded-lg transition-colors"
                                   >
-                                    <ChevronRight className="h-5 w-5 text-[#A3AF87]" />
+                                    <ChevronRight className="h-5 w-5 text-[#435664]" />
                                   </button>
                                 </div>
 
@@ -1196,7 +1196,7 @@ export default function SupplyInputPage() {
                                     setCurrentMonth(today);
                                     handleDateSelect(today.getDate());
                                   }}
-                                  className="w-full mt-4 py-2.5 bg-[#A3AF87]/10 text-[#A3AF87] font-semibold rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
+                                  className="w-full mt-4 py-2.5 bg-[#435664] text-white font-semibold rounded-xl hover:bg-[#303646] transition-colors"
                                 >
                                   Hari Ini
                                 </button>
@@ -1228,15 +1228,15 @@ export default function SupplyInputPage() {
                                   }
                                   className={`p-4 rounded-2xl transition-all group ${
                                     isSelected
-                                      ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-xl border-2 border-[#A3AF87]"
-                                      : "bg-white border-2 border-gray-200 hover:border-[#A3AF87]/50 hover:shadow-lg"
+                                      ? "bg-gradient-to-br from-[#303646] to-[#435664] shadow-xl border-2 border-[#303646]"
+                                      : "bg-white border-2 border-gray-200 hover:border-[#435664] hover:shadow-lg"
                                   }`}
                                 >
                                   <div
                                     className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center transition-all ${
                                       isSelected
                                         ? "bg-white/20"
-                                        : "bg-gray-50 group-hover:bg-[#A3AF87]/10"
+                                        : "bg-gray-50 group-hover:bg-[#fdf8d4]"
                                     }`}
                                   >
                                     <IconComponent
@@ -1285,7 +1285,7 @@ export default function SupplyInputPage() {
                           }
                           placeholder="Contoh: Sampah di depan pagar, warna kantong hitam..."
                           rows={3}
-                          className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all resize-none text-gray-900"
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#a3af87] focus:ring-2 focus:ring-[#a3af87]/20 transition-all resize-none text-gray-900"
                         />
                       </div>
 
@@ -1301,7 +1301,7 @@ export default function SupplyInputPage() {
                         disabled={!canProceedStep2 || isSubmitting}
                         className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                           canProceedStep2 && !isSubmitting
-                            ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
+                            ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white shadow-lg hover:shadow-xl"
                             : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
                       >

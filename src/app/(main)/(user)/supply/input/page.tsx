@@ -57,36 +57,44 @@ const LocationPicker = dynamic(() => import("@/components/supply/LocationPicker"
 
 const wasteTypes = [
   {
-    id: "sisa_makanan",
-    name: "Sisa Makanan",
-    icon: Apple,
-    desc: "Nasi, lauk, roti, kue",
-    color: "bg-orange-100 text-orange-600",
-    borderColor: "border-orange-200",
-  },
-  {
     id: "sayuran_buah",
     name: "Sayuran & Buah",
     icon: Carrot,
-    desc: "Kulit, potongan, busuk",
+    desc: "Sisa sayur, kulit buah",
     color: "bg-green-100 text-green-600",
     borderColor: "border-green-200",
   },
   {
-    id: "sisa_dapur",
-    name: "Sisa Dapur",
-    icon: Fish,
-    desc: "Tulang, cangkang, kulit telur",
-    color: "bg-blue-100 text-blue-600",
-    borderColor: "border-blue-200",
+    id: "nasi_mie_karbohidrat",
+    name: "Nasi, Mie & Karbohidrat",
+    icon: Apple,
+    desc: "Nasi, mie, pasta, roti",
+    color: "bg-amber-100 text-amber-600",
+    borderColor: "border-amber-200",
   },
   {
-    id: "campuran",
-    name: "Campuran Organik",
+    id: "roti_kue",
+    name: "Roti & Kue",
+    icon: Recycle,
+    desc: "Roti, kue, bakery",
+    color: "bg-pink-100 text-pink-600",
+    borderColor: "border-pink-200",
+  },
+  {
+    id: "ampas_tahu_tempe",
+    name: "Ampas Tahu & Tempe",
+    icon: Leaf,
+    desc: "Ampas dari olahan kedelai",
+    color: "bg-yellow-100 text-yellow-700",
+    borderColor: "border-yellow-200",
+  },
+  {
+    id: "bahan_nabati_lain",
+    name: "Bahan Nabati Lainnya",
     icon: Trash2,
-    desc: "Berbagai jenis organik",
-    color: "bg-purple-100 text-purple-600",
-    borderColor: "border-purple-200",
+    desc: "Sisa bahan dapur nabati",
+    color: "bg-emerald-100 text-emerald-600",
+    borderColor: "border-emerald-200",
   },
 ];
 
@@ -504,10 +512,11 @@ export default function SupplyInputPage() {
   if (isSuccess && successData) {
     // Map waste type to display name
     const wasteTypeNames: Record<string, string> = {
-      sisa_makanan: "Sisa Makanan",
       sayuran_buah: "Sayuran & Buah",
-      sisa_dapur: "Sisa Dapur",
-      campuran: "Campuran Organik",
+      nasi_mie_karbohidrat: "Nasi, Mie & Karbohidrat",
+      roti_kue: "Roti & Kue",
+      ampas_tahu_tempe: "Ampas Tahu & Tempe",
+      bahan_nabati_lain: "Bahan Nabati Lainnya",
     };
 
     // Map weight to display label
@@ -742,9 +751,9 @@ export default function SupplyInputPage() {
                       {/* Waste Type */}
                       <div>
                         <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Jenis Sampah Organik
+                          Jenis Sampah Organik Nabati
                         </label>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 lg:gap-4">
                           {wasteTypes.map((type) => {
                             const Icon = type.icon;
                             const isSelected = formData.wasteType === type.id;

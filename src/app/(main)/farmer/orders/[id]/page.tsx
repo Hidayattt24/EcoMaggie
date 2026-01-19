@@ -222,13 +222,118 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
     setIsUpdating(false);
   };
 
-  // Loading state
+  // Loading state with skeleton
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-600">Memuat data pesanan...</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Header Skeleton */}
+          <div className="mb-8 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-40 mb-4"></div>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-36"></div>
+              </div>
+              <div className="h-10 bg-gray-200 rounded-xl w-32"></div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-4 lg:gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-4 space-y-4 lg:space-y-6">
+              {/* Customer Card Skeleton */}
+              <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-32 mb-4"></div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-40"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-32"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-full"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4 mt-1"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary Skeleton */}
+              <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-40 mb-4"></div>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-300 rounded w-20 mb-2"></div>
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex justify-between">
+                        <div className="h-4 bg-gray-300 rounded w-32"></div>
+                        <div className="h-4 bg-gray-300 rounded w-24"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-3 border-t border-gray-300">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex justify-between mb-2">
+                        <div className="h-4 bg-gray-300 rounded w-24"></div>
+                        <div className="h-4 bg-gray-300 rounded w-20"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-3 border-t-2 border-gray-400">
+                    <div className="flex justify-between items-center">
+                      <div className="h-5 bg-gray-300 rounded w-16"></div>
+                      <div className="h-6 bg-gray-300 rounded w-28"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Method Skeleton */}
+              <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-36 mb-3"></div>
+                <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-300">
+                  <div className="w-10 h-10 bg-gray-300 rounded-lg"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-300 rounded w-24 mb-1"></div>
+                    <div className="h-3 bg-gray-300 rounded w-32"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="lg:col-span-8 space-y-4 lg:space-y-6">
+              {/* Action Form Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-40 mb-4"></div>
+                <div className="space-y-6">
+                  <div className="p-5 bg-gray-50 rounded-2xl">
+                    <div className="h-4 bg-gray-200 rounded w-48 mb-3"></div>
+                    <div className="h-12 bg-gray-200 rounded-xl w-full"></div>
+                  </div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                    <div className="h-12 bg-gray-200 rounded-xl w-full"></div>
+                  </div>
+                  <div className="h-14 bg-gray-200 rounded-xl w-full"></div>
+                </div>
+              </div>
+
+              {/* Internal Notes Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-36 mb-4"></div>
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+                  <div className="h-24 bg-gray-200 rounded-xl w-full mb-4"></div>
+                  <div className="h-12 bg-gray-200 rounded-xl w-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

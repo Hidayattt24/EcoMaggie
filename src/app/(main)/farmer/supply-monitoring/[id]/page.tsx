@@ -149,13 +149,96 @@ export default function SupplyMonitoringDetailPage({
     fetchSupply();
   }, [id]);
 
-  // Loading state
+  // Loading state with skeleton
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-600">Memuat detail supply...</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Header Skeleton */}
+          <div className="mb-8 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-40"></div>
+              </div>
+              <div className="h-10 bg-gray-200 rounded-xl w-32"></div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Supplier Info Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-40 mb-4"></div>
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gray-200"></div>
+                  <div className="flex-1">
+                    <div className="h-6 bg-gray-200 rounded w-32 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-28 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Waste Details Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-32 mb-4"></div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-5 bg-gray-200 rounded w-32"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-5 bg-gray-200 rounded w-20"></div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+                  <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                </div>
+              </div>
+
+              {/* Location Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-40 mb-4"></div>
+                <div className="p-5 bg-gray-50 rounded-xl mb-4">
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-5 bg-gray-200 rounded w-32"></div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-5 bg-gray-200 rounded w-28"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-40 mb-6"></div>
+                <div className="space-y-6">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-200"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-24"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

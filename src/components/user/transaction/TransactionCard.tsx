@@ -46,6 +46,8 @@ interface Transaction {
   shippingCourier?: string;
   date: string;
   trackingNumber?: string;
+  paymentExpiry?: string; // ISO date string
+  hasReviewed?: boolean; // Whether user has reviewed this order
 }
 
 interface TransactionCardProps {
@@ -264,10 +266,31 @@ export function TransactionCard({
   const getActionButtons = () => {
     switch (transaction.status) {
       case "unpaid":
+        // Check if payment has expired
+        const isExpired = transaction.paymentExpiry 
+          ? new Date(transaction.paymentExpiry) < new Date()
+          : false;
+
+        if (isExpired) {
+          return (
+            <div className="flex-1 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
+              <div className="flex items-center gap-2 justify-center">
+                <Clock className="h-4 w-4 text-red-500" />
+                <span className="text-sm font-bold text-red-600">
+                  Batas Waktu Pembayaran Habis
+                </span>
+              </div>
+              <p className="text-xs text-red-500 text-center mt-1">
+                Pesanan akan dibatalkan otomatis
+              </p>
+            </div>
+          );
+        }
+
         return (
           <>
             <Link
-              href={`/market/checkout?orderId=${transaction.orderId}`}
+              href={`/market/orders/${transaction.orderId}`}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all text-center"
             >
               Bayar Sekarang
@@ -315,6 +338,27 @@ export function TransactionCard({
           </button>
         );
       case "completed":
+        // Check if user has already reviewed
+        if (transaction.hasReviewed) {
+          return (
+            <>
+              <div className="flex-1 px-4 py-2.5 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-bold text-green-600">
+                  Sudah Dinilai
+                </span>
+              </div>
+              <Link
+                href={`/transaction/${transaction.orderId}`}
+                className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Detail
+              </Link>
+            </>
+          );
+        }
+
         return (
           <>
             <Link

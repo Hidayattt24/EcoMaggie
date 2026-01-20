@@ -43,6 +43,8 @@ interface Transaction {
   shippingCourier: string;
   date: string;
   trackingNumber?: string;
+  paymentExpiry?: string; // ISO date string for unpaid orders
+  hasReviewed?: boolean; // Whether user has reviewed this order
 }
 
 // ============================================
@@ -85,6 +87,18 @@ function transformDbOrderToTransaction(dbOrder: DbOrder): Transaction {
 
   const totalItems = products.reduce((sum, p) => sum + p.quantity, 0);
 
+  // Calculate payment expiry (24 hours from creation for unpaid orders)
+  let paymentExpiry: string | undefined;
+  if (dbOrder.status === "pending") {
+    const expiryDate = new Date(dbOrder.created_at);
+    expiryDate.setHours(expiryDate.getHours() + 24);
+    paymentExpiry = expiryDate.toISOString();
+  }
+
+  // Check if user has reviewed (check if any item has a review from this user)
+  // TODO: Implement review checking when review system is integrated with orders
+  const hasReviewed = false;
+
   return {
     id: dbOrder.id,
     orderId: dbOrder.order_id,
@@ -102,6 +116,8 @@ function transformDbOrderToTransaction(dbOrder: DbOrder): Transaction {
       year: "numeric",
     }),
     trackingNumber: dbOrder.shipping_tracking_number || undefined,
+    paymentExpiry,
+    hasReviewed,
   };
 }
 

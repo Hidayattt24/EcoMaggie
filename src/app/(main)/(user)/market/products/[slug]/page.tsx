@@ -465,34 +465,63 @@ export default function ProductDetailPage({ params }: PageProps) {
 
           {/* Main Content - Compact Layout */}
           <div className="grid lg:grid-cols-5 gap-4 mb-4">
-            {/* Left: Images - Smaller */}
+            {/* Left: Images - Modern Design */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-4 border-2 border-[#435664]/10">
                 {/* Main Image */}
-                <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-50">
+                <div className="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-gradient-to-br from-gray-100 to-gray-50 shadow-inner border-2 border-[#435664]/5 group">
                   <img
                     src={productImages[selectedImage]}
                     alt={product.name}
-                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                    className="w-full h-full object-cover cursor-zoom-in hover:scale-110 transition-transform duration-500 ease-out"
                     onClick={() =>
                       setPreviewImage(productImages[selectedImage])
                     }
                   />
+                  {/* Gradient Overlay on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+                  {/* Zoom Icon Hint */}
+                  <div className="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none shadow-lg">
+                    <svg
+                      className="w-4 h-4 text-[#435664]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Discount Badge */}
                   {product.discountPercent > 0 && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-md">
-                      -{product.discountPercent}%
+                    <div className="absolute top-3 left-3 px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-lg shadow-lg animate-pulse">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                        </svg>
+                        <span>-{product.discountPercent}%</span>
+                      </div>
                     </div>
                   )}
+
+                  {/* Wishlist Button */}
                   <button
                     onClick={handleToggleWishlist}
                     disabled={isTogglingWishlist}
-                    className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="absolute top-3 right-3 w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed group/wishlist border-2 border-white/50"
                   >
                     <svg
-                      className={`h-4 w-4 transition-all ${
+                      className={`h-5 w-5 transition-all ${
                         isWishlisted
-                          ? "text-red-500 fill-red-500"
-                          : "text-gray-500 group-hover:text-red-500"
+                          ? "text-red-500 fill-red-500 scale-110"
+                          : "text-gray-400 group-hover/wishlist:text-red-500 group-hover/wishlist:scale-110"
                       }`}
                       fill={isWishlisted ? "currentColor" : "none"}
                       stroke="currentColor"
@@ -507,17 +536,18 @@ export default function ProductDetailPage({ params }: PageProps) {
                     </svg>
                   </button>
                 </div>
+
                 {/* Thumbnails */}
                 {productImages.length > 1 && (
-                  <div className="grid grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-5 gap-2">
                     {productImages.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${
+                        className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${
                           selectedImage === index
-                            ? "border-[#435664]"
-                            : "border-transparent hover:border-gray-300"
+                            ? "border-[#435664] shadow-md scale-105 ring-2 ring-[#435664]/20"
+                            : "border-gray-200 hover:border-[#a3af87] hover:shadow-sm hover:scale-105"
                         }`}
                       >
                         <img
@@ -532,113 +562,164 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Right: Product Info - Compact */}
+            {/* Right: Product Info - Modern & Clean */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#fdf8d4] text-[#435664] border border-[#435664]/20">
-                        {categoryDisplay}
+              <div className="bg-white rounded-2xl shadow-lg p-5 sm:p-6 border-2 border-[#435664]/10">
+                {/* Product Name & Category */}
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white shadow-sm">
+                      {categoryDisplay}
+                    </span>
+                    {product.farmer.isVerified && (
+                      <span className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full">
+                        <svg
+                          className="h-3.5 w-3.5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Terverifikasi
                       </span>
-                      {product.farmer.isVerified && (
-                        <span className="flex items-center gap-1 text-xs text-[#435664]">
-                          <svg
-                            className="h-3 w-3"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Terverifikasi
-                        </span>
-                      )}
+                    )}
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-[#303646] leading-tight">
+                    {product.name}
+                  </h1>
+                </div>
+
+                {/* Stats Cards - Modern Grid */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
+                  {/* Rating Card */}
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-3 border border-yellow-200/50">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <svg
+                        className="h-4 w-4 fill-yellow-500"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <span className="text-lg font-bold text-[#303646]">
+                        {product.rating.toFixed(1)}
+                      </span>
                     </div>
-                    <h1 className="text-xl font-bold text-[#303646]">
-                      {product.name}
-                    </h1>
+                    <p className="text-xs text-gray-600">
+                      {product.totalReviews} ulasan
+                    </p>
+                  </div>
+
+                  {/* Sales Card */}
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200/50">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <svg
+                        className="h-4 w-4 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                        />
+                      </svg>
+                      <span className="text-lg font-bold text-[#303646]">
+                        {product.totalSold}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600">Terjual</p>
+                  </div>
+
+                  {/* Stock Card */}
+                  <div className={`rounded-xl p-3 border ${
+                    product.stock > 10
+                      ? "bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/50"
+                      : product.stock > 0
+                        ? "bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200/50"
+                        : "bg-gradient-to-br from-red-50 to-pink-50 border-red-200/50"
+                  }`}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <svg
+                        className={`h-4 w-4 ${
+                          product.stock > 10
+                            ? "text-emerald-600"
+                            : product.stock > 0
+                              ? "text-orange-600"
+                              : "text-red-600"
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                      </svg>
+                      <span className={`text-lg font-bold ${
+                        product.stock > 10
+                          ? "text-emerald-600"
+                          : product.stock > 0
+                            ? "text-orange-600"
+                            : "text-red-600"
+                      }`}>
+                        {product.stock}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600">{product.unit}</p>
                   </div>
                 </div>
 
-                {/* Rating & Stock Row */}
-                <div className="flex flex-wrap items-center gap-3 mb-3 pb-3 border-b border-gray-100">
-                  <div className="flex items-center gap-1">
-                    <svg
-                      className="h-4 w-4 fill-yellow-400"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                    <span className="text-sm font-semibold text-[#303646]">
-                      {product.rating.toFixed(1)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      ({product.totalReviews} ulasan)
-                    </span>
+                {/* Price Section - Prominent */}
+                <div className="mb-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664]/20 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-[#435664]">Harga</span>
+                    {product.discountPercent > 0 && (
+                      <span className="px-2.5 py-1 text-xs font-bold bg-red-500 text-white rounded-lg shadow-sm animate-pulse">
+                        Hemat {product.discountPercent}%
+                      </span>
+                    )}
                   </div>
-                  <span className="text-gray-300">|</span>
-                  <span className="text-xs text-gray-500">
-                    {product.totalSold} terjual
-                  </span>
-                  <span className="text-gray-300">|</span>
-                  <span
-                    className={`text-xs font-medium ${
-                      product.stock > 10
-                        ? "text-emerald-600"
-                        : product.stock > 0
-                          ? "text-orange-500"
-                          : "text-red-500"
-                    }`}
-                  >
-                    {product.stock > 0
-                      ? `${product.stock} ${product.unit} tersedia`
-                      : "Stok habis"}
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="mb-3 p-3 rounded-lg bg-[#fdf8d4]">
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-2xl font-bold text-[#303646]">
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-3xl sm:text-4xl font-bold text-[#303646]">
                       Rp {product.finalPrice.toLocaleString("id-ID")}
                     </span>
                     {product.discountPercent > 0 && (
-                      <>
-                        <span className="text-sm text-gray-400 line-through">
-                          Rp {product.price.toLocaleString("id-ID")}
-                        </span>
-                        <span className="px-1.5 py-0.5 text-xs font-semibold bg-red-100 text-red-600 rounded">
-                          Hemat {product.discountPercent}%
-                        </span>
-                      </>
+                      <span className="text-lg text-gray-400 line-through">
+                        Rp {product.price.toLocaleString("id-ID")}
+                      </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-sm text-[#435664] mt-1 font-medium">
                     per {product.unit}
                   </p>
                 </div>
 
-                {/* Quantity & Actions */}
-                <div className="space-y-3 mb-4">
-                  {/* Quantity Selector - Improved & Mobile Responsive */}
-                  <div className="bg-[#fdf8d4] p-3 sm:p-4 rounded-xl border border-[#435664]/20">
-                    <label className="block text-xs sm:text-sm font-semibold text-[#435664] mb-2 sm:mb-3">
+                {/* Quantity Selector - Enhanced */}
+                <div className="mb-5">
+                  <div className="bg-white p-3 sm:p-5 rounded-2xl border-2 border-[#435664]/20 shadow-sm">
+                    <label className="block text-xs sm:text-sm font-bold text-[#303646] mb-2 sm:mb-3">
                       Jumlah Pembelian
                     </label>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-                      <div className="flex items-center justify-center border-2 border-[#435664]/30 rounded-xl overflow-hidden bg-white">
+
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      {/* Quantity Controls */}
+                      <div className="flex items-center border-2 border-[#435664]/30 rounded-lg sm:rounded-xl overflow-hidden bg-[#fdf8d4] shadow-sm">
                         <button
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          className="flex-1 sm:w-12 h-12 sm:h-12 flex items-center justify-center text-[#435664] hover:bg-[#fdf8d4] active:bg-[#435664] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center text-[#435664] hover:bg-[#a3af87] hover:text-white active:bg-[#303646] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold"
                           disabled={product.stock === 0}
                         >
                           <svg
-                            className="w-6 h-6 sm:w-6 sm:h-6"
+                            className="w-4 h-4 sm:w-5 sm:h-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -662,18 +743,18 @@ export default function ProductDetailPage({ params }: PageProps) {
                               ),
                             )
                           }
-                          className="w-20 sm:w-20 h-12 sm:h-12 text-center text-xl sm:text-xl font-bold border-x-2 border-[#435664]/30 focus:outline-none focus:bg-[#fdf8d4] text-[#303646]"
+                          className="w-12 h-9 sm:w-16 sm:h-12 text-center text-base sm:text-xl font-bold border-x-2 border-[#435664]/30 focus:outline-none focus:bg-white text-[#303646] bg-[#fdf8d4]"
                           disabled={product.stock === 0}
                         />
                         <button
                           onClick={() =>
                             setQuantity(Math.min(product.stock, quantity + 1))
                           }
-                          className="flex-1 sm:w-12 h-12 sm:h-12 flex items-center justify-center text-[#435664] hover:bg-[#fdf8d4] active:bg-[#435664] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center text-[#435664] hover:bg-[#a3af87] hover:text-white active:bg-[#303646] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold"
                           disabled={product.stock === 0}
                         >
                           <svg
-                            className="w-6 h-6 sm:w-6 sm:h-6"
+                            className="w-4 h-4 sm:w-5 sm:h-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -687,24 +768,41 @@ export default function ProductDetailPage({ params }: PageProps) {
                           </svg>
                         </button>
                       </div>
-                      <div className="flex-1 text-left">
-                        <div className="text-xs text-gray-500 mb-1">Total Harga</div>
-                        <div className="text-2xl font-bold text-[#303646]">
+
+                      {/* Total Price Display */}
+                      <div className="flex-1 bg-gradient-to-r from-[#fdf8d4] to-[#f5efc0] rounded-lg sm:rounded-xl p-2 sm:p-4 border border-[#435664]/20">
+                        <div className="text-[10px] sm:text-xs text-[#435664] mb-0.5 sm:mb-1 font-semibold">Total Harga</div>
+                        <div className="text-sm sm:text-2xl font-bold text-[#303646]">
                           Rp {(product.finalPrice * quantity).toLocaleString("id-ID")}
                         </div>
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-gray-500">
-                      Stok tersedia: <span className="font-semibold text-[#435664]">{product.stock} {product.unit}</span>
+
+                    <div className="mt-2 sm:mt-3 flex items-center gap-2 text-xs sm:text-sm">
+                      <svg
+                        className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#435664] flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="text-[#435664] font-medium">
+                        Stok tersedia: <span className="font-bold">{product.stock} {product.unit}</span>
+                      </span>
                     </div>
                   </div>
                 </div>
-
-                {/* Action Buttons - With Animation */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                {/* Action Buttons - Modern & Prominent */}
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={handleAddToCart}
-                    className="group w-full sm:flex-1 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-[#a3af87]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    className="group w-full sm:flex-1 py-4 px-5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold hover:shadow-xl hover:shadow-[#a3af87]/40 hover:-translate-y-1 active:translate-y-0 active:shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     disabled={product.stock === 0 || isAddingToCart}
                   >
                     {isAddingToCart ? (
@@ -715,11 +813,11 @@ export default function ProductDetailPage({ params }: PageProps) {
                     ) : (
                       <>
                         <svg
-                          className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-200"
+                          className="h-5 w-5 group-hover:scale-125 group-hover:rotate-12 transition-transform duration-200"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
-                          strokeWidth={2}
+                          strokeWidth={2.5}
                         >
                           <path
                             strokeLinecap="round"
@@ -727,61 +825,65 @@ export default function ProductDetailPage({ params }: PageProps) {
                             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                           />
                         </svg>
-                        <span>+ Keranjang</span>
+                        <span>Tambah ke Keranjang</span>
                       </>
                     )}
                   </button>
                   <button
                     onClick={() => {
-                      // Direct buy - navigate to checkout with query params
                       const checkoutUrl = `/market/checkout?productId=${product.id}&qty=${quantity}`;
                       router.push(checkoutUrl);
                     }}
-                    className="group w-full sm:flex-1 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    className="group w-full sm:flex-1 py-4 px-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-bold hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-1 active:translate-y-0 active:shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     disabled={product.stock === 0}
                   >
                     <svg
-                      className="h-5 w-5 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-200"
+                      className="h-5 w-5 group-hover:scale-110 transition-transform duration-200"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                       />
                     </svg>
                     Beli Sekarang
                   </button>
                 </div>
 
-                {/* Seller Info - Compact */}
-                <div className="pt-3 border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#435664] to-[#303646] flex items-center justify-center">
-                        <svg
-                          className="h-5 w-5 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                {/* Seller Info - Modern Card */}
+                <div className="mt-5 pt-5 border-t-2 border-gray-100">
+                  <div className="bg-gradient-to-br from-[#fdf8d4] to-white rounded-2xl p-4 border-2 border-[#435664]/10 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                      {/* Seller Avatar */}
+                      <div className="flex-shrink-0">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#435664] to-[#303646] flex items-center justify-center shadow-lg ring-2 ring-white">
+                          <svg
+                            className="h-7 w-7 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="font-semibold text-sm text-[#303646]">
+
+                      {/* Seller Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-base text-[#303646] truncate">
                             {product.farmer.farmName}
-                          </p>
+                          </h3>
                           {product.farmer.isVerified && (
                             <svg
-                              className="h-4 w-4 text-blue-500"
+                              className="h-5 w-5 text-blue-500 flex-shrink-0"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -793,67 +895,90 @@ export default function ProductDetailPage({ params }: PageProps) {
                             </svg>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <svg
-                            className="h-3 w-3 fill-yellow-500"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                          <span className="font-medium">
-                            {product.farmer.rating.toFixed(1)}
-                          </span>
+                        
+                        {/* Seller Stats */}
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#435664] mb-2">
+                          <div className="flex items-center gap-1">
+                            <svg
+                              className="h-3.5 w-3.5 fill-yellow-500"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                            <span className="font-semibold">{product.farmer.rating.toFixed(1)}</span>
+                          </div>
                           {product.farmer.location && (
                             <>
                               <span className="text-gray-300">•</span>
-                              <span>{product.farmer.location}</span>
+                              <div className="flex items-center gap-1">
+                                <svg
+                                  className="h-3.5 w-3.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={2}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                  />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                  />
+                                </svg>
+                                <span className="truncate">{product.farmer.location}</span>
+                              </div>
                             </>
                           )}
                           <span className="text-gray-300">•</span>
-                          <span>
-                            Bergabung {formatJoinDate(product.farmer.joinedAt)}
-                          </span>
+                          <span>Bergabung {formatJoinDate(product.farmer.joinedAt)}</span>
                         </div>
-                        <div className="text-xs text-gray-500 mt-0.5">
+
+                        <div className="text-xs text-[#435664] font-medium">
                           {product.farmer.totalProducts} Produk
                         </div>
                       </div>
+
+                      {/* Chat Button */}
+                      {product.farmer.phone ? (
+                        <a
+                          href={`https://wa.me/${product.farmer.phone
+                            .replace(/^0/, "62")
+                            .replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                            `Halo, saya tertarik dengan produk ${product.name} di EcoMaggie`,
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 hover:shadow-lg hover:shadow-green-500/30 transition-all active:scale-95"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                          </svg>
+                          <span className="hidden sm:inline">Chat</span>
+                        </a>
+                      ) : (
+                        <button
+                          disabled
+                          className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 text-sm font-bold rounded-xl cursor-not-allowed"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                          </svg>
+                          <span className="hidden sm:inline">Chat</span>
+                        </button>
+                      )}
                     </div>
-                    {product.farmer.phone ? (
-                      <a
-                        href={`https://wa.me/${product.farmer.phone
-                          .replace(/^0/, "62")
-                          .replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                          `Halo, saya tertarik dengan produk ${product.name} di EcoMaggie`,
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-full hover:bg-green-600 transition-colors"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                        </svg>
-                        Chat
-                      </a>
-                    ) : (
-                      <button
-                        disabled
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 text-gray-500 text-xs font-medium rounded-full cursor-not-allowed"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                        </svg>
-                        Chat
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

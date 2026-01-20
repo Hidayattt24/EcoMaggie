@@ -528,8 +528,8 @@ function CheckoutContent() {
             <span className="font-medium">Kembali ke Produk</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] rounded-xl shadow-lg">
-              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            <div className="p-2 sm:p-3 bg-[#fdf8d4] border-2 border-[#435664]/20 rounded-xl shadow-lg">
+              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-[#435664]" />
             </div>
             <div className="flex-1">
               <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
@@ -559,7 +559,7 @@ function CheckoutContent() {
                   <div
                     className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-sm font-bold transition-all ${
                       currentStep >= step.number
-                        ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white border-[#a3af87] shadow-lg shadow-[#a3af87]/30"
+                        ? "bg-[#fdf8d4] text-[#435664] border-[#435664] shadow-lg"
                         : "border-gray-200 bg-white text-gray-400 shadow-sm"
                     }`}
                   >
@@ -601,18 +601,18 @@ function CheckoutContent() {
                 key={step.number}
                 className={`flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all ${
                   currentStep === step.number
-                    ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] border-[#a3af87] shadow-lg shadow-[#a3af87]/30"
+                    ? "bg-[#fdf8d4] border-[#435664] shadow-lg"
                     : currentStep > step.number
-                    ? "bg-[#fdf8d4] border-[#a3af87]/30"
+                    ? "bg-[#fdf8d4] border-[#435664]/30"
                     : "border-gray-200 bg-white"
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                     currentStep === step.number
-                      ? "bg-white text-[#435664]"
+                      ? "bg-[#435664] text-white"
                       : currentStep > step.number
-                      ? "bg-[#a3af87] text-white"
+                      ? "bg-[#435664] text-white"
                       : "bg-gray-100 text-gray-400"
                   }`}
                 >
@@ -625,7 +625,7 @@ function CheckoutContent() {
                 <span
                   className={`text-xs font-bold ${
                     currentStep === step.number
-                      ? "text-white"
+                      ? "text-[#435664]"
                       : currentStep > step.number
                       ? "text-[#435664]"
                       : "text-gray-400"
@@ -653,18 +653,18 @@ function CheckoutContent() {
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
+                      <div className="p-2 sm:p-3 bg-[#a3af87] rounded-xl shadow-lg">
                         <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b]">
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#435664]">
                         Alamat Pengiriman
                       </h2>
                     </div>
                     <button
                       onClick={() => setShowAddressForm(!showAddressForm)}
-                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-[#5a6c5b] hover:text-white bg-white border-2 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-[#435664] hover:text-white bg-white border-2 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
                       style={{
-                        borderColor: "#A3AF87",
+                        borderColor: "#a3af87",
                       }}
                     >
                       {showAddressForm ? (
@@ -699,7 +699,7 @@ function CheckoutContent() {
                         >
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
+                              <label className="block text-sm font-bold text-[#435664] mb-2">
                                 Label Alamat <span className="text-red-500">*</span>
                               </label>
                               <input
@@ -719,7 +719,7 @@ function CheckoutContent() {
                             </div>
 
                             <div>
-                              <label className="block text-sm font-bold text-[#5a6c5b] mb-2">
+                              <label className="block text-sm font-bold text-[#435664] mb-2">
                                 Nomor Telepon <span className="text-red-500">*</span>
                               </label>
                               <input
@@ -753,13 +753,13 @@ function CheckoutContent() {
                                 setShowAddressForm(false);
                                 setFormErrors({});
                               }}
-                              className="px-6 py-3 text-sm font-bold text-[#5a6c5b]/70 hover:text-[#5a6c5b] hover:bg-green-50 rounded-xl transition-all"
+                              className="px-6 py-3 text-sm font-bold text-[#435664]/70 hover:text-[#435664] hover:bg-[#fdf8d4] rounded-xl transition-all"
                             >
                               Batal
                             </button>
                             <button
                               type="submit"
-                              className="px-8 py-3 bg-gradient-to-r from-[#A3AF87] to-[#95a17a]/90 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all"
+                              className="px-8 py-3 bg-gradient-to-r from-[#a3af87] to-[#95a17a]/90 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
                             >
                               Simpan Alamat
                             </button>
@@ -777,7 +777,7 @@ function CheckoutContent() {
                         onClick={() => setSelectedAddress(address)}
                         className={`w-full text-left p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl transition-all ${
                           selectedAddress?.id === address.id
-                            ? "border-[#A3AF87] bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg shadow-[#A3AF87]/20"
+                            ? "border-[#a3af87] bg-gradient-to-br from-[#fdf8d4] to-[#fdf8d4]/50 shadow-lg shadow-[#a3af87]/20"
                             : "border-[#5a6c5b]/20 hover:border-[#5a6c5b]/40 bg-white hover:shadow-md"
                         }`}
                       >
@@ -785,7 +785,7 @@ function CheckoutContent() {
                           <div
                             className={`w-6 h-6 rounded-full border-2 mt-0.5 flex items-center justify-center transition-all ${
                               selectedAddress?.id === address.id
-                                ? "border-[#A3AF87] bg-[#A3AF87] shadow-md"
+                                ? "border-[#a3af87] bg-[#a3af87] shadow-md"
                                 : "border-[#5a6c5b]/30 bg-white"
                             }`}
                           >
@@ -798,24 +798,24 @@ function CheckoutContent() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="font-bold text-[#5a6c5b]">
+                              <p className="font-bold text-[#435664]">
                                 {address.label}
                               </p>
                               {address.isDefault && (
-                                <span className="px-3 py-1 bg-gradient-to-r from-[#A3AF87] to-[#95a17a]/90 text-white text-xs font-bold rounded-lg shadow-sm">
+                                <span className="px-3 py-1 bg-gradient-to-r from-[#a3af87] to-[#95a17a]/90 text-white text-xs font-bold rounded-lg shadow-sm">
                                   Utama
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-[#5a6c5b]/70 font-medium">
+                            <p className="text-sm text-[#435664]/70 font-medium">
                               {address.recipientName} - {address.recipientPhone}
                             </p>
-                            <p className="text-sm text-[#5a6c5b]/70 mt-1 font-medium">
+                            <p className="text-sm text-[#435664]/70 mt-1 font-medium">
                               {address.streetAddress}
                               {address.district && `, ${address.district}`}
                               {address.village && `, ${address.village}`}
                             </p>
-                            <p className="text-sm text-[#5a6c5b]/70 font-medium">
+                            <p className="text-sm text-[#435664]/70 font-medium">
                               {address.city}, {address.province} {address.postalCode}
                             </p>
                           </div>
@@ -829,7 +829,7 @@ function CheckoutContent() {
                     disabled={!canProceedToStep2}
                     className={`w-full mt-6 sm:mt-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 ${
                       canProceedToStep2
-                        ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a]/90 text-white hover:shadow-xl hover:shadow-[#A3AF87]/30"
+                        ? "bg-gradient-to-r from-[#a3af87] to-[#95a17a]/90 text-white hover:shadow-xl hover:shadow-[#a3af87]/30"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     }`}
                   >
@@ -850,37 +850,37 @@ function CheckoutContent() {
                 >
                   <div className="flex items-center justify-between mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#A3AF87] to-[#95a17a]/80 rounded-xl shadow-lg">
+                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#a3af87] to-[#95a17a]/80 rounded-xl shadow-lg">
                         <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b]">
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#435664]">
                         Metode Pengiriman
                       </h2>
                     </div>
                   </div>
 
                   {/* Selected Address Info */}
-                  <div className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100/50 border-2 border-[#5a6c5b]/20 rounded-xl sm:rounded-2xl mb-6 shadow-md">
+                  <div className="p-4 sm:p-6 bg-gradient-to-br from-[#fdf8d4] to-[#fdf8d4]/50 border-2 border-[#5a6c5b]/20 rounded-xl sm:rounded-2xl mb-6 shadow-md">
                     <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-[#A3AF87] rounded-xl">
+                        <div className="p-2 bg-[#a3af87] rounded-xl">
                           <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-bold text-[#5a6c5b]">
+                          <p className="font-bold text-[#435664]">
                             {selectedAddress.label}
                           </p>
-                          <p className="text-[#5a6c5b]/70 mt-1 text-sm font-medium">
+                          <p className="text-[#435664]/70 mt-1 text-sm font-medium">
                             {selectedAddress.recipientName} - {selectedAddress.recipientPhone}
                           </p>
-                          <p className="text-[#5a6c5b]/70 text-sm font-medium">
+                          <p className="text-[#435664]/70 text-sm font-medium">
                             {selectedAddress.streetAddress}, {selectedAddress.city}
                           </p>
                         </div>
                       </div>
                       <button
                         onClick={() => setCurrentStep(1)}
-                        className="text-[#5a6c5b] hover:text-white text-xs font-bold px-4 py-2 hover:bg-gradient-to-r hover:from-[#5a6c5b] hover:to-[#5a6c5b]/90 border-2 border-[#A3AF87] rounded-xl transition-all bg-white"
+                        className="text-[#435664] hover:text-white text-xs font-bold px-4 py-2 hover:bg-gradient-to-r hover:from-[#5a6c5b] hover:to-[#5a6c5b]/90 border-2 border-[#a3af87] rounded-xl transition-all bg-white"
                       >
                         Ubah
                       </button>
@@ -891,8 +891,8 @@ function CheckoutContent() {
                   {isLoadingShipping && (
                     <div className="p-6 border-2 border-[#5a6c5b]/20 rounded-xl bg-white">
                       <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-[#A3AF87] border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[#5a6c5b] font-medium">Memuat opsi pengiriman...</p>
+                        <div className="w-5 h-5 border-2 border-[#a3af87] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[#435664] font-medium">Memuat opsi pengiriman...</p>
                       </div>
                     </div>
                   )}
@@ -923,7 +923,7 @@ function CheckoutContent() {
                         onClick={() => setSelectedShipping(method.id)}
                         className={`w-full text-left p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl transition-all ${
                           selectedShipping === method.id
-                            ? "border-[#A3AF87] bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg shadow-[#A3AF87]/20"
+                            ? "border-[#a3af87] bg-gradient-to-br from-[#fdf8d4] to-[#fdf8d4]/50 shadow-lg shadow-[#a3af87]/20"
                             : "border-[#5a6c5b]/20 hover:border-[#5a6c5b]/40 bg-white hover:shadow-md"
                         }`}
                       >
@@ -931,7 +931,7 @@ function CheckoutContent() {
                           <div
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                               selectedShipping === method.id
-                                ? "border-[#A3AF87] bg-[#A3AF87] shadow-md"
+                                ? "border-[#a3af87] bg-[#a3af87] shadow-md"
                                 : "border-[#5a6c5b]/30 bg-white"
                             }`}
                           >
@@ -944,25 +944,25 @@ function CheckoutContent() {
                           </div>
 
                           <div className="p-2.5 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                            <method.icon className="h-6 w-6 text-[#5a6c5b]" />
+                            <method.icon className="h-6 w-6 text-[#435664]" />
                           </div>
 
                           <div className="flex-1">
-                            <p className="font-bold text-[#5a6c5b] mb-1">
+                            <p className="font-bold text-[#435664] mb-1">
                               {method.name}
                             </p>
-                            <p className="text-sm text-[#5a6c5b]/70 font-medium">
+                            <p className="text-sm text-[#435664]/70 font-medium">
                               {method.description}
                             </p>
                           </div>
 
                           <div className="text-right">
-                            <p className="font-bold text-[#5a6c5b] mb-2">
+                            <p className="font-bold text-[#435664] mb-2">
                               {method.price === 0
                                 ? "GRATIS"
                                 : `Rp ${method.price.toLocaleString("id-ID")}`}
                             </p>
-                            <div className="flex items-center gap-1.5 text-xs text-[#5a6c5b] bg-green-100 px-3 py-1.5 rounded-lg inline-flex font-bold">
+                            <div className="flex items-center gap-1.5 text-xs text-[#435664] bg-green-100 px-3 py-1.5 rounded-lg inline-flex font-bold">
                               <Clock className="h-3.5 w-3.5" />
                               <span>{method.estimatedDays}</span>
                             </div>
@@ -975,8 +975,8 @@ function CheckoutContent() {
                       {shippingMethods.length === 0 && !isLoadingShipping && !shippingError && (
                         <div className="p-6 border-2 border-[#5a6c5b]/20 rounded-xl bg-white text-center">
                           <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                          <p className="text-[#5a6c5b] font-medium">Tidak ada opsi pengiriman tersedia</p>
-                          <p className="text-sm text-[#5a6c5b]/70 mt-1">Silakan pilih alamat lain atau hubungi customer service</p>
+                          <p className="text-[#435664] font-medium">Tidak ada opsi pengiriman tersedia</p>
+                          <p className="text-sm text-[#435664]/70 mt-1">Silakan pilih alamat lain atau hubungi customer service</p>
                         </div>
                       )}
                     </div>
@@ -985,7 +985,7 @@ function CheckoutContent() {
                   <div className="flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
                     <button
                       onClick={() => setCurrentStep(1)}
-                      className="px-6 sm:px-8 py-3 text-sm font-bold text-[#5a6c5b]/70 hover:text-[#5a6c5b] hover:bg-green-50 rounded-xl transition-all order-2 sm:order-1"
+                      className="px-6 sm:px-8 py-3 text-sm font-bold text-[#435664]/70 hover:text-[#435664] hover:bg-[#fdf8d4] rounded-xl transition-all order-2 sm:order-1"
                     >
                       Kembali
                     </button>
@@ -994,7 +994,7 @@ function CheckoutContent() {
                       disabled={!canProceedToStep3}
                       className={`flex-1 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 order-1 sm:order-2 ${
                         canProceedToStep3
-                          ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a]/90 text-white hover:shadow-xl hover:shadow-[#A3AF87]/30"
+                          ? "bg-gradient-to-r from-[#a3af87] to-[#95a17a]/90 text-white hover:shadow-xl hover:shadow-[#a3af87]/30"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
@@ -1016,25 +1016,25 @@ function CheckoutContent() {
                 >
                   <div className="flex items-center justify-between mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#A3AF87] to-[#95a17a]/80 rounded-xl shadow-lg">
+                      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#a3af87] to-[#95a17a]/80 rounded-xl shadow-lg">
                         <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-bold text-[#5a6c5b]">
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#435664]">
                         Metode Pembayaran
                       </h2>
                     </div>
                   </div>
 
                   {/* Midtrans Badge */}
-                  <div className="flex items-center gap-3 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 border-2 border-blue-200 rounded-xl sm:rounded-2xl mb-6 shadow-md">
-                    <div className="p-2 sm:p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                  <div className="flex items-center gap-3 p-4 sm:p-6 bg-[#fdf8d4] border-2 border-[#435664]/20 rounded-xl sm:rounded-2xl mb-6 shadow-md">
+                    <div className="p-2 sm:p-2.5 bg-[#435664] rounded-xl shadow-lg">
                       <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold text-blue-900">
+                      <p className="font-bold text-[#303646]">
                         Powered by Midtrans
                       </p>
-                      <p className="text-xs text-blue-700 font-medium mt-0.5">
+                      <p className="text-xs text-[#435664] font-medium mt-0.5">
                         Pembayaran aman dan terpercaya
                       </p>
                     </div>
@@ -1074,7 +1074,7 @@ function CheckoutContent() {
                         onClick={() => setSelectedPayment(method.id)}
                         className={`w-full text-left p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl transition-all ${
                           selectedPayment === method.id
-                            ? "border-[#A3AF87] bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg shadow-[#A3AF87]/20"
+                            ? "border-[#a3af87] bg-gradient-to-br from-[#fdf8d4] to-[#fdf8d4]/50 shadow-lg shadow-[#a3af87]/20"
                             : "border-[#5a6c5b]/20 hover:border-[#5a6c5b]/40 bg-white hover:shadow-md"
                         }`}
                       >
@@ -1082,7 +1082,7 @@ function CheckoutContent() {
                           <div
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all mt-1 ${
                               selectedPayment === method.id
-                                ? "border-[#A3AF87] bg-[#A3AF87] shadow-md"
+                                ? "border-[#a3af87] bg-[#a3af87] shadow-md"
                                 : "border-[#5a6c5b]/30 bg-white"
                             }`}
                           >
@@ -1095,18 +1095,18 @@ function CheckoutContent() {
                           </div>
 
                           <div className="p-2.5 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                            <method.icon className="h-6 w-6 text-[#5a6c5b]" />
+                            <method.icon className="h-6 w-6 text-[#435664]" />
                           </div>
 
                           <div className="flex-1">
-                            <p className="font-bold text-[#5a6c5b] mb-3">
+                            <p className="font-bold text-[#435664] mb-3">
                               {method.name}
                             </p>
                             <div className="flex flex-wrap gap-2">
                               {method.logos.map((logo) => (
                                 <span
                                   key={logo}
-                                  className="px-3 py-1.5 bg-white border-2 border-[#5a6c5b]/20 text-xs font-bold text-[#5a6c5b] rounded-lg shadow-sm"
+                                  className="px-3 py-1.5 bg-white border-2 border-[#5a6c5b]/20 text-xs font-bold text-[#435664] rounded-lg shadow-sm"
                                 >
                                   {logo}
                                 </span>
@@ -1122,7 +1122,7 @@ function CheckoutContent() {
                     <button
                       onClick={() => setCurrentStep(2)}
                       disabled={isProcessingPayment}
-                      className="px-6 sm:px-8 py-3 text-sm font-bold text-[#5a6c5b]/70 hover:text-[#5a6c5b] hover:bg-green-50 rounded-xl transition-all disabled:opacity-50 order-2 sm:order-1"
+                      className="px-6 sm:px-8 py-3 text-sm font-bold text-[#435664]/70 hover:text-[#435664] hover:bg-[#fdf8d4] rounded-xl transition-all disabled:opacity-50 order-2 sm:order-1"
                     >
                       Kembali
                     </button>
@@ -1131,7 +1131,7 @@ function CheckoutContent() {
                       disabled={!canCompleteOrder || isProcessingPayment}
                       className={`flex-1 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all order-1 sm:order-2 ${
                         canCompleteOrder && !isProcessingPayment
-                          ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a]/90 text-white hover:shadow-xl hover:shadow-[#A3AF87]/30"
+                          ? "bg-gradient-to-r from-[#a3af87] to-[#95a17a]/90 text-white hover:shadow-xl hover:shadow-[#a3af87]/30"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
@@ -1154,21 +1154,21 @@ function CheckoutContent() {
           <div className="hidden lg:block lg:col-span-2">
             <div className="sticky top-4 space-y-6">
               {/* Order Summary Card */}
-              <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white to-[#A3AF87]/5 rounded-2xl p-6 shadow-xl shadow-[#A3AF87]/10">
+              <div className="border-2 border-[#a3af87]/20 bg-gradient-to-br from-white to-[#a3af87]/5 rounded-2xl p-6 shadow-xl shadow-[#a3af87]/10">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2.5 bg-[#A3AF87] rounded-xl shadow-lg">
+                  <div className="p-2.5 bg-[#a3af87] rounded-xl shadow-lg">
                     <ShoppingBag className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="font-bold text-[#5a6c5b] text-lg">
+                  <h3 className="font-bold text-[#435664] text-lg">
                     Ringkasan Pesanan
                   </h3>
                 </div>
 
                 {/* Product */}
-                <div className="pb-5 mb-5 border-b-2 border-[#A3AF87]/10 space-y-4">
+                <div className="pb-5 mb-5 border-b-2 border-[#a3af87]/10 space-y-4">
                   {checkoutProducts.map((product) => (
                     <div key={product.id} className="flex gap-4">
-                      <div className="w-24 h-24 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#A3AF87]/10">
+                      <div className="w-24 h-24 bg-gradient-to-br from-[#a3af87]/10 to-[#a3af87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#a3af87]/10">
                         <img
                           src={product.image}
                           alt={product.name}
@@ -1176,13 +1176,13 @@ function CheckoutContent() {
                         />
                       </div>
                       <div className="flex-1">
-                        <p className="text-base font-bold text-[#5a6c5b] leading-snug mb-2">
+                        <p className="text-base font-bold text-[#435664] leading-snug mb-2">
                           {product.name}
                         </p>
-                        <p className="text-xs text-[#5a6c5b] font-bold bg-[#A3AF87]/20 px-3 py-1.5 rounded-lg inline-block mb-2">
+                        <p className="text-xs text-[#435664] font-bold bg-[#a3af87]/20 px-3 py-1.5 rounded-lg inline-block mb-2">
                           {product.quantity} {product.unit}
                         </p>
-                        <p className="text-lg font-bold text-[#5a6c5b]">
+                        <p className="text-lg font-bold text-[#435664]">
                           Rp {product.finalPrice.toLocaleString("id-ID")}
                         </p>
                       </div>
@@ -1193,21 +1193,21 @@ function CheckoutContent() {
                 {/* Price Details */}
                 <div className="space-y-4 text-sm mb-5">
                   <div className="flex justify-between">
-                    <span className="text-[#5a6c5b]/70 font-medium">
+                    <span className="text-[#435664]/70 font-medium">
                       Subtotal ({checkoutProducts.reduce((sum, p) => sum + p.quantity, 0)} item)
                     </span>
-                    <span className="text-[#5a6c5b] font-bold">
+                    <span className="text-[#435664] font-bold">
                       Rp {subtotal.toLocaleString("id-ID")}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <div className="flex justify-between items-start">
                       <div className="flex flex-col">
-                        <span className="text-[#5a6c5b]/70 font-medium">
+                        <span className="text-[#435664]/70 font-medium">
                           Ongkos Kirim
                         </span>
                         {currentStep < 2 && (
-                          <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                          <span className="text-xs text-[#435664]/50 mt-0.5">
                             Pilih alamat & metode pengiriman
                           </span>
                         )}
@@ -1218,7 +1218,7 @@ function CheckoutContent() {
                           </span>
                         )}
                       </div>
-                      <span className="text-[#5a6c5b] font-bold">
+                      <span className="text-[#435664] font-bold">
                         {currentStep < 2 ? (
                           <span className="text-gray-400">-</span>
                         ) : selectedShipping && shippingCost >= 0 ? (
@@ -1235,27 +1235,27 @@ function CheckoutContent() {
                   </div>
                   <div className="flex justify-between">
                     <div className="flex flex-col">
-                      <span className="text-[#5a6c5b]/70 font-medium">
+                      <span className="text-[#435664]/70 font-medium">
                         Biaya Layanan
                       </span>
-                      <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                      <span className="text-xs text-[#435664]/50 mt-0.5">
                         5% dari subtotal
                       </span>
                     </div>
-                    <span className="text-[#5a6c5b] font-bold">
+                    <span className="text-[#435664] font-bold">
                       Rp {serviceFee.toLocaleString("id-ID")}
                     </span>
                   </div>
                 </div>
 
                 {/* Total */}
-                <div className="pt-5 border-t-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 -mx-6 px-6 -mb-6 pb-6 rounded-b-2xl">
+                <div className="pt-5 border-t-2 border-[#a3af87]/20 bg-gradient-to-br from-[#a3af87]/10 to-[#a3af87]/5 -mx-6 px-6 -mb-6 pb-6 rounded-b-2xl">
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#5a6c5b] text-lg">
+                      <span className="font-bold text-[#435664] text-lg">
                         Total Pembayaran
                       </span>
-                      <span className="text-2xl font-bold text-[#5a6c5b]">
+                      <span className="text-2xl font-bold text-[#435664]">
                         Rp {total.toLocaleString("id-ID")}
                       </span>
                     </div>
@@ -1264,111 +1264,111 @@ function CheckoutContent() {
               </div>
 
               {/* Trust Badges - Enhanced Design */}
-              <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white via-green-50/30 to-[#A3AF87]/10 rounded-2xl p-5 overflow-hidden relative">
+              <div className="border-2 border-[#a3af87]/20 bg-gradient-to-br from-white via-green-50/30 to-[#a3af87]/10 rounded-2xl p-5 overflow-hidden relative">
                 {/* Background Pattern */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#A3AF87]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#A3AF87]/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#a3af87]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#a3af87]/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
                 
                 {/* Header with Shield Icon */}
                 <div className="flex items-center gap-3 mb-5 relative">
-                  <div className="p-2.5 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6d] rounded-xl shadow-lg shadow-[#A3AF87]/30">
+                  <div className="p-2.5 bg-gradient-to-br from-[#a3af87] to-[#8a9a6d] rounded-xl shadow-lg shadow-[#a3af87]/30">
                     <Shield className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#5a6c5b] text-base">
+                    <h4 className="font-bold text-[#435664] text-base">
                       Jaminan Belanja Aman
                     </h4>
-                    <p className="text-xs text-[#5a6c5b]/60">Belanja dengan tenang di Eco-maggie</p>
+                    <p className="text-xs text-[#435664]/60">Belanja dengan tenang di Eco-maggie</p>
                   </div>
                 </div>
 
                 {/* Trust Items */}
                 <div className="space-y-4 relative">
                   {/* 100% Original */}
-                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 hover:border-[#a3af87]/30 hover:shadow-md transition-all">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <BadgeCheck className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                      <p className="text-sm font-bold text-[#435664] mb-0.5">
                         100% Produk Original
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                      <p className="text-xs text-[#435664]/60 leading-relaxed">
                         Semua produk dijamin asli dan berkualitas tinggi langsung dari supplier terpercaya
                       </p>
                     </div>
                   </div>
 
                   {/* Secure Payment */}
-                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 hover:border-[#a3af87]/30 hover:shadow-md transition-all">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <Lock className="h-5 w-5 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                      <p className="text-sm font-bold text-[#435664] mb-0.5">
                         Pembayaran Terenkripsi
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                      <p className="text-xs text-[#435664]/60 leading-relaxed">
                         Data pembayaran dilindungi enkripsi SSL 256-bit. Powered by Midtrans
                       </p>
                     </div>
                   </div>
 
                   {/* Fast Delivery */}
-                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 hover:border-[#a3af87]/30 hover:shadow-md transition-all">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <Truck className="h-5 w-5 text-orange-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                      <p className="text-sm font-bold text-[#435664] mb-0.5">
                         Pengiriman Cepat & Aman
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                      <p className="text-xs text-[#435664]/60 leading-relaxed">
                         Dikemas dengan hati-hati dan dikirim tepat waktu ke alamat Anda
                       </p>
                     </div>
                   </div>
 
                   {/* Return Policy */}
-                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 hover:border-[#a3af87]/30 hover:shadow-md transition-all">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <RefreshCcw className="h-5 w-5 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                      <p className="text-sm font-bold text-[#435664] mb-0.5">
                         Garansi Kepuasan
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                      <p className="text-xs text-[#435664]/60 leading-relaxed">
                         Komplain produk rusak/tidak sesuai akan kami proses dengan cepat
                       </p>
                     </div>
                   </div>
 
                   {/* Customer Support */}
-                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 hover:border-[#a3af87]/30 hover:shadow-md transition-all">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <Headphones className="h-5 w-5 text-teal-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                      <p className="text-sm font-bold text-[#435664] mb-0.5">
                         Layanan Pelanggan 24/7
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                      <p className="text-xs text-[#435664]/60 leading-relaxed">
                         Tim support siap membantu via WhatsApp kapan saja
                       </p>
                     </div>
                   </div>
 
                   {/* Eco-Friendly */}
-                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 hover:border-[#A3AF87]/30 hover:shadow-md transition-all">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 hover:border-[#a3af87]/30 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#fdf8d4] to-[#fdf8d4]/70 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <Leaf className="h-5 w-5 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] mb-0.5">
+                      <p className="text-sm font-bold text-[#435664] mb-0.5">
                         Ramah Lingkungan
                       </p>
-                      <p className="text-xs text-[#5a6c5b]/60 leading-relaxed">
+                      <p className="text-xs text-[#435664]/60 leading-relaxed">
                         Kemasan eco-friendly, mendukung gaya hidup berkelanjutan
                       </p>
                     </div>
@@ -1376,8 +1376,8 @@ function CheckoutContent() {
                 </div>
 
                 {/* Trust Seal */}
-                <div className="mt-5 pt-4 border-t border-[#A3AF87]/20">
-                  <div className="flex items-center justify-center gap-2 text-xs text-[#5a6c5b]/70">
+                <div className="mt-5 pt-4 border-t border-[#a3af87]/20">
+                  <div className="flex items-center justify-center gap-2 text-xs text-[#435664]/70">
                     <Lock className="h-3.5 w-3.5" />
                     <span className="font-medium">Transaksi Anda 100% Aman & Terlindungi</span>
                   </div>
@@ -1385,8 +1385,8 @@ function CheckoutContent() {
               </div>
 
               {/* Help Section */}
-              <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-white rounded-2xl p-5">
-                <h4 className="font-bold text-[#5a6c5b] text-sm mb-3">
+              <div className="border-2 border-[#a3af87]/20 bg-gradient-to-br from-[#a3af87]/10 to-white rounded-2xl p-5">
+                <h4 className="font-bold text-[#435664] text-sm mb-3">
                   Butuh Bantuan?
                 </h4>
                 <p className="text-xs text-gray-600 mb-4">
@@ -1397,7 +1397,7 @@ function CheckoutContent() {
                   href="https://wa.me/6282288953268"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#A3AF87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"
                 >
                   <svg
                     className="h-5 w-5"
@@ -1415,21 +1415,21 @@ function CheckoutContent() {
           {/* Order Summary - Mobile */}
           <div className="lg:hidden space-y-4">
             {/* Order Summary Card */}
-            <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white to-[#A3AF87]/5 rounded-2xl p-4 shadow-xl shadow-[#A3AF87]/10">
+            <div className="border-2 border-[#a3af87]/20 bg-gradient-to-br from-white to-[#a3af87]/5 rounded-2xl p-4 shadow-xl shadow-[#a3af87]/10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#A3AF87] rounded-xl shadow-lg">
+                <div className="p-2 bg-[#a3af87] rounded-xl shadow-lg">
                   <ShoppingBag className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-bold text-[#5a6c5b] text-base">
+                <h3 className="font-bold text-[#435664] text-base">
                   Ringkasan Pesanan
                 </h3>
               </div>
 
               {/* Product */}
-              <div className="pb-4 mb-4 border-b-2 border-[#A3AF87]/10 space-y-3">
+              <div className="pb-4 mb-4 border-b-2 border-[#a3af87]/10 space-y-3">
                 {checkoutProducts.map((product) => (
                   <div key={product.id} className="flex gap-3">
-                    <div className="w-20 h-20 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#A3AF87]/10">
+                    <div className="w-20 h-20 bg-gradient-to-br from-[#a3af87]/10 to-[#a3af87]/5 rounded-xl flex-shrink-0 overflow-hidden border-2 border-[#a3af87]/10">
                       <img
                         src={product.image}
                         alt={product.name}
@@ -1437,13 +1437,13 @@ function CheckoutContent() {
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-[#5a6c5b] leading-snug mb-2">
+                      <p className="text-sm font-bold text-[#435664] leading-snug mb-2">
                         {product.name}
                       </p>
-                      <p className="text-xs text-[#5a6c5b] font-bold bg-[#A3AF87]/20 px-2.5 py-1 rounded-lg inline-block mb-2">
+                      <p className="text-xs text-[#435664] font-bold bg-[#a3af87]/20 px-2.5 py-1 rounded-lg inline-block mb-2">
                         {product.quantity} {product.unit}
                       </p>
-                      <p className="text-base font-bold text-[#5a6c5b]">
+                      <p className="text-base font-bold text-[#435664]">
                         Rp {product.finalPrice.toLocaleString("id-ID")}
                       </p>
                     </div>
@@ -1454,21 +1454,21 @@ function CheckoutContent() {
               {/* Price Details */}
               <div className="space-y-3 text-sm mb-4">
                 <div className="flex justify-between">
-                  <span className="text-[#5a6c5b]/70 font-medium">
+                  <span className="text-[#435664]/70 font-medium">
                     Subtotal ({checkoutProducts.reduce((sum, p) => sum + p.quantity, 0)} item)
                   </span>
-                  <span className="text-[#5a6c5b] font-bold">
+                  <span className="text-[#435664] font-bold">
                     Rp {subtotal.toLocaleString("id-ID")}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <div className="flex justify-between items-start">
                     <div className="flex flex-col">
-                      <span className="text-[#5a6c5b]/70 font-medium">
+                      <span className="text-[#435664]/70 font-medium">
                         Ongkos Kirim
                       </span>
                       {currentStep < 2 && (
-                        <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                        <span className="text-xs text-[#435664]/50 mt-0.5">
                           Pilih alamat & metode
                         </span>
                       )}
@@ -1479,7 +1479,7 @@ function CheckoutContent() {
                         </span>
                       )}
                     </div>
-                    <span className="text-[#5a6c5b] font-bold text-right">
+                    <span className="text-[#435664] font-bold text-right">
                       {currentStep < 2 ? (
                         <span className="text-gray-400">-</span>
                       ) : selectedShipping && shippingCost >= 0 ? (
@@ -1496,27 +1496,27 @@ function CheckoutContent() {
                 </div>
                 <div className="flex justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[#5a6c5b]/70 font-medium">
+                    <span className="text-[#435664]/70 font-medium">
                       Biaya Layanan
                     </span>
-                    <span className="text-xs text-[#5a6c5b]/50 mt-0.5">
+                    <span className="text-xs text-[#435664]/50 mt-0.5">
                       5% dari subtotal
                     </span>
                   </div>
-                  <span className="text-[#5a6c5b] font-bold">
+                  <span className="text-[#435664] font-bold">
                     Rp {serviceFee.toLocaleString("id-ID")}
                   </span>
                 </div>
               </div>
 
               {/* Total */}
-              <div className="pt-4 border-t-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 -mx-4 px-4 -mb-4 pb-4 rounded-b-2xl">
+              <div className="pt-4 border-t-2 border-[#a3af87]/20 bg-gradient-to-br from-[#a3af87]/10 to-[#a3af87]/5 -mx-4 px-4 -mb-4 pb-4 rounded-b-2xl">
                 <div className="flex flex-col gap-1">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-[#5a6c5b] text-base">
+                    <span className="font-bold text-[#435664] text-base">
                       Total Pembayaran
                     </span>
-                    <span className="text-xl font-bold text-[#5a6c5b]">
+                    <span className="text-xl font-bold text-[#435664]">
                       Rp {total.toLocaleString("id-ID")}
                     </span>
                   </div>
@@ -1525,59 +1525,59 @@ function CheckoutContent() {
             </div>
 
             {/* Trust Badges - Mobile Enhanced */}
-            <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-white via-green-50/30 to-[#A3AF87]/10 rounded-2xl p-4 overflow-hidden relative">
+            <div className="border-2 border-[#a3af87]/20 bg-gradient-to-br from-white via-green-50/30 to-[#a3af87]/10 rounded-2xl p-4 overflow-hidden relative">
               {/* Background Pattern */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#A3AF87]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#a3af87]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
               {/* Header with Shield Icon */}
               <div className="flex items-center gap-3 mb-4 relative">
-                <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6d] rounded-xl shadow-lg shadow-[#A3AF87]/30">
+                <div className="p-2 bg-gradient-to-br from-[#a3af87] to-[#8a9a6d] rounded-xl shadow-lg shadow-[#a3af87]/30">
                   <Shield className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#5a6c5b] text-sm">
+                  <h4 className="font-bold text-[#435664] text-sm">
                     Jaminan Belanja Aman
                   </h4>
-                  <p className="text-xs text-[#5a6c5b]/60">Belanja dengan tenang</p>
+                  <p className="text-xs text-[#435664]/60">Belanja dengan tenang</p>
                 </div>
               </div>
 
               {/* Trust Items - Compact Grid */}
               <div className="grid grid-cols-2 gap-2 relative">
                 {/* 100% Original */}
-                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 text-center">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center mb-2 shadow-sm">
                     <BadgeCheck className="h-5 w-5 text-emerald-600" />
                   </div>
-                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">100% Original</p>
-                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Produk asli berkualitas</p>
+                  <p className="text-xs font-bold text-[#435664] mb-0.5">100% Original</p>
+                  <p className="text-[10px] text-[#435664]/60 leading-tight">Produk asli berkualitas</p>
                 </div>
 
                 {/* Secure Payment */}
-                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 text-center">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center mb-2 shadow-sm">
                     <Lock className="h-5 w-5 text-blue-600" />
                   </div>
-                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">Pembayaran Aman</p>
-                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Enkripsi SSL 256-bit</p>
+                  <p className="text-xs font-bold text-[#435664] mb-0.5">Pembayaran Aman</p>
+                  <p className="text-[10px] text-[#435664]/60 leading-tight">Enkripsi SSL 256-bit</p>
                 </div>
 
                 {/* Fast Delivery */}
-                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 text-center">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center mb-2 shadow-sm">
                     <Truck className="h-5 w-5 text-orange-600" />
                   </div>
-                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">Pengiriman Cepat</p>
-                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Dikemas dengan hati</p>
+                  <p className="text-xs font-bold text-[#435664] mb-0.5">Pengiriman Cepat</p>
+                  <p className="text-[10px] text-[#435664]/60 leading-tight">Dikemas dengan hati</p>
                 </div>
 
                 {/* Customer Support */}
-                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#A3AF87]/10 text-center">
+                <div className="flex flex-col items-center p-3 bg-white/80 rounded-xl border border-[#a3af87]/10 text-center">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center mb-2 shadow-sm">
                     <Headphones className="h-5 w-5 text-teal-600" />
                   </div>
-                  <p className="text-xs font-bold text-[#5a6c5b] mb-0.5">Support 24/7</p>
-                  <p className="text-[10px] text-[#5a6c5b]/60 leading-tight">Siap bantu kapan saja</p>
+                  <p className="text-xs font-bold text-[#435664] mb-0.5">Support 24/7</p>
+                  <p className="text-[10px] text-[#435664]/60 leading-tight">Siap bantu kapan saja</p>
                 </div>
               </div>
 
@@ -1585,21 +1585,21 @@ function CheckoutContent() {
               <div className="mt-3 space-y-2">
                 <div className="flex items-center gap-2 p-2.5 bg-white/60 rounded-lg">
                   <RefreshCcw className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                  <p className="text-[11px] text-[#5a6c5b]/70">
-                    <span className="font-semibold text-[#5a6c5b]">Garansi Kepuasan:</span> Komplain produk rusak diproses cepat
+                  <p className="text-[11px] text-[#435664]/70">
+                    <span className="font-semibold text-[#435664]">Garansi Kepuasan:</span> Komplain produk rusak diproses cepat
                   </p>
                 </div>
                 <div className="flex items-center gap-2 p-2.5 bg-white/60 rounded-lg">
                   <Leaf className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <p className="text-[11px] text-[#5a6c5b]/70">
-                    <span className="font-semibold text-[#5a6c5b]">Eco-Friendly:</span> Kemasan ramah lingkungan
+                  <p className="text-[11px] text-[#435664]/70">
+                    <span className="font-semibold text-[#435664]">Eco-Friendly:</span> Kemasan ramah lingkungan
                   </p>
                 </div>
               </div>
 
               {/* Trust Seal */}
-              <div className="mt-3 pt-3 border-t border-[#A3AF87]/20">
-                <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#5a6c5b]/70">
+              <div className="mt-3 pt-3 border-t border-[#a3af87]/20">
+                <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#435664]/70">
                   <Lock className="h-3 w-3" />
                   <span className="font-medium">Transaksi 100% Aman & Terlindungi</span>
                 </div>
@@ -1607,8 +1607,8 @@ function CheckoutContent() {
             </div>
 
             {/* Help Section */}
-            <div className="border-2 border-[#A3AF87]/20 bg-gradient-to-br from-[#A3AF87]/10 to-white rounded-2xl p-4">
-              <h4 className="font-bold text-[#5a6c5b] text-sm mb-3">
+            <div className="border-2 border-[#a3af87]/20 bg-gradient-to-br from-[#a3af87]/10 to-white rounded-2xl p-4">
+              <h4 className="font-bold text-[#435664] text-sm mb-3">
                 Butuh Bantuan?
               </h4>
               <p className="text-xs text-gray-600 mb-3">
@@ -1619,7 +1619,7 @@ function CheckoutContent() {
                 href="https://wa.me/6282288953268"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#A3AF87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"
               >
                 <svg
                   className="h-5 w-5"

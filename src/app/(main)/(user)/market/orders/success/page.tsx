@@ -194,9 +194,9 @@ function OrderSuccessContent() {
     if (paymentStatus === "settlement" || paymentStatus === "capture" || paymentStatus === "paid") {
       return {
         icon: CheckCircle,
-        color: "text-green-600",
-        bgColor: "bg-green-50",
-        borderColor: "border-green-200",
+        color: "text-[#435664]",
+        bgColor: "bg-gradient-to-br from-[#fdf8d4] to-[#ebfba8]/30",
+        borderColor: "border-[#a3af87]",
         title: "Pembayaran Berhasil!",
         message: "Terima kasih, pembayaran Anda telah berhasil diproses.",
       };
@@ -224,10 +224,70 @@ function OrderSuccessContent() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-500">Memuat data pesanan...</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid lg:grid-cols-5 gap-8">
+            {/* Main Content Skeleton - Left */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Header Card Skeleton */}
+              <div className="rounded-2xl shadow-xl border-2 border-gray-200 bg-[#fdf8d4]/20 p-6 sm:p-8">
+                <div className="flex flex-col items-center mb-6">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-full mb-4 animate-pulse"></div>
+                  <div className="h-8 w-64 bg-gray-200 rounded-lg mb-2 animate-pulse"></div>
+                  <div className="h-4 w-48 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+                <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-200">
+                  <div className="h-4 w-20 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-6 w-48 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Details Card Skeleton */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8">
+                <div className="h-6 w-40 bg-gray-200 rounded-lg mb-5 animate-pulse"></div>
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-xl animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar Skeleton - Right */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Actions Card Skeleton */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
+                <div className="h-6 w-24 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+                <div className="space-y-3">
+                  <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+                  <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Info Card Skeleton */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                <div className="h-5 w-32 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-full bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -236,13 +296,13 @@ function OrderSuccessContent() {
   // Error state
   if (error || !transactionData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-800 mb-2">{error || "Data transaksi tidak ditemukan"}</h2>
           <Link
             href="/market/products"
-            className="mt-4 inline-block px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
+            className="mt-4 inline-block px-4 py-2 bg-[#a3af87] text-white rounded-lg hover:bg-[#95a17a] transition-colors"
           >
             Kembali ke Produk
           </Link>
@@ -258,7 +318,7 @@ function OrderSuccessContent() {
   const items = transactionData.items || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10">
+    <div className="min-h-screen bg-white">
       {(
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="grid lg:grid-cols-5 gap-8">
@@ -300,7 +360,7 @@ function OrderSuccessContent() {
                       <p className="text-xs text-gray-500 font-medium mb-1">
                         ID Pesanan
                       </p>
-                      <p className="text-lg sm:text-xl font-bold text-[#5a6c5b]">
+                      <p className="text-lg sm:text-xl font-bold text-[#435664]">
                         {transactionData.orderId}
                       </p>
                     </div>
@@ -315,7 +375,7 @@ function OrderSuccessContent() {
                       </button>
                       <button
                         onClick={copyOrderId}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-[#5a6c5b] hover:bg-gray-100 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-[#435664] hover:bg-gray-100 transition-colors"
                       >
                         {copied ? (
                           <>
@@ -418,18 +478,20 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl border border-[#A3AF87]/20 p-6 sm:p-8"
+                className="bg-white rounded-2xl shadow-xl border border-[#a3af87]/20 p-6 sm:p-8"
               >
-                <h2 className="text-lg font-bold text-[#5a6c5b] mb-5 flex items-center gap-2">
-                  <Package className="h-5 w-5 text-[#A3AF87]" />
+                <h2 className="text-lg font-bold text-[#435664] mb-5 flex items-center gap-2">
+                  <div className="p-1.5 bg-[#fdf8d4] rounded-lg">
+                    <Package className="h-5 w-5 text-[#435664]" />
+                  </div>
                   Detail Pesanan
                 </h2>
 
                 <div className="space-y-4">
                   {/* Products */}
                   {items.map((item: any) => (
-                    <div key={item.id} className="flex items-start gap-4 p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl flex items-center justify-center border border-[#A3AF87]/20 overflow-hidden">
+                    <div key={item.id} className="flex items-start gap-4 p-4 bg-[#a3af87]/5 rounded-xl border border-[#a3af87]/10">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl flex items-center justify-center border border-[#a3af87]/20 overflow-hidden">
                         {item.product_image && (
                           <img
                             src={item.product_image}
@@ -439,13 +501,13 @@ function OrderSuccessContent() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-[#5a6c5b] mb-1">
+                        <p className="font-bold text-[#435664] mb-1">
                           {item.product_name}
                         </p>
                         <p className="text-sm text-gray-500">
                           {item.quantity} {item.unit} × Rp {item.unit_price.toLocaleString("id-ID")}
                         </p>
-                        <p className="text-lg font-bold text-[#5a6c5b] mt-2">
+                        <p className="text-lg font-bold text-[#435664] mt-2">
                           Rp {item.subtotal.toLocaleString("id-ID")}
                         </p>
                       </div>
@@ -454,16 +516,16 @@ function OrderSuccessContent() {
 
                   {/* Shipping Info */}
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
+                    <div className="p-4 bg-[#fdf8d4]/30 rounded-xl border border-[#435664]/10">
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
-                          <MapPin className="h-4 w-4 text-white" />
+                        <div className="w-8 h-8 bg-[#fdf8d4] rounded-lg flex items-center justify-center border border-[#435664]/20">
+                          <MapPin className="h-4 w-4 text-[#435664]" />
                         </div>
                         <p className="text-xs font-semibold text-gray-500 uppercase">
                           Alamat Pengiriman
                         </p>
                       </div>
-                      <p className="font-semibold text-[#5a6c5b] text-sm">
+                      <p className="font-semibold text-[#435664] text-sm">
                         {transaction.customer_name}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
@@ -474,23 +536,23 @@ function OrderSuccessContent() {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
+                    <div className="p-4 bg-[#fdf8d4]/30 rounded-xl border border-[#435664]/10">
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
-                          <Truck className="h-4 w-4 text-white" />
+                        <div className="w-8 h-8 bg-[#fdf8d4] rounded-lg flex items-center justify-center border border-[#435664]/20">
+                          <Truck className="h-4 w-4 text-[#435664]" />
                         </div>
                         <p className="text-xs font-semibold text-gray-500 uppercase">
                           Metode Pengiriman
                         </p>
                       </div>
-                      <p className="font-semibold text-[#5a6c5b] text-sm">
+                      <p className="font-semibold text-[#435664] text-sm">
                         {transaction.shipping_method}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         Est: {transaction.estimated_delivery}
                       </p>
                       {transaction.shipping_tracking_number && (
-                        <p className="text-xs text-[#5a6c5b] mt-2 font-mono font-bold">
+                        <p className="text-xs text-[#435664] mt-2 font-mono font-bold">
                           Resi: {transaction.shipping_tracking_number}
                         </p>
                       )}
@@ -498,17 +560,17 @@ function OrderSuccessContent() {
                   </div>
 
                   {/* Payment Info */}
-                  <div className="p-4 bg-[#A3AF87]/5 rounded-xl border border-[#A3AF87]/10">
+                  <div className="p-4 bg-[#fdf8d4]/30 rounded-xl border border-[#435664]/10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#A3AF87] rounded-lg flex items-center justify-center">
-                          <CreditCard className="h-4 w-4 text-white" />
+                        <div className="w-8 h-8 bg-[#fdf8d4] rounded-lg flex items-center justify-center border border-[#435664]/20">
+                          <CreditCard className="h-4 w-4 text-[#435664]" />
                         </div>
                         <div>
                           <p className="text-xs font-semibold text-gray-500 uppercase">
                             Pembayaran
                           </p>
-                          <p className="font-semibold text-[#5a6c5b] text-sm">
+                          <p className="font-semibold text-[#435664] text-sm">
                             {payment?.payment_type ? payment.payment_type.replace(/_/g, " ").toUpperCase() : "Midtrans"}
                           </p>
                         </div>
@@ -545,19 +607,19 @@ function OrderSuccessContent() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Subtotal</span>
-                        <span className="font-bold text-[#5a6c5b]">
+                        <span className="font-bold text-[#435664]">
                           Rp {transaction.subtotal.toLocaleString("id-ID")}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Ongkir</span>
-                        <span className="font-bold text-[#5a6c5b]">
+                        <span className="font-bold text-[#435664]">
                           {transaction.shipping_cost === 0 ? "GRATIS" : `Rp ${transaction.shipping_cost.toLocaleString("id-ID")}`}
                         </span>
                       </div>
                       <div className="flex justify-between pt-2 border-t-2 border-gray-300">
-                        <span className="font-bold text-[#5a6c5b]">Total</span>
-                        <span className="text-xl font-bold text-[#5a6c5b]">
+                        <span className="font-bold text-[#435664]">Total</span>
+                        <span className="text-xl font-bold text-[#435664]">
                           Rp {transactionData.total.toLocaleString("id-ID")}
                         </span>
                       </div>
@@ -574,16 +636,21 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl shadow-xl border border-[#A3AF87]/20 p-6"
+                className="bg-[#fdf8d4]/30 rounded-2xl shadow-xl border-2 border-[#435664]/20 p-6"
               >
-                <h3 className="text-lg font-bold text-[#5a6c5b] mb-4">
+                <h3 className="text-lg font-bold text-[#435664] mb-4 flex items-center gap-2">
+                  <div className="p-1.5 bg-[#fdf8d4] rounded-lg border border-[#435664]/20">
+                    <svg className="w-5 h-5 text-[#435664]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
                   Tindakan
                 </h3>
                 <div className="space-y-3">
                   {/* Cetak PDF Invoice */}
                   <button
                     onClick={handleDownloadPDF}
-                    className="group w-full py-3.5 bg-[#A3AF87] text-white rounded-xl text-sm font-bold hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2"
+                    className="group w-full py-3.5 bg-[#a3af87] text-white rounded-xl text-sm font-bold hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
                   >
                     <Download className="h-5 w-5" />
                     Cetak PDF Invoice
@@ -593,7 +660,7 @@ function OrderSuccessContent() {
                   {/* Lanjut Belanja */}
                   <Link
                     href="/market/products"
-                    className="group w-full py-3.5 border-2 border-[#A3AF87] text-[#5a6c5b] rounded-xl text-sm font-bold hover:bg-[#A3AF87]/10 transition-all text-center flex items-center justify-center gap-2"
+                    className="group w-full py-3.5 border-2 border-[#a3af87] text-[#435664] rounded-xl text-sm font-bold hover:bg-[#a3af87]/10 transition-all text-center flex items-center justify-center gap-2"
                   >
                     <ShoppingBag className="h-5 w-5" />
                     Lanjut Belanja
@@ -603,7 +670,7 @@ function OrderSuccessContent() {
                   {/* Lihat Semua Pesanan */}
                   <Link
                     href="/transaction"
-                    className="block w-full py-3 text-gray-500 text-sm text-center hover:text-[#5a6c5b] font-medium transition-colors"
+                    className="block w-full py-3 text-gray-500 text-sm text-center hover:text-[#435664] font-medium transition-colors"
                   >
                     Lihat Semua Pesanan
                   </Link>
@@ -615,9 +682,14 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-gradient-to-br from-[#A3AF87]/10 to-white rounded-2xl border border-[#A3AF87]/20 p-6"
+                className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#435664]/20 p-6"
               >
-                <h3 className="text-sm font-bold text-[#5a6c5b] mb-4">
+                <h3 className="text-sm font-bold text-[#435664] mb-4 flex items-center gap-2">
+                  <div className="p-1.5 bg-[#fdf8d4] rounded-lg border border-[#435664]/20">
+                    <svg className="w-4 h-4 text-[#435664]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                  </div>
                   Langkah Selanjutnya
                 </h3>
                 <div className="space-y-4">
@@ -628,7 +700,7 @@ function OrderSuccessContent() {
                           <span className="text-sm font-bold text-orange-700">1</span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                          <p className="text-sm font-semibold text-[#435664]">
                             Selesaikan Pembayaran
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -637,11 +709,11 @@ function OrderSuccessContent() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-[#5a6c5b]">2</span>
+                        <div className="w-8 h-8 rounded-full bg-[#fdf8d4] border border-[#435664]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#435664]">2</span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                          <p className="text-sm font-semibold text-[#435664]">
                             Konfirmasi Otomatis
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -650,11 +722,11 @@ function OrderSuccessContent() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-[#5a6c5b]">3</span>
+                        <div className="w-8 h-8 rounded-full bg-[#fdf8d4] border border-[#435664]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#435664]">3</span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                          <p className="text-sm font-semibold text-[#435664]">
                             Pesanan Diproses
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -666,11 +738,11 @@ function OrderSuccessContent() {
                   ) : (
                     <>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                          <CheckCircle className="h-4 w-4 text-green-700" />
+                        <div className="w-8 h-8 rounded-full bg-[#ebfba8] border border-[#435664]/20 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="h-4 w-4 text-[#435664]" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                          <p className="text-sm font-semibold text-[#435664]">
                             Pembayaran Diterima
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -679,11 +751,11 @@ function OrderSuccessContent() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-[#5a6c5b]">2</span>
+                        <div className="w-8 h-8 rounded-full bg-[#fdf8d4] border border-[#435664]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#435664]">2</span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                          <p className="text-sm font-semibold text-[#435664]">
                             Pesanan Dikemas
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -692,11 +764,11 @@ function OrderSuccessContent() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#A3AF87]/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-[#5a6c5b]">3</span>
+                        <div className="w-8 h-8 rounded-full bg-[#fdf8d4] border border-[#435664]/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-[#435664]">3</span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#5a6c5b]">
+                          <p className="text-sm font-semibold text-[#435664]">
                             Pesanan Dikirim
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -714,9 +786,14 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white rounded-2xl shadow-lg border border-[#A3AF87]/20 p-5"
+                className="bg-[#fdf8d4]/30 rounded-2xl shadow-lg border-2 border-[#435664]/20 p-5"
               >
-                <h3 className="text-sm font-bold text-[#5a6c5b] mb-3">
+                <h3 className="text-sm font-bold text-[#435664] mb-3 flex items-center gap-2">
+                  <div className="p-1.5 bg-[#fdf8d4] rounded-lg border border-[#435664]/20">
+                    <svg className="w-4 h-4 text-[#435664]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
                   Butuh Bantuan?
                 </h3>
                 <p className="text-xs text-gray-500 mb-4">
@@ -748,10 +825,70 @@ function OrderSuccessContent() {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#A3AF87]/5 via-white to-[#A3AF87]/10 flex items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="h-12 w-12 animate-spin text-[#A3AF87] mx-auto mb-4" />
-        <p className="text-gray-500">Memuat data pesanan...</p>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* Main Content Skeleton - Left */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Header Card Skeleton */}
+            <div className="rounded-2xl shadow-xl border-2 border-gray-200 bg-[#fdf8d4]/20 p-6 sm:p-8">
+              <div className="flex flex-col items-center mb-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-full mb-4 animate-pulse"></div>
+                <div className="h-8 w-64 bg-gray-200 rounded-lg mb-2 animate-pulse"></div>
+                <div className="h-4 w-48 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+              <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-200">
+                <div className="h-4 w-20 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                <div className="h-6 w-48 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Details Card Skeleton */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8">
+              <div className="h-6 w-40 bg-gray-200 rounded-lg mb-5 animate-pulse"></div>
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Skeleton - Right */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Actions Card Skeleton */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
+              <div className="h-6 w-24 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+              <div className="space-y-3">
+                <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+                <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Info Card Skeleton */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="h-5 w-32 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 w-full bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

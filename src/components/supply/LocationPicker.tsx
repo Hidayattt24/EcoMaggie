@@ -180,16 +180,16 @@ export default function LocationPicker({
   });
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-3 sm:space-y-4">
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleUseMyLocation}
           disabled={isLoadingLocation}
           type="button"
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all shadow-md ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all shadow-md ${
             isLoadingLocation
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white hover:shadow-lg"
@@ -198,12 +198,14 @@ export default function LocationPicker({
           {isLoadingLocation ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Mendapatkan Lokasi...
+              <span className="hidden sm:inline">Mendapatkan Lokasi...</span>
+              <span className="sm:hidden">Memuat...</span>
             </>
           ) : (
             <>
               <Navigation className="h-4 w-4" />
-              Gunakan Lokasi Saya
+              <span className="hidden sm:inline">Gunakan Lokasi Saya</span>
+              <span className="sm:hidden">Lokasi Saya</span>
             </>
           )}
         </motion.button>
@@ -216,7 +218,7 @@ export default function LocationPicker({
             whileTap={{ scale: 0.98 }}
             onClick={handleClearLocation}
             type="button"
-            className="flex items-center gap-2 px-5 py-3 bg-red-50 text-red-600 rounded-xl font-semibold text-sm hover:bg-red-100 transition-colors border-2 border-red-200"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-red-50 text-red-600 rounded-xl font-semibold text-xs sm:text-sm hover:bg-red-100 transition-colors border-2 border-red-200"
           >
             <X className="h-4 w-4" />
             Hapus Lokasi
@@ -249,7 +251,7 @@ export default function LocationPicker({
       </AnimatePresence>
 
       {/* Map Container */}
-      <div className="relative rounded-2xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-xl h-[450px] isolate">
+      <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-xl h-[300px] sm:h-[400px] lg:h-[450px] isolate">
         {/* Hint Text - Top Center */}
         <AnimatePresence>
           {!selectedPosition && (
@@ -257,9 +259,9 @@ export default function LocationPicker({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-gray-200 pointer-events-none"
+              className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white/90 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg border border-gray-200 pointer-events-none"
             >
-              <p className="text-xs font-semibold text-gray-700">
+              <p className="text-[10px] sm:text-xs font-semibold text-gray-700">
                 👆 Ketuk peta untuk memilih lokasi
               </p>
             </motion.div>
@@ -268,10 +270,10 @@ export default function LocationPicker({
 
         {/* Loading Geocoding Indicator */}
         {isReverseGeocoding && (
-          <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-lg border border-gray-200 pointer-events-none">
-            <div className="flex items-center gap-2">
+          <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-white/90 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-full shadow-lg border border-gray-200 pointer-events-none">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Loader2 className="h-3 w-3 text-[#A3AF87] animate-spin" />
-              <span className="text-xs font-medium text-gray-700">Memuat alamat...</span>
+              <span className="text-[10px] sm:text-xs font-medium text-gray-700">Memuat alamat...</span>
             </div>
           </div>
         )}
@@ -317,28 +319,28 @@ export default function LocationPicker({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
           >
-            <div className="bg-white rounded-2xl p-5 shadow-lg border-2 border-[#A3AF87]/30">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-green-100 rounded-xl flex-shrink-0">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-lg border-2 border-[#A3AF87]/30">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-green-100 rounded-lg sm:rounded-xl flex-shrink-0">
+                  <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-green-600 mb-2">
+                  <p className="text-xs sm:text-sm font-bold text-green-600 mb-1 sm:mb-2">
                     Lokasi Terpilih
                   </p>
-                  <p className="text-base font-bold text-gray-900 mb-3">
+                  <p className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3 break-words">
                     {address}
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-500">Latitude:</span>
-                      <span className="font-mono bg-gray-100 px-3 py-1 rounded-lg font-medium">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-600">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="font-semibold text-gray-500 text-[10px] sm:text-xs">Lat:</span>
+                      <span className="font-mono bg-gray-100 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg font-medium text-[10px] sm:text-xs">
                         {selectedPosition[0].toFixed(6)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-500">Longitude:</span>
-                      <span className="font-mono bg-gray-100 px-3 py-1 rounded-lg font-medium">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="font-semibold text-gray-500 text-[10px] sm:text-xs">Lng:</span>
+                      <span className="font-mono bg-gray-100 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg font-medium text-[10px] sm:text-xs">
                         {selectedPosition[1].toFixed(6)}
                       </span>
                     </div>
@@ -354,10 +356,10 @@ export default function LocationPicker({
       <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200">
         <AlertCircle className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
-          <p className="text-xs text-blue-900 font-medium mb-1">
+          <p className="text-xs sm:text-sm text-blue-900 font-medium mb-0.5 sm:mb-1">
             Tips: Geser marker untuk menyesuaikan posisi
           </p>
-          <p className="text-xs text-blue-700">
+          <p className="text-[10px] sm:text-xs text-blue-700">
             Lokasi yang presisi membantu kurir menemukan titik penjemputan dengan mudah
           </p>
         </div>

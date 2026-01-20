@@ -84,7 +84,7 @@ export default function ProductCard({
             icon: "warning",
             title: "Login Diperlukan",
             text: "Silakan login untuk menambahkan produk ke keranjang",
-            confirmButtonColor: "#A3AF87",
+            confirmButtonColor: "#a3af87",
             customClass: {
               popup: "rounded-3xl shadow-2xl border border-gray-100",
               title: "text-lg font-bold text-[#5a6c5b]",
@@ -101,7 +101,7 @@ export default function ProductCard({
             icon: "error",
             title: "Gagal",
             text: result.message || "Gagal menambahkan ke keranjang",
-            confirmButtonColor: "#A3AF87",
+            confirmButtonColor: "#a3af87",
             customClass: {
               popup: "rounded-3xl shadow-2xl border border-gray-100",
               title: "text-lg font-bold text-[#5a6c5b]",
@@ -181,7 +181,7 @@ export default function ProductCard({
           >
             <div className="bg-white rounded-full p-4 sm:p-6 shadow-2xl">
               <motion.svg
-                className="h-12 w-12 sm:h-16 sm:w-16 text-[#A3AF87]"
+                className="h-12 w-12 sm:h-16 sm:w-16 text-[#a3af87]"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={3}
@@ -242,7 +242,7 @@ export default function ProductCard({
                 className="w-2 h-2 rounded-full"
                 style={{
                   backgroundColor:
-                    particle.id % 2 === 0 ? "#A3AF87" : "#FDF8D4",
+                    particle.id % 2 === 0 ? "#a3af87" : "#fdf8d4",
                   boxShadow: "0 0 8px rgba(163, 175, 135, 0.6)",
                 }}
               />
@@ -255,7 +255,7 @@ export default function ProductCard({
             animate={{ scale: 3, opacity: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
             className="absolute w-20 h-20 rounded-full border-4"
-            style={{ borderColor: "#A3AF87" }}
+            style={{ borderColor: "#a3af87" }}
           />
 
           {/* Secondary Ring */}
@@ -264,7 +264,7 @@ export default function ProductCard({
             animate={{ scale: 3.5, opacity: 0 }}
             transition={{ duration: 1.2, delay: 0.1, ease: "easeOut" }}
             className="absolute w-20 h-20 rounded-full border-2"
-            style={{ borderColor: "#A3AF87" }}
+            style={{ borderColor: "#a3af87" }}
           />
         </div>
       )}
@@ -360,10 +360,11 @@ export default function ProductCard({
 
         {/* Category Badge */}
         <div
-          className="absolute top-1.5 left-1.5 px-1.5 py-0.5 text-white text-[9px] font-semibold rounded-full pointer-events-none"
+          className="absolute top-1.5 left-1.5 px-1.5 py-0.5 text-[9px] font-semibold rounded-full pointer-events-none"
           style={
             {
-              backgroundColor: "rgba(163, 175, 135, 0.9)",
+              backgroundColor: "#fdf8d4",
+              color: "#303646",
             } as React.CSSProperties
           }
         >
@@ -384,7 +385,7 @@ export default function ProductCard({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
             className="absolute bottom-1.5 right-1.5 px-2 py-0.5 text-white text-[9px] font-bold rounded-full shadow-lg pointer-events-none flex items-center gap-0.5"
-            style={{ backgroundColor: "#A3AF87" }}
+            style={{ backgroundColor: "#a3af87" }}
           >
             <svg
               className="h-2.5 w-2.5"
@@ -485,11 +486,11 @@ export default function ProductCard({
             onClick={handleAddToCart}
             disabled={isAdding}
             className={`flex-1 text-white py-1.5 rounded-md font-semibold text-[10px] transition-all relative overflow-hidden disabled:opacity-70 ${
-              isInCart ? "ring-2 ring-[#A3AF87] ring-offset-1" : ""
+              isInCart ? "ring-2 ring-[#a3af87] ring-offset-1" : ""
             }`}
             style={
               {
-                backgroundColor: "#A3AF87",
+                backgroundColor: "#a3af87",
               } as React.CSSProperties
             }
             whileHover={{
@@ -519,7 +520,7 @@ export default function ProductCard({
             {isAdding && (
               <>
                 <motion.div
-                  className="absolute inset-0 bg-[#A3AF87] rounded-md"
+                  className="absolute inset-0 bg-[#a3af87] rounded-md"
                   animate={{
                     opacity: [0.3, 0.6, 0.3],
                     scale: [1, 1.05, 1],
@@ -636,7 +637,7 @@ export default function ProductCard({
                 {[...Array(6)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="absolute w-1 h-1 bg-[#FDF8D4] rounded-full"
+                    className="absolute w-1 h-1 bg-[#fdf8d4] rounded-full"
                     style={{
                       left: `${20 + i * 12}%`,
                       top: "50%",

@@ -255,13 +255,115 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
     }
   };
 
-  // Loading state
+  // Loading state with skeleton
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#A3AF87] mx-auto mb-4" />
-          <p className="text-gray-600">Memuat data supply...</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Header Skeleton */}
+          <div className="mb-8 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-40 mb-4"></div>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-40"></div>
+              </div>
+              <div className="h-10 bg-gray-200 rounded-xl w-32"></div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-4 lg:gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-4 space-y-4 lg:space-y-6">
+              {/* Supplier Card Skeleton */}
+              <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-32 mb-4"></div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-32"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-28"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Waste Info Skeleton */}
+              <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-32 mb-4"></div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-36"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-24 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-20"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pickup Info Skeleton */}
+              <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-32 mb-4"></div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-full mb-1"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-20 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-40"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-5 bg-gray-300 rounded w-32"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="lg:col-span-8 space-y-4 lg:space-y-6">
+              {/* Driver Form Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-40 mb-4"></div>
+                <div className="space-y-4">
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-28 mb-2"></div>
+                    <div className="h-12 bg-gray-200 rounded-xl"></div>
+                  </div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-36 mb-2"></div>
+                    <div className="h-12 bg-gray-200 rounded-xl"></div>
+                  </div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                    <div className="h-12 bg-gray-200 rounded-xl"></div>
+                  </div>
+                  <div className="h-12 bg-gray-200 rounded-xl"></div>
+                </div>
+              </div>
+
+              {/* Internal Notes Skeleton */}
+              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-36 mb-4"></div>
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+                  <div className="h-24 bg-gray-200 rounded-xl"></div>
+                </div>
+              </div>
+
+              {/* Action Buttons Skeleton */}
+              <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl border-2 border-gray-200 p-6 animate-pulse">
+                <div className="h-5 bg-gray-300 rounded w-40 mb-4"></div>
+                <div className="h-14 bg-gray-300 rounded-xl"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

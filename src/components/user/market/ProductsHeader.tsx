@@ -14,12 +14,15 @@ export default function ProductsHeader({
       <div
         className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
         style={
-          { backgroundColor: "rgba(163, 175, 135, 0.1)" } as React.CSSProperties
+          {
+            backgroundColor: "#fdf8d4",
+            border: "2px solid #ebfba8",
+          } as React.CSSProperties
         }
       >
         <svg
           className="h-4 w-4"
-          style={{ color: "#A3AF87" } as React.CSSProperties}
+          style={{ color: "#435664" } as React.CSSProperties}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -27,23 +30,29 @@ export default function ProductsHeader({
         </svg>
         <span
           className="text-xs font-bold tracking-wider uppercase font-poppins"
-          style={{ color: "#A3AF87" } as React.CSSProperties}
+          style={{ color: "#303646" } as React.CSSProperties}
         >
           Market Pengolahan Maggot
         </span>
       </div>
 
-      <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-4 leading-tight font-poppins">
+      <h1
+        className="text-2xl lg:text-3xl xl:text-4xl font-bold mb-4 leading-tight font-poppins"
+        style={{ color: "#303646" } as React.CSSProperties}
+      >
         DI MANA{" "}
         <span style={{ color: "#A3AF87" } as React.CSSProperties}>
           TEKNOLOGI
         </span>
         <br />
         BERTEMU{" "}
-        <span style={{ color: "#A3AF87" } as React.CSSProperties}>ALAM</span>
+        <span style={{ color: "#435664" } as React.CSSProperties}>ALAM</span>
       </h1>
 
-      <p className="text-sm lg:text-base text-gray-600 mb-8 leading-relaxed font-poppins max-w-3xl mx-auto">
+      <p
+        className="text-sm lg:text-base mb-8 leading-relaxed font-poppins max-w-3xl mx-auto"
+        style={{ color: "#435664" } as React.CSSProperties}
+      >
         EcoMaggie memanfaatkan teknologi untuk mendukung pengelolaan sampah
         organik yang lebih{" "}
         <span

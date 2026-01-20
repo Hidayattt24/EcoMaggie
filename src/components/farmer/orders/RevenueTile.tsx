@@ -39,7 +39,7 @@ export const RevenueTile = React.memo(({ stats }: RevenueTileProps) => {
           </div>
         </div>
         {/* Dynamic Growth Badge */}
-        {hasGrowthData && (
+        {/* {hasGrowthData && (
           <div
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
               isPositiveGrowth ? "bg-emerald-50" : "bg-red-50"
@@ -59,7 +59,7 @@ export const RevenueTile = React.memo(({ stats }: RevenueTileProps) => {
               {stats.orderGrowth} order
             </span>
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

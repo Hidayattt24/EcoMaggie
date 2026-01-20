@@ -146,28 +146,26 @@ export function NavbarUser() {
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/wishlist"
                   ? "shadow-md scale-105"
-                  : "text-gray-700"
+                  : ""
               }`}
               style={
                 {
                   backgroundColor:
                     pathname === "/wishlist"
-                      ? "rgba(163, 175, 135, 0.1)"
+                      ? "rgba(235, 251, 168, 0.5)"
                       : "transparent",
-                  color: pathname === "/wishlist" ? "#A3AF87" : undefined,
+                  color: pathname === "/wishlist" ? "#303646" : "#303646",
                 } as React.CSSProperties
               }
               onMouseEnter={(e) => {
                 if (pathname !== "/wishlist") {
                   e.currentTarget.style.backgroundColor =
-                    "rgba(163, 175, 135, 0.1)";
-                  e.currentTarget.style.color = "#A3AF87";
+                    "rgba(235, 251, 168, 0.3)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (pathname !== "/wishlist") {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "";
                 }
               }}
               title="Wishlist"
@@ -187,8 +185,8 @@ export function NavbarUser() {
               </svg>
               {wishlistCount > 0 && (
                 <span
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: "#A3AF87" }}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
+                  style={{ backgroundColor: "#303646", color: "#fdf8d4" }}
                 >
                   {wishlistCount > 99 ? "99+" : wishlistCount}
                 </span>
@@ -200,28 +198,26 @@ export function NavbarUser() {
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/market/cart"
                   ? "shadow-md scale-105"
-                  : "text-gray-700"
+                  : ""
               }`}
               style={
                 {
                   backgroundColor:
                     pathname === "/market/cart"
-                      ? "rgba(163, 175, 135, 0.1)"
+                      ? "rgba(235, 251, 168, 0.5)"
                       : "transparent",
-                  color: pathname === "/market/cart" ? "#A3AF87" : undefined,
+                  color: pathname === "/market/cart" ? "#303646" : "#303646",
                 } as React.CSSProperties
               }
               onMouseEnter={(e) => {
                 if (pathname !== "/market/cart") {
                   e.currentTarget.style.backgroundColor =
-                    "rgba(163, 175, 135, 0.1)";
-                  e.currentTarget.style.color = "#A3AF87";
+                    "rgba(235, 251, 168, 0.3)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (pathname !== "/market/cart") {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "";
                 }
               }}
               title="Keranjang"
@@ -241,8 +237,8 @@ export function NavbarUser() {
               </svg>
               {cartCount > 0 && (
                 <span
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: "#A3AF87" }}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
+                  style={{ backgroundColor: "#303646", color: "#fdf8d4" }}
                 >
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
@@ -254,28 +250,26 @@ export function NavbarUser() {
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                 pathname === "/transaction"
                   ? "shadow-md scale-105"
-                  : "text-gray-700"
+                  : ""
               }`}
               style={
                 {
                   backgroundColor:
                     pathname === "/transaction"
-                      ? "rgba(163, 175, 135, 0.1)"
+                      ? "rgba(235, 251, 168, 0.5)"
                       : "transparent",
-                  color: pathname === "/transaction" ? "#A3AF87" : undefined,
+                  color: pathname === "/transaction" ? "#303646" : "#303646",
                 } as React.CSSProperties
               }
               onMouseEnter={(e) => {
                 if (pathname !== "/transaction") {
                   e.currentTarget.style.backgroundColor =
-                    "rgba(163, 175, 135, 0.1)";
-                  e.currentTarget.style.color = "#A3AF87";
+                    "rgba(235, 251, 168, 0.3)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (pathname !== "/transaction") {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "";
                 }
               }}
               title="Transaksi Saya"
@@ -295,8 +289,8 @@ export function NavbarUser() {
               </svg>
               {transactionCount > 0 && (
                 <span
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: "#A3AF87" }}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
+                  style={{ backgroundColor: "#303646", color: "#fdf8d4" }}
                 >
                   {transactionCount > 99 ? "99+" : transactionCount}
                 </span>
@@ -306,16 +300,16 @@ export function NavbarUser() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg hover:scale-105 overflow-hidden ${
+                className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg hover:scale-105 overflow-hidden ${
                   pathname?.startsWith("/profile")
                     ? "shadow-xl scale-110 ring-2 ring-offset-2"
                     : ""
                 }`}
                 style={
                   {
-                    backgroundColor: "#A3AF87",
+                    backgroundColor: "#303646",
                     borderColor: pathname?.startsWith("/profile")
-                      ? "#A3AF87"
+                      ? "#ebfba8"
                       : undefined,
                   } as React.CSSProperties
                 }
@@ -329,7 +323,7 @@ export function NavbarUser() {
                   />
                 ) : (
                   <svg
-                    className="h-5 w-5"
+                    className="h-5 w-5 text-[#fdf8d4]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -357,7 +351,7 @@ export function NavbarUser() {
                   >
                     <p
                       className="font-bold text-base"
-                      style={{ color: "#A3AF87" }}
+                      style={{ color: "#435664" }}
                     >
                       {profileLoading ? (
                         <span className="inline-block w-32 h-5 bg-gray-200 animate-pulse rounded"></span>
@@ -383,14 +377,14 @@ export function NavbarUser() {
                     >
                       <div
                         className="p-2 rounded-lg transition-all"
-                        style={{ backgroundColor: "rgba(163, 175, 135, 0.1)" }}
+                        style={{ backgroundColor: "rgba(67, 86, 100, 0.1)" }}
                       >
                         <svg
                           className="h-5 w-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
-                          style={{ color: "#A3AF87" }}
+                          style={{ color: "#435664" }}
                         >
                           <path
                             strokeLinecap="round"
@@ -465,12 +459,12 @@ export function NavbarUser() {
 
       <div className="lg:hidden fixed top-0 inset-x-0 z-50 pt-safe">
         <div className="mx-2 mt-3">
-          <div className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-4 py-3">
+          <div className="relative rounded-3xl shadow-2xl border border-gray-200/50 px-4 py-3" style={{ backgroundColor: "#fdf8d4" }}>
             <div
               className="absolute inset-0 rounded-3xl pointer-events-none"
               style={{
                 background:
-                  "linear-gradient(to right, rgba(163, 175, 135, 0.1), transparent, rgba(90, 108, 91, 0.1))",
+                  "linear-gradient(to right, rgba(235, 251, 168, 0.3), transparent, rgba(235, 251, 168, 0.3))",
               }}
             ></div>
 
@@ -490,32 +484,31 @@ export function NavbarUser() {
                 <Link
                   href="/wishlist"
                   className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
-                    pathname === "/wishlist" ? "scale-105" : "text-gray-600"
+                    pathname === "/wishlist" ? "scale-105" : ""
                   }`}
                   style={{
                     backgroundColor:
                       pathname === "/wishlist"
-                        ? "rgba(163, 175, 135, 0.1)"
+                        ? "rgba(235, 251, 168, 0.5)"
                         : "transparent",
-                    color: pathname === "/wishlist" ? "#A3AF87" : undefined,
+                    color: pathname === "/wishlist" ? "#303646" : "#303646",
                   }}
                   onMouseEnter={(e) => {
                     if (pathname !== "/wishlist") {
                       e.currentTarget.style.backgroundColor =
-                        "rgba(163, 175, 135, 0.1)";
-                      e.currentTarget.style.color = "#A3AF87";
+                        "rgba(235, 251, 168, 0.3)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (pathname !== "/wishlist") {
                       e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "";
                     }
                   }}
                   title="Wishlist"
                 >
                   <svg
                     className="h-5 w-5"
+                    style={{ color: "#303646" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -529,8 +522,8 @@ export function NavbarUser() {
                   </svg>
                   {wishlistCount > 0 && (
                     <span
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                      style={{ backgroundColor: "#A3AF87" }}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
+                      style={{ backgroundColor: "#303646", color: "#fdf8d4" }}
                     >
                       {wishlistCount > 99 ? "99+" : wishlistCount}
                     </span>
@@ -540,32 +533,31 @@ export function NavbarUser() {
                 <Link
                   href="/market/cart"
                   className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
-                    pathname === "/market/cart" ? "scale-105" : "text-gray-600"
+                    pathname === "/market/cart" ? "scale-105" : ""
                   }`}
                   style={{
                     backgroundColor:
                       pathname === "/market/cart"
-                        ? "rgba(163, 175, 135, 0.1)"
+                        ? "rgba(235, 251, 168, 0.5)"
                         : "transparent",
-                    color: pathname === "/market/cart" ? "#A3AF87" : undefined,
+                    color: pathname === "/market/cart" ? "#303646" : "#303646",
                   }}
                   onMouseEnter={(e) => {
                     if (pathname !== "/market/cart") {
                       e.currentTarget.style.backgroundColor =
-                        "rgba(163, 175, 135, 0.1)";
-                      e.currentTarget.style.color = "#A3AF87";
+                        "rgba(235, 251, 168, 0.3)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (pathname !== "/market/cart") {
                       e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "";
                     }
                   }}
                   title="Keranjang"
                 >
                   <svg
                     className="h-5 w-5"
+                    style={{ color: "#303646" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -579,8 +571,8 @@ export function NavbarUser() {
                   </svg>
                   {cartCount > 0 && (
                     <span
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                      style={{ backgroundColor: "#A3AF87" }}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
+                      style={{ backgroundColor: "#303646", color: "#fdf8d4" }}
                     >
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
@@ -590,32 +582,31 @@ export function NavbarUser() {
                 <Link
                   href="/transaction"
                   className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${
-                    pathname === "/transaction" ? "scale-105" : "text-gray-600"
+                    pathname === "/transaction" ? "scale-105" : ""
                   }`}
                   style={{
                     backgroundColor:
                       pathname === "/transaction"
-                        ? "rgba(163, 175, 135, 0.1)"
+                        ? "rgba(235, 251, 168, 0.5)"
                         : "transparent",
-                    color: pathname === "/transaction" ? "#A3AF87" : undefined,
+                    color: pathname === "/transaction" ? "#303646" : "#303646",
                   }}
                   onMouseEnter={(e) => {
                     if (pathname !== "/transaction") {
                       e.currentTarget.style.backgroundColor =
-                        "rgba(163, 175, 135, 0.1)";
-                      e.currentTarget.style.color = "#A3AF87";
+                        "rgba(235, 251, 168, 0.3)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (pathname !== "/transaction") {
                       e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "";
                     }
                   }}
                   title="Transaksi"
                 >
                   <svg
                     className="h-5 w-5"
+                    style={{ color: "#303646" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -629,8 +620,8 @@ export function NavbarUser() {
                   </svg>
                   {transactionCount > 0 && (
                     <span
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                      style={{ backgroundColor: "#A3AF87" }}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
+                      style={{ backgroundColor: "#303646", color: "#fdf8d4" }}
                     >
                       {transactionCount > 99 ? "99+" : transactionCount}
                     </span>
@@ -640,12 +631,15 @@ export function NavbarUser() {
                 <div className="relative" ref={mobileDropdownRef}>
                   <button
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-all hover:shadow-lg active:scale-95 overflow-hidden ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg active:scale-95 overflow-hidden ${
                       pathname?.startsWith("/profile")
-                        ? "shadow-xl scale-105 ring-2 ring-white"
+                        ? "shadow-xl scale-105 ring-2"
                         : ""
                     }`}
-                    style={{ backgroundColor: "#A3AF87" }}
+                    style={{
+                      backgroundColor: "#303646",
+                      borderColor: pathname?.startsWith("/profile") ? "#ebfba8" : undefined
+                    }}
                     title="Profile"
                   >
                     {profile?.avatar ? (
@@ -656,7 +650,7 @@ export function NavbarUser() {
                       />
                     ) : (
                       <svg
-                        className="h-5 w-5"
+                        className="h-5 w-5 text-[#fdf8d4]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -684,7 +678,7 @@ export function NavbarUser() {
                       >
                         <p
                           className="font-bold text-base"
-                          style={{ color: "#A3AF87" }}
+                          style={{ color: "#435664" }}
                         >
                           {profileLoading ? (
                             <span className="inline-block w-32 h-5 bg-gray-200 animate-pulse rounded"></span>
@@ -711,7 +705,7 @@ export function NavbarUser() {
                           <div
                             className="p-2 rounded-lg transition-all"
                             style={{
-                              backgroundColor: "rgba(163, 175, 135, 0.1)",
+                              backgroundColor: "rgba(67, 86, 100, 0.1)",
                             }}
                           >
                             <svg
@@ -719,7 +713,7 @@ export function NavbarUser() {
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
-                              style={{ color: "#A3AF87" }}
+                              style={{ color: "#435664" }}
                             >
                               <path
                                 strokeLinecap="round"
@@ -801,12 +795,12 @@ export function NavbarUser() {
           !pathname?.includes("/cart") &&
           !pathname?.includes("/profile") && (
             <div className="mx-2 mb-3">
-              <nav className="relative bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3">
+              <nav className="relative rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3" style={{ backgroundColor: "#fdf8d4" }}>
                 <div
                   className="absolute inset-0 rounded-3xl pointer-events-none"
                   style={{
                     background:
-                      "linear-gradient(to right, rgba(163, 175, 135, 0.1), transparent, rgba(90, 108, 91, 0.1))",
+                      "linear-gradient(to right, rgba(235, 251, 168, 0.3), transparent, rgba(235, 251, 168, 0.3))",
                   }}
                 ></div>
 
@@ -825,8 +819,7 @@ export function NavbarUser() {
                           <div
                             className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full"
                             style={{
-                              background:
-                                "linear-gradient(to right, #A3AF87, #5a6c5b)",
+                              backgroundColor: "#303646",
                             }}
                           ></div>
                         )}
@@ -835,7 +828,7 @@ export function NavbarUser() {
                           className="transition-all"
                           style={
                             {
-                              color: isActive ? "#A3AF87" : "rgb(107 114 128)",
+                              color: isActive ? "#303646" : "#435664",
                               transform: isActive ? "scale(1.1)" : undefined,
                             } as React.CSSProperties
                           }
@@ -847,7 +840,7 @@ export function NavbarUser() {
                           className="text-[10px] font-medium transition-all"
                           style={
                             {
-                              color: isActive ? "#A3AF87" : "rgb(107 114 128)",
+                              color: isActive ? "#303646" : "#435664",
                             } as React.CSSProperties
                           }
                         >

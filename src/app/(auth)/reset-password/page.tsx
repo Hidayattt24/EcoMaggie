@@ -83,6 +83,10 @@ function ResetPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isLoading) return;
+    
     setError("");
 
     if (!password) {
@@ -404,12 +408,20 @@ function ResetPasswordForm() {
             <motion.button
               type="submit"
               disabled={isLoading || !password || !confirmPassword}
+              onClick={(e) => {
+                if (isLoading || !password || !confirmPassword) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return false;
+                }
+              }}
               variants={itemVariants}
               whileHover={{ scale: isLoading ? 1 : 1.02 }}
               whileTap={{ scale: isLoading ? 1 : 0.98 }}
               className="w-full flex justify-center items-center gap-2 py-2.5 sm:py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm sm:text-base text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed poppins-semibold"
               style={{
                 backgroundColor: "#A3AF87",
+                pointerEvents: (isLoading || !password || !confirmPassword) ? "none" : "auto"
               }}
             >
               {isLoading ? (

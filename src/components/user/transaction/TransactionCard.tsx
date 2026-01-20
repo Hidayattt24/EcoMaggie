@@ -46,6 +46,8 @@ interface Transaction {
   shippingCourier?: string;
   date: string;
   trackingNumber?: string;
+  paymentExpiry?: string; // ISO date string
+  hasReviewed?: boolean; // Whether user has reviewed this order
 }
 
 interface TransactionCardProps {
@@ -165,7 +167,7 @@ function CancelModal({
                   key={r}
                   className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                     selectedReason === r
-                      ? "border-[#A3AF87] bg-[#A3AF87]/5"
+                      ? "border-[#435664] bg-[#fdf8d4]"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
@@ -175,7 +177,7 @@ function CancelModal({
                     value={r}
                     checked={selectedReason === r}
                     onChange={(e) => setSelectedReason(e.target.value)}
-                    className="w-4 h-4 text-[#A3AF87] focus:ring-[#A3AF87]"
+                    className="w-4 h-4 text-[#435664] focus:ring-[#435664]"
                   />
                   <span className="text-sm text-gray-700">{r}</span>
                 </label>
@@ -190,7 +192,7 @@ function CancelModal({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Tulis alasan pembatalan..."
-                className="w-full p-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A3AF87] resize-none"
+                className="w-full p-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#435664] resize-none"
                 rows={3}
               />
             </div>
@@ -264,17 +266,38 @@ export function TransactionCard({
   const getActionButtons = () => {
     switch (transaction.status) {
       case "unpaid":
+        // Check if payment has expired
+        const isExpired = transaction.paymentExpiry 
+          ? new Date(transaction.paymentExpiry) < new Date()
+          : false;
+
+        if (isExpired) {
+          return (
+            <div className="flex-1 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
+              <div className="flex items-center gap-2 justify-center">
+                <Clock className="h-4 w-4 text-red-500" />
+                <span className="text-sm font-bold text-red-600">
+                  Batas Waktu Pembayaran Habis
+                </span>
+              </div>
+              <p className="text-xs text-red-500 text-center mt-1">
+                Pesanan akan dibatalkan otomatis
+              </p>
+            </div>
+          );
+        }
+
         return (
           <>
             <Link
-              href={`/market/checkout?orderId=${transaction.orderId}`}
-              className="flex-1 px-4 py-2.5 bg-[#A3AF87] text-white rounded-xl font-bold text-sm hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all text-center"
+              href={`/market/orders/${transaction.orderId}`}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all text-center"
             >
               Bayar Sekarang
             </Link>
             <button
               onClick={() => setShowCancelModal(true)}
-              className="px-4 py-2.5 border border-red-200 text-red-500 rounded-xl font-semibold text-sm hover:bg-red-50 transition-all"
+              className="px-4 py-2.5 border border-red-200 text-red-500 rounded-2xl font-semibold text-sm hover:bg-red-50 transition-all"
             >
               Batalkan
             </button>
@@ -291,14 +314,14 @@ export function TransactionCard({
               href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 px-4 py-2.5 border border-[#A3AF87] text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
             >
               <Phone className="h-4 w-4" />
               Hubungi WhatsApp
             </a>
             <button
               onClick={() => setShowCancelModal(true)}
-              className="px-4 py-2.5 border border-red-200 text-red-500 rounded-xl font-semibold text-sm hover:bg-red-50 transition-all"
+              className="px-4 py-2.5 border border-red-200 text-red-500 rounded-2xl font-semibold text-sm hover:bg-red-50 transition-all"
             >
               Batalkan
             </button>
@@ -308,25 +331,46 @@ export function TransactionCard({
         return (
           <button
             onClick={() => onTrack?.(transaction)}
-            className="flex-1 px-4 py-2.5 bg-[#A3AF87] text-white rounded-xl font-bold text-sm hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
           >
             <MapPin className="h-4 w-4" />
             Lacak Pesanan
           </button>
         );
       case "completed":
+        // Check if user has already reviewed
+        if (transaction.hasReviewed) {
+          return (
+            <>
+              <div className="flex-1 px-4 py-2.5 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-bold text-green-600">
+                  Sudah Dinilai
+                </span>
+              </div>
+              <Link
+                href={`/transaction/${transaction.orderId}`}
+                className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Detail
+              </Link>
+            </>
+          );
+        }
+
         return (
           <>
             <Link
               href={`/market/products/${firstProduct.slug || firstProduct.id}#ulasan`}
-              className="flex-1 px-4 py-2.5 bg-[#A3AF87] text-white rounded-xl font-bold text-sm hover:bg-[#95a17a] hover:shadow-lg hover:shadow-[#A3AF87]/30 transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
             >
               <Star className="h-4 w-4" />
               Beri Nilai
             </Link>
             <Link
               href={`/transaction/${transaction.orderId}`}
-              className="flex-1 px-4 py-2.5 border border-[#A3AF87] text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
             >
               <FileText className="h-4 w-4" />
               Detail
@@ -337,7 +381,7 @@ export function TransactionCard({
         return (
           <Link
             href="/market/products"
-            className="flex-1 px-4 py-2.5 border border-[#A3AF87] text-[#5a6c5b] rounded-xl font-bold text-sm hover:bg-[#A3AF87]/10 transition-all flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
           >
             <ShoppingBag className="h-4 w-4" />
             Belanja Lagi
@@ -355,22 +399,22 @@ export function TransactionCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="bg-white border border-[#A3AF87]/20 rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-[#A3AF87]/10 transition-all"
+        className="bg-[#fdf8d4] border border-[#435664]/20 rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-[#435664]/10 transition-all"
       >
         {/* Header */}
-        <div className="p-4 border-b border-[#A3AF87]/10 bg-gradient-to-r from-[#A3AF87]/5 to-white">
+        <div className="p-4 border-b border-[#435664]/10 bg-[#fdf8d4]">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-[#A3AF87]/10 rounded-lg flex items-center justify-center">
-                <Store className="h-4 w-4 text-[#A3AF87]" />
+              <div className="w-7 h-7 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center">
+                <Store className="h-4 w-4 text-white" />
               </div>
-              <span className="font-bold text-sm text-[#5a6c5b]">
+              <span className="font-bold text-sm text-[#303646]">
                 {transaction.farmName}
               </span>
             </div>
             <Link
               href={`/market/orders/${transaction.orderId}`}
-              className="flex items-center gap-1 text-xs text-[#5a6c5b] hover:text-[#A3AF87] hover:gap-2 transition-all font-semibold"
+              className="flex items-center gap-1 text-xs text-[#435664] hover:text-[#303646] hover:gap-2 transition-all font-semibold"
             >
               <span>Detail</span>
               <ChevronRight className="h-3.5 w-3.5" />
@@ -393,9 +437,9 @@ export function TransactionCard({
         </div>
 
         {/* Body - Products */}
-        <div className="p-4">
+        <div className="p-4 bg-[#fdf8d4]">
           <div className="flex gap-3 mb-3">
-            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-[#A3AF87]/10 rounded-xl overflow-hidden border border-[#A3AF87]/10">
+            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl overflow-hidden border border-[#435664]/10">
               <img
                 src={firstProduct.image}
                 alt={firstProduct.name}
@@ -403,7 +447,7 @@ export function TransactionCard({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-sm text-[#5a6c5b] line-clamp-1 mb-1">
+              <h3 className="font-bold text-sm text-[#303646] line-clamp-1 mb-1">
                 {firstProduct.name}
               </h3>
               <p className="text-xs text-gray-500 mb-1">
@@ -412,14 +456,14 @@ export function TransactionCard({
               <p className="text-xs text-gray-500">x{firstProduct.quantity}</p>
             </div>
             <div className="text-right">
-              <p className="font-bold text-sm text-[#5a6c5b]">
+              <p className="font-bold text-sm text-[#303646]">
                 Rp {firstProduct.price.toLocaleString("id-ID")}
               </p>
             </div>
           </div>
 
           {otherProductsCount > 0 && (
-            <div className="px-3 py-2 bg-[#A3AF87]/5 rounded-lg text-xs text-[#5a6c5b] font-medium border border-[#A3AF87]/10">
+            <div className="px-3 py-2 bg-white rounded-lg text-xs text-[#435664] font-medium border border-[#435664]/10">
               + {otherProductsCount} produk lainnya
             </div>
           )}
@@ -433,14 +477,14 @@ export function TransactionCard({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#A3AF87]/10 bg-[#A3AF87]/5">
+        <div className="p-4 border-t border-[#435664]/10 bg-[#fdf8d4]">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-gray-500 font-medium">
               {transaction.totalItems} Produk
             </span>
             <div className="text-right">
               <span className="text-xs text-gray-500 mr-2">Total:</span>
-              <span className="text-base font-bold text-[#5a6c5b]">
+              <span className="text-base font-bold text-[#303646]">
                 Rp {transaction.totalPrice.toLocaleString("id-ID")}
               </span>
             </div>

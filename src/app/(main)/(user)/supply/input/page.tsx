@@ -57,36 +57,44 @@ const LocationPicker = dynamic(() => import("@/components/supply/LocationPicker"
 
 const wasteTypes = [
   {
-    id: "sisa_makanan",
-    name: "Sisa Makanan",
-    icon: Apple,
-    desc: "Nasi, lauk, roti, kue",
-    color: "bg-orange-100 text-orange-600",
-    borderColor: "border-orange-200",
-  },
-  {
     id: "sayuran_buah",
     name: "Sayuran & Buah",
     icon: Carrot,
-    desc: "Kulit, potongan, busuk",
+    desc: "Sisa sayur, kulit buah",
     color: "bg-green-100 text-green-600",
     borderColor: "border-green-200",
   },
   {
-    id: "sisa_dapur",
-    name: "Sisa Dapur",
-    icon: Fish,
-    desc: "Tulang, cangkang, kulit telur",
-    color: "bg-blue-100 text-blue-600",
-    borderColor: "border-blue-200",
+    id: "nasi_mie_karbohidrat",
+    name: "Nasi, Mie & Karbohidrat",
+    icon: Apple,
+    desc: "Nasi, mie, pasta, roti",
+    color: "bg-amber-100 text-amber-600",
+    borderColor: "border-amber-200",
   },
   {
-    id: "campuran",
-    name: "Campuran Organik",
+    id: "roti_kue",
+    name: "Roti & Kue",
+    icon: Recycle,
+    desc: "Roti, kue, bakery",
+    color: "bg-pink-100 text-pink-600",
+    borderColor: "border-pink-200",
+  },
+  {
+    id: "ampas_tahu_tempe",
+    name: "Ampas Tahu & Tempe",
+    icon: Leaf,
+    desc: "Ampas dari olahan kedelai",
+    color: "bg-yellow-100 text-yellow-700",
+    borderColor: "border-yellow-200",
+  },
+  {
+    id: "bahan_nabati_lain",
+    name: "Bahan Nabati Lainnya",
     icon: Trash2,
-    desc: "Berbagai jenis organik",
-    color: "bg-purple-100 text-purple-600",
-    borderColor: "border-purple-200",
+    desc: "Sisa bahan dapur nabati",
+    color: "bg-emerald-100 text-emerald-600",
+    borderColor: "border-emerald-200",
   },
 ];
 
@@ -504,10 +512,11 @@ export default function SupplyInputPage() {
   if (isSuccess && successData) {
     // Map waste type to display name
     const wasteTypeNames: Record<string, string> = {
-      sisa_makanan: "Sisa Makanan",
       sayuran_buah: "Sayuran & Buah",
-      sisa_dapur: "Sisa Dapur",
-      campuran: "Campuran Organik",
+      nasi_mie_karbohidrat: "Nasi, Mie & Karbohidrat",
+      roti_kue: "Roti & Kue",
+      ampas_tahu_tempe: "Ampas Tahu & Tempe",
+      bahan_nabati_lain: "Bahan Nabati Lainnya",
     };
 
     // Map weight to display label
@@ -709,12 +718,12 @@ export default function SupplyInputPage() {
           <div className="flex gap-2 mb-8 max-w-xl">
             <div
               className={`flex-1 h-2 rounded-full transition-colors ${
-                step >= 1 ? "bg-[#A3AF87]" : "bg-gray-200"
+                step >= 1 ? "bg-[#435664]" : "bg-gray-200"
               }`}
             />
             <div
               className={`flex-1 h-2 rounded-full transition-colors ${
-                step >= 2 ? "bg-[#A3AF87]" : "bg-gray-200"
+                step >= 2 ? "bg-[#435664]" : "bg-gray-200"
               }`}
             />
           </div>
@@ -742,9 +751,9 @@ export default function SupplyInputPage() {
                       {/* Waste Type */}
                       <div>
                         <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Jenis Sampah Organik
+                          Jenis Sampah Organik Nabati
                         </label>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 lg:gap-4">
                           {wasteTypes.map((type) => {
                             const Icon = type.icon;
                             const isSelected = formData.wasteType === type.id;
@@ -761,7 +770,7 @@ export default function SupplyInputPage() {
                                 }
                                 className={`p-4 lg:p-5 rounded-2xl border-2 text-left transition-all ${
                                   isSelected
-                                    ? "border-[#A3AF87] bg-[#A3AF87]/5 shadow-md"
+                                    ? "border-[#435664] bg-[#435664]/5 shadow-md"
                                     : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm`
                                 }`}
                               >
@@ -773,7 +782,7 @@ export default function SupplyInputPage() {
                                 <p
                                   className={`font-semibold text-sm lg:text-base ${
                                     isSelected
-                                      ? "text-[#A3AF87]"
+                                      ? "text-[#435664]"
                                       : "text-gray-900"
                                   }`}
                                 >
@@ -809,7 +818,7 @@ export default function SupplyInputPage() {
                                 }
                                 className={`p-4 rounded-xl text-center transition-all ${
                                   isSelected
-                                    ? "bg-[#A3AF87] text-white shadow-lg"
+                                    ? "bg-[#435664] text-white shadow-lg"
                                     : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                                 }`}
                               >
@@ -850,7 +859,7 @@ export default function SupplyInputPage() {
                         disabled={!canProceedStep1}
                         className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                           canProceedStep1
-                            ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
+                            ? "bg-gradient-to-r from-[#435664] to-[#303646] text-white shadow-lg hover:shadow-xl"
                             : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
                       >
@@ -870,42 +879,42 @@ export default function SupplyInputPage() {
                       className="space-y-8"
                     >
                       {/* Address & Location Section - Redesigned */}
-                      <div className="space-y-6">
+                      <div className="space-y-4 sm:space-y-6">
                         {/* Section Header */}
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
                             Lokasi Penjemputan
                           </h3>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600">
                             Tentukan alamat dan titik lokasi untuk memudahkan kurir menemukan sampah Anda
                           </p>
                         </div>
 
                         {/* Step 1: Address Selection */}
-                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-200">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-8 h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#435664]">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#435664] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                               1
                             </div>
-                            <h4 className="font-bold text-gray-900">Pilih Alamat</h4>
+                            <h4 className="font-bold text-gray-900 text-sm sm:text-base">Pilih Alamat</h4>
                           </div>
 
                           {/* Default Address Option */}
                           {!useCustomAddress && (
-                            <div className="space-y-3">
-                              <div className="bg-white rounded-xl p-4 border-2 border-[#A3AF87] shadow-sm">
-                                <div className="flex items-start gap-3">
-                                  <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-                                    <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                            <div className="space-y-2 sm:space-y-3">
+                              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-[#A3AF87] shadow-sm">
+                                <div className="flex items-start gap-2 sm:gap-3">
+                                  <div className="p-1.5 sm:p-2 bg-[#A3AF87]/10 rounded-lg">
+                                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-[#A3AF87]" />
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <p className="text-xs font-semibold text-[#A3AF87]">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                      <p className="text-[10px] sm:text-xs font-semibold text-[#A3AF87]">
                                         ALAMAT TERPILIH
                                       </p>
-                                      <CheckCircle className="h-4 w-4 text-[#A3AF87]" />
+                                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-[#A3AF87]" />
                                     </div>
-                                    <p className="text-sm text-gray-900 font-medium">
+                                    <p className="text-xs sm:text-sm text-gray-900 font-medium break-words">
                                       {defaultAddress}
                                     </p>
                                   </div>
@@ -923,9 +932,9 @@ export default function SupplyInputPage() {
                                     addressId: null,
                                   });
                                 }}
-                                className="w-full py-3 px-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all flex items-center justify-center gap-2"
+                                className="w-full py-2.5 sm:py-3 px-3 sm:px-4 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-gray-700 font-medium text-xs sm:text-sm hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all flex items-center justify-center gap-2"
                               >
-                                <MapPin className="h-4 w-4" />
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 Gunakan Alamat Lain
                               </button>
                             </div>
@@ -933,7 +942,7 @@ export default function SupplyInputPage() {
 
                           {/* Custom Address Input */}
                           {useCustomAddress && (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                               <textarea
                                 value={customAddress}
                                 onChange={(e) => {
@@ -947,7 +956,7 @@ export default function SupplyInputPage() {
                                 }}
                                 placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
                                 rows={3}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#A3AF87] focus:outline-none resize-none text-gray-900 placeholder:text-gray-400"
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 border-gray-300 focus:border-[#A3AF87] focus:outline-none resize-none text-xs sm:text-sm text-gray-900 placeholder:text-gray-400"
                               />
                               
                               <div className="flex items-center gap-2">
@@ -964,15 +973,15 @@ export default function SupplyInputPage() {
                                       });
                                     }
                                   }}
-                                  className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                  className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
                                 >
-                                  <X className="h-4 w-4" />
+                                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                   Batal
                                 </button>
                                 
                                 {customAddress && (
-                                  <div className="flex-1 py-2.5 px-4 bg-green-50 text-green-700 rounded-xl font-medium text-sm flex items-center justify-center gap-2">
-                                    <CheckCircle className="h-4 w-4" />
+                                  <div className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 bg-green-50 text-green-700 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2">
+                                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     Tersimpan
                                   </div>
                                 )}
@@ -982,30 +991,30 @@ export default function SupplyInputPage() {
                         </div>
 
                         {/* Step 2: Pin Location (Recommended) */}
-                        <div className="bg-gradient-to-br from-[#A3AF87]/5 to-white rounded-2xl p-6 border-2 border-[#A3AF87]/30">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-[#A3AF87] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#435664]">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#435664] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                                 2
                               </div>
                               <div>
-                                <h4 className="font-bold text-gray-900">
+                                <h4 className="font-bold text-gray-900 text-sm sm:text-base">
                                   Tandai Titik Lokasi di Peta
                                 </h4>
-                                <p className="text-xs text-gray-600 mt-0.5">
+                                <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
                                   Direkomendasikan untuk akurasi pickup
                                 </p>
                               </div>
                             </div>
-                            <div className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+                            <div className="px-2.5 sm:px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] sm:text-xs font-bold self-start">
                               REKOMENDASI
                             </div>
                           </div>
 
                           {/* Info Box */}
-                          <div className="mb-4 flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                            <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-blue-900">
+                          <div className="mb-3 sm:mb-4 flex items-start gap-2 p-2.5 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl border border-blue-200">
+                            <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-[10px] sm:text-xs text-blue-900">
                               <span className="font-semibold">Mengapa perlu?</span> Titik lokasi yang presisi membantu kurir menemukan lokasi penjemputan dengan cepat dan tepat.
                             </p>
                           </div>
@@ -1032,11 +1041,11 @@ export default function SupplyInputPage() {
                             <button
                               type="button"
                               onClick={() => setShowDatePicker(!showDatePicker)}
-                              className="w-full px-5 py-4 bg-gradient-to-r from-[#A3AF87]/5 to-[#A3AF87]/10 border-2 border-[#A3AF87]/30 rounded-2xl text-left hover:border-[#A3AF87] transition-all group"
+                              className="w-full px-5 py-4 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-2xl text-left hover:shadow-md transition-all group"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="p-2 bg-[#A3AF87]/20 rounded-xl group-hover:bg-[#A3AF87]/30 transition-colors">
-                                  <Calendar className="h-5 w-5 text-[#A3AF87]" />
+                                <div className="p-2 bg-[#435664]/20 rounded-xl group-hover:bg-[#435664]/30 transition-colors">
+                                  <Calendar className="h-5 w-5 text-[#435664]" />
                                 </div>
                                 <div className="flex-1">
                                   <p className="text-sm text-gray-600 font-medium">
@@ -1047,7 +1056,7 @@ export default function SupplyInputPage() {
                                   </p>
                                 </div>
                                 <ChevronRight
-                                  className={`h-5 w-5 text-[#A3AF87] transition-transform ${
+                                  className={`h-5 w-5 text-[#435664] transition-transform ${
                                     showDatePicker ? "rotate-90" : ""
                                   }`}
                                 />
@@ -1060,7 +1069,7 @@ export default function SupplyInputPage() {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="absolute z-50 mt-2 w-full bg-white border-2 border-[#A3AF87]/30 rounded-2xl shadow-2xl p-5"
+                                className="absolute z-50 mt-2 w-full bg-white border-2 border-[#435664] rounded-2xl shadow-2xl p-5"
                               >
                                 {/* Month Navigator */}
                                 <div className="flex items-center justify-between mb-4">
@@ -1074,9 +1083,9 @@ export default function SupplyInputPage() {
                                         ),
                                       )
                                     }
-                                    className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-[#fdf8d4] rounded-lg transition-colors"
                                   >
-                                    <ChevronLeft className="h-5 w-5 text-[#A3AF87]" />
+                                    <ChevronLeft className="h-5 w-5 text-[#435664]" />
                                   </button>
                                   <p className="font-bold text-gray-900">
                                     {currentMonth.toLocaleDateString("id-ID", {
@@ -1094,9 +1103,9 @@ export default function SupplyInputPage() {
                                         ),
                                       )
                                     }
-                                    className="p-2 hover:bg-[#A3AF87]/10 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-[#fdf8d4] rounded-lg transition-colors"
                                   >
-                                    <ChevronRight className="h-5 w-5 text-[#A3AF87]" />
+                                    <ChevronRight className="h-5 w-5 text-[#435664]" />
                                   </button>
                                 </div>
 
@@ -1187,7 +1196,7 @@ export default function SupplyInputPage() {
                                     setCurrentMonth(today);
                                     handleDateSelect(today.getDate());
                                   }}
-                                  className="w-full mt-4 py-2.5 bg-[#A3AF87]/10 text-[#A3AF87] font-semibold rounded-xl hover:bg-[#A3AF87]/20 transition-colors"
+                                  className="w-full mt-4 py-2.5 bg-[#435664] text-white font-semibold rounded-xl hover:bg-[#303646] transition-colors"
                                 >
                                   Hari Ini
                                 </button>
@@ -1219,15 +1228,15 @@ export default function SupplyInputPage() {
                                   }
                                   className={`p-4 rounded-2xl transition-all group ${
                                     isSelected
-                                      ? "bg-gradient-to-br from-[#A3AF87] to-[#95a17a] shadow-xl border-2 border-[#A3AF87]"
-                                      : "bg-white border-2 border-gray-200 hover:border-[#A3AF87]/50 hover:shadow-lg"
+                                      ? "bg-gradient-to-br from-[#303646] to-[#435664] shadow-xl border-2 border-[#303646]"
+                                      : "bg-white border-2 border-gray-200 hover:border-[#435664] hover:shadow-lg"
                                   }`}
                                 >
                                   <div
                                     className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center transition-all ${
                                       isSelected
                                         ? "bg-white/20"
-                                        : "bg-gray-50 group-hover:bg-[#A3AF87]/10"
+                                        : "bg-gray-50 group-hover:bg-[#fdf8d4]"
                                     }`}
                                   >
                                     <IconComponent
@@ -1276,7 +1285,7 @@ export default function SupplyInputPage() {
                           }
                           placeholder="Contoh: Sampah di depan pagar, warna kantong hitam..."
                           rows={3}
-                          className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 transition-all resize-none text-gray-900"
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#a3af87] focus:ring-2 focus:ring-[#a3af87]/20 transition-all resize-none text-gray-900"
                         />
                       </div>
 
@@ -1292,7 +1301,7 @@ export default function SupplyInputPage() {
                         disabled={!canProceedStep2 || isSubmitting}
                         className={`w-full py-4 rounded-2xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
                           canProceedStep2 && !isSubmitting
-                            ? "bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white shadow-lg hover:shadow-xl"
+                            ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white shadow-lg hover:shadow-xl"
                             : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
                       >

@@ -26,10 +26,13 @@ import {
 } from "@/lib/api/cart.actions";
 import { getFeaturedProducts } from "@/lib/api/product.actions";
 import { CartItemSkeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/ui/Toast";
 import Swal from "sweetalert2";
 
 export default function CartPage() {
   const router = useRouter();
+  const { toast, success, error: showError, hideToast } = useToast();
   const [cart, setCart] = useState<Cart | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -119,49 +122,64 @@ export default function CartPage() {
           });
         }
 
-        // Show success feedback with Framer Motion toast
-        const toast = Swal.mixin({
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-
-        toast.fire({
-          icon: "success",
-          title: "Jumlah berhasil diperbarui",
-        });
+        // Show success feedback with Toast
+        success(
+          "Berhasil!",
+          "Jumlah produk berhasil diperbarui"
+        );
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: result.message,
-          confirmButtonColor: "#A3AF87",
-        });
+        showError(
+          "Gagal",
+          result.message || "Gagal memperbarui jumlah produk"
+        );
         // Refresh cart to get accurate data
         fetchCart();
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Terjadi Kesalahan",
-        text: "Gagal memperbarui jumlah produk",
-        confirmButtonColor: "#A3AF87",
-      });
+      showError(
+        "Terjadi Kesalahan",
+        "Gagal memperbarui jumlah produk"
+      );
     } finally {
       setIsUpdating(null);
     }
   };
 
   const removeItem = async (itemId: string) => {
+    const item = cart?.items.find((i) => i.id === itemId);
+
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Hapus dari Keranjang?",
+      text: `Hapus ${item?.product?.name || "produk ini"} dari keranjang?`,
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#9CA3AF",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+      customClass: {
+        popup: "rounded-3xl shadow-2xl border border-gray-100",
+        title: "text-xl font-bold text-[#303646]",
+        htmlContainer: "text-gray-600",
+        confirmButton:
+          "rounded-xl px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all",
+        cancelButton:
+          "rounded-xl px-8 py-3 font-medium hover:bg-gray-100 transition-all",
+      },
+      showClass: {
+        popup: "animate__animated animate__fadeInDown animate__faster",
+      },
+    });
+
+    if (!result.isConfirmed) return;
+
     setIsDeleting(itemId);
 
     try {
-      const result = await removeFromCart(itemId);
+      const response = await removeFromCart(itemId);
 
-      if (result.success) {
+      if (response.success) {
         // Update local state with animation
         if (cart) {
           setCart({
@@ -181,32 +199,23 @@ export default function CartPage() {
         // Remove from selected items
         setSelectedItems(selectedItems.filter((id) => id !== itemId));
 
-        // Show success animation
-        Swal.fire({
-          icon: "success",
-          title: "Dihapus!",
-          text: "Produk berhasil dihapus dari keranjang",
-          timer: 1500,
-          showConfirmButton: false,
-          toast: true,
-          position: "top-end",
-        });
+        // Show success with Toast
+        success(
+          "Berhasil Dihapus!",
+          "Produk berhasil dihapus dari keranjang"
+        );
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: result.message,
-          confirmButtonColor: "#A3AF87",
-        });
+        showError(
+          "Gagal",
+          response.message || "Gagal menghapus produk"
+        );
       }
     } catch (error) {
       console.error("Error removing item:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Terjadi Kesalahan",
-        text: "Gagal menghapus produk",
-        confirmButtonColor: "#A3AF87",
-      });
+      showError(
+        "Terjadi Kesalahan",
+        "Gagal menghapus produk dari keranjang"
+      );
     } finally {
       setIsDeleting(null);
     }
@@ -250,18 +259,22 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Toast Notification */}
+      <Toast
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Back Button - Mobile Only */}
         <button
           onClick={() => router.back()}
-          className="lg:hidden flex items-center gap-2 mb-4 text-[#5a6c5b] hover:text-[#5a6c5b]/80 transition-colors"
+          className="lg:hidden flex items-center gap-2 mb-4 text-[#435664] hover:text-[#303646] transition-colors"
         >
-          <div
-            className="p-2 bg-white border-2 rounded-lg transition-colors hover:bg-[#A3AF87]/10"
-            style={
-              { borderColor: "rgba(163, 175, 135, 0.2)" } as React.CSSProperties
-            }
-          >
+          <div className="p-2 bg-white border-2 border-[#435664]/30 rounded-lg hover:bg-[#435664]/10 transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </div>
           <span className="font-semibold text-sm">Kembali</span>
@@ -270,17 +283,14 @@ export default function CartPage() {
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-2">
-            <div className="p-2.5 sm:p-3 bg-[#A3AF87] rounded-xl shadow-lg">
+            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-[#435664] to-[#303646] rounded-xl shadow-lg">
               <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#5a6c5b]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
                 Keranjang Belanja
               </h1>
-              <p
-                className="text-xs sm:text-sm font-medium mt-0.5"
-                style={{ color: "rgba(90, 108, 91, 0.7)" }}
-              >
+              <p className="text-xs sm:text-sm text-[#435664] font-medium mt-0.5">
                 {cart?.items.length || 0} produk di keranjang Anda
               </p>
             </div>
@@ -297,40 +307,18 @@ export default function CartPage() {
               exit={{ opacity: 0, y: -20 }}
               className="flex flex-col items-center justify-center py-16 sm:py-20"
             >
-              <div
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4"
-                style={
-                  {
-                    backgroundColor: "rgba(163, 175, 135, 0.1)",
-                    borderColor: "rgba(163, 175, 135, 0.15)",
-                  } as React.CSSProperties
-                }
-              >
-                <ShoppingBag
-                  className="h-12 w-12 sm:h-16 sm:w-16"
-                  style={{ color: "rgba(163, 175, 135, 0.3)" }}
-                />
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-full flex items-center justify-center mb-6 sm:mb-8 border-4 border-[#435664]/20">
+                <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-[#435664]" />
               </div>
-              <h2
-                className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-center"
-                style={{ color: "#303646" } as React.CSSProperties}
-              >
+              <h2 className="text-xl sm:text-2xl font-bold text-[#303646] mb-2 sm:mb-3 text-center">
                 Keranjang Anda Kosong
               </h2>
-              <p
-                className="text-sm sm:text-base mb-6 sm:mb-8 text-center max-w-md px-4"
-                style={
-                  { color: "rgba(90, 108, 91, 0.7)" } as React.CSSProperties
-                }
-              >
+              <p className="text-sm sm:text-base text-[#435664] mb-6 sm:mb-8 text-center max-w-md px-4">
                 Yuk, mulai belanja produk berkualitas untuk kebutuhan Anda
               </p>
               <Link
                 href="/market/products"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-[#A3AF87] text-white rounded-xl font-bold text-sm sm:text-base transition-all hover:bg-[#95a17a]"
-                style={{
-                  boxShadow: "0 20px 50px -12px rgba(163, 175, 135, 0.3)",
-                }}
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-xl font-bold text-sm sm:text-base hover:shadow-xl hover:shadow-[#a3af87]/30 transition-all"
               >
                 <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 Mulai Belanja
@@ -342,33 +330,15 @@ export default function CartPage() {
               {/* Left Column - Cart Items */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Select All Bar */}
-                <div
-                  className="flex items-center justify-between p-4 border-2 rounded-xl"
-                  style={
-                    {
-                      backgroundColor: "rgba(163, 175, 135, 0.05)",
-                      borderColor: "rgba(163, 175, 135, 0.15)",
-                    } as React.CSSProperties
-                  }
-                >
+                <div className="flex items-center justify-between p-4 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-xl">
                   <label className="flex items-center gap-2 cursor-pointer group">
                     <div className="relative">
                       <input
                         type="checkbox"
                         checked={selectedItems.length === cart.items.length}
                         onChange={toggleSelectAll}
-                        className="peer w-5 h-5 rounded-md border-2 cursor-pointer transition-all appearance-none"
-                        style={{
-                          borderColor: "rgba(90, 108, 91, 0.3)",
-                          backgroundColor: "transparent",
-                        }}
+                        className="peer w-5 h-5 rounded-md border-2 border-[#435664] checked:bg-[#435664] checked:border-[#435664] focus:ring-2 focus:ring-[#435664]/30 cursor-pointer transition-all appearance-none"
                       />
-                      <style jsx>{`
-                        input[type="checkbox"]:checked {
-                          background-color: #a3af87;
-                          border-color: #a3af87;
-                        }
-                      `}</style>
                       <svg
                         className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
                         fill="none"
@@ -383,12 +353,12 @@ export default function CartPage() {
                         />
                       </svg>
                     </div>
-                    <span className="text-sm font-bold text-[#5a6c5b] group-hover:text-[#5a6c5b]/80">
+                    <span className="text-sm font-bold text-[#303646] group-hover:text-[#435664]">
                       Pilih Semua ({cart.items.length})
                     </span>
                   </label>
                   {selectedItems.length > 0 && (
-                    <span className="text-xs sm:text-sm font-bold text-[#5a6c5b]">
+                    <span className="text-xs sm:text-sm font-bold text-[#435664]">
                       {selectedItems.length} item dipilih
                     </span>
                   )}
@@ -405,8 +375,8 @@ export default function CartPage() {
                       transition={{ delay: index * 0.05 }}
                       className={`p-4 bg-white border-2 rounded-xl transition-all ${
                         selectedItems.includes(item.id)
-                          ? "border-[#A3AF87] shadow-md"
-                          : "border-gray-200 hover:border-[#A3AF87]/30"
+                          ? "border-[#435664] shadow-md shadow-[#435664]/10"
+                          : "border-gray-200 hover:border-[#435664]/30"
                       } ${isDeleting === item.id ? "opacity-50" : ""}`}
                     >
                       <div className="flex gap-4">
@@ -418,22 +388,8 @@ export default function CartPage() {
                                 type="checkbox"
                                 checked={selectedItems.includes(item.id)}
                                 onChange={() => toggleSelectItem(item.id)}
-                                className="peer w-5 h-5 rounded-md border-2 cursor-pointer transition-all appearance-none"
-                                style={
-                                  {
-                                    borderColor: "rgba(163, 175, 135, 0.3)",
-                                  } as React.CSSProperties
-                                }
+                                className="peer w-5 h-5 rounded-md border-2 border-[#435664]/30 checked:bg-[#435664] checked:border-[#435664] focus:ring-2 focus:ring-[#435664]/30 cursor-pointer transition-all appearance-none"
                               />
-                              <style jsx>{`
-                                input[type="checkbox"]:checked {
-                                  background-color: #a3af87;
-                                  border-color: #a3af87;
-                                }
-                                input[type="checkbox"]:focus {
-                                  outline: 2px solid rgba(163, 175, 135, 0.3);
-                                }
-                              `}</style>
                               <svg
                                 className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
                                 fill="none"
@@ -616,76 +572,50 @@ export default function CartPage() {
 
               {/* Right Column - Summary (Desktop) */}
               <div className="hidden lg:block">
-                <div
-                  className="sticky top-4 border-2 rounded-2xl p-6 shadow-xl"
-                  style={
-                    {
-                      borderColor: "rgba(163, 175, 135, 0.2)",
-                      backgroundColor: "white",
-                      boxShadow: "0 20px 50px -12px rgba(163, 175, 135, 0.15)",
-                    } as React.CSSProperties
-                  }
-                >
+                <div className="sticky top-4 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-2xl p-6 shadow-xl">
                   <div className="flex items-center gap-3 mb-6">
-                    <div
-                      className="p-2 rounded-lg"
-                      style={
-                        { backgroundColor: "#A3AF87" } as React.CSSProperties
-                      }
-                    >
+                    <div className="p-2 bg-[#435664] rounded-lg">
                       <Package className="h-5 w-5 text-white" />
                     </div>
-                    <h3
-                      className="text-lg font-bold"
-                      style={{ color: "#303646" } as React.CSSProperties}
-                    >
+                    <h3 className="text-lg font-bold text-[#303646]">
                       Ringkasan Belanja
                     </h3>
                   </div>
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span
-                        className="font-medium"
-                        style={{ color: "rgba(90, 108, 91, 0.7)" }}
-                      >
+                      <span className="font-medium text-[#435664]">
                         Total Item
                       </span>
-                      <span className="font-bold text-[#5a6c5b]">
+                      <span className="font-bold text-[#303646]">
                         {totalItems} produk
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span
-                        className="font-medium"
-                        style={{ color: "rgba(90, 108, 91, 0.7)" }}
-                      >
+                      <span className="font-medium text-[#435664]">
                         Subtotal
                       </span>
                       <motion.span
                         key={subtotal}
                         initial={{ scale: 1.2 }}
                         animate={{ scale: 1 }}
-                        className="font-bold text-[#5a6c5b]"
+                        className="font-bold text-[#303646]"
                       >
                         Rp {subtotal.toLocaleString("id-ID")}
                       </motion.span>
                     </div>
                   </div>
 
-                  <div
-                    className="border-t-2 pt-4 mb-6"
-                    style={{ borderColor: "rgba(163, 175, 135, 0.15)" }}
-                  >
+                  <div className="border-t-2 border-[#435664]/20 pt-4 mb-6">
                     <div className="flex justify-between items-baseline mb-2">
-                      <span className="text-base font-bold text-[#5a6c5b]">
+                      <span className="text-base font-bold text-[#303646]">
                         Total Belanja
                       </span>
                       <motion.span
                         key={subtotal}
                         initial={{ scale: 1.2 }}
                         animate={{ scale: 1 }}
-                        className="text-2xl font-bold text-[#5a6c5b]"
+                        className="text-2xl font-bold text-[#303646]"
                       >
                         Rp {subtotal.toLocaleString("id-ID")}
                       </motion.span>
@@ -696,27 +626,16 @@ export default function CartPage() {
                     href="/market/checkout"
                     className={`w-full py-4 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
                       selectedItems.length > 0
-                        ? "bg-[#A3AF87] text-white hover:bg-[#95a17a]"
+                        ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white hover:shadow-lg hover:shadow-[#a3af87]/30"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
                     }`}
-                    style={
-                      selectedItems.length > 0
-                        ? {
-                            boxShadow:
-                              "0 20px 50px -12px rgba(163, 175, 135, 0.3)",
-                          }
-                        : {}
-                    }
                   >
                     <span>Checkout Sekarang</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
 
                   {selectedItems.length === 0 && (
-                    <p
-                      className="text-xs text-center mt-3"
-                      style={{ color: "rgba(90, 108, 91, 0.7)" }}
-                    >
+                    <p className="text-xs text-center text-[#435664] mt-3">
                       Pilih produk untuk melanjutkan
                     </p>
                   )}
@@ -798,23 +717,17 @@ export default function CartPage() {
 
       {/* Mobile Sticky Bottom Bar */}
       {cart && cart.items.length > 0 && (
-        <div
-          className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 shadow-2xl p-4 z-50"
-          style={{ borderColor: "rgba(163, 175, 135, 0.2)" }}
-        >
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#435664]/20 shadow-2xl p-4 z-50">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p
-                className="text-xs"
-                style={{ color: "rgba(90, 108, 91, 0.7)" }}
-              >
+              <p className="text-xs text-[#435664]">
                 Total Belanja
               </p>
               <motion.p
                 key={subtotal}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
-                className="text-xl font-bold text-[#5a6c5b]"
+                className="text-xl font-bold text-[#303646]"
               >
                 Rp {subtotal.toLocaleString("id-ID")}
               </motion.p>
@@ -823,7 +736,7 @@ export default function CartPage() {
               href="/market/checkout"
               className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                 selectedItems.length > 0
-                  ? "bg-[#A3AF87] text-white hover:shadow-lg hover:bg-[#95a17a]"
+                  ? "bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white hover:shadow-lg hover:shadow-[#a3af87]/30"
                   : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
               }`}
             >
@@ -832,10 +745,7 @@ export default function CartPage() {
             </Link>
           </div>
           {selectedItems.length > 0 && (
-            <p
-              className="text-xs text-center"
-              style={{ color: "rgba(90, 108, 91, 0.7)" }}
-            >
+            <p className="text-xs text-center text-[#435664]">
               {totalItems} produk dipilih
             </p>
           )}

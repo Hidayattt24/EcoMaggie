@@ -161,6 +161,8 @@ export interface Order {
   shipping_courier: string | null;
   shipping_tracking_number: string | null;
   estimated_delivery: string | null;
+  delivery_latitude: number | null;
+  delivery_longitude: number | null;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -171,6 +173,11 @@ export interface Order {
   paid_at: string | null;
   items: OrderProduct[];
   tracking_history?: TrackingHistory[];
+  metadata?: {
+    deliveryLatitude?: number;
+    deliveryLongitude?: number;
+    [key: string]: any;
+  } | null;
 }
 
 export interface TrackingHistory {
@@ -302,6 +309,8 @@ export async function getFarmerOrders(): Promise<ApiResponse<Order[]>> {
         shipping_courier,
         shipping_tracking_number,
         estimated_delivery,
+        delivery_latitude,
+        delivery_longitude,
         customer_name,
         customer_email,
         customer_phone,
@@ -438,7 +447,11 @@ export async function getFarmerOrderDetail(orderId: string): Promise<ApiResponse
       tracking_history: trackingHistory || [],
     };
 
-    console.log(`✅ [getFarmerOrderDetail] Order found: ${orderId}`);
+    console.log(`✅ [getFarmerOrderDetail] Order found: ${orderId}`, {
+      hasMetadata: !!transaction.metadata,
+      metadata: transaction.metadata,
+      shippingMethod: transaction.shipping_method,
+    });
 
     return {
       success: true,

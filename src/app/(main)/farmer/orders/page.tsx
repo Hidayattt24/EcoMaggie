@@ -75,7 +75,7 @@ interface Order {
 // CONFIGURATIONS - Only for export mapping
 // ============================================
 const statusLabels: Record<OrderStatus, string> = {
-  pending: "Menunggu",
+  pending: "Belum Dibayar",
   paid: "Dibayar",
   confirmed: "Dikonfirmasi",
   processing: "Dikemas",
@@ -194,17 +194,21 @@ export default function FarmerOrdersPage() {
   // Calculate stats with growth comparison
   const stats = useMemo(() => {
     const total = orders.length;
-    const needsAction = orders.filter((o) =>
+    const unpaid = orders.filter((o) => o.status === "pending").length;
+    const packed = orders.filter((o) =>
       ["paid", "confirmed", "processing"].includes(o.status),
     ).length;
-    const processing = orders.filter((o) =>
-      ["processing", "ready_pickup"].includes(o.status),
-    ).length;
+    const readyPickup = orders.filter((o) => o.status === "ready_pickup").length;
     const shipped = orders.filter((o) => o.status === "shipped").length;
     const completed = orders.filter((o) =>
       ["delivered", "completed"].includes(o.status),
     ).length;
     const cancelled = orders.filter((o) => o.status === "cancelled").length;
+
+    // Calculate needsAction: orders that need farmer's attention
+    const needsAction = orders.filter((o) =>
+      ["paid", "confirmed", "processing", "ready_pickup"].includes(o.status),
+    ).length;
 
     const paidOrders = orders.filter((o) =>
       [
@@ -242,11 +246,13 @@ export default function FarmerOrdersPage() {
 
     return {
       total,
-      needsAction,
-      processing,
+      unpaid,
+      packed,
+      readyPickup,
       shipped,
       completed,
       cancelled,
+      needsAction,
       totalRevenue,
       totalSales,
       paidOrdersCount: paidOrders.length,
@@ -261,14 +267,14 @@ export default function FarmerOrdersPage() {
     let filtered = orders;
 
     // Apply filter
-    if (filter === "needs_action") {
+    if (filter === "unpaid") {
+      filtered = filtered.filter((o) => o.status === "pending");
+    } else if (filter === "packed") {
       filtered = filtered.filter((o) =>
         ["paid", "confirmed", "processing"].includes(o.status),
       );
-    } else if (filter === "processing") {
-      filtered = filtered.filter((o) =>
-        ["processing", "ready_pickup"].includes(o.status),
-      );
+    } else if (filter === "ready_pickup") {
+      filtered = filtered.filter((o) => o.status === "ready_pickup");
     } else if (filter === "shipped") {
       filtered = filtered.filter((o) => o.status === "shipped");
     } else if (filter === "completed") {
@@ -441,27 +447,12 @@ export default function FarmerOrdersPage() {
               <div className="flex items-center gap-2 sm:gap-3 bg-[#fdf8d4]/50 rounded-xl p-1.5 overflow-x-auto w-full sm:w-auto">
                 {[
                   { value: "all", label: "Semua", count: stats.total },
-                  {
-                    value: "needs_action",
-                    label: "Tindakan",
-                    count: stats.needsAction,
-                  },
-                  {
-                    value: "processing",
-                    label: "Diproses",
-                    count: stats.processing,
-                  },
+                  { value: "unpaid", label: "Belum Dibayar", count: stats.unpaid },
+                  { value: "packed", label: "Dikemas", count: stats.packed },
+                  { value: "ready_pickup", label: "Siap Diambil", count: stats.readyPickup },
                   { value: "shipped", label: "Dikirim", count: stats.shipped },
-                  {
-                    value: "completed",
-                    label: "Selesai",
-                    count: stats.completed,
-                  },
-                  {
-                    value: "cancelled",
-                    label: "Batal",
-                    count: stats.cancelled,
-                  },
+                  { value: "completed", label: "Selesai", count: stats.completed },
+                  { value: "cancelled", label: "Dibatalkan", count: stats.cancelled },
                 ].map((tab) => (
                   <button
                     key={tab.value}
@@ -477,7 +468,7 @@ export default function FarmerOrdersPage() {
                       {tab.count > 0 && (
                         <span
                           className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-bold rounded-full ${
-                            tab.value === "needs_action" ||
+                            tab.value === "unpaid" ||
                             tab.value === "cancelled"
                               ? "bg-red-500 text-white shadow-sm"
                               : tab.value === "shipped" ||

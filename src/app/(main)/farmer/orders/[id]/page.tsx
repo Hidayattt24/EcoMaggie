@@ -60,7 +60,7 @@ const COURIER_OPTIONS = [
 // STATUS CONFIG
 // ============================================
 const statusConfig = {
-  pending: { label: "Menunggu Pembayaran", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/30", dotColor: "bg-[#a3af87]" },
+  pending: { label: "Belum Dibayar", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/30", dotColor: "bg-[#a3af87]" },
   paid: { label: "Dibayar", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/50", dotColor: "bg-[#a3af87]" },
   confirmed: { label: "Dikonfirmasi", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/50", dotColor: "bg-[#a3af87]" },
   processing: { label: "Dikemas", color: "bg-[#a3af87]/20 text-[#435664] border-[#a3af87]", dotColor: "bg-[#a3af87]" },
@@ -109,6 +109,18 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
       setOrder(result.data);
       const type = detectShippingType(result.data.shipping_method);
       setShippingType(type);
+
+      // Debug logging for delivery location
+      console.log("🗺️ [Farmer Orders Detail] Order Data:", {
+        orderId: result.data.order_id,
+        shippingMethod: result.data.shipping_method,
+        shippingType: type,
+        hasMetadata: !!result.data.metadata,
+        metadata: result.data.metadata,
+        deliveryLat: result.data.metadata?.deliveryLatitude,
+        deliveryLng: result.data.metadata?.deliveryLongitude,
+      });
+
       setResiData({
         waybillId: result.data.shipping_tracking_number || "",
         courierCode: result.data.shipping_courier || "",
@@ -427,6 +439,41 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                     <p className="text-sm text-[#303646]">{order.customer_address}</p>
                   </div>
                 </div>
+
+                {/* Navigation Buttons for Eco-Maggie Delivery */}
+                {shippingType === "ecomaggie-delivery" && (order.delivery_latitude && order.delivery_longitude || order.metadata?.deliveryLatitude && order.metadata?.deliveryLongitude) && (
+                  <div className="mt-5 pt-5 border-t-2 border-[#a3af87]/30">
+                    <p className="text-sm font-bold text-[#435664] mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-[#a3af87]" />
+                      Navigasi ke Lokasi
+                    </p>
+                    <div className="space-y-2">
+                      {/* Buka Google Maps */}
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${order.delivery_latitude || order.metadata?.deliveryLatitude},${order.delivery_longitude || order.metadata?.deliveryLongitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#a3af87] hover:bg-[#435664] text-white rounded-xl font-semibold transition-colors"
+                      >
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        Buka Google Maps
+                      </a>
+
+                      {/* Lihat di Peta */}
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${order.delivery_latitude || order.metadata?.deliveryLatitude},${order.delivery_longitude || order.metadata?.deliveryLongitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white border-2 border-[#a3af87]/30 hover:border-[#a3af87] hover:bg-[#fdf8d4]/50 text-[#435664] rounded-xl font-semibold transition-colors"
+                      >
+                        <MapPin className="h-5 w-5 text-[#a3af87]" />
+                        Lihat di Peta
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Order Summary Card */}
@@ -502,6 +549,8 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                   </div>
                 </div>
               </div>
+
+
             </motion.div>
 
             {/* Right Column - Action Forms */}
@@ -617,6 +666,47 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                       </div>
                     </div>
                   </div>
+
+                  {/* Action Buttons for Expedition */}
+                  {order.status === "shipped" && (
+                    <button
+                      onClick={() => handleStatusUpdate("delivered")}
+                      disabled={isUpdating}
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Sudah Sampai (Delivered)
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {order.status === "delivered" && (
+                    <button
+                      onClick={() => handleStatusUpdate("completed")}
+                      disabled={isUpdating}
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Selesai (Completed)
+                        </>
+                      )}
+                    </button>
+                  )}
 
                   {order.tracking_history && order.tracking_history.length > 0 && (
                     <div>
@@ -754,25 +844,58 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                   <div className="p-4 bg-[#a3af87]/20 border border-[#a3af87] rounded-xl mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle2 className="h-5 w-5 text-[#435664]" />
-                      <p className="font-semibold text-[#435664]">Pesanan Sedang Diantar</p>
+                      <p className="font-semibold text-[#435664]">
+                        {order.status === "shipped" ? "Pesanan Sedang Diantar" : "Pesanan Sudah Sampai"}
+                      </p>
                     </div>
                     {order.notes && <p className="text-sm text-[#435664] mt-2">{order.notes}</p>}
                   </div>
 
+                  {/* Action Buttons for Ecomaggie Delivery */}
                   {order.status === "shipped" && (
                     <button
                       onClick={() => handleStatusUpdate("delivered")}
                       disabled={isUpdating}
-                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3"
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
                     >
-                      {isUpdating ? "Memproses..." : "Tandai Sudah Sampai"}
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Sudah Sampai (Delivered)
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {order.status === "delivered" && (
+                    <button
+                      onClick={() => handleStatusUpdate("completed")}
+                      disabled={isUpdating}
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Selesai (Completed)
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
               )}
 
               {/* Self Pickup */}
-              {shippingType === "self-pickup" && (
+              {shippingType === "self-pickup" && order.status !== "completed" && order.status !== "cancelled" && (
                 <div className="bg-[#fdf8d4]/20 rounded-2xl border-2 border-[#a3af87]/30 p-6">
                   <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
                     <Store className="h-5 w-5 text-[#a3af87]" />
@@ -787,9 +910,19 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                       <button
                         onClick={() => handleStatusUpdate("completed")}
                         disabled={isUpdating}
-                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50"
+                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
                       >
-                        {isUpdating ? "Memproses..." : "Tandai Sudah Diambil (Selesai)"}
+                        {isUpdating ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Memproses...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-5 w-5" />
+                            Tandai Sudah Diambil (Selesai)
+                          </>
+                        )}
                       </button>
                     </div>
                   ) : (
@@ -800,9 +933,19 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                       <button
                         onClick={() => handleStatusUpdate("ready_pickup")}
                         disabled={isUpdating}
-                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50"
+                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
                       >
-                        {isUpdating ? "Memproses..." : "Tandai Siap Diambil"}
+                        {isUpdating ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Memproses...
+                          </>
+                        ) : (
+                          <>
+                            <Store className="h-5 w-5" />
+                            Tandai Siap Diambil
+                          </>
+                        )}
                       </button>
                     </div>
                   )}
@@ -841,7 +984,7 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
 
               {/* Status Change Actions */}
               {!isAlreadyShipped && order.status !== "cancelled" && order.status !== "ready_pickup" && shippingType !== "self-pickup" && (
-                <div className="bg-gradient-to-br from-[#a3af87]/10 to-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/20 p-6">
+                <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6">
                   <div className="flex items-start gap-3 mb-4">
                     <AlertCircle className="h-5 w-5 text-[#a3af87] mt-0.5" />
                     <div>
@@ -851,6 +994,120 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                           ? "Pastikan nomor resi sudah benar sebelum menyimpan. Setelah disimpan, status pesanan akan berubah menjadi 'Dikirim'."
                           : "Pastikan data driver sudah benar. Customer akan menerima notifikasi dengan info driver."}
                       </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* GPS Coordinates Section - For Eco-Maggie Delivery */}
+              {shippingType === "ecomaggie-delivery" && (order.delivery_latitude && order.delivery_longitude || order.metadata?.deliveryLatitude && order.metadata?.deliveryLongitude) && (
+                <div className="bg-white rounded-2xl border-2 border-[#a3af87]/30 p-6 shadow-lg">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-bold text-[#303646] text-lg flex items-center gap-2">
+                      <div className="p-2 bg-[#a3af87] rounded-xl">
+                        <MapPin className="h-5 w-5 text-white" />
+                      </div>
+                      Koordinat GPS
+                    </h3>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-xs font-semibold text-green-700">GPS Ready</span>
+                    </div>
+                  </div>
+
+                  {/* Coordinates Display - Horizontal Layout for Desktop */}
+                  <div className="bg-[#fdf8d4]/30 rounded-xl border-2 border-[#a3af87]/20 p-6 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Latitude */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-2 bg-[#a3af87]/10 rounded-lg">
+                            <svg className="h-5 w-5 text-[#a3af87]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-bold text-[#435664] uppercase">Latitude</span>
+                        </div>
+                        <div className="bg-white rounded-lg p-4 border border-[#a3af87]/30 mb-3">
+                          <p className="text-2xl font-mono font-bold text-[#303646] break-all">
+                            {(order.delivery_latitude || order.metadata?.deliveryLatitude)?.toFixed(6)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText((order.delivery_latitude || order.metadata?.deliveryLatitude)?.toFixed(6) || '');
+                            success("Tersalin!", "Latitude berhasil disalin");
+                          }}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#a3af87]/10 hover:bg-[#a3af87]/20 text-[#435664] rounded-lg text-sm font-semibold transition-colors"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Salin
+                        </button>
+                      </div>
+
+                      {/* Longitude */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-2 bg-[#435664]/10 rounded-lg">
+                            <svg className="h-5 w-5 text-[#435664]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-bold text-[#435664] uppercase">Longitude</span>
+                        </div>
+                        <div className="bg-white rounded-lg p-4 border border-[#a3af87]/30 mb-3">
+                          <p className="text-2xl font-mono font-bold text-[#303646] break-all">
+                            {(order.delivery_longitude || order.metadata?.deliveryLongitude)?.toFixed(6)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText((order.delivery_longitude || order.metadata?.deliveryLongitude)?.toFixed(6) || '');
+                            success("Tersalin!", "Longitude berhasil disalin");
+                          }}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#435664]/10 hover:bg-[#435664]/20 text-[#435664] rounded-lg text-sm font-semibold transition-colors"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Salin
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Copy Full Coordinates Button */}
+                  <button
+                    onClick={() => {
+                      const lat = (order.delivery_latitude || order.metadata?.deliveryLatitude)?.toFixed(6);
+                      const lng = (order.delivery_longitude || order.metadata?.deliveryLongitude)?.toFixed(6);
+                      navigator.clipboard.writeText(`${lat}, ${lng}`);
+                      success("Tersalin!", "Koordinat lengkap berhasil disalin");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-[#435664] hover:bg-[#303646] text-white rounded-xl font-semibold transition-colors mb-4"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Salin Koordinat Lengkap
+                  </button>
+
+                  {/* Helper Text for Driver */}
+                  <div className="p-4 sm:p-5 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-2xl">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-[#a3af87]/10 rounded-lg flex-shrink-0">
+                        <svg className="h-5 w-5 text-[#a3af87]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs sm:text-sm text-[#303646] leading-relaxed">
+                          <span className="font-bold text-[#435664]">Info untuk Driver:</span> Gunakan koordinat GPS ini untuk menemukan lokasi pengantaran yang presisi. Pastikan customer sudah standby di lokasi saat pengantaran.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   X,
   Loader2,
+  Bike,
 } from "lucide-react";
 import Link from "next/link";
 import { cancelOrderByCustomer } from "@/lib/api/orders.actions";
@@ -39,7 +40,7 @@ interface Transaction {
   orderId: string;
   farmName: string;
   farmerId: number;
-  status: "unpaid" | "packed" | "shipped" | "completed" | "cancelled";
+  status: "unpaid" | "packed" | "ready_pickup" | "shipped" | "completed" | "cancelled";
   products: Product[];
   totalItems: number;
   totalPrice: number;
@@ -67,6 +68,11 @@ const statusConfig = {
     label: "Sedang Dikemas",
     color: "bg-blue-50 text-blue-600 border border-blue-200",
     icon: Package,
+  },
+  ready_pickup: {
+    label: "Siap Diambil",
+    color: "bg-amber-50 text-amber-600 border border-amber-200",
+    icon: Store,
   },
   shipped: {
     label: "Dalam Pengiriman",
@@ -237,12 +243,49 @@ export function TransactionCard({
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const config = statusConfig[transaction.status];
   const StatusIcon = config.icon;
 
   const firstProduct = transaction.products[0];
   const otherProductsCount = transaction.products.length - 1;
+
+  // Detect shipping type from shipping method
+  const shippingType = (() => {
+    const method = transaction.shippingMethod?.toLowerCase() || "";
+    if (method.includes("ecomaggie") || method.includes("delivery") || method.includes("motor")) {
+      return "ecomaggie-delivery";
+    }
+    if (method.includes("pickup") || method.includes("ambil")) {
+      return "self-pickup";
+    }
+    return "expedition";
+  })();
+
+  // Shipping type config for label display
+  const shippingTypeConfig = {
+    "ecomaggie-delivery": {
+      label: "Eco-Maggie Delivery",
+      icon: Bike,
+      color: "bg-green-50 text-green-700 border-green-200",
+    },
+    "self-pickup": {
+      label: "Ambil di Toko",
+      icon: Store,
+      color: "bg-orange-50 text-orange-700 border-orange-200",
+    },
+    expedition: {
+      label: transaction.shippingCourier
+        ? `Ekspedisi ${transaction.shippingCourier.toUpperCase()}`
+        : "Ekspedisi",
+      icon: Truck,
+      color: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+  };
+
+  const shippingConfig = shippingTypeConfig[shippingType];
+  const ShippingIcon = shippingConfig.icon;
 
   const handleCancelOrder = async (reason: string) => {
     setIsCancelling(true);
@@ -261,6 +304,31 @@ export function TransactionCard({
       setCancelError("Terjadi kesalahan saat membatalkan pesanan");
     } finally {
       setIsCancelling(false);
+    }
+  };
+
+  const handleConfirmDelivery = async () => {
+    if (!confirm("Apakah Anda yakin sudah menerima pesanan ini?")) return;
+
+    setIsConfirming(true);
+    try {
+      // Call API to mark as delivered/completed by customer
+      const response = await fetch("/api/orders/confirm-delivery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: transaction.orderId }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        onCancelSuccess?.(); // Reload transactions
+      } else {
+        alert(result.message || "Gagal mengkonfirmasi penerimaan");
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat mengkonfirmasi penerimaan");
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -333,16 +401,85 @@ export function TransactionCard({
             </button>
           </>
         );
-      case "shipped":
-        return (
-          <button
-            onClick={() => onTrack?.(transaction)}
-            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
-          >
-            <MapPin className="h-4 w-4" />
-            Lacak Pesanan
-          </button>
+      case "ready_pickup":
+        const whatsappMessagePickup = encodeURIComponent(
+          `Halo, saya ingin mengambil pesanan dengan ID: ${transaction.orderId}. Kapan saya bisa datang?`
         );
+        const whatsappNumberPickup = "6282288953268";
+        return (
+          <>
+            <a
+              href={`https://wa.me/${whatsappNumberPickup}?text=${whatsappMessagePickup}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
+            >
+              <Store className="h-4 w-4" />
+              Konfirmasi Ambil
+            </a>
+            <Link
+              href={`/market/orders/${transaction.orderId}`}
+              className="px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Detail
+            </Link>
+          </>
+        );
+      case "shipped":
+        // For EXPEDITION: Show "Lacak Pesanan" + "Konfirmasi Terima"
+        // For DELIVERY: Show only "Konfirmasi Terima"
+        if (shippingType === "expedition") {
+          return (
+            <>
+              <button
+                onClick={() => onTrack?.(transaction)}
+                className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
+              >
+                <MapPin className="h-4 w-4" />
+                Lacak Pesanan
+              </button>
+              <button
+                onClick={handleConfirmDelivery}
+                disabled={isConfirming}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isConfirming ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Konfirmasi Terima
+                  </>
+                )}
+              </button>
+            </>
+          );
+        } else {
+          // For delivery (ecomaggie-delivery)
+          return (
+            <button
+              onClick={handleConfirmDelivery}
+              disabled={isConfirming}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {isConfirming ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Memproses...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Konfirmasi Terima
+                </>
+              )}
+            </button>
+          );
+        }
       case "completed":
         // Check if user has already reviewed
         if (transaction.hasReviewed) {
@@ -473,6 +610,23 @@ export function TransactionCard({
               + {otherProductsCount} produk lainnya
             </div>
           )}
+
+          {/* Shipping Type Label */}
+          <div className={`flex flex-col sm:flex-row sm:items-center gap-2 ${otherProductsCount > 0 ? 'mt-3' : ''}`}>
+            <span className="text-xs text-gray-500 font-medium">Pengiriman:</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${shippingConfig.color}`}>
+                <ShippingIcon className="h-3.5 w-3.5" />
+                {shippingConfig.label}
+              </div>
+              {transaction.trackingNumber && (
+                <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600">
+                  <Package className="h-3.5 w-3.5" />
+                  <span className="font-mono font-medium">{transaction.trackingNumber}</span>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Cancel Error */}
           {cancelError && (

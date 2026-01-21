@@ -91,7 +91,7 @@ const statusConfig: Record<OrderStatus, {
   dotColor: string;
   icon: typeof Clock;
 }> = {
-  pending: { label: "Menunggu", color: "bg-amber-50 text-amber-700 border-amber-200", bgColor: "bg-amber-100", dotColor: "bg-amber-500", icon: Clock },
+  pending: { label: "Belum Dibayar", color: "bg-amber-50 text-amber-700 border-amber-200", bgColor: "bg-amber-100", dotColor: "bg-amber-500", icon: Clock },
   paid: { label: "Dibayar", color: "bg-blue-50 text-blue-700 border-blue-200", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: CheckCircle2 },
   confirmed: { label: "Dikonfirmasi", color: "bg-blue-50 text-blue-700 border-blue-200", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: CheckCircle2 },
   processing: { label: "Dikemas", color: "bg-purple-50 text-purple-700 border-purple-200", bgColor: "bg-purple-100", dotColor: "bg-purple-500", icon: Package },
@@ -215,21 +215,24 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
           <button
             onClick={(e) => { e.stopPropagation(); router.push(`/farmer/orders/${order.orderId}`); }}
             className="p-2 bg-[#fdf8d4]/50 rounded-lg hover:bg-[#a3af87]/30 transition-colors"
+            title="Lihat Detail"
           >
             <Eye className="h-4 w-4 text-[#435664]" />
           </button>
-          {["paid", "confirmed", "processing"].includes(order.status) && (
+          {!["completed", "cancelled"].includes(order.status) && (
             <button
               onClick={(e) => { e.stopPropagation(); router.push(`/farmer/orders/${order.orderId}`); }}
               className="p-2 bg-[#a3af87] rounded-lg hover:bg-[#435664] transition-colors"
+              title="Proses Pesanan"
             >
               <ArrowRight className="h-4 w-4 text-white" />
             </button>
           )}
-          {["paid", "confirmed", "processing", "ready_pickup"].includes(order.status) && (
+          {["pending", "paid", "confirmed", "processing", "ready_pickup"].includes(order.status) && (
             <button
               onClick={(e) => onCancelClick(order, e)}
               className="p-2 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+              title="Batalkan Pesanan"
             >
               <Ban className="h-4 w-4 text-red-600" />
             </button>

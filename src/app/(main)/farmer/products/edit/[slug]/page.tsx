@@ -181,7 +181,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdf8d4]/30 to-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -191,7 +191,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         >
           <Link
             href={`/farmer/products/${slug}`}
-            className="inline-flex items-center gap-2 text-sm text-[#5a6c5b] hover:text-[#4a5c4b] mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-[#435664] hover:text-[#303646] mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Detail Produk
@@ -201,7 +201,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             <h1 className="text-3xl font-bold text-[#303646] mb-2">
               Edit Produk
             </h1>
-            <p className="text-gray-600">
+            <p className="text-[#435664]">
               Perbarui informasi produk Anda
             </p>
           </div>
@@ -213,7 +213,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border-2 border-gray-100 p-6 space-y-6"
+          className="bg-[#fdf8d4]/20 rounded-2xl border-2 border-[#a3af87]/30 p-6 space-y-6"
         >
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
@@ -228,14 +228,14 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           {/* Product Image */}
           <div>
             <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-[#A3AF87]" />
+              <ImageIcon className="h-4 w-4 text-[#a3af87]" />
               Foto Produk
             </label>
-            <div className="w-full h-64 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center">
+            <div className="w-full h-64 bg-[#fdf8d4]/30 rounded-xl border-2 border-dashed border-[#a3af87]/50 flex items-center justify-center">
               <div className="text-center">
-                <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">Upload foto produk</p>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG hingga 5MB</p>
+                <ImageIcon className="h-12 w-12 text-[#a3af87]/50 mx-auto mb-2" />
+                <p className="text-sm text-[#435664]">Upload foto produk</p>
+                <p className="text-xs text-[#435664]/70 mt-1">PNG, JPG hingga 5MB</p>
               </div>
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           {/* Product Name */}
           <div>
             <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-              <Package className="h-4 w-4 text-[#A3AF87]" />
+              <Package className="h-4 w-4 text-[#a3af87]" />
               Nama Produk <span className="text-red-500">*</span>
             </label>
             <input
@@ -252,7 +252,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Contoh: Kompos Organik Premium"
               required
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]/50"
             />
           </div>
 
@@ -260,14 +260,14 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-                <Layers className="h-4 w-4 text-[#A3AF87]" />
+                <Layers className="h-4 w-4 text-[#a3af87]" />
                 Kategori <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 required
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646]"
+                className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646]"
               >
                 <option value="">Pilih Kategori</option>
                 <option value="kompos">Kompos</option>
@@ -279,7 +279,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
             <div>
               <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-                <Package className="h-4 w-4 text-[#A3AF87]" />
+                <Package className="h-4 w-4 text-[#a3af87]" />
                 Stok <span className="text-red-500">*</span>
               </label>
               <input
@@ -289,7 +289,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                 placeholder="0"
                 min="0"
                 required
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
+                className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]/50"
               />
             </div>
           </div>
@@ -298,11 +298,11 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-[#A3AF87]" />
+                <DollarSign className="h-4 w-4 text-[#a3af87]" />
                 Harga <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#435664] font-semibold">
                   Rp
                 </span>
                 <input
@@ -312,21 +312,21 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                   placeholder="0"
                   min="0"
                   required
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]/50"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-                <Tag className="h-4 w-4 text-[#A3AF87]" />
+                <Tag className="h-4 w-4 text-[#a3af87]" />
                 Satuan <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.unit}
                 onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                 required
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646]"
+                className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646]"
               >
                 <option value="">Pilih Satuan</option>
                 <option value="kg">Kilogram (kg)</option>
@@ -340,7 +340,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-[#303646] mb-3 flex items-center gap-2">
-              <FileText className="h-4 w-4 text-[#A3AF87]" />
+              <FileText className="h-4 w-4 text-[#a3af87]" />
               Deskripsi Produk
             </label>
             <textarea
@@ -348,24 +348,24 @@ export default function EditProductPage({ params }: EditProductPageProps) {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Jelaskan detail produk Anda..."
               rows={5}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors resize-none text-[#303646] placeholder:text-gray-400"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors resize-none text-[#303646] placeholder:text-[#435664]/50"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-100">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-[#a3af87]/30">
             <button
               type="button"
               onClick={() => router.back()}
               disabled={isSaving}
-              className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-colors disabled:opacity-50"
+              className="flex-1 px-6 py-3 bg-[#fdf8d4]/50 hover:bg-[#fdf8d4] text-[#435664] rounded-xl font-semibold transition-colors disabled:opacity-50"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] hover:from-[#95a17a] hover:to-[#8a9471] text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#a3af87] to-[#435664] hover:from-[#435664] hover:to-[#a3af87] text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSaving ? (
                 <>

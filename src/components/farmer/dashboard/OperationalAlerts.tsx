@@ -60,13 +60,13 @@ export default function OperationalAlerts() {
   const getAlertColor = (type: Alert["type"]) => {
     switch (type) {
       case "new_order":
-        return "bg-green-50 border-green-100 text-green-700";
+        return "bg-gradient-to-r from-emerald-50 to-emerald-100/50 border-emerald-200 text-emerald-800";
       case "new_supply_request":
-        return "bg-blue-50 border-blue-100 text-blue-700";
+        return "bg-gradient-to-r from-blue-50 to-blue-100/50 border-blue-200 text-blue-800";
       case "low_stock":
-        return "bg-amber-50 border-amber-100 text-amber-700";
+        return "bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 text-amber-800";
       default:
-        return "bg-gray-50 border-gray-100 text-gray-700";
+        return "bg-gradient-to-r from-gray-50 to-gray-100/50 border-gray-200 text-gray-800";
     }
   };
 
@@ -97,8 +97,8 @@ export default function OperationalAlerts() {
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#A3AF87]/10 rounded-xl">
-            <Bell className="h-5 w-5 text-[#A3AF87]" />
+          <div className="p-2.5 bg-gradient-to-br from-[#435664] to-[#303646] rounded-xl shadow-sm">
+            <Bell className="h-5 w-5 text-white" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-[#303646] poppins-bold">
@@ -108,7 +108,7 @@ export default function OperationalAlerts() {
           </div>
         </div>
         {alerts.length > 0 && (
-          <span className="px-2.5 py-1 bg-[#A3AF87]/10 text-[#A3AF87] text-xs font-semibold rounded-full">
+          <span className="px-2.5 py-1 bg-gradient-to-r from-[#435664] to-[#303646] text-white text-xs font-semibold rounded-full shadow-sm">
             {alerts.length}
           </span>
         )}
@@ -116,17 +116,17 @@ export default function OperationalAlerts() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="text-center p-2 bg-green-50 rounded-lg">
-          <p className="text-lg font-bold text-green-600">{newOrdersCount}</p>
-          <p className="text-[10px] text-gray-500">Pesanan</p>
+        <div className="text-center p-2 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg border border-emerald-200/50">
+          <p className="text-lg font-bold text-emerald-700">{newOrdersCount}</p>
+          <p className="text-[10px] text-emerald-600 font-medium">Pesanan</p>
         </div>
-        <div className="text-center p-2 bg-blue-50 rounded-lg">
-          <p className="text-lg font-bold text-blue-600">{supplyRequestsCount}</p>
-          <p className="text-[10px] text-gray-500">Pickup</p>
+        <div className="text-center p-2 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg border border-blue-200/50">
+          <p className="text-lg font-bold text-blue-700">{supplyRequestsCount}</p>
+          <p className="text-[10px] text-blue-600 font-medium">Pickup</p>
         </div>
-        <div className="text-center p-2 bg-amber-50 rounded-lg">
-          <p className="text-lg font-bold text-amber-600">{lowStockCount}</p>
-          <p className="text-[10px] text-gray-500">Stok</p>
+        <div className="text-center p-2 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-lg border border-amber-200/50">
+          <p className="text-lg font-bold text-amber-700">{lowStockCount}</p>
+          <p className="text-[10px] text-amber-600 font-medium">Stok</p>
         </div>
       </div>
 
@@ -134,7 +134,7 @@ export default function OperationalAlerts() {
       <div className="flex-1 overflow-y-auto space-y-2 mb-4">
         {isLoading ? (
           <div className="text-center py-6 text-gray-400">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3AF87] mx-auto mb-2"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#435664] mx-auto mb-2"></div>
             <p className="text-sm">Memuat notifikasi...</p>
           </div>
         ) : displayedAlerts.length > 0 ? (
@@ -145,7 +145,7 @@ export default function OperationalAlerts() {
                 alert.type
               )} hover:shadow-sm transition-shadow`}
             >
-              <div className="p-2 rounded-lg bg-white/50">
+              <div className="p-2 rounded-lg bg-white/80 shadow-sm">
                 {getAlertIcon(alert.type)}
               </div>
               <div className="flex-1 min-w-0">
@@ -178,7 +178,7 @@ export default function OperationalAlerts() {
               {alert.type === "new_order" && alert.metadata?.orderId && (
                 <Link
                   href={`/farmer/orders/${alert.metadata.orderId}`}
-                  className="text-xs font-medium text-[#A3AF87] hover:underline whitespace-nowrap"
+                  className="text-xs font-medium text-[#435664] hover:text-[#303646] hover:underline whitespace-nowrap"
                 >
                   Lihat
                 </Link>
@@ -186,7 +186,7 @@ export default function OperationalAlerts() {
               {alert.type === "new_supply_request" && alert.metadata?.supplyId && (
                 <Link
                   href={`/farmer/supply-monitoring`}
-                  className="text-xs font-medium text-[#A3AF87] hover:underline whitespace-nowrap"
+                  className="text-xs font-medium text-[#435664] hover:text-[#303646] hover:underline whitespace-nowrap"
                 >
                   Proses
                 </Link>
@@ -205,7 +205,7 @@ export default function OperationalAlerts() {
       {alerts.length > 3 && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full py-2 text-sm font-medium text-[#A3AF87] hover:bg-[#A3AF87]/5 rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2 text-sm font-medium text-[#435664] hover:bg-[#435664]/5 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           {isExpanded ? (
             <>

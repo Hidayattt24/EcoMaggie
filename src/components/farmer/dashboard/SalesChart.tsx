@@ -37,7 +37,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="bg-white p-3 rounded-xl shadow-lg border border-gray-100">
         <p className="text-sm font-semibold text-[#303646] mb-1">{label}</p>
         <p className="text-sm text-gray-600">
-          <span className="font-bold text-[#A3AF87]">
+          <span className="font-bold text-[#a3af87]">
             Rp {payload[0].value.toLocaleString("id-ID")}
           </span>
         </p>
@@ -146,10 +146,10 @@ function CustomCalendar({
         disabled={disabled}
         className={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
           selected
-            ? "bg-[#A3AF87] text-white"
+            ? "bg-[#a3af87] text-white"
             : disabled
             ? "text-gray-300 cursor-not-allowed"
-            : "text-gray-700 hover:bg-[#A3AF87]/20"
+            : "text-gray-700 hover:bg-[#a3af87]/20"
         }`}
       >
         {day}
@@ -367,9 +367,9 @@ export default function SalesChart() {
                 setShowDatePicker(!showDatePicker);
                 setActiveCalendar(null);
               }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#A3AF87]/10 hover:bg-[#A3AF87]/20 rounded-xl transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#a3af87]/10 hover:bg-[#a3af87]/20 rounded-xl transition-colors"
             >
-              <Calendar className="h-4 w-4 text-[#A3AF87]" />
+              <Calendar className="h-4 w-4 text-[#a3af87]" />
               <span className="text-xs font-medium text-[#303646] hidden sm:inline">
                 {getDisplayLabel()}
               </span>
@@ -401,7 +401,7 @@ export default function SalesChart() {
                         onClick={() => handlePresetClick(index)}
                         className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                           selectedPreset === index && !useCustomRange
-                            ? "bg-[#A3AF87] text-white"
+                            ? "bg-[#a3af87] text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       >
@@ -428,7 +428,7 @@ export default function SalesChart() {
                           }
                           className={`w-full px-3 py-2.5 rounded-xl border text-sm text-left transition-colors ${
                             activeCalendar === "start"
-                              ? "border-[#A3AF87] bg-[#A3AF87]/5"
+                              ? "border-[#a3af87] bg-[#a3af87]/5"
                               : "border-gray-200 hover:border-gray-300"
                           }`}
                         >
@@ -457,7 +457,7 @@ export default function SalesChart() {
                           }
                           className={`w-full px-3 py-2.5 rounded-xl border text-sm text-left transition-colors ${
                             activeCalendar === "end"
-                              ? "border-[#A3AF87] bg-[#A3AF87]/5"
+                              ? "border-[#a3af87] bg-[#a3af87]/5"
                               : "border-gray-200 hover:border-gray-300"
                           }`}
                         >
@@ -517,7 +517,7 @@ export default function SalesChart() {
                     <button
                       onClick={handleCustomRangeApply}
                       disabled={!customRange.start || !customRange.end}
-                      className="w-full py-2.5 bg-[#A3AF87] text-white text-sm font-semibold rounded-xl hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#435664] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Terapkan
                     </button>
@@ -531,7 +531,7 @@ export default function SalesChart() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
+        <div className="p-3 bg-[#a3af87]/10 rounded-xl">
           <p className="text-xs text-gray-500 mb-0.5">Total Penjualan</p>
           <p className="text-lg font-bold text-[#303646]">
             Rp {totalSales.toLocaleString("id-ID")}
@@ -554,8 +554,8 @@ export default function SalesChart() {
           >
             <defs>
               <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#A3AF87" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#A3AF87" stopOpacity={0} />
+                <stop offset="5%" stopColor="#a3af87" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#a3af87" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -580,13 +580,13 @@ export default function SalesChart() {
             <Area
               type="monotone"
               dataKey="sales"
-              stroke="#A3AF87"
+              stroke="#a3af87"
               strokeWidth={2.5}
               fill="url(#salesGradient)"
               dot={false}
               activeDot={{
                 r: 6,
-                fill: "#A3AF87",
+                fill: "#a3af87",
                 stroke: "#fff",
                 strokeWidth: 2,
               }}

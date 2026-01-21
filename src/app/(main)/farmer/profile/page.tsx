@@ -39,17 +39,17 @@ function ProfileSkeleton() {
   return (
     <div className="animate-pulse space-y-6">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-20 h-20 bg-gray-200 rounded-2xl"></div>
+        <div className="w-20 h-20 bg-[#fdf8d4]/50 rounded-2xl"></div>
         <div className="flex-1">
-          <div className="h-6 bg-gray-200 rounded w-48 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-32"></div>
+          <div className="h-6 bg-[#fdf8d4]/50 rounded w-48 mb-2"></div>
+          <div className="h-4 bg-[#a3af87]/20 rounded w-32"></div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div key={i} className={i > 4 ? "md:col-span-2" : ""}>
-            <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-            <div className="h-12 bg-gray-200 rounded-xl"></div>
+            <div className="h-4 bg-[#fdf8d4]/50 rounded w-24 mb-2"></div>
+            <div className="h-12 bg-[#a3af87]/20 rounded-xl"></div>
           </div>
         ))}
       </div>
@@ -183,13 +183,13 @@ export default function FarmerProfilePage() {
             <h1 className="text-2xl lg:text-3xl font-bold text-[#303646]">
               Pengaturan Profile
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-[#435664] mt-1">
               Kelola informasi akun dan keamanan Anda
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 rounded-xl">
-            <Settings className="h-5 w-5 text-[#A3AF87]" />
-            <span className="text-sm font-medium text-[#5a6c5b]">Settings</span>
+          <div className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 rounded-xl border border-[#a3af87]/30">
+            <Settings className="h-5 w-5 text-[#a3af87]" />
+            <span className="text-sm font-medium text-[#435664]">Settings</span>
           </div>
         </div>
       </motion.div>
@@ -204,28 +204,28 @@ export default function FarmerProfilePage() {
           className="lg:col-span-4 space-y-6"
         >
           {/* Profile Card */}
-          <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-sm">
+          <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6 shadow-sm">
             {loading ? (
               <div className="animate-pulse">
                 <div className="flex flex-col items-center">
-                  <div className="w-24 h-24 bg-gray-200 rounded-2xl mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded w-32 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-48"></div>
+                  <div className="w-24 h-24 bg-[#fdf8d4]/50 rounded-2xl mb-4"></div>
+                  <div className="h-6 bg-[#fdf8d4]/50 rounded w-32 mb-2"></div>
+                  <div className="h-4 bg-[#a3af87]/20 rounded w-48"></div>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col items-center text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6e] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-24 h-24 bg-[#a3af87] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                   <UserCircle className="h-12 w-12 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-[#303646] mb-1">
                   {profile?.name || "Farmer"}
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">{email || profile?.email}</p>
+                <p className="text-sm text-[#435664] mb-4">{email || profile?.email}</p>
                 {profile?.farmName && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#A3AF87]/10 rounded-full">
-                    <Store className="h-4 w-4 text-[#A3AF87]" />
-                    <span className="text-sm font-medium text-[#5a6c5b]">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#fdf8d4]/50 rounded-full border border-[#a3af87]/30">
+                    <Store className="h-4 w-4 text-[#a3af87]" />
+                    <span className="text-sm font-medium text-[#435664]">
                       {profile.farmName}
                     </span>
                   </div>
@@ -235,7 +235,7 @@ export default function FarmerProfilePage() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="bg-white rounded-2xl border-2 border-gray-100 p-3 shadow-sm">
+          <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-3 shadow-sm">
             <nav className="space-y-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -246,11 +246,11 @@ export default function FarmerProfilePage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                       isActive
-                        ? "bg-[#A3AF87] text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-50"
+                        ? "bg-[#a3af87] text-white shadow-md"
+                        : "text-[#435664] hover:bg-[#fdf8d4]/50"
                     }`}
                   >
-                    <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-400"}`} />
+                    <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-[#a3af87]"}`} />
                     <span className="font-medium">{tab.label}</span>
                   </button>
                 );
@@ -259,14 +259,14 @@ export default function FarmerProfilePage() {
           </div>
 
           {/* Quick Info */}
-          <div className="bg-gradient-to-br from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-2xl p-5 border border-[#A3AF87]/20">
+          <div className="bg-[#fdf8d4]/50 rounded-2xl p-5 border-2 border-[#a3af87]/30">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-[#A3AF87] flex-shrink-0 mt-0.5" />
+              <Info className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-semibold text-[#303646] text-sm mb-1">
                   Tips Keamanan
                 </h4>
-                <p className="text-xs text-gray-600 leading-relaxed">
+                <p className="text-xs text-[#435664] leading-relaxed">
                   Pastikan password Anda kuat dan unik. Gunakan kombinasi huruf, angka, dan simbol untuk keamanan maksimal.
                 </p>
               </div>
@@ -288,17 +288,17 @@ export default function FarmerProfilePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-2xl border-2 border-gray-100 p-6 lg:p-8 shadow-sm"
+                className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6 lg:p-8 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                    <User className="h-6 w-6 text-[#A3AF87]" />
+                  <div className="p-3 bg-[#fdf8d4]/50 rounded-xl border border-[#a3af87]/30">
+                    <User className="h-6 w-6 text-[#a3af87]" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-[#303646]">
                       Informasi Profile
                     </h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#435664]">
                       Update informasi pribadi dan usaha Anda
                     </p>
                   </div>
@@ -311,7 +311,7 @@ export default function FarmerProfilePage() {
                     {/* Email (editable) */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                        <Mail className="h-4 w-4 text-gray-400" />
+                        <Mail className="h-4 w-4 text-[#a3af87]" />
                         Email <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -319,7 +319,7 @@ export default function FarmerProfilePage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                        className="w-full px-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                         placeholder="email@example.com"
                       />
                     </div>
@@ -328,7 +328,7 @@ export default function FarmerProfilePage() {
                       {/* Name */}
                       <div>
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                          <User className="h-4 w-4 text-gray-400" />
+                          <User className="h-4 w-4 text-[#a3af87]" />
                           Nama Lengkap <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -336,7 +336,7 @@ export default function FarmerProfilePage() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           required
-                          className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                          className="w-full px-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                           placeholder="Masukkan nama lengkap"
                         />
                       </div>
@@ -344,7 +344,7 @@ export default function FarmerProfilePage() {
                       {/* Phone */}
                       <div>
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                          <Phone className="h-4 w-4 text-gray-400" />
+                          <Phone className="h-4 w-4 text-[#a3af87]" />
                           No. HP/WhatsApp <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -352,7 +352,7 @@ export default function FarmerProfilePage() {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           required
-                          className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                          className="w-full px-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                           placeholder="08xxxxxxxxxx"
                         />
                       </div>
@@ -361,14 +361,14 @@ export default function FarmerProfilePage() {
                     {/* Farm Name */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                        <Building2 className="h-4 w-4 text-gray-400" />
+                        <Building2 className="h-4 w-4 text-[#a3af87]" />
                         Nama Usaha/Farm
                       </label>
                       <input
                         type="text"
                         value={farmName}
                         onChange={(e) => setFarmName(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                        className="w-full px-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                         placeholder="Contoh: Farm Organik Sejahtera"
                       />
                     </div>
@@ -376,14 +376,14 @@ export default function FarmerProfilePage() {
                     {/* Location */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                        <MapPin className="h-4 w-4 text-gray-400" />
+                        <MapPin className="h-4 w-4 text-[#a3af87]" />
                         Lokasi
                       </label>
                       <input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                        className="w-full px-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                         placeholder="Contoh: Banda Aceh, Aceh"
                       />
                     </div>
@@ -391,24 +391,24 @@ export default function FarmerProfilePage() {
                     {/* Description */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                        <FileText className="h-4 w-4 text-gray-400" />
+                        <FileText className="h-4 w-4 text-[#a3af87]" />
                         Deskripsi Usaha
                       </label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={4}
-                        className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors resize-none"
+                        className="w-full px-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors resize-none"
                         placeholder="Ceritakan tentang usaha Anda..."
                       />
                     </div>
 
                     {/* Submit Button */}
-                    <div className="flex justify-end pt-4 border-t border-gray-100">
+                    <div className="flex justify-end pt-4 border-t border-[#a3af87]/30">
                       <button
                         type="submit"
                         disabled={isSavingProfile}
-                        className="flex items-center gap-2 px-6 py-3 bg-[#A3AF87] text-white font-semibold rounded-xl hover:bg-[#8a9a6e] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                        className="flex items-center gap-2 px-6 py-3 bg-[#a3af87] text-white font-semibold rounded-xl hover:bg-[#435664] disabled:bg-[#435664]/50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                       >
                         {isSavingProfile ? (
                           <>
@@ -434,17 +434,17 @@ export default function FarmerProfilePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-2xl border-2 border-gray-100 p-6 lg:p-8 shadow-sm"
+                className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6 lg:p-8 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                    <KeyRound className="h-6 w-6 text-[#A3AF87]" />
+                  <div className="p-3 bg-[#fdf8d4]/50 rounded-xl border border-[#a3af87]/30">
+                    <KeyRound className="h-6 w-6 text-[#a3af87]" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-[#303646]">
                       Ganti Password
                     </h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#435664]">
                       Perbarui password untuk keamanan akun
                     </p>
                   </div>
@@ -454,7 +454,7 @@ export default function FarmerProfilePage() {
                   {/* Current Password */}
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                      <Lock className="h-4 w-4 text-gray-400" />
+                      <Lock className="h-4 w-4 text-[#a3af87]" />
                       Password Lama <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -463,13 +463,13 @@ export default function FarmerProfilePage() {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-3 pr-12 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                        className="w-full px-4 py-3 pr-12 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                         placeholder="Masukkan password lama"
                       />
                       <button
                         type="button"
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a3af87] hover:text-[#435664]"
                       >
                         {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
@@ -479,7 +479,7 @@ export default function FarmerProfilePage() {
                   {/* New Password */}
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                      <KeyRound className="h-4 w-4 text-gray-400" />
+                      <KeyRound className="h-4 w-4 text-[#a3af87]" />
                       Password Baru <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -489,13 +489,13 @@ export default function FarmerProfilePage() {
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
                         minLength={6}
-                        className="w-full px-4 py-3 pr-12 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                        className="w-full px-4 py-3 pr-12 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                         placeholder="Minimal 6 karakter"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a3af87] hover:text-[#435664]"
                       >
                         {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
@@ -505,7 +505,7 @@ export default function FarmerProfilePage() {
                   {/* Confirm Password */}
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-[#303646] mb-2">
-                      <CheckCircle className="h-4 w-4 text-gray-400" />
+                      <CheckCircle className="h-4 w-4 text-[#a3af87]" />
                       Konfirmasi Password <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -515,13 +515,13 @@ export default function FarmerProfilePage() {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         minLength={6}
-                        className="w-full px-4 py-3 pr-12 bg-white border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] transition-colors"
+                        className="w-full px-4 py-3 pr-12 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] transition-colors"
                         placeholder="Masukkan ulang password baru"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a3af87] hover:text-[#435664]"
                       >
                         {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
@@ -529,14 +529,14 @@ export default function FarmerProfilePage() {
                   </div>
 
                   {/* Warning Notice */}
-                  <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                  <div className="bg-[#fdf8d4]/70 border-2 border-[#a3af87]/40 rounded-xl p-4">
                     <div className="flex items-start gap-3">
-                      <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <AlertTriangle className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-amber-800 mb-1">
+                        <p className="text-sm font-semibold text-[#303646] mb-1">
                           Perhatian
                         </p>
-                        <p className="text-sm text-amber-700">
+                        <p className="text-sm text-[#435664]">
                           Setelah mengganti password, Anda akan tetap login di perangkat ini. 
                           Namun Anda perlu login ulang di perangkat lain menggunakan password baru.
                         </p>
@@ -545,11 +545,11 @@ export default function FarmerProfilePage() {
                   </div>
 
                   {/* Submit Button */}
-                  <div className="flex justify-end pt-4 border-t border-gray-100">
+                  <div className="flex justify-end pt-4 border-t border-[#a3af87]/30">
                     <button
                       type="submit"
                       disabled={isSavingPassword}
-                      className="flex items-center gap-2 px-6 py-3 bg-[#A3AF87] text-white font-semibold rounded-xl hover:bg-[#8a9a6e] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                      className="flex items-center gap-2 px-6 py-3 bg-[#a3af87] text-white font-semibold rounded-xl hover:bg-[#435664] disabled:bg-[#435664]/50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                     >
                       {isSavingPassword ? (
                         <>

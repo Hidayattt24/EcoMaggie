@@ -76,30 +76,30 @@ export default function NotificationDropdown() {
     switch (type) {
       case "new_order":
         return {
-          bg: "bg-green-50",
-          border: "border-green-100",
-          text: "text-green-700",
-          iconBg: "bg-green-100",
+          bg: "bg-gradient-to-r from-emerald-50 to-emerald-100/50",
+          border: "border-emerald-200",
+          text: "text-emerald-800",
+          iconBg: "bg-emerald-100",
         };
       case "new_supply_request":
         return {
-          bg: "bg-blue-50",
-          border: "border-blue-100",
-          text: "text-blue-700",
+          bg: "bg-gradient-to-r from-blue-50 to-blue-100/50",
+          border: "border-blue-200",
+          text: "text-blue-800",
           iconBg: "bg-blue-100",
         };
       case "low_stock":
         return {
-          bg: "bg-amber-50",
-          border: "border-amber-100",
-          text: "text-amber-700",
+          bg: "bg-gradient-to-r from-amber-50 to-amber-100/50",
+          border: "border-amber-200",
+          text: "text-amber-800",
           iconBg: "bg-amber-100",
         };
       default:
         return {
-          bg: "bg-gray-50",
-          border: "border-gray-100",
-          text: "text-gray-700",
+          bg: "bg-gradient-to-r from-gray-50 to-gray-100/50",
+          border: "border-gray-200",
+          text: "text-gray-800",
           iconBg: "bg-gray-100",
         };
     }
@@ -148,8 +148,8 @@ export default function NotificationDropdown() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white sm:rounded-t-2xl">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-                  <Bell className="h-5 w-5 text-[#A3AF87]" />
+                <div className="p-2 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg shadow-sm">
+                  <Bell className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[#303646]">
@@ -168,23 +168,23 @@ export default function NotificationDropdown() {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2 p-4 border-b border-gray-100 bg-gray-50">
-              <div className="text-center p-2 bg-white rounded-lg">
-                <p className="text-lg font-bold text-green-600">
+              <div className="text-center p-2 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg border border-emerald-200/50">
+                <p className="text-lg font-bold text-emerald-700">
                   {alerts.filter((a) => a.type === "new_order").length}
                 </p>
-                <p className="text-[10px] text-gray-500">Pesanan</p>
+                <p className="text-[10px] text-emerald-600 font-medium">Pesanan</p>
               </div>
-              <div className="text-center p-2 bg-white rounded-lg">
-                <p className="text-lg font-bold text-blue-600">
+              <div className="text-center p-2 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg border border-blue-200/50">
+                <p className="text-lg font-bold text-blue-700">
                   {alerts.filter((a) => a.type === "new_supply_request").length}
                 </p>
-                <p className="text-[10px] text-gray-500">Pickup</p>
+                <p className="text-[10px] text-blue-600 font-medium">Pickup</p>
               </div>
-              <div className="text-center p-2 bg-white rounded-lg">
-                <p className="text-lg font-bold text-amber-600">
+              <div className="text-center p-2 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-lg border border-amber-200/50">
+                <p className="text-lg font-bold text-amber-700">
                   {alerts.filter((a) => a.type === "low_stock").length}
                 </p>
-                <p className="text-[10px] text-gray-500">Stok</p>
+                <p className="text-[10px] text-amber-600 font-medium">Stok</p>
               </div>
             </div>
 
@@ -192,7 +192,7 @@ export default function NotificationDropdown() {
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {isLoading ? (
                 <div className="text-center py-8 text-gray-400">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3AF87] mx-auto mb-2"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#435664] mx-auto mb-2"></div>
                   <p className="text-sm">Memuat notifikasi...</p>
                 </div>
               ) : alerts.length > 0 ? (
@@ -226,7 +226,7 @@ export default function NotificationDropdown() {
                         }
                       }}
                     >
-                      <div className={`p-2 rounded-lg ${colors.iconBg} flex-shrink-0`}>
+                      <div className={`p-2 rounded-lg ${colors.iconBg} flex-shrink-0 shadow-sm`}>
                         {getAlertIcon(alert.type)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -257,7 +257,7 @@ export default function NotificationDropdown() {
                         </p>
                       </div>
                       {navUrl && (
-                        <span className="text-xs font-medium text-[#A3AF87] whitespace-nowrap flex-shrink-0">
+                        <span className="text-xs font-medium text-[#435664] whitespace-nowrap flex-shrink-0">
                           {alert.type === "new_order" ? "Lihat" : alert.type === "new_supply_request" ? "Proses" : "Kelola"}
                         </span>
                       )}
@@ -281,7 +281,7 @@ export default function NotificationDropdown() {
                     setIsOpen(false);
                     // Optional: Navigate to full notifications page
                   }}
-                  className="w-full py-2 text-sm font-medium text-[#A3AF87] hover:bg-white rounded-lg transition-colors"
+                  className="w-full py-2 text-sm font-medium text-[#435664] hover:bg-white rounded-lg transition-colors"
                 >
                   Lihat Semua Notifikasi
                 </button>

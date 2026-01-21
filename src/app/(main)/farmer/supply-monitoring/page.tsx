@@ -248,10 +248,10 @@ function CustomCalendar({
         disabled={disabled}
         className={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
           selected
-            ? "bg-[#A3AF87] text-white"
+            ? "bg-[#a3af87] text-white"
             : disabled
-            ? "text-gray-300 cursor-not-allowed"
-            : "text-gray-700 hover:bg-[#A3AF87]/20"
+            ? "text-[#435664]/30 cursor-not-allowed"
+            : "text-[#435664] hover:bg-[#fdf8d4]/50"
         }`}
       >
         {day}
@@ -264,25 +264,25 @@ function CustomCalendar({
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-[#fdf8d4]/50 transition-colors"
         >
-          <ChevronLeft className="h-4 w-4 text-gray-600" />
+          <ChevronLeft className="h-4 w-4 text-[#435664]" />
         </button>
         <span className="text-sm font-semibold text-[#303646]">
           {monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}
         </span>
         <button
           onClick={nextMonth}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-[#fdf8d4]/50 transition-colors"
         >
-          <ChevronRight className="h-4 w-4 text-gray-600" />
+          <ChevronRight className="h-4 w-4 text-[#435664]" />
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-2">
         {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((day) => (
           <div
             key={day}
-            className="h-8 w-8 flex items-center justify-center text-xs text-gray-400 font-medium"
+            className="h-8 w-8 flex items-center justify-center text-xs text-[#435664] font-medium"
           >
             {day}
           </div>
@@ -298,33 +298,33 @@ function CustomCalendar({
 // ============================================
 function StatsTileSkeleton() {
   return (
-    <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+    <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-[#a3af87]/20 p-6 animate-pulse">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gray-200 rounded-xl w-12 h-12"></div>
+        <div className="p-3 bg-[#fdf8d4]/50 rounded-xl w-12 h-12"></div>
         <div className="flex-1">
-          <div className="h-5 bg-gray-200 rounded w-32 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-20"></div>
+          <div className="h-5 bg-[#fdf8d4]/50 rounded w-32 mb-2"></div>
+          <div className="h-3 bg-[#fdf8d4]/30 rounded w-20"></div>
         </div>
       </div>
       <div className="space-y-4">
-        <div className="p-4 bg-gray-100 rounded-xl">
-          <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
-          <div className="h-8 bg-gray-200 rounded w-24 mb-1"></div>
-          <div className="h-3 bg-gray-200 rounded w-32"></div>
+        <div className="p-4 bg-[#fdf8d4]/20 rounded-xl">
+          <div className="h-4 bg-[#fdf8d4]/50 rounded w-40 mb-2"></div>
+          <div className="h-8 bg-[#fdf8d4]/50 rounded w-24 mb-1"></div>
+          <div className="h-3 bg-[#fdf8d4]/30 rounded w-32"></div>
         </div>
-        <div className="p-4 bg-gray-100 rounded-xl">
-          <div className="h-4 bg-gray-200 rounded w-36 mb-2"></div>
-          <div className="h-8 bg-gray-200 rounded w-20 mb-1"></div>
-          <div className="h-3 bg-gray-200 rounded w-16"></div>
+        <div className="p-4 bg-[#fdf8d4]/20 rounded-xl">
+          <div className="h-4 bg-[#fdf8d4]/50 rounded w-36 mb-2"></div>
+          <div className="h-8 bg-[#fdf8d4]/50 rounded w-20 mb-1"></div>
+          <div className="h-3 bg-[#fdf8d4]/30 rounded w-16"></div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-gray-100 rounded-xl">
-            <div className="h-3 bg-gray-200 rounded w-16 mb-2"></div>
-            <div className="h-8 bg-gray-200 rounded w-12"></div>
+          <div className="p-3 bg-[#fdf8d4]/20 rounded-xl">
+            <div className="h-3 bg-[#fdf8d4]/50 rounded w-16 mb-2"></div>
+            <div className="h-8 bg-[#fdf8d4]/50 rounded w-12"></div>
           </div>
-          <div className="p-3 bg-gray-100 rounded-xl">
-            <div className="h-3 bg-gray-200 rounded w-20 mb-2"></div>
-            <div className="h-8 bg-gray-200 rounded w-12"></div>
+          <div className="p-3 bg-[#fdf8d4]/20 rounded-xl">
+            <div className="h-3 bg-[#fdf8d4]/50 rounded w-20 mb-2"></div>
+            <div className="h-8 bg-[#fdf8d4]/50 rounded w-12"></div>
           </div>
         </div>
       </div>
@@ -334,38 +334,38 @@ function StatsTileSkeleton() {
 
 function ChartSkeleton() {
   return (
-    <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 p-6 animate-pulse">
+    <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-[#a3af87]/20 p-6 animate-pulse">
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-gray-200 rounded-xl w-12 h-12"></div>
+          <div className="p-3 bg-[#fdf8d4]/50 rounded-xl w-12 h-12"></div>
           <div>
-            <div className="h-5 bg-gray-200 rounded w-40 mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-24"></div>
+            <div className="h-5 bg-[#fdf8d4]/50 rounded w-40 mb-2"></div>
+            <div className="h-3 bg-[#fdf8d4]/30 rounded w-24"></div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-7 bg-gray-200 rounded-full w-16"></div>
-          <div className="h-7 bg-gray-200 rounded-xl w-28"></div>
+          <div className="h-7 bg-[#fdf8d4]/50 rounded-full w-16"></div>
+          <div className="h-7 bg-[#fdf8d4]/50 rounded-xl w-28"></div>
         </div>
       </div>
       <div className="flex items-end justify-between gap-3 h-64 px-4">
-        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+        {[65, 45, 80, 55, 70, 50, 60].map((height, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-3">
             <div className="relative w-full flex items-end justify-center h-52">
               <div
-                className="w-full rounded-t-xl bg-gray-200"
-                style={{ height: `${Math.random() * 80 + 20}%` }}
+                className="w-full rounded-t-xl bg-[#fdf8d4]/50"
+                style={{ height: `${height}%` }}
               ></div>
             </div>
-            <div className="h-4 bg-gray-200 rounded w-12"></div>
+            <div className="h-4 bg-[#fdf8d4]/50 rounded w-12"></div>
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t-2 border-gray-100">
+      <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t-2 border-[#a3af87]/20">
         {[1, 2, 3].map((i) => (
           <div key={i}>
-            <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
-            <div className="h-6 bg-gray-200 rounded w-16"></div>
+            <div className="h-3 bg-[#fdf8d4]/50 rounded w-24 mb-2"></div>
+            <div className="h-6 bg-[#fdf8d4]/50 rounded w-16"></div>
           </div>
         ))}
       </div>
@@ -375,38 +375,38 @@ function ChartSkeleton() {
 
 function TableRowSkeleton() {
   return (
-    <tr className="border-b border-gray-100 animate-pulse">
+    <tr className="border-b border-[#a3af87]/20 animate-pulse">
       <td className="py-4 px-4">
-        <div className="h-5 bg-gray-200 rounded w-24 mb-1"></div>
-        <div className="h-3 bg-gray-200 rounded w-32"></div>
+        <div className="h-5 bg-[#fdf8d4]/50 rounded w-24 mb-1"></div>
+        <div className="h-3 bg-[#fdf8d4]/30 rounded w-32"></div>
       </td>
       <td className="py-4 px-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+          <div className="w-10 h-10 rounded-full bg-[#fdf8d4]/50"></div>
           <div>
-            <div className="h-5 bg-gray-200 rounded w-28 mb-1"></div>
-            <div className="h-3 bg-gray-200 rounded w-24"></div>
+            <div className="h-5 bg-[#fdf8d4]/50 rounded w-28 mb-1"></div>
+            <div className="h-3 bg-[#fdf8d4]/30 rounded w-24"></div>
           </div>
         </div>
       </td>
       <td className="py-4 px-4">
-        <div className="h-5 bg-gray-200 rounded w-32 mb-1"></div>
-        <div className="h-4 bg-gray-200 rounded w-16"></div>
+        <div className="h-5 bg-[#fdf8d4]/50 rounded w-32 mb-1"></div>
+        <div className="h-4 bg-[#fdf8d4]/30 rounded w-16"></div>
       </td>
       <td className="py-4 px-4">
-        <div className="h-4 bg-gray-200 rounded w-40"></div>
+        <div className="h-4 bg-[#fdf8d4]/30 rounded w-40"></div>
       </td>
       <td className="py-4 px-4">
-        <div className="h-5 bg-gray-200 rounded w-20 mb-1"></div>
-        <div className="h-3 bg-gray-200 rounded w-24"></div>
+        <div className="h-5 bg-[#fdf8d4]/50 rounded w-20 mb-1"></div>
+        <div className="h-3 bg-[#fdf8d4]/30 rounded w-24"></div>
       </td>
       <td className="py-4 px-4">
-        <div className="h-7 bg-gray-200 rounded-full w-24"></div>
+        <div className="h-7 bg-[#fdf8d4]/50 rounded-full w-24"></div>
       </td>
       <td className="py-4 px-4">
         <div className="flex gap-2">
-          <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
-          <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+          <div className="w-8 h-8 bg-[#fdf8d4]/50 rounded-lg"></div>
+          <div className="w-8 h-8 bg-[#fdf8d4]/50 rounded-lg"></div>
         </div>
       </td>
     </tr>
@@ -671,7 +671,7 @@ export default function SupplyMonitoringPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdf8d4]/30 to-white">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -684,7 +684,7 @@ export default function SupplyMonitoringPage() {
               <h1 className="text-3xl font-bold text-[#303646]">
                 Supply Monitoring
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-[#435664] mt-1">
                 Monitor dan kelola penjemputan sampah organik dari masyarakat
               </p>
             </div>
@@ -692,15 +692,15 @@ export default function SupplyMonitoringPage() {
               <button
                 onClick={handleExportExcel}
                 disabled={isLoadingSupplies || filteredSupplies.length === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-[#a3af87] text-white rounded-xl hover:bg-[#435664] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Export ke Excel"
               >
                 <Download className="h-4 w-4" />
                 <span className="text-sm font-medium hidden sm:inline">Export Excel</span>
               </button>
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 rounded-xl">
-                <Activity className="h-5 w-5 text-[#A3AF87] animate-pulse" />
-                <span className="text-sm font-medium text-[#5a6c5b]">
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 rounded-xl border border-[#a3af87]/30">
+                <Activity className="h-5 w-5 text-[#a3af87] animate-pulse" />
+                <span className="text-sm font-medium text-[#435664]">
                   Live Monitoring
                 </span>
               </div>
@@ -718,52 +718,52 @@ export default function SupplyMonitoringPage() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+              className="col-span-12 lg:col-span-4 bg-white rounded-2xl border-2 border-[#a3af87]/30 hover:border-[#a3af87]/50 transition-colors p-6 shadow-sm"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-[#A3AF87] rounded-xl">
+                <div className="p-3 bg-[#a3af87] rounded-xl">
                   <Scale className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-[#303646]">Live Supply Stats</h3>
-                  <p className="text-xs text-gray-500">Update realtime</p>
+                  <p className="text-xs text-[#435664]">Update realtime</p>
                 </div>
               </div>
 
             <div className="space-y-4">
               {/* Total Weight */}
-              <div className="p-4 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/5 rounded-xl">
-                <p className="text-sm text-gray-600 mb-1">
+              <div className="p-4 bg-[#fdf8d4]/30 rounded-xl border border-[#a3af87]/20">
+                <p className="text-sm text-[#435664] mb-1">
                   Total Berat Menunggu Pickup
                 </p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-bold text-[#303646]">
                     {totalWeight}
                   </p>
-                  <p className="text-lg text-gray-600">kg</p>
+                  <p className="text-lg text-[#435664]">kg</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[#435664] mt-1">
                   Estimasi dari {todaySupplies.length} permintaan
                 </p>
               </div>
 
               {/* Active Pickup Points */}
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <p className="text-sm text-gray-600 mb-1">
+              <div className="p-4 bg-[#fdf8d4]/20 rounded-xl border border-[#a3af87]/20">
+                <p className="text-sm text-[#435664] mb-1">
                   Titik Penjemputan Aktif
                 </p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-bold text-[#303646]">
                     {activePickupPoints}
                   </p>
-                  <p className="text-lg text-gray-600">lokasi</p>
+                  <p className="text-lg text-[#435664]">lokasi</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Hari ini</p>
+                <p className="text-xs text-[#435664] mt-1">Hari ini</p>
               </div>
 
               {/* Status Breakdown */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-amber-50 rounded-xl">
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
                   <p className="text-xs text-amber-700 font-medium mb-1">
                     Menunggu
                   </p>
@@ -771,7 +771,7 @@ export default function SupplyMonitoringPage() {
                     {supplies.filter((s) => s.status === "PENDING").length}
                   </p>
                 </div>
-                <div className="p-3 bg-purple-50 rounded-xl">
+                <div className="p-3 bg-purple-50 rounded-xl border border-purple-200">
                   <p className="text-xs text-purple-700 font-medium mb-1">
                     Dalam Perjalanan
                   </p>
@@ -792,18 +792,18 @@ export default function SupplyMonitoringPage() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+              className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-[#a3af87]/30 hover:border-[#a3af87]/50 transition-colors p-6 shadow-sm"
             >
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-[#A3AF87] rounded-xl">
+                <div className="p-3 bg-[#a3af87] rounded-xl">
                   <BarChart3 className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-[#303646]">
                     Tren Masuk Sampah Organik
                   </h3>
-                  <p className="text-xs text-gray-500">{getDisplayLabel()}</p>
+                  <p className="text-xs text-[#435664]">{getDisplayLabel()}</p>
                 </div>
               </div>
 
@@ -837,14 +837,14 @@ export default function SupplyMonitoringPage() {
                       setShowDatePicker(!showDatePicker);
                       setActiveCalendar(null);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[#A3AF87]/10 hover:bg-[#A3AF87]/20 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-[#fdf8d4]/50 hover:bg-[#fdf8d4] rounded-xl transition-colors border border-[#a3af87]/30"
                   >
-                    <Calendar className="h-4 w-4 text-[#A3AF87]" />
+                    <Calendar className="h-4 w-4 text-[#a3af87]" />
                     <span className="text-xs font-medium text-[#303646] hidden sm:inline">
                       {getDisplayLabel()}
                     </span>
                     <ChevronDown
-                      className={`h-4 w-4 text-gray-400 transition-transform ${
+                      className={`h-4 w-4 text-[#435664] transition-transform ${
                         showDatePicker ? "rotate-180" : ""
                       }`}
                     />
@@ -856,7 +856,7 @@ export default function SupplyMonitoringPage() {
                         className="fixed inset-0 bg-black/20 z-40 sm:hidden"
                         onClick={() => setShowDatePicker(false)}
                       />
-                      <div className="fixed left-4 right-4 top-1/2 -translate-y-1/2 sm:absolute sm:right-0 sm:left-auto sm:top-full sm:translate-y-0 sm:mt-2 sm:w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-50">
+                      <div className="fixed left-4 right-4 top-1/2 -translate-y-1/2 sm:absolute sm:right-0 sm:left-auto sm:top-full sm:translate-y-0 sm:mt-2 sm:w-80 bg-white rounded-2xl shadow-xl border border-[#a3af87]/30 p-4 z-50">
                         <p className="text-sm font-semibold text-[#303646] mb-3">
                           Pilih Rentang Waktu
                         </p>
@@ -868,8 +868,8 @@ export default function SupplyMonitoringPage() {
                               onClick={() => handlePresetClick(index)}
                               className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                                 selectedPreset === index && !useCustomRange
-                                  ? "bg-[#A3AF87] text-white"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  ? "bg-[#a3af87] text-white"
+                                  : "bg-[#fdf8d4]/30 text-[#435664] hover:bg-[#fdf8d4]/50"
                               }`}
                             >
                               {preset.label}
@@ -877,13 +877,13 @@ export default function SupplyMonitoringPage() {
                           ))}
                         </div>
 
-                        <div className="border-t border-gray-100 pt-4">
-                          <p className="text-xs text-gray-500 mb-3">
+                        <div className="border-t border-[#a3af87]/20 pt-4">
+                          <p className="text-xs text-[#435664] mb-3">
                             Rentang Kustom
                           </p>
                           <div className="flex flex-col sm:flex-row gap-2 mb-3">
                             <div className="flex-1">
-                              <label className="text-xs text-gray-400 mb-1 block">
+                              <label className="text-xs text-[#435664] mb-1 block">
                                 Dari
                               </label>
                               <button
@@ -894,15 +894,15 @@ export default function SupplyMonitoringPage() {
                                 }
                                 className={`w-full px-3 py-2.5 rounded-xl border text-sm text-left transition-colors ${
                                   activeCalendar === "start"
-                                    ? "border-[#A3AF87] bg-[#A3AF87]/5"
-                                    : "border-gray-200 hover:border-gray-300"
+                                    ? "border-[#a3af87] bg-[#fdf8d4]/30"
+                                    : "border-[#a3af87]/30 hover:border-[#a3af87]/50"
                                 }`}
                               >
                                 <span
                                   className={
                                     customRange.start
                                       ? "text-[#303646]"
-                                      : "text-gray-400"
+                                      : "text-[#435664]"
                                   }
                                 >
                                   {formatDisplayDate(customRange.start)}
@@ -910,7 +910,7 @@ export default function SupplyMonitoringPage() {
                               </button>
                             </div>
                             <div className="flex-1">
-                              <label className="text-xs text-gray-400 mb-1 block">
+                              <label className="text-xs text-[#435664] mb-1 block">
                                 Sampai
                               </label>
                               <button
@@ -921,15 +921,15 @@ export default function SupplyMonitoringPage() {
                                 }
                                 className={`w-full px-3 py-2.5 rounded-xl border text-sm text-left transition-colors ${
                                   activeCalendar === "end"
-                                    ? "border-[#A3AF87] bg-[#A3AF87]/5"
-                                    : "border-gray-200 hover:border-gray-300"
+                                    ? "border-[#a3af87] bg-[#fdf8d4]/30"
+                                    : "border-[#a3af87]/30 hover:border-[#a3af87]/50"
                                 }`}
                               >
                                 <span
                                   className={
                                     customRange.end
                                       ? "text-[#303646]"
-                                      : "text-gray-400"
+                                      : "text-[#435664]"
                                   }
                                 >
                                   {formatDisplayDate(customRange.end)}
@@ -939,7 +939,7 @@ export default function SupplyMonitoringPage() {
                           </div>
 
                           {activeCalendar && (
-                            <div className="mb-3 p-3 bg-gray-50 rounded-xl">
+                            <div className="mb-3 p-3 bg-[#fdf8d4]/20 rounded-xl border border-[#a3af87]/20">
                               <CustomCalendar
                                 selectedDate={
                                   activeCalendar === "start"
@@ -978,7 +978,7 @@ export default function SupplyMonitoringPage() {
                           <button
                             onClick={handleCustomRangeApply}
                             disabled={!customRange.start || !customRange.end}
-                            className="w-full py-2.5 bg-[#A3AF87] text-white text-sm font-semibold rounded-xl hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#435664] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Terapkan
                           </button>
@@ -1004,13 +1004,13 @@ export default function SupplyMonitoringPage() {
                       }}
                     >
                       <div className="text-center">
-                        <div className="text-[#A3AF87] text-[10px] font-semibold mb-1">
+                        <div className="text-[#fdf8d4] text-[10px] font-semibold mb-1">
                           {weeklyTrendData[hoveredBar].date}
                         </div>
                         <div className="font-bold text-base">
                           {weeklyTrendData[hoveredBar].volume} kg
                         </div>
-                        <div className="text-[10px] text-gray-400 mt-1">
+                        <div className="text-[10px] text-[#fdf8d4]/70 mt-1">
                           Sampah Organik
                         </div>
                       </div>
@@ -1056,13 +1056,13 @@ export default function SupplyMonitoringPage() {
                               }}
                               className={`w-full rounded-t-xl transition-all cursor-pointer ${
                                 isHovered
-                                  ? "bg-gradient-to-t from-[#8a9a6e] to-[#A3AF87] shadow-lg scale-105"
-                                  : "bg-gradient-to-t from-[#A3AF87] to-[#A3AF87]/60"
+                                  ? "bg-[#435664] shadow-lg scale-105"
+                                  : "bg-[#a3af87]"
                               }`}
                             />
                           </div>
                           <p className={`text-sm font-semibold transition-colors ${
-                            isHovered ? "text-[#A3AF87]" : "text-gray-600"
+                            isHovered ? "text-[#a3af87]" : "text-[#435664]"
                           }`}>
                             {data.date}
                           </p>
@@ -1072,9 +1072,9 @@ export default function SupplyMonitoringPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t-2 border-gray-100">
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t-2 border-[#a3af87]/20">
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">Rata-rata/hari</p>
+                    <p className="text-xs text-[#435664] mb-1">Rata-rata/hari</p>
                     <p className="text-xl font-bold text-[#303646]">
                       {Math.round(
                         weeklyTrendData.reduce((sum, d) => sum + d.volume, 0) /
@@ -1084,7 +1084,7 @@ export default function SupplyMonitoringPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">
+                    <p className="text-xs text-[#435664] mb-1">
                       Volume Tertinggi
                     </p>
                     <p className="text-xl font-bold text-green-600">
@@ -1092,8 +1092,8 @@ export default function SupplyMonitoringPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">Total Periode</p>
-                    <p className="text-xl font-bold text-[#A3AF87]">
+                    <p className="text-xs text-[#435664] mb-1">Total Periode</p>
+                    <p className="text-xl font-bold text-[#a3af87]">
                       {weeklyTrendData.reduce((sum, d) => sum + d.volume, 0)} kg
                     </p>
                   </div>
@@ -1106,13 +1106,13 @@ export default function SupplyMonitoringPage() {
                 transition={{ delay: 0.3 }}
                 className="flex flex-col items-center justify-center py-16"
               >
-                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                  <PackageX className="h-10 w-10 text-gray-400" />
+                <div className="w-20 h-20 rounded-full bg-[#fdf8d4]/50 flex items-center justify-center mb-4">
+                  <PackageX className="h-10 w-10 text-[#a3af87]" />
                 </div>
                 <h4 className="text-lg font-bold text-[#303646] mb-2">
                   Tidak Ada Data
                 </h4>
-                <p className="text-sm text-gray-500 text-center max-w-xs">
+                <p className="text-sm text-[#435664] text-center max-w-xs">
                   Belum ada data supply untuk rentang waktu yang dipilih
                 </p>
               </motion.div>
@@ -1126,25 +1126,25 @@ export default function SupplyMonitoringPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+          className="bg-white rounded-2xl border-2 border-[#a3af87]/30 hover:border-[#a3af87]/50 transition-colors p-6 shadow-sm"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl">
+              <div className="p-2 sm:p-3 bg-[#a3af87] rounded-xl">
                 <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
                 <h3 className="font-bold text-sm sm:text-base text-[#303646]">
                   Real-time Incoming Supply
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[#435664]">
                   Data terbaru dari masyarakat
                 </p>
               </div>
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 rounded-xl p-1 overflow-x-auto w-full sm:w-auto">
+            <div className="flex items-center gap-1 sm:gap-2 bg-[#fdf8d4]/30 rounded-xl p-1 overflow-x-auto w-full sm:w-auto border border-[#a3af87]/20">
               {[
                 { value: "all", label: "Semua" },
                 { value: "waiting", label: "Menunggu" },
@@ -1157,8 +1157,8 @@ export default function SupplyMonitoringPage() {
                   onClick={() => setFilter(tab.value)}
                   className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                     filter === tab.value
-                      ? "bg-white text-[#303646] shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "bg-[#a3af87] text-white shadow-sm"
+                      : "text-[#435664] hover:text-[#303646] hover:bg-[#fdf8d4]/50"
                   }`}
                 >
                   {tab.label}
@@ -1171,26 +1171,26 @@ export default function SupplyMonitoringPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-gray-100">
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                <tr className="border-b-2 border-[#a3af87]/20">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     ID & Waktu Submit
                   </th>
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     Nama Penyuplai
                   </th>
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     Jenis & Berat
                   </th>
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     Lokasi Pickup
                   </th>
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     Jadwal
                   </th>
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     Status
                   </th>
-                  <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                     Aksi
                   </th>
                 </tr>
@@ -1215,7 +1215,7 @@ export default function SupplyMonitoringPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors group"
+                      className="border-b border-[#a3af87]/20 hover:bg-[#fdf8d4]/20 transition-colors group"
                     >
                       {/* ID & Time */}
                       <td className="py-4 px-4">
@@ -1224,7 +1224,7 @@ export default function SupplyMonitoringPage() {
                             <p className="font-semibold text-[#303646]">
                               {supply.supplyNumber}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[#435664]">
                               {new Date(supply.createdAt).toLocaleString(
                                 "id-ID",
                                 {
@@ -1251,14 +1251,14 @@ export default function SupplyMonitoringPage() {
                       {/* Supplier Name */}
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-[#a3af87] flex items-center justify-center">
                             <User className="h-5 w-5 text-white" />
                           </div>
                           <div>
                             <p className="font-semibold text-[#303646]">
                               {supply.userName}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[#435664]">
                               {supply.userPhone}
                             </p>
                           </div>
@@ -1276,8 +1276,8 @@ export default function SupplyMonitoringPage() {
                              supply.wasteType}
                           </p>
                           <div className="flex items-center gap-1 mt-1">
-                            <Scale className="h-3 w-3 text-gray-400" />
-                            <p className="text-sm text-gray-600">
+                            <Scale className="h-3 w-3 text-[#a3af87]" />
+                            <p className="text-sm text-[#435664]">
                               {supply.estimatedWeight === "1" ? "1 kg" :
                                supply.estimatedWeight === "3" ? "1-3 kg" :
                                supply.estimatedWeight === "5" ? "3-5 kg" :
@@ -1292,8 +1292,8 @@ export default function SupplyMonitoringPage() {
                       {/* Location */}
                       <td className="py-4 px-4">
                         <div className="flex items-start gap-2 max-w-xs">
-                          <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                          <p className="text-sm text-gray-600 line-clamp-2">
+                          <MapPin className="h-4 w-4 text-[#a3af87] mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-[#435664] line-clamp-2">
                             {supply.pickupAddress}
                           </p>
                         </div>
@@ -1304,7 +1304,7 @@ export default function SupplyMonitoringPage() {
                         {supply.pickupDate ? (
                           <div>
                             <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3 text-gray-400" />
+                              <Calendar className="h-3 w-3 text-[#a3af87]" />
                               <p className="text-sm font-medium text-[#303646]">
                                 {new Date(supply.pickupDate).toLocaleDateString(
                                   "id-ID",
@@ -1313,19 +1313,19 @@ export default function SupplyMonitoringPage() {
                               </p>
                             </div>
                             <div className="flex items-center gap-1 mt-1">
-                              <Clock className="h-3 w-3 text-gray-400" />
-                              <p className="text-xs text-gray-600">
+                              <Clock className="h-3 w-3 text-[#a3af87]" />
+                              <p className="text-xs text-[#435664]">
                                 {supply.pickupTimeRange || supply.pickupTimeSlot}
                               </p>
                             </div>
                             {supply.courierName && (
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-[#435664] mt-1">
                                 Driver: {supply.courierName}
                               </p>
                             )}
                           </div>
                         ) : (
-                          <p className="text-sm text-gray-400 italic">
+                          <p className="text-sm text-[#435664] italic">
                             Belum dijadwalkan
                           </p>
                         )}
@@ -1350,14 +1350,14 @@ export default function SupplyMonitoringPage() {
                         <div className="flex items-center gap-2">
                           <Link
                             href={`/farmer/supply-monitoring/${supply.id}`}
-                            className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors group/btn"
+                            className="p-2 bg-[#fdf8d4]/50 rounded-lg hover:bg-[#fdf8d4] transition-colors group/btn border border-[#a3af87]/30"
                           >
-                            <Eye className="h-4 w-4 text-gray-600 group-hover/btn:text-gray-900" />
+                            <Eye className="h-4 w-4 text-[#a3af87] group-hover/btn:text-[#435664]" />
                           </Link>
                           {supply.status !== "COMPLETED" && supply.status !== "CANCELLED" && (
                             <Link
                               href={`/farmer/supply-monitoring/action/${supply.id}`}
-                              className="p-2 bg-[#A3AF87] rounded-lg hover:bg-[#95a17a] transition-colors group/btn"
+                              className="p-2 bg-[#a3af87] rounded-lg hover:bg-[#435664] transition-colors group/btn"
                             >
                               <ArrowRight className="h-4 w-4 text-white" />
                             </Link>
@@ -1374,8 +1374,8 @@ export default function SupplyMonitoringPage() {
 
           {!isLoadingSupplies && filteredSupplies.length === 0 && (
             <div className="text-center py-12">
-              <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">Tidak ada data supply</p>
+              <Package className="h-12 w-12 text-[#a3af87] mx-auto mb-3" />
+              <p className="text-[#435664]">Tidak ada data supply</p>
             </div>
           )}
         </motion.div>

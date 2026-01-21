@@ -31,8 +31,8 @@ export default function StatsTile({
   const variants = {
     default: {
       bg: "bg-white",
-      iconBg: "bg-[#A3AF87]/10",
-      iconColor: "text-[#A3AF87]",
+      iconBg: "bg-[#a3af87]/10",
+      iconColor: "text-[#a3af87]",
     },
     warning: {
       bg: "bg-white",
@@ -45,9 +45,9 @@ export default function StatsTile({
       iconColor: "text-emerald-600",
     },
     highlight: {
-      bg: "bg-[#FDF8D4]",
-      iconBg: "bg-[#A3AF87]/20",
-      iconColor: "text-[#A3AF87]",
+      bg: "bg-[#fdf8d4]",
+      iconBg: "bg-[#a3af87]/20",
+      iconColor: "text-[#a3af87]",
     },
   };
 
@@ -98,7 +98,7 @@ export default function StatsTile({
       {href && (
         <Link
           href={href}
-          className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-sm font-medium text-[#A3AF87] hover:text-[#8a9a6e] transition-colors group"
+          className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-sm font-medium text-[#a3af87] hover:text-[#435664] transition-colors group"
         >
           <span>Selengkapnya</span>
           <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

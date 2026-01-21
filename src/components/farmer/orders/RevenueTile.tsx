@@ -26,11 +26,11 @@ export const RevenueTile = React.memo(({ stats }: RevenueTileProps) => {
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.2 }}
-      className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+      className="col-span-12 lg:col-span-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-[#a3af87]/30 transition-colors p-6 shadow-sm"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-[#A3AF87] to-[#8a9a6e] rounded-xl">
+          <div className="p-3 bg-[#a3af87] rounded-xl">
             <Banknote className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -63,22 +63,22 @@ export const RevenueTile = React.memo(({ stats }: RevenueTileProps) => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 bg-gradient-to-br from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-xl">
+        <div className="p-4 bg-[#fdf8d4] rounded-xl border border-[#a3af87]/20">
           <p className="text-xs text-gray-600 mb-1">Pendapatan Bersih</p>
           <p className="text-xl font-bold text-[#303646]">Rp {stats.totalRevenue.toLocaleString("id-ID")}</p>
-          <p className="text-[10px] text-gray-500 mt-1">Setelah potongan 5%</p>
+          <p className="text-[10px] text-[#435664] mt-1">Setelah potongan 5%</p>
         </div>
-        <div className="p-4 bg-gray-50 rounded-xl">
+        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
           <p className="text-xs text-gray-600 mb-1">Total Penjualan</p>
           <p className="text-xl font-bold text-[#303646]">Rp {stats.totalSales.toLocaleString("id-ID")}</p>
           <p className="text-[10px] text-gray-500 mt-1">Termasuk ongkir</p>
         </div>
-        <div className="p-4 bg-amber-50 rounded-xl">
+        <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
           <p className="text-xs text-amber-700 mb-1">Menunggu Proses</p>
           <p className="text-xl font-bold text-amber-600">{stats.needsAction}</p>
           <p className="text-[10px] text-amber-600/70 mt-1">Butuh tindakan</p>
         </div>
-        <div className="p-4 bg-red-50 rounded-xl">
+        <div className="p-4 bg-red-50 rounded-xl border border-red-200">
           <p className="text-xs text-red-700 mb-1">Dibatalkan</p>
           <p className="text-xl font-bold text-red-600">{stats.cancelled}</p>
           <p className="text-[10px] text-red-600/70 mt-1">Total cancel</p>

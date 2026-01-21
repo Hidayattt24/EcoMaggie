@@ -18,7 +18,7 @@ import type { Order as DbOrder } from "@/lib/api/orders.actions";
 // ============================================
 // TYPES
 // ============================================
-type TransactionStatus = "unpaid" | "packed" | "shipped" | "completed" | "cancelled";
+type TransactionStatus = "unpaid" | "packed" | "ready_pickup" | "shipped" | "completed" | "cancelled";
 
 interface Product {
   id: number;
@@ -81,7 +81,7 @@ function mapDbStatusToUiStatus(dbStatus: string): TransactionStatus {
     paid: "packed",
     confirmed: "packed",
     processing: "packed",
-    ready_pickup: "packed",
+    ready_pickup: "ready_pickup", // ✅ FIXED: Now maps to its own status
     shipped: "shipped",
     delivered: "completed",
     completed: "completed",
@@ -203,7 +203,7 @@ function TransactionSkeleton() {
 // MAIN COMPONENT
 // ============================================
 export default function TransactionPage() {
-  const [activeTab, setActiveTab] = useState("shipped");
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [trackingTransaction, setTrackingTransaction] = useState<Transaction | null>(null);
@@ -255,8 +255,10 @@ export default function TransactionPage() {
 
   // Calculate counts for each tab
   const counts = useMemo(() => ({
+    all: transactions.length,
     unpaid: transactions.filter((t) => t.status === "unpaid").length,
     packed: transactions.filter((t) => t.status === "packed").length,
+    ready_pickup: transactions.filter((t) => t.status === "ready_pickup").length,
     shipped: transactions.filter((t) => t.status === "shipped").length,
     completed: transactions.filter((t) => t.status === "completed").length,
     cancelled: transactions.filter((t) => t.status === "cancelled").length,
@@ -265,7 +267,7 @@ export default function TransactionPage() {
   // Filter transactions
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
-      const matchesTab = transaction.status === activeTab;
+      const matchesTab = activeTab === "all" || transaction.status === activeTab;
       const matchesSearch =
         searchQuery === "" ||
         transaction.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||

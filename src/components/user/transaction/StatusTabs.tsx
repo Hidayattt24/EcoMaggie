@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CreditCard, Package, Truck, CheckCircle, XCircle } from "lucide-react";
+import { CreditCard, Package, Store, Truck, CheckCircle, XCircle, LayoutGrid } from "lucide-react";
 
 interface StatusTabsProps {
   activeTab: string;
@@ -12,8 +12,10 @@ interface StatusTabsProps {
 }
 
 const tabs = [
+  { id: "all", label: "Semua", icon: LayoutGrid },
   { id: "unpaid", label: "Belum Bayar", icon: CreditCard },
   { id: "packed", label: "Dikemas", icon: Package },
+  { id: "ready_pickup", label: "Siap Diambil", icon: Store },
   { id: "shipped", label: "Dikirim", icon: Truck },
   { id: "completed", label: "Selesai", icon: CheckCircle },
   { id: "cancelled", label: "Dibatalkan", icon: XCircle },

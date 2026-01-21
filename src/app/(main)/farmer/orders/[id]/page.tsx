@@ -60,7 +60,7 @@ const COURIER_OPTIONS = [
 // STATUS CONFIG
 // ============================================
 const statusConfig = {
-  pending: { label: "Menunggu Pembayaran", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/30", dotColor: "bg-[#a3af87]" },
+  pending: { label: "Belum Dibayar", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/30", dotColor: "bg-[#a3af87]" },
   paid: { label: "Dibayar", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/50", dotColor: "bg-[#a3af87]" },
   confirmed: { label: "Dikonfirmasi", color: "bg-[#fdf8d4] text-[#435664] border-[#a3af87]/50", dotColor: "bg-[#a3af87]" },
   processing: { label: "Dikemas", color: "bg-[#a3af87]/20 text-[#435664] border-[#a3af87]", dotColor: "bg-[#a3af87]" },
@@ -667,6 +667,47 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                     </div>
                   </div>
 
+                  {/* Action Buttons for Expedition */}
+                  {order.status === "shipped" && (
+                    <button
+                      onClick={() => handleStatusUpdate("delivered")}
+                      disabled={isUpdating}
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Sudah Sampai (Delivered)
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {order.status === "delivered" && (
+                    <button
+                      onClick={() => handleStatusUpdate("completed")}
+                      disabled={isUpdating}
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Selesai (Completed)
+                        </>
+                      )}
+                    </button>
+                  )}
+
                   {order.tracking_history && order.tracking_history.length > 0 && (
                     <div>
                       <h4 className="font-semibold text-[#303646] mb-3 flex items-center gap-2">
@@ -803,25 +844,58 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                   <div className="p-4 bg-[#a3af87]/20 border border-[#a3af87] rounded-xl mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle2 className="h-5 w-5 text-[#435664]" />
-                      <p className="font-semibold text-[#435664]">Pesanan Sedang Diantar</p>
+                      <p className="font-semibold text-[#435664]">
+                        {order.status === "shipped" ? "Pesanan Sedang Diantar" : "Pesanan Sudah Sampai"}
+                      </p>
                     </div>
                     {order.notes && <p className="text-sm text-[#435664] mt-2">{order.notes}</p>}
                   </div>
 
+                  {/* Action Buttons for Ecomaggie Delivery */}
                   {order.status === "shipped" && (
                     <button
                       onClick={() => handleStatusUpdate("delivered")}
                       disabled={isUpdating}
-                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3"
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
                     >
-                      {isUpdating ? "Memproses..." : "Tandai Sudah Sampai"}
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Sudah Sampai (Delivered)
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {order.status === "delivered" && (
+                    <button
+                      onClick={() => handleStatusUpdate("completed")}
+                      disabled={isUpdating}
+                      className="w-full py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors disabled:opacity-50 mb-3 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Tandai Selesai (Completed)
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
               )}
 
               {/* Self Pickup */}
-              {shippingType === "self-pickup" && (
+              {shippingType === "self-pickup" && order.status !== "completed" && order.status !== "cancelled" && (
                 <div className="bg-[#fdf8d4]/20 rounded-2xl border-2 border-[#a3af87]/30 p-6">
                   <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
                     <Store className="h-5 w-5 text-[#a3af87]" />
@@ -836,9 +910,19 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                       <button
                         onClick={() => handleStatusUpdate("completed")}
                         disabled={isUpdating}
-                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50"
+                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
                       >
-                        {isUpdating ? "Memproses..." : "Tandai Sudah Diambil (Selesai)"}
+                        {isUpdating ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Memproses...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-5 w-5" />
+                            Tandai Sudah Diambil (Selesai)
+                          </>
+                        )}
                       </button>
                     </div>
                   ) : (
@@ -849,9 +933,19 @@ export default function FarmerOrderDetailPage({ params }: { params: Promise<{ id
                       <button
                         onClick={() => handleStatusUpdate("ready_pickup")}
                         disabled={isUpdating}
-                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50"
+                        className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
                       >
-                        {isUpdating ? "Memproses..." : "Tandai Siap Diambil"}
+                        {isUpdating ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Memproses...
+                          </>
+                        ) : (
+                          <>
+                            <Store className="h-5 w-5" />
+                            Tandai Siap Diambil
+                          </>
+                        )}
                       </button>
                     </div>
                   )}

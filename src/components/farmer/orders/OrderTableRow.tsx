@@ -96,7 +96,7 @@ const statusConfig: Record<OrderStatus, {
   confirmed: { label: "Dikonfirmasi", color: "bg-blue-50 text-blue-700 border-blue-200", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: CheckCircle2 },
   processing: { label: "Dikemas", color: "bg-purple-50 text-purple-700 border-purple-200", bgColor: "bg-purple-100", dotColor: "bg-purple-500", icon: Package },
   ready_pickup: { label: "Siap Diambil", color: "bg-orange-50 text-orange-700 border-orange-200", bgColor: "bg-orange-100", dotColor: "bg-orange-500", icon: Store },
-  shipped: { label: "Dikirim", color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]", bgColor: "bg-[#A3AF87]/20", dotColor: "bg-[#A3AF87]", icon: Truck },
+  shipped: { label: "Dikirim", color: "bg-[#a3af87]/20 text-[#435664] border-[#a3af87]", bgColor: "bg-[#a3af87]/20", dotColor: "bg-[#a3af87]", icon: Truck },
   delivered: { label: "Terkirim", color: "bg-teal-50 text-teal-700 border-teal-200", bgColor: "bg-teal-100", dotColor: "bg-teal-500", icon: PackageCheck },
   completed: { label: "Selesai", color: "bg-green-50 text-green-700 border-green-200", bgColor: "bg-green-100", dotColor: "bg-green-500", icon: CheckCircle2 },
   cancelled: { label: "Dibatalkan", color: "bg-red-50 text-red-700 border-red-200", bgColor: "bg-red-100", dotColor: "bg-red-500", icon: XCircle },
@@ -123,7 +123,7 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
-      className="border-b border-gray-100 hover:bg-gray-50 transition-colors group cursor-pointer"
+      className="border-b border-[#a3af87]/30 hover:bg-[#fdf8d4]/30 transition-colors group cursor-pointer"
       onClick={() => router.push(`/farmer/orders/${order.orderId}`)}
     >
       {/* ID & Time */}
@@ -131,7 +131,7 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
         <div className="flex items-center gap-2">
           <div>
             <p className="font-semibold text-[#303646]">{order.orderId}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-[#435664]">
               {new Date(order.createdAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
             </p>
           </div>
@@ -146,12 +146,12 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
       {/* Customer */}
       <td className="py-4 px-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-[#a3af87] flex items-center justify-center">
             <User className="h-5 w-5 text-white" />
           </div>
           <div>
             <p className="font-semibold text-[#303646]">{order.customer.name}</p>
-            <p className="text-xs text-gray-500">{order.customer.phone}</p>
+            <p className="text-xs text-[#435664]">{order.customer.phone}</p>
           </div>
         </div>
       </td>
@@ -161,23 +161,23 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
         <div className="flex items-center gap-2">
           <div className="flex -space-x-2">
             {order.products.slice(0, 2).map((product, idx) => (
-              <div key={idx} className="w-8 h-8 rounded-lg border-2 border-white bg-gray-100 overflow-hidden">
+              <div key={idx} className="w-8 h-8 rounded-lg border-2 border-white bg-[#fdf8d4]/50 overflow-hidden">
                 {product.image ? (
                   <Image src={product.image} alt={product.name} width={32} height={32} className="object-cover w-full h-full" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-gray-400" /></div>
+                  <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-[#a3af87]" /></div>
                 )}
               </div>
             ))}
             {order.products.length > 2 && (
-              <div className="w-8 h-8 rounded-lg border-2 border-white bg-gray-200 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-gray-600">+{order.products.length - 2}</span>
+              <div className="w-8 h-8 rounded-lg border-2 border-white bg-[#a3af87]/30 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-[#435664]">+{order.products.length - 2}</span>
               </div>
             )}
           </div>
           <div>
             <p className="font-medium text-[#303646]">{order.totalItems} item</p>
-            <p className="text-xs text-gray-500 truncate max-w-[120px]">{order.products[0]?.name}</p>
+            <p className="text-xs text-[#435664] truncate max-w-[120px]">{order.products[0]?.name}</p>
           </div>
         </div>
       </td>
@@ -191,14 +191,14 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
           </span>
         </div>
         {order.trackingNumber && (
-          <p className="text-[10px] text-gray-500 mt-1 font-mono">{order.trackingNumber}</p>
+          <p className="text-[10px] text-[#435664] mt-1 font-mono">{order.trackingNumber}</p>
         )}
       </td>
 
       {/* Total */}
       <td className="py-4 px-4">
         <p className="font-bold text-[#303646]">Rp {order.totalPrice.toLocaleString("id-ID")}</p>
-        <p className="text-xs text-[#A3AF87]">+Rp {order.netEarnings.toLocaleString("id-ID")}</p>
+        <p className="text-xs text-[#a3af87]">+Rp {order.netEarnings.toLocaleString("id-ID")}</p>
       </td>
 
       {/* Status */}
@@ -214,14 +214,14 @@ export const OrderTableRow = React.memo(({ order, index, onCancelClick }: OrderT
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => { e.stopPropagation(); router.push(`/farmer/orders/${order.orderId}`); }}
-            className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            className="p-2 bg-[#fdf8d4]/50 rounded-lg hover:bg-[#a3af87]/30 transition-colors"
           >
-            <Eye className="h-4 w-4 text-gray-600" />
+            <Eye className="h-4 w-4 text-[#435664]" />
           </button>
           {["paid", "confirmed", "processing"].includes(order.status) && (
             <button
               onClick={(e) => { e.stopPropagation(); router.push(`/farmer/orders/${order.orderId}`); }}
-              className="p-2 bg-[#A3AF87] rounded-lg hover:bg-[#95a17a] transition-colors"
+              className="p-2 bg-[#a3af87] rounded-lg hover:bg-[#435664] transition-colors"
             >
               <ArrowRight className="h-4 w-4 text-white" />
             </button>

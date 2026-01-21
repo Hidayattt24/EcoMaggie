@@ -381,7 +381,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
           <p className="text-gray-600 mb-6">{errorMsg || "Supply tidak ditemukan"}</p>
           <Link
             href="/farmer/supply-monitoring"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-semibold hover:bg-[#95a17a] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#a3af87] text-white rounded-xl font-semibold hover:bg-[#435664] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Monitoring
@@ -404,7 +404,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
         onClose={hideToast}
       />
       
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdf8d4]/20 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -425,7 +425,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
               <h1 className="text-3xl font-bold text-[#303646] mb-2">
                 Action Center
               </h1>
-              <p className="text-gray-600">Supply ID: {supply.supplyNumber}</p>
+              <p className="text-[#435664]">Supply ID: {supply.supplyNumber}</p>
             </div>
 
             <div
@@ -448,25 +448,25 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             className="lg:col-span-4 space-y-4 lg:space-y-6"
           >
             {/* Supplier Card */}
-            <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6">
+            <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6">
               <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <User className="h-5 w-5 text-gray-400" />
+                <User className="h-5 w-5 text-[#a3af87]" />
                 Penyuplai
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">Nama</p>
+                  <p className="text-sm text-[#435664]">Nama</p>
                   <p className="font-semibold text-[#303646]">
                     {supply.userName}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Telepon</p>
+                  <p className="text-sm text-[#435664]">Telepon</p>
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-gray-400" />
+                    <Phone className="h-4 w-4 text-[#a3af87]" />
                     <a
                       href={`tel:${supply.userPhone}`}
-                      className="font-semibold text-[#303646] hover:text-[#A3AF87]"
+                      className="font-semibold text-[#303646] hover:text-[#a3af87]"
                     >
                       {supply.userPhone}
                     </a>
@@ -476,22 +476,22 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             </div>
 
             {/* Waste Info Card */}
-            <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6">
+            <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6">
               <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <Package className="h-5 w-5 text-gray-400" />
+                <Package className="h-5 w-5 text-[#a3af87]" />
                 Detail Sampah
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">Jenis</p>
+                  <p className="text-sm text-[#435664]">Jenis</p>
                   <p className="font-semibold text-[#303646]">
                     {wasteTypeLabels[supply.wasteType] || supply.wasteType}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Estimasi Berat</p>
+                  <p className="text-sm text-[#435664]">Estimasi Berat</p>
                   <div className="flex items-center gap-2">
-                    <Scale className="h-4 w-4 text-gray-400" />
+                    <Scale className="h-4 w-4 text-[#a3af87]" />
                     <p className="font-semibold text-[#303646]">
                       {weightLabels[supply.estimatedWeight] || `${supply.estimatedWeight} kg`}
                     </p>
@@ -499,7 +499,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 </div>
                 {supply.notes && (
                   <div>
-                    <p className="text-sm text-gray-600">Catatan</p>
+                    <p className="text-sm text-[#435664]">Catatan</p>
                     <p className="text-sm text-[#303646] italic">
                       {supply.notes}
                     </p>
@@ -507,7 +507,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 )}
                 {supply.photoUrl && (
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
+                    <p className="text-sm text-[#435664] mb-2 flex items-center gap-2">
                       <ImageIcon className="h-4 w-4" />
                       Foto/Video
                     </p>
@@ -520,7 +520,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                         <video
                           src={supply.photoUrl}
                           controls
-                          className="w-full h-40 object-cover rounded-lg border border-gray-300 bg-gray-100"
+                          className="w-full h-40 object-cover rounded-lg border border-[#a3af87]/30 bg-[#fdf8d4]/10"
                         >
                           Browser Anda tidak mendukung video.
                         </video>
@@ -532,7 +532,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                             console.error("Error loading image:", supply.photoUrl);
                             e.currentTarget.style.display = 'none';
                           }}
-                          className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                          className="w-full h-32 object-cover rounded-lg border border-[#a3af87]/30"
                         />
                       )}
                     </div>
@@ -542,18 +542,18 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             </div>
 
             {/* Pickup Info Card */}
-            <div className="bg-gray-50 rounded-2xl border-2 border-gray-200 p-6">
+            <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6">
               <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-gray-400" />
+                <MapPin className="h-5 w-5 text-[#a3af87]" />
                 Penjemputan
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">Alamat</p>
+                  <p className="text-sm text-[#435664]">Alamat</p>
                   <p className="text-sm text-[#303646]">{supply.pickupAddress}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 flex items-center gap-2">
+                  <p className="text-sm text-[#435664] flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Tanggal
                   </p>
@@ -566,7 +566,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 flex items-center gap-2">
+                  <p className="text-sm text-[#435664] flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     Waktu
                   </p>
@@ -587,9 +587,9 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
           >
             {/* Driver Assignment Form */}
             {(currentStatus === "PENDING" || currentStatus === "SCHEDULED") && (
-              <div className="bg-white rounded-2xl border-2 border-gray-100 p-6">
+              <div className="bg-white rounded-2xl border-2 border-[#a3af87]/30 p-6">
                 <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-[#A3AF87]" />
+                  <Truck className="h-5 w-5 text-[#a3af87]" />
                   Informasi Driver
                 </h3>
 
@@ -604,7 +604,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                       value={formData.driver}
                       onChange={handleInputChange}
                       placeholder="Masukkan nama driver"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]"
                     />
                   </div>
 
@@ -619,7 +619,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                       value={formData.driverPhone}
                       onChange={handleInputChange}
                       placeholder="Contoh: 082288953268"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]"
                     />
                   </div>
 
@@ -633,14 +633,14 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                       value={formData.estimatedArrival}
                       onChange={handleInputChange}
                       placeholder="Contoh: 15 menit lagi"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#A3AF87] focus:outline-none transition-colors text-[#303646] placeholder:text-gray-400"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]"
                     />
                   </div>
 
                   <button
                     onClick={handleSaveInfo}
                     disabled={isSaving}
-                    className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full px-6 py-3 bg-[#fdf8d4]/50 hover:bg-[#fdf8d4] text-[#435664] rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 border border-[#a3af87]/30"
                   >
                     <Save className="h-5 w-5" />
                     {isSaving ? "Menyimpan..." : "Simpan Informasi"}

@@ -35,9 +35,9 @@ export default function ImpactTile() {
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-[#A3AF87]/5 to-[#FDF8D4]/50 p-5 lg:p-6 rounded-2xl border border-[#A3AF87]/20 shadow-sm h-full">
+      <div className="bg-gradient-to-br from-[#a3af87]/5 to-[#fdf8d4]/50 p-5 lg:p-6 rounded-2xl border border-[#a3af87]/20 shadow-sm h-full">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-[#A3AF87] rounded-xl">
+          <div className="p-2.5 bg-[#a3af87] rounded-xl">
             <Leaf className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -56,10 +56,10 @@ export default function ImpactTile() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-[#A3AF87]/5 to-[#FDF8D4]/50 p-5 lg:p-6 rounded-2xl border border-[#A3AF87]/20 shadow-sm h-full">
+    <div className="bg-gradient-to-br from-[#a3af87]/5 to-[#fdf8d4]/50 p-5 lg:p-6 rounded-2xl border border-[#a3af87]/20 shadow-sm h-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-[#A3AF87] rounded-xl">
+        <div className="p-2.5 bg-[#a3af87] rounded-xl">
           <Leaf className="h-5 w-5 text-white" />
         </div>
         <div>
@@ -75,8 +75,8 @@ export default function ImpactTile() {
         <div className="flex flex-col justify-center">
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-[#A3AF87]/10 rounded-xl">
-                <Recycle className="h-7 w-7 text-[#A3AF87]" />
+              <div className="p-3 bg-[#a3af87]/10 rounded-xl">
+                <Recycle className="h-7 w-7 text-[#a3af87]" />
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Sampah</p>
@@ -87,7 +87,7 @@ export default function ImpactTile() {
               <span className="text-4xl lg:text-5xl font-bold text-[#303646] poppins-bold">
                 {impactData?.totalWeightKg.toLocaleString("id-ID") || "0"}
               </span>
-              <span className="text-xl font-semibold text-[#A3AF87]">KG</span>
+              <span className="text-xl font-semibold text-[#a3af87]">KG</span>
             </div>
             <p className="text-sm text-gray-500 mt-2">
               Total sampah organik yang berhasil dikelola
@@ -143,7 +143,7 @@ export default function ImpactTile() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-[#A3AF87] text-sm">
+                    <p className="font-bold text-[#a3af87] text-sm">
                       {supplier.totalWeight} kg
                     </p>
                     <p className="text-xs text-gray-400">

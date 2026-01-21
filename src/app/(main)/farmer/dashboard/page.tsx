@@ -70,7 +70,7 @@ export default function FarmerDashboard() {
             </h1>
             <p className="text-gray-500 mt-1">
               Selamat datang kembali,{" "}
-              <span className="font-semibold text-[#A3AF87]">
+              <span className="font-semibold text-[#a3af87]">
                 Petani Maggot
               </span>
             </p>
@@ -156,7 +156,7 @@ export default function FarmerDashboard() {
       </div>
 
       {/* Quick Actions Bar */}
-      <div className="mt-6 lg:mt-8 p-4 lg:p-5 bg-gradient-to-r from-[#A3AF87]/10 to-[#FDF8D4]/30 rounded-2xl border border-[#A3AF87]/20">
+      <div className="mt-6 lg:mt-8 p-4 lg:p-5 bg-gradient-to-r from-[#a3af87]/10 to-[#fdf8d4]/30 rounded-2xl border border-[#a3af87]/20">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h3 className="font-bold text-[#303646] poppins-bold">
@@ -169,7 +169,7 @@ export default function FarmerDashboard() {
           <div className="flex flex-wrap gap-3">
             <a
               href="/farmer/products/new"
-              className="px-4 py-2.5 bg-[#A3AF87] text-white text-sm font-semibold rounded-xl hover:bg-[#8a9a6e] transition-colors shadow-sm"
+              className="px-4 py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#435664] transition-colors shadow-sm"
             >
               + Tambah Produk
             </a>

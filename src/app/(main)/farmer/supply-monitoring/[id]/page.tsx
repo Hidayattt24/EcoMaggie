@@ -270,7 +270,7 @@ export default function SupplyMonitoringDetailPage({
   const timeline = buildTimeline(supply);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdf8d4]/20 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -280,7 +280,7 @@ export default function SupplyMonitoringDetailPage({
         >
           <Link
             href="/farmer/supply-monitoring"
-            className="inline-flex items-center gap-2 text-sm text-[#5a6c5b] hover:text-[#4a5c4b] mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-[#435664] hover:text-[#303646] mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Monitoring
@@ -301,13 +301,13 @@ export default function SupplyMonitoringDetailPage({
                   <span className="text-sm font-semibold">{status.label}</span>
                 </div>
               </div>
-              <p className="text-gray-600">Supply ID: {supply.supplyNumber}</p>
+              <p className="text-[#435664]">Supply ID: {supply.supplyNumber}</p>
             </div>
 
             {supply.status !== "COMPLETED" && supply.status !== "CANCELLED" && (
               <Link
                 href={`/farmer/supply-monitoring/action/${supply.id}`}
-                className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#A3AF87] to-[#95a17a] text-white rounded-xl text-sm sm:text-base font-semibold hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-[#a3af87] text-white rounded-xl text-sm sm:text-base font-semibold hover:bg-[#435664] hover:shadow-lg transition-all"
               >
                 <Edit3 className="h-4 w-4 sm:h-5 sm:w-5" />
                 Update Status
@@ -324,31 +324,31 @@ export default function SupplyMonitoringDetailPage({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl border-2 border-gray-100 p-6"
+              className="bg-white rounded-2xl border-2 border-[#a3af87]/30 p-6"
             >
               <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <User className="h-5 w-5 text-[#A3AF87]" />
+                <User className="h-5 w-5 text-[#a3af87]" />
                 Informasi Penyuplai
               </h3>
 
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#A3AF87] to-[#5a6c5b] flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-[#a3af87] flex items-center justify-center flex-shrink-0">
                   <User className="h-8 w-8 text-white" />
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-lg text-[#303646] mb-1">
                     {supply.userName}
                   </p>
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-[#435664]">
                     <Phone className="h-4 w-4" />
                     <a
                       href={`tel:${supply.userPhone}`}
-                      className="hover:text-[#A3AF87]"
+                      className="hover:text-[#a3af87]"
                     >
                       {supply.userPhone}
                     </a>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#435664] mt-1">
                     ID: {supply.userId}
                   </p>
                 </div>
@@ -360,24 +360,24 @@ export default function SupplyMonitoringDetailPage({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl border-2 border-gray-100 p-6"
+              className="bg-white rounded-2xl border-2 border-[#a3af87]/30 p-6"
             >
               <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
-                <Package className="h-5 w-5 text-[#A3AF87]" />
+                <Package className="h-5 w-5 text-[#a3af87]" />
                 Detail Sampah
               </h3>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Jenis Sampah</p>
+                  <p className="text-sm text-[#435664] mb-1">Jenis Sampah</p>
                   <p className="font-semibold text-[#303646]">
                     {wasteTypeLabels[supply.wasteType] || supply.wasteType}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Estimasi Berat</p>
+                  <p className="text-sm text-[#435664] mb-1">Estimasi Berat</p>
                   <div className="flex items-center gap-2">
-                    <Scale className="h-4 w-4 text-gray-400" />
+                    <Scale className="h-4 w-4 text-[#a3af87]" />
                     <p className="font-semibold text-[#303646]">
                       {weightLabels[supply.estimatedWeight] || `${supply.estimatedWeight} kg`}
                     </p>
@@ -385,10 +385,10 @@ export default function SupplyMonitoringDetailPage({
                 </div>
                 {supply.actualWeight && (
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Berat Aktual</p>
+                    <p className="text-sm text-[#435664] mb-1">Berat Aktual</p>
                     <div className="flex items-center gap-2">
-                      <Scale className="h-4 w-4 text-[#A3AF87]" />
-                      <p className="font-bold text-[#A3AF87]">
+                      <Scale className="h-4 w-4 text-[#a3af87]" />
+                      <p className="font-bold text-[#a3af87]">
                         {supply.actualWeight} kg
                       </p>
                     </div>
@@ -397,8 +397,8 @@ export default function SupplyMonitoringDetailPage({
               </div>
 
               {supply.notes && (
-                <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600 mb-1 flex items-center gap-2">
+                <div className="mt-6 p-4 bg-[#fdf8d4]/30 rounded-xl border border-[#a3af87]/20">
+                  <p className="text-sm text-[#435664] mb-1 flex items-center gap-2">
                     <FileText className="h-4 w-4" />
                     Catatan dari Penyuplai
                   </p>
@@ -411,14 +411,14 @@ export default function SupplyMonitoringDetailPage({
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-base font-semibold text-[#303646] flex items-center gap-2">
-                      <ImageIcon className="h-5 w-5 text-[#A3AF87]" />
+                      <ImageIcon className="h-5 w-5 text-[#a3af87]" />
                       Foto Sampah
                     </p>
                     <a
                       href={supply.photoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-[#A3AF87] hover:text-[#8a9b73] font-medium flex items-center gap-1"
+                      className="text-sm text-[#a3af87] hover:text-[#435664] font-medium flex items-center gap-1"
                     >
                       Lihat Full Screen
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -428,7 +428,7 @@ export default function SupplyMonitoringDetailPage({
                   </div>
 
                   {/* Large Photo Display */}
-                  <div className="relative w-full rounded-2xl overflow-hidden border-2 border-[#A3AF87]/30 shadow-xl bg-gray-100">
+                  <div className="relative w-full rounded-2xl overflow-hidden border-2 border-[#a3af87]/30 shadow-xl bg-[#fdf8d4]/10">
                     <img
                       src={supply.photoUrl}
                       alt="Foto sampah untuk pickup"
@@ -465,11 +465,11 @@ export default function SupplyMonitoringDetailPage({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-100 p-6 shadow-lg"
+              className="bg-white rounded-2xl border-2 border-[#a3af87]/30 p-6 shadow-lg"
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-[#303646] text-lg flex items-center gap-2">
-                  <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#8a9b73] rounded-xl">
+                  <div className="p-2 bg-[#a3af87] rounded-xl">
                     <MapPin className="h-5 w-5 text-white" />
                   </div>
                   Lokasi Penjemputan
@@ -485,13 +485,13 @@ export default function SupplyMonitoringDetailPage({
               </div>
 
               {/* Address Card */}
-              <div className="mb-4 p-5 bg-white rounded-xl border-2 border-[#A3AF87]/20 shadow-sm">
+              <div className="mb-4 p-5 bg-[#fdf8d4]/30 rounded-xl border-2 border-[#a3af87]/20 shadow-sm">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-[#A3AF87]/10 rounded-lg flex-shrink-0">
-                    <MapPin className="h-5 w-5 text-[#A3AF87]" />
+                  <div className="p-2 bg-[#a3af87]/20 rounded-lg flex-shrink-0">
+                    <MapPin className="h-5 w-5 text-[#a3af87]" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wide">Alamat Lengkap</p>
+                    <p className="text-xs text-[#435664] font-semibold mb-1 uppercase tracking-wide">Alamat Lengkap</p>
                     <p className="text-[#303646] font-medium leading-relaxed">{supply.pickupAddress}</p>
                   </div>
                 </div>
@@ -709,7 +709,7 @@ export default function SupplyMonitoringDetailPage({
             transition={{ delay: 0.5 }}
             className="lg:col-span-1"
           >
-            <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 sticky top-6">
+            <div className="bg-white rounded-2xl border-2 border-[#a3af87]/30 p-6 sticky top-6">
               <h3 className="font-bold text-[#303646] mb-6">
                 Timeline Penjemputan
               </h3>
@@ -721,7 +721,7 @@ export default function SupplyMonitoringDetailPage({
                     {index < timeline.length - 1 && (
                       <div
                         className={`absolute left-4 top-10 w-0.5 h-full ${
-                          item.completed ? "bg-[#A3AF87]" : "bg-gray-200"
+                          item.completed ? "bg-[#a3af87]" : "bg-[#fdf8d4]"
                         }`}
                       />
                     )}
@@ -729,13 +729,13 @@ export default function SupplyMonitoringDetailPage({
                     {/* Icon */}
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 ${
-                        item.completed ? "bg-[#A3AF87]" : "bg-gray-200"
+                        item.completed ? "bg-[#a3af87]" : "bg-[#fdf8d4]"
                       }`}
                     >
                       {item.completed ? (
                         <CheckCircle className="h-5 w-5 text-white" />
                       ) : (
-                        <Circle className="h-5 w-5 text-gray-400" />
+                        <Circle className="h-5 w-5 text-[#a3af87]" />
                       )}
                     </div>
 
@@ -743,13 +743,13 @@ export default function SupplyMonitoringDetailPage({
                     <div className="flex-1">
                       <p
                         className={`font-semibold ${
-                          item.completed ? "text-[#303646]" : "text-gray-400"
+                          item.completed ? "text-[#303646]" : "text-[#435664]"
                         }`}
                       >
                         {item.label}
                       </p>
                       {item.date && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-[#435664] mt-1">
                           {new Date(item.date).toLocaleString("id-ID", {
                             day: "numeric",
                             month: "short",
@@ -765,8 +765,8 @@ export default function SupplyMonitoringDetailPage({
               </div>
 
               {/* Submitted At */}
-              <div className="mt-6 pt-6 border-t-2 border-gray-100">
-                <p className="text-sm text-gray-600">Waktu Submit</p>
+              <div className="mt-6 pt-6 border-t-2 border-[#a3af87]/20">
+                <p className="text-sm text-[#435664]">Waktu Submit</p>
                 <p className="text-sm font-semibold text-[#303646] mt-1">
                   {new Date(supply.createdAt).toLocaleString("id-ID", {
                     day: "numeric",

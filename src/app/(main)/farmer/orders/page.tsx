@@ -340,7 +340,7 @@ export default function FarmerOrdersPage() {
           <p className="text-gray-500 mb-6">{error}</p>
           <button
             onClick={loadOrders}
-            className="px-6 py-3 bg-[#A3AF87] text-white rounded-xl font-bold hover:bg-[#8a9a6e] transition-colors"
+            className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors"
           >
             Coba Lagi
           </button>
@@ -351,7 +351,7 @@ export default function FarmerOrdersPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="min-h-screen bg-[#fdf8d4]/20">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {/* Header */}
           <motion.div
@@ -364,7 +364,7 @@ export default function FarmerOrdersPage() {
                 <h1 className="text-3xl font-bold text-[#303646]">
                   Pesanan Saya
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-[#435664] mt-1">
                   Monitor dan kelola pesanan dari customer
                 </p>
               </div>
@@ -372,7 +372,7 @@ export default function FarmerOrdersPage() {
                 <button
                   onClick={handleExportExcel}
                   disabled={isLoading || filteredOrders.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-xl hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#a3af87] text-white rounded-xl hover:bg-[#435664] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Export ke Excel"
                 >
                   <Download className="h-4 w-4" />
@@ -383,18 +383,18 @@ export default function FarmerOrdersPage() {
                 <button
                   onClick={loadOrders}
                   disabled={isLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl hover:border-[#A3AF87] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl hover:border-[#a3af87] transition-colors disabled:opacity-50"
                 >
                   <RefreshCw
-                    className={`h-4 w-4 text-gray-600 ${isLoading ? "animate-spin" : ""}`}
+                    className={`h-4 w-4 text-[#435664] ${isLoading ? "animate-spin" : ""}`}
                   />
-                  <span className="text-sm font-medium text-gray-700 hidden sm:inline">
+                  <span className="text-sm font-medium text-[#435664] hidden sm:inline">
                     Refresh
                   </span>
                 </button>
-                <div className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87]/10 rounded-xl">
-                  <Activity className="h-5 w-5 text-[#A3AF87] animate-pulse" />
-                  <span className="text-sm font-medium text-[#5a6c5b]">
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4] rounded-xl border border-[#a3af87]/20">
+                  <Activity className="h-5 w-5 text-[#a3af87] animate-pulse" />
+                  <span className="text-sm font-medium text-[#435664]">
                     Live
                   </span>
                 </div>
@@ -420,25 +420,25 @@ export default function FarmerOrdersPage() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors p-6 shadow-sm"
+            className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 hover:border-[#a3af87]/50 transition-colors p-6 shadow-sm"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-3 bg-[#A3AF87] rounded-xl">
+                <div className="p-2 sm:p-3 bg-[#a3af87] rounded-xl">
                   <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm sm:text-base text-[#303646]">
                     Real-time Incoming Orders
                   </h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[#435664]">
                     Data pesanan terbaru dari customer
                   </p>
                 </div>
               </div>
 
               {/* Filter Tabs with Badge Counts */}
-              <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-xl p-1.5 overflow-x-auto w-full sm:w-auto">
+              <div className="flex items-center gap-2 sm:gap-3 bg-[#fdf8d4]/50 rounded-xl p-1.5 overflow-x-auto w-full sm:w-auto">
                 {[
                   { value: "all", label: "Semua", count: stats.total },
                   {
@@ -468,8 +468,8 @@ export default function FarmerOrdersPage() {
                     onClick={() => setFilter(tab.value)}
                     className={`relative px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
                       filter === tab.value
-                        ? "bg-white text-[#303646] shadow-md"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                        ? "bg-[#a3af87] text-white shadow-md"
+                        : "text-[#435664] hover:text-[#303646] hover:bg-[#fdf8d4]"
                     }`}
                   >
                     <span className="flex items-center gap-2">
@@ -479,11 +479,11 @@ export default function FarmerOrdersPage() {
                           className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-bold rounded-full ${
                             tab.value === "needs_action" ||
                             tab.value === "cancelled"
-                              ? "bg-red-500 text-white shadow-sm shadow-red-200"
+                              ? "bg-red-500 text-white shadow-sm"
                               : tab.value === "shipped" ||
                                   tab.value === "completed"
-                                ? "bg-[#A3AF87] text-white shadow-sm shadow-[#A3AF87]/30"
-                                : "bg-gray-500 text-white"
+                                ? "bg-[#a3af87] text-white shadow-sm"
+                                : "bg-[#435664] text-white"
                           }`}
                         >
                           {tab.count}
@@ -498,71 +498,71 @@ export default function FarmerOrdersPage() {
             {/* Search & Sort */}
             <div className="flex flex-col md:flex-row gap-3 mb-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a3af87] pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Cari order ID, nama customer, atau produk..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-[#303646] placeholder:text-gray-400 focus:outline-none focus:border-[#A3AF87] focus:bg-white transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl text-[#303646] placeholder:text-[#435664]/50 focus:outline-none focus:border-[#a3af87] focus:bg-[#fdf8d4] transition-all"
                 />
               </div>
               <div className="flex gap-2">
                 {/* Custom Sort Dropdown with Green Color Palette */}
                 <div className="relative group">
-                  <button className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#A3AF87]/15 to-[#A3AF87]/5 border-2 border-[#A3AF87]/40 rounded-xl hover:border-[#A3AF87] hover:shadow-md hover:shadow-[#A3AF87]/10 transition-all">
+                  <button className="flex items-center gap-3 px-4 py-3 bg-[#fdf8d4] border-2 border-[#a3af87]/40 rounded-xl hover:border-[#a3af87] hover:shadow-md transition-all">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-[#A3AF87]/20 rounded-lg flex items-center justify-center">
+                      <div className="w-8 h-8 bg-[#a3af87]/20 rounded-lg flex items-center justify-center">
                         {sortBy === "date" ? (
-                          <Calendar className="h-4 w-4 text-[#5a6c5b]" />
+                          <Calendar className="h-4 w-4 text-[#435664]" />
                         ) : (
-                          <Banknote className="h-4 w-4 text-[#5a6c5b]" />
+                          <Banknote className="h-4 w-4 text-[#435664]" />
                         )}
                       </div>
-                      <span className="text-sm font-semibold text-[#5a6c5b]">
+                      <span className="text-sm font-semibold text-[#435664]">
                         {sortBy === "date" ? "Tanggal" : "Harga"}
                       </span>
                     </div>
-                    <ChevronDown className="h-4 w-4 text-[#5a6c5b] group-hover:rotate-180 transition-transform" />
+                    <ChevronDown className="h-4 w-4 text-[#435664] group-hover:rotate-180 transition-transform" />
                   </button>
 
                   {/* Dropdown Menu */}
-                  <div className="absolute top-full left-0 mt-2 w-full min-w-[160px] bg-white rounded-xl border-2 border-[#A3AF87]/30 shadow-lg shadow-[#A3AF87]/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+                  <div className="absolute top-full left-0 mt-2 w-full min-w-[160px] bg-white rounded-xl border-2 border-[#a3af87]/30 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
                     <div className="p-2">
                       <button
                         onClick={() => setSortBy("date")}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                           sortBy === "date"
-                            ? "bg-[#A3AF87]/15 text-[#5a6c5b]"
-                            : "hover:bg-gray-50 text-gray-700"
+                            ? "bg-[#fdf8d4] text-[#435664]"
+                            : "hover:bg-[#fdf8d4]/50 text-[#435664]"
                         }`}
                       >
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "date" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "date" ? "bg-[#a3af87]/30" : "bg-[#fdf8d4]/50"}`}
                         >
                           <Calendar className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Tanggal</span>
                         {sortBy === "date" && (
-                          <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />
+                          <CheckCircle2 className="h-4 w-4 text-[#a3af87] ml-auto" />
                         )}
                       </button>
                       <button
                         onClick={() => setSortBy("price")}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                           sortBy === "price"
-                            ? "bg-[#A3AF87]/15 text-[#5a6c5b]"
-                            : "hover:bg-gray-50 text-gray-700"
+                            ? "bg-[#fdf8d4] text-[#435664]"
+                            : "hover:bg-[#fdf8d4]/50 text-[#435664]"
                         }`}
                       >
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "price" ? "bg-[#A3AF87]/30" : "bg-gray-100"}`}
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${sortBy === "price" ? "bg-[#a3af87]/30" : "bg-[#fdf8d4]/50"}`}
                         >
                           <Banknote className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Harga</span>
                         {sortBy === "price" && (
-                          <CheckCircle2 className="h-4 w-4 text-[#A3AF87] ml-auto" />
+                          <CheckCircle2 className="h-4 w-4 text-[#a3af87] ml-auto" />
                         )}
                       </button>
                     </div>
@@ -576,8 +576,8 @@ export default function FarmerOrdersPage() {
                   }
                   className={`px-4 py-3 rounded-xl border-2 transition-all flex items-center gap-2 ${
                     sortOrder === "desc"
-                      ? "bg-[#A3AF87] border-[#A3AF87] text-white shadow-md shadow-[#A3AF87]/30"
-                      : "bg-white border-[#A3AF87]/40 text-[#5a6c5b] hover:border-[#A3AF87] hover:shadow-md"
+                      ? "bg-[#a3af87] border-[#a3af87] text-white shadow-md"
+                      : "bg-[#fdf8d4]/50 border-[#a3af87]/40 text-[#435664] hover:border-[#a3af87] hover:shadow-md"
                   }`}
                   title={sortOrder === "desc" ? "Terbaru dulu" : "Terlama dulu"}
                 >
@@ -594,26 +594,26 @@ export default function FarmerOrdersPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-gray-100">
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                  <tr className="border-b-2 border-[#a3af87]/30">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       ID & Waktu
                     </th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       Customer
                     </th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       Produk
                     </th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       Pengiriman
                     </th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       Total
                     </th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       Status
                     </th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-gray-600">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-[#435664]">
                       Aksi
                     </th>
                   </tr>
@@ -628,8 +628,8 @@ export default function FarmerOrdersPage() {
                   ) : filteredOrders.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-12 text-center">
-                        <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-500">
+                        <Package className="h-12 w-12 text-[#a3af87]/30 mx-auto mb-3" />
+                        <p className="text-[#435664]">
                           {searchQuery
                             ? "Tidak ada pesanan yang cocok"
                             : "Tidak ada pesanan"}

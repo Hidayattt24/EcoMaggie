@@ -23,7 +23,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         </p>
         <p className="text-sm text-gray-600">
           Terjual:{" "}
-          <span className="font-bold text-[#A3AF87]">{payload[0].value}</span>{" "}
+          <span className="font-bold text-[#a3af87]">{payload[0].value}</span>{" "}
           unit
         </p>
         <p className="text-xs text-gray-400 mt-0.5">
@@ -70,8 +70,8 @@ export default function TopProducts() {
       {/* Header */}
       <div className="flex items-start justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#A3AF87]/10 rounded-xl">
-            <Package className="h-5 w-5 text-[#A3AF87]" />
+          <div className="p-2.5 bg-[#a3af87]/10 rounded-xl">
+            <Package className="h-5 w-5 text-[#a3af87]" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-[#303646] poppins-bold">
@@ -109,19 +109,25 @@ export default function TopProducts() {
               />
               <Tooltip
                 content={<CustomTooltip />}
-                cursor={{ fill: "rgba(163, 175, 135, 0.1)" }}
+                cursor={{ fill: "rgba(163, 175, 135, 0.08)" }}
               />
               <Bar dataKey="sold" radius={[0, 6, 6, 0]} barSize={20}>
-                {topProductsData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      index === 0
-                        ? "#A3AF87"
-                        : `rgba(163, 175, 135, ${0.8 - index * 0.15})`
-                    }
-                  />
-                ))}
+                {topProductsData.map((entry, index) => {
+                  // Gradasi warna dari warna-2 (#a3af87) ke warna-3 (#435664)
+                  const colors = [
+                    "#a3af87", // Rank 1 - Hijau sage penuh
+                    "#8a9a6e", // Rank 2 - Hijau sage lebih gelap
+                    "#6d7f5a", // Rank 3 - Hijau sage lebih gelap lagi
+                    "#556550", // Rank 4 - Mendekati abu-abu hijau
+                    "#435664", // Rank 5 - Biru gelap
+                  ];
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={colors[index] || "#435664"}
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -137,31 +143,38 @@ export default function TopProducts() {
 
       {/* Product List with Details */}
       <div className="space-y-2">
-        {topProductsData.slice(0, 3).map((product, index) => (
-          <div
-            key={product.name}
-            className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl"
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  index === 0
-                    ? "bg-[#A3AF87] text-white"
-                    : "bg-gray-200 text-gray-600"
-                }`}
-              >
-                {index + 1}
-              </span>
-              <span className="text-sm font-medium text-[#303646] truncate max-w-[140px]">
-                {product.name}
-              </span>
+        {topProductsData.slice(0, 3).map((product, index) => {
+          // Warna badge sesuai ranking
+          const badgeColors = [
+            "bg-[#a3af87] text-white", // Rank 1 - Hijau sage
+            "bg-[#8a9a6e] text-white", // Rank 2 - Hijau sage lebih gelap
+            "bg-[#6d7f5a] text-white", // Rank 3 - Hijau sage lebih gelap lagi
+          ];
+          
+          return (
+            <div
+              key={product.name}
+              className="flex items-center justify-between p-2.5 bg-gradient-to-r from-gray-50 to-transparent rounded-xl hover:from-[#a3af87]/5 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ${
+                    badgeColors[index] || "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {index + 1}
+                </span>
+                <span className="text-sm font-medium text-[#303646] truncate max-w-[140px]">
+                  {product.name}
+                </span>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-[#a3af87]">{product.sold}</p>
+                <p className="text-[10px] text-gray-400">unit</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-bold text-[#A3AF87]">{product.sold}</p>
-              <p className="text-[10px] text-gray-400">unit</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

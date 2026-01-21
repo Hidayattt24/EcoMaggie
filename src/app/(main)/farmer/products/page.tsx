@@ -176,7 +176,7 @@ export default function FarmerProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-4 px-4 md:px-6 lg:px-0 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdf8d4]/30 to-white pt-4 px-4 md:px-6 lg:px-0 pb-8">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
@@ -188,7 +188,7 @@ export default function FarmerProductsPage() {
             <h1 className="text-2xl md:text-3xl font-bold text-[#303646] mb-1">
               Manajemen Produk
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[#435664]">
               Kelola inventori dan performa produk Anda
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function FarmerProductsPage() {
             <button
               onClick={handleExportExcel}
               disabled={loading || filteredProducts.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-[#A3AF87] text-white rounded-lg hover:bg-[#8a9a6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-[#a3af87] text-white rounded-lg hover:bg-[#435664] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Export ke Excel"
             >
               <Download className="h-4 w-4" />
@@ -204,7 +204,7 @@ export default function FarmerProductsPage() {
             </button>
             <button
               onClick={() => refetch()}
-              className="p-3 bg-white text-gray-600 rounded-lg border-2 border-gray-200 hover:border-[#A3AF87] hover:text-[#A3AF87] transition-colors"
+              className="p-3 bg-[#fdf8d4]/30 text-[#435664] rounded-lg border-2 border-[#a3af87]/30 hover:border-[#a3af87] hover:text-[#a3af87] transition-colors"
               title="Refresh Data"
             >
               <RefreshCw
@@ -213,7 +213,7 @@ export default function FarmerProductsPage() {
             </button>
             <Link
               href="/farmer/products/add"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#A3AF87] text-white rounded-lg font-medium hover:bg-[#95a17a] transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#a3af87] text-white rounded-lg font-medium hover:bg-[#435664] transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             >
               <Plus className="h-5 w-5" />
               Tambah Produk
@@ -250,17 +250,17 @@ export default function FarmerProductsPage() {
         transition={{ delay: 0.1 }}
         className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6"
       >
-        <div className="bg-white rounded-xl p-4 border-2 border-gray-100 hover:border-[#A3AF87]/30 transition-colors">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-4 border-2 border-[#a3af87]/30 hover:border-[#a3af87] transition-colors">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#A3AF87]/10 rounded-lg">
-              <Package className="h-5 w-5 text-[#A3AF87]" />
+            <div className="p-2 bg-[#a3af87]/10 rounded-lg">
+              <Package className="h-5 w-5 text-[#a3af87]" />
             </div>
             <div>
               {analyticsLoading ? (
                 <StatsSkeleton />
               ) : (
                 <>
-                  <p className="text-xs text-gray-600">Total Produk</p>
+                  <p className="text-xs text-[#435664]">Total Produk</p>
                   <p className="text-xl font-bold text-[#303646]">
                     {stats.totalProducts}
                   </p>
@@ -270,7 +270,7 @@ export default function FarmerProductsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border-2 border-gray-100 hover:border-green-200 transition-colors">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-4 border-2 border-[#a3af87]/30 hover:border-green-200 transition-colors">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-50 rounded-lg">
               <TrendingUp className="h-5 w-5 text-green-600" />
@@ -280,7 +280,7 @@ export default function FarmerProductsPage() {
                 <StatsSkeleton />
               ) : (
                 <>
-                  <p className="text-xs text-gray-600">Produk Aktif</p>
+                  <p className="text-xs text-[#435664]">Produk Aktif</p>
                   <p className="text-xl font-bold text-[#303646]">
                     {stats.activeProducts}
                   </p>
@@ -290,7 +290,7 @@ export default function FarmerProductsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border-2 border-gray-100 hover:border-red-200 transition-colors">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-4 border-2 border-[#a3af87]/30 hover:border-red-200 transition-colors">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-50 rounded-lg">
               <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -300,7 +300,7 @@ export default function FarmerProductsPage() {
                 <StatsSkeleton />
               ) : (
                 <>
-                  <p className="text-xs text-gray-600">Stok Rendah</p>
+                  <p className="text-xs text-[#435664]">Stok Rendah</p>
                   <p className="text-xl font-bold text-red-600">
                     {stats.lowStockCount}
                   </p>
@@ -310,7 +310,7 @@ export default function FarmerProductsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border-2 border-gray-100 hover:border-blue-200 transition-colors">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-4 border-2 border-[#a3af87]/30 hover:border-blue-200 transition-colors">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-50 rounded-lg">
               <BarChart3 className="h-5 w-5 text-blue-600" />
@@ -320,7 +320,7 @@ export default function FarmerProductsPage() {
                 <StatsSkeleton />
               ) : (
                 <>
-                  <p className="text-xs text-gray-600">Total Revenue</p>
+                  <p className="text-xs text-[#435664]">Total Revenue</p>
                   <p className="text-lg font-bold text-[#303646]">
                     {new Intl.NumberFormat("id-ID", {
                       style: "currency",
@@ -343,10 +343,10 @@ export default function FarmerProductsPage() {
         className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6"
       >
         {/* TILE 1: TOP PRODUCTS */}
-        <div className="bg-white rounded-xl p-5 border-2 border-gray-100 hover:shadow-lg transition-shadow">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-5 border-2 border-[#a3af87]/30 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-[#A3AF87] to-[#95a17a] rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-[#a3af87] to-[#435664] rounded-lg">
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <h3 className="font-bold text-[#303646]">Produk Terlaris</h3>
@@ -395,21 +395,21 @@ export default function FarmerProductsPage() {
                           {product.name}
                         </p>
                       </div>
-                      <span className="text-xs font-bold text-[#A3AF87] ml-2">
+                      <span className="text-xs font-bold text-[#a3af87] ml-2">
                         {product.totalSold}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-[#fdf8d4]/30 rounded-full h-2 overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#A3AF87] to-[#95a17a] rounded-full transition-all duration-500"
+                        className="h-full bg-[#a3af87] rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-[10px] text-gray-500">
+                      <p className="text-[10px] text-[#435664]">
                         {product.category}
                       </p>
-                      <p className="text-[10px] font-medium text-gray-600">
+                      <p className="text-[10px] font-medium text-[#435664]">
                         {new Intl.NumberFormat("id-ID", {
                           style: "currency",
                           currency: "IDR",
@@ -425,7 +425,7 @@ export default function FarmerProductsPage() {
         </div>
 
         {/* TILE 2: STOCK ALERTS */}
-        <div className="bg-white rounded-xl p-5 border-2 border-red-100 hover:shadow-lg transition-shadow">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-5 border-2 border-red-100 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-red-500 rounded-lg">
@@ -520,10 +520,10 @@ export default function FarmerProductsPage() {
         </div>
 
         {/* TILE 3: CATEGORY DISTRIBUTION */}
-        <div className="bg-white rounded-xl p-5 border-2 border-gray-100 hover:shadow-lg transition-shadow">
+        <div className="bg-[#fdf8d4]/20 rounded-xl p-5 border-2 border-[#a3af87]/30 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-[#A3AF87] rounded-lg">
+              <div className="p-2 bg-[#a3af87] rounded-lg">
                 <BarChart3 className="h-5 w-5 text-white" />
               </div>
               <h3 className="font-bold text-[#303646]">Distribusi Kategori</h3>
@@ -547,7 +547,7 @@ export default function FarmerProductsPage() {
               {/* Category Distribution */}
               {products.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-gray-600 mb-2">
+                  <p className="text-xs font-semibold text-[#435664] mb-2">
                     Distribusi Kategori
                   </p>
                   {Array.from(new Set(products.map((p) => p.category)))
@@ -561,14 +561,14 @@ export default function FarmerProductsPage() {
                       return (
                         <div key={category}>
                           <div className="flex items-center justify-between mb-1">
-                            <p className="text-xs text-gray-700">{category}</p>
-                            <span className="text-xs font-bold text-[#A3AF87]">
+                            <p className="text-xs text-[#303646]">{category}</p>
+                            <span className="text-xs font-bold text-[#a3af87]">
                               {count}
                             </span>
                           </div>
-                          <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="w-full bg-[#fdf8d4]/30 rounded-full h-1.5">
                             <div
-                              className="h-full bg-[#A3AF87] rounded-full"
+                              className="h-full bg-[#a3af87] rounded-full"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -580,8 +580,8 @@ export default function FarmerProductsPage() {
 
               {products.length === 0 && (
                 <div className="text-center py-4">
-                  <p className="text-sm text-gray-500">Belum ada produk</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-sm text-[#435664]">Belum ada produk</p>
+                  <p className="text-xs text-[#435664]/70 mt-1">
                     Tambahkan produk pertama Anda
                   </p>
                 </div>
@@ -596,27 +596,27 @@ export default function FarmerProductsPage() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="bg-white rounded-xl p-4 border-2 border-gray-100 mb-4"
+        className="bg-[#fdf8d4]/20 rounded-xl p-4 border-2 border-[#a3af87]/30 mb-4"
       >
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#435664]" />
             <input
               type="text"
               placeholder="Cari produk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:border-[#A3AF87] focus:ring-2 focus:ring-[#A3AF87]/20 focus:outline-none transition-all text-sm text-gray-900 placeholder:text-gray-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-[#a3af87]/30 rounded-lg focus:border-[#a3af87] focus:ring-2 focus:ring-[#a3af87]/20 focus:outline-none transition-all text-sm text-[#303646] placeholder:text-[#435664]/50"
             />
           </div>
 
           {/* Category Filter - Modern Hover Dropdown */}
           <div className="relative group">
             <button
-              className="w-full md:w-auto px-4 py-3 rounded-xl border-2 border-[#A3AF87]/40 bg-white hover:border-[#A3AF87] hover:shadow-md transition-all flex items-center gap-2 text-[#5a6c5b] font-semibold"
+              className="w-full md:w-auto px-4 py-3 rounded-xl border-2 border-[#a3af87]/40 bg-white hover:border-[#a3af87] hover:shadow-md transition-all flex items-center gap-2 text-[#435664] font-semibold"
             >
-              <Filter className="h-5 w-5 text-[#A3AF87]" />
+              <Filter className="h-5 w-5 text-[#a3af87]" />
               <span className="text-sm">
                 {selectedCategory === "all" ? "Semua Kategori" : selectedCategory}
               </span>
@@ -626,10 +626,10 @@ export default function FarmerProductsPage() {
             </button>
 
             {/* Dropdown Menu */}
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl border-2 border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl border-2 border-[#a3af87]/30 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
               <div className="p-2">
-                <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pilih Kategori</p>
+                <div className="px-3 py-2 border-b border-[#a3af87]/20 mb-1">
+                  <p className="text-xs font-semibold text-[#435664] uppercase tracking-wide">Pilih Kategori</p>
                 </div>
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                   {categories.map((cat) => (
@@ -638,12 +638,12 @@ export default function FarmerProductsPage() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                         selectedCategory === cat 
-                          ? "bg-[#A3AF87]/15 text-[#5a6c5b]" 
-                          : "hover:bg-gray-50 text-gray-700"
+                          ? "bg-[#a3af87]/15 text-[#303646]" 
+                          : "hover:bg-[#fdf8d4]/30 text-[#435664]"
                       }`}
                     >
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                        selectedCategory === cat ? "bg-[#A3AF87]/30" : "bg-gray-100"
+                        selectedCategory === cat ? "bg-[#a3af87]/30" : "bg-[#fdf8d4]/50"
                       }`}>
                         <Package className="h-4 w-4" />
                       </div>
@@ -651,7 +651,7 @@ export default function FarmerProductsPage() {
                         {cat === "all" ? "Semua Kategori" : cat}
                       </span>
                       {selectedCategory === cat && (
-                        <svg className="h-4 w-4 text-[#A3AF87] ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="h-4 w-4 text-[#a3af87] ml-auto" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       )}
@@ -669,12 +669,12 @@ export default function FarmerProductsPage() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="bg-white rounded-xl border-2 border-gray-100 overflow-hidden"
+        className="bg-[#fdf8d4]/20 rounded-xl border-2 border-[#a3af87]/30 overflow-hidden"
       >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-[#A3AF87]/10 to-[#FDF8D4]/30 border-b-2 border-gray-100">
+              <tr className="bg-gradient-to-r from-[#a3af87]/10 to-[#fdf8d4]/30 border-b-2 border-[#a3af87]/30">
                 <th className="text-left px-4 py-3 text-xs font-bold text-[#303646] uppercase tracking-wider">
                   Produk
                 </th>
@@ -698,7 +698,7 @@ export default function FarmerProductsPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[#a3af87]/20">
               {loading
                 ? // Skeleton loading rows
                   [...Array(5)].map((_, index) => (
@@ -710,12 +710,12 @@ export default function FarmerProductsPage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: index * 0.05 }}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-[#fdf8d4]/30 transition-colors"
                     >
                       {/* Product Info */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#fdf8d4]/30 flex-shrink-0">
                             {product.images[0] ? (
                               <img
                                 src={product.images[0]}
@@ -724,7 +724,7 @@ export default function FarmerProductsPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <Package className="h-6 w-6 text-gray-300" />
+                                <Package className="h-6 w-6 text-[#a3af87]/50" />
                               </div>
                             )}
                           </div>
@@ -732,7 +732,7 @@ export default function FarmerProductsPage() {
                             <p className="font-semibold text-sm text-[#303646] truncate">
                               {product.name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[#435664]">
                               {product.totalReviews} ulasan
                             </p>
                           </div>
@@ -741,7 +741,7 @@ export default function FarmerProductsPage() {
 
                       {/* Category */}
                       <td className="px-4 py-3">
-                        <span className="inline-block px-2 py-1 bg-[#A3AF87]/10 text-[#5a6c5b] text-xs font-medium rounded-md">
+                        <span className="inline-block px-2 py-1 bg-[#a3af87]/10 text-[#435664] text-xs font-medium rounded-md">
                           {product.category}
                         </span>
                       </td>
@@ -851,7 +851,7 @@ export default function FarmerProductsPage() {
                           </Link>
                           <Link
                             href={`/farmer/products/edit/${product.slug}`}
-                            className="p-2 bg-[#A3AF87]/10 text-[#5a6c5b] rounded-lg hover:bg-[#A3AF87]/20 transition-colors"
+                            className="p-2 bg-[#a3af87]/10 text-[#a3af87] rounded-lg hover:bg-[#a3af87]/20 transition-colors"
                             title="Edit Produk"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -873,13 +873,13 @@ export default function FarmerProductsPage() {
           {/* Empty State */}
           {!loading && filteredProducts.length === 0 && (
             <div className="text-center py-12">
-              <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">
+              <Package className="h-12 w-12 text-[#a3af87]/50 mx-auto mb-3" />
+              <p className="text-[#435664] font-medium">
                 {products.length === 0
                   ? "Belum ada produk"
                   : "Produk tidak ditemukan"}
               </p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-[#435664]/70 mt-1">
                 {products.length === 0
                   ? "Tambahkan produk pertama Anda sekarang"
                   : "Coba ubah filter atau kata kunci pencarian"}
@@ -887,7 +887,7 @@ export default function FarmerProductsPage() {
               {products.length === 0 && (
                 <Link
                   href="/farmer/products/add"
-                  className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#A3AF87] text-white rounded-lg text-sm font-medium hover:bg-[#95a17a] transition-colors"
+                  className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#a3af87] text-white rounded-lg text-sm font-medium hover:bg-[#435664] transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Tambah Produk

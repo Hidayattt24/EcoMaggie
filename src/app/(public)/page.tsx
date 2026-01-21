@@ -15,28 +15,63 @@ import LoadingScreen from "@/components/landing/LoadingScreen";
 import PWAInstallBanner from "@/components/landing/PWAInstallBanner";
 
 export const metadata: Metadata = {
-  title: "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
+  title: "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
   description:
-    "Tahukah Anda sampah organik bisa jadi sumber penghasilan? EcoMaggie menghubungkan penghasil limbah dengan peternak maggot BSF untuk ciptakan passive income. Sudah 500+ mitra sukses! Apakah Anda siap bergabung dalam revolusi ekonomi sirkular Indonesia?",
+    "Tahukah kamu? EcoMaggie membangun sistem ekonomi sirkular di Gampong Rukoh dengan menghubungkan sumber limbah organik langsung ke petani maggot melalui platform digital. Bersama-sama, kita mengurangi beban sampah di TPA sekaligus menciptakan produk pakan ternak bernilai ekonomi bagi kesejahteraan masyarakat lokal.",
   keywords: [
-    "ubah sampah jadi uang",
-    "passive income dari sampah",
-    "pengelolaan sampah organik",
-    "budidaya maggot",
-    "maggot BSF",
-    "black soldier fly",
-    "peternak maggot Indonesia",
-    "ekonomi sirkular",
-    "platform sampah organik",
+// --- Brand & Core Concept ---
+    "EcoMaggie",
     "supply connect",
     "maggot market",
-    "bisnis maggot",
-    "penghasilan dari limbah",
+    "ekonomi sirkular",
+    "sustainable waste management",
+    "zero waste Indonesia",
+    
+    // --- Lokasi & Komunitas Spesifik (SEO Lokal) ---
+    "Banda Aceh",
+    "UMKM Banda Aceh",
+    "Gampong Rukoh",
+    "Gampong Lamdingin",
+    "Syiah Kuala",
+    "Pasar Rukoh",
+    "Universitas Syiah Kuala",
+    "USK",
+    "pengelolaan sampah Banda Aceh",
+    "maggot BSF Aceh",
+    "DLHK3 Banda Aceh",
+    
+    // --- Masalah & Solusi (Pertanyaan Orang Awam) ---
+    "cara olah sampah rumah tangga",
+    "tempat buang sampah organik",
+    "solusi sampah menumpuk",
+    "manfaat maggot BSF",
+    "cara memilah sampah",
+    "pengomposan praktis",
+    "pemanfaatan limbah dapur",
+    "pupuk organik cair maggot",
+    
+    // --- Sektor Peternakan & Bisnis (Target UMKM/Petani) ---
+    "pakan ternak alternatif murah",
+    "pakan ikan lele Aceh",
+    "pakan ayam organik",
+    "bisnis maggot BSF",
+    "jual maggot hidup Banda Aceh",
+    "pakan burung bernutrisi",
+    "kemitraan pengolahan sampah",
+    "peluang usaha pakan ternak",
+    
+    // --- Terminologi Teknis & Umum ---
+    "maggot BSF",
+    "black soldier fly",
+    "limbah organik",
+    "sampah pasar",
+    "maggot farming",
+    "biokonversi sampah",
   ],
   openGraph: {
-    title: "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
+    title: "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
     description:
-      "Tahukah Anda sampah organik bisa jadi sumber penghasilan? Bergabunglah dengan 500+ mitra sukses yang sudah menghasilkan passive income dari sampah. Mulai transformasi Anda hari ini!",
+     "Tahukah kamu? EcoMaggie membangun sistem ekonomi sirkular di Gampong Rukoh dengan menghubungkan sumber limbah organik langsung ke petani maggot melalui platform digital. Bersama-sama, kita mengurangi beban sampah di TPA sekaligus menciptakan produk pakan ternak bernilai ekonomi bagi kesejahteraan masyarakat lokal.",
     url: "https://eco-maggie.vercel.app",
     type: "website",
   },

@@ -12,6 +12,7 @@ import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
 import EmailVerificationRedirect from "@/components/EmailVerificationRedirect";
 import HashRemover from "@/components/landing/HashRemover";
 import LoadingScreen from "@/components/landing/LoadingScreen";
+import PWAInstallBanner from "@/components/landing/PWAInstallBanner";
 
 export const metadata: Metadata = {
   title: "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
@@ -116,6 +117,9 @@ export default function Home() {
 
       {/* Floating WhatsApp Button for Quick Contact */}
       <FloatingWhatsApp />
+
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
     </div>
   );
 }

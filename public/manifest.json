@@ -1,16 +1,72 @@
 {
-  "name": "EcoMaggie",
+  "name": "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
   "short_name": "EcoMaggie",
-  "description": "Platform Pengelolaan Sampah Organik & Budidaya Maggot Indonesia",
+  "description": "Platform ekonomi sirkular yang menghubungkan limbah organik dengan petani maggot untuk menciptakan pakan ternak bernilai tinggi di Banda Aceh",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2D5016",
   "orientation": "portrait-primary",
-  "icons": [],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
   "categories": ["business", "lifestyle", "productivity"],
   "lang": "id",
   "dir": "ltr",
   "scope": "/",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Supply Connect",
+      "short_name": "Supply",
+      "description": "Input dan kelola limbah organik",
+      "url": "/supply",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Maggot Market",
+      "short_name": "Market",
+      "description": "Belanja produk maggot BSF",
+      "url": "/market",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard Petani",
+      "short_name": "Dashboard",
+      "description": "Kelola bisnis maggot Anda",
+      "url": "/farmer/dashboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/assets/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }

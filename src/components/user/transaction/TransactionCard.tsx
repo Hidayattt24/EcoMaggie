@@ -25,6 +25,7 @@ import { cancelOrderByCustomer } from "@/lib/api/orders.actions";
 
 interface Product {
   id: number;
+  productId: string; // Real product ID from database
   name: string;
   variant: string;
   quantity: number;
@@ -267,30 +268,35 @@ export function TransactionCard({
     switch (transaction.status) {
       case "unpaid":
         // Check if payment has expired
-        const isExpired = transaction.paymentExpiry 
+        const isExpired = transaction.paymentExpiry
           ? new Date(transaction.paymentExpiry) < new Date()
           : false;
 
         if (isExpired) {
           return (
-            <div className="flex-1 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
-              <div className="flex items-center gap-2 justify-center">
-                <Clock className="h-4 w-4 text-red-500" />
-                <span className="text-sm font-bold text-red-600">
-                  Batas Waktu Pembayaran Habis
-                </span>
+            <>
+              <div className="flex-1 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
+                <div className="flex items-center gap-2 justify-center">
+                  <Clock className="h-4 w-4 text-red-500" />
+                  <span className="text-sm font-bold text-red-600">
+                    Batas Waktu Pembayaran Habis
+                  </span>
+                </div>
               </div>
-              <p className="text-xs text-red-500 text-center mt-1">
-                Pesanan akan dibatalkan otomatis
-              </p>
-            </div>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="px-4 py-2.5 bg-red-500 text-white rounded-2xl font-semibold text-sm hover:bg-red-600 transition-all"
+              >
+                Hapus
+              </button>
+            </>
           );
         }
 
         return (
           <>
             <Link
-              href={`/market/orders/${transaction.orderId}`}
+              href={`/market/orders/success?orderId=${transaction.orderId}`}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all text-center"
             >
               Bayar Sekarang
@@ -362,7 +368,7 @@ export function TransactionCard({
         return (
           <>
             <Link
-              href={`/market/products/${firstProduct.slug || firstProduct.id}#ulasan`}
+              href={`/market/products/${firstProduct.slug || firstProduct.productId}#ulasan`}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
             >
               <Star className="h-4 w-4" />

@@ -22,6 +22,7 @@ type TransactionStatus = "unpaid" | "packed" | "shipped" | "completed" | "cancel
 
 interface Product {
   id: number;
+  productId: string; // Real product ID from database
   name: string;
   variant: string;
   quantity: number;
@@ -52,6 +53,26 @@ interface Transaction {
 // ============================================
 
 /**
+ * Check if string is UUID format
+ */
+function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
+/**
+ * Generate slug from product name
+ */
+function generateSlugFromName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-'); // Remove multiple hyphens
+}
+
+/**
  * Map database status to UI status
  */
 function mapDbStatusToUiStatus(dbStatus: string): TransactionStatus {
@@ -75,15 +96,42 @@ function mapDbStatusToUiStatus(dbStatus: string): TransactionStatus {
  * Transform database order to UI transaction format
  */
 function transformDbOrderToTransaction(dbOrder: DbOrder): Transaction {
-  const products: Product[] = dbOrder.items.map((item, index) => ({
-    id: index + 1,
-    name: item.product_name,
-    variant: item.unit || "Standard",
-    quantity: item.quantity,
-    price: item.unit_price,
-    image: item.product_image || "/assets/dummy/magot.png",
-    slug: item.product?.slug,
-  }));
+  const products: Product[] = dbOrder.items.map((item, index) => {
+    // Handle both product and products field (Supabase join can return either)
+    let productSlug: string | undefined;
+    if (item.product?.slug) {
+      productSlug = item.product.slug;
+    } else if (item.products) {
+      // Handle array or single object
+      const productsData = Array.isArray(item.products) ? item.products[0] : item.products;
+      productSlug = productsData?.slug;
+    }
+
+    // If slug is UUID or not available, use productId (which should be the slug-formatted ID)
+    // Or fallback to generate slug from product name
+    let finalSlug = productSlug;
+    if (!finalSlug || isUUID(finalSlug)) {
+      // Try using productId first (it might be the actual slug)
+      finalSlug = item.product_id;
+
+      // If productId is also UUID, generate from name as last resort
+      if (isUUID(finalSlug)) {
+        // console.warn(`⚠️ Product ${item.product_name} has UUID slug, generating from name`);
+        finalSlug = generateSlugFromName(item.product_name);
+      }
+    }
+
+    return {
+      id: index + 1,
+      productId: item.product_id, // Store real product ID
+      name: item.product_name,
+      variant: item.unit || "Standard",
+      quantity: item.quantity,
+      price: item.unit_price,
+      image: item.product_image || "/assets/dummy/magot.png",
+      slug: finalSlug,
+    };
+  });
 
   const totalItems = products.reduce((sum, p) => sum + p.quantity, 0);
 
@@ -175,7 +223,24 @@ export default function TransactionPage() {
       const result = await getCustomerOrders();
 
       if (result.success && result.data) {
+        // Debug: Log first order to check data structure (DISABLED)
+        // if (result.data.length > 0) {
+        //   console.log("🔍 [Transaction Debug] First order items:", result.data[0].items);
+        // }
+
         const transformedTransactions = result.data.map(transformDbOrderToTransaction);
+
+        // Debug: Log transformed data (DISABLED)
+        // if (transformedTransactions.length > 0) {
+        //   console.log("✅ [Transaction Debug] First transformed transaction:", {
+        //     products: transformedTransactions[0].products.map(p => ({
+        //       name: p.name,
+        //       slug: p.slug,
+        //       productId: p.productId
+        //     }))
+        //   });
+        // }
+
         setTransactions(transformedTransactions);
       } else {
         setError(result.message || "Gagal memuat transaksi");

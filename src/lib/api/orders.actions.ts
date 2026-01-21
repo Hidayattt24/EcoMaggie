@@ -495,12 +495,20 @@ export async function getCustomerOrders(): Promise<ApiResponse<Order[]>> {
     // Fetch items for each transaction
     const ordersWithItems = await Promise.all(
       (transactions || []).map(async (transaction) => {
-        const { data: items } = await supabase
+        const { data: items, error: itemsError } = await supabase
           .from("transaction_items")
           .select(
             `
-            *,
-            products(
+            id,
+            transaction_id,
+            product_id,
+            product_name,
+            product_image,
+            unit_price,
+            quantity,
+            subtotal,
+            unit,
+            products!inner(
               slug,
               name,
               images
@@ -508,6 +516,19 @@ export async function getCustomerOrders(): Promise<ApiResponse<Order[]>> {
           `
           )
           .eq("transaction_id", transaction.id);
+
+        if (itemsError) {
+          console.error("❌ [getCustomerOrders] Error fetching items:", itemsError);
+        }
+
+        // Debug log to check if slug is fetched correctly (DISABLED)
+        // if (items && items.length > 0) {
+        //   console.log("🔍 [getCustomerOrders] First item structure:", {
+        //     product_id: items[0].product_id,
+        //     product_name: items[0].product_name,
+        //     products: items[0].products,
+        //   });
+        // }
 
         return {
           ...transaction,

@@ -109,6 +109,12 @@ function OrderSuccessContent() {
   useEffect(() => {
     fetchTransactionData();
 
+    // Load Midtrans Snap script
+    const snapScript = document.createElement("script");
+    snapScript.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    snapScript.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "");
+    document.body.appendChild(snapScript);
+
     // Poll for status updates only if pending
     const interval = setInterval(() => {
       // Stop polling if already paid
@@ -120,7 +126,12 @@ function OrderSuccessContent() {
       fetchTransactionData();
     }, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (snapScript.parentNode) {
+        document.body.removeChild(snapScript);
+      }
+    };
   }, [orderId, fetchTransactionData]);
 
   // Stop polling when status changes to paid
@@ -203,9 +214,9 @@ function OrderSuccessContent() {
     } else if (paymentStatus === "pending") {
       return {
         icon: Clock,
-        color: "text-orange-600",
-        bgColor: "bg-orange-50",
-        borderColor: "border-orange-200",
+        color: "text-[#5a6c5b]",
+        bgColor: "bg-gradient-to-br from-[#fdf8d4] to-[#f5f0c8]",
+        borderColor: "border-[#a3af87]/50",
         title: "Menunggu Pembayaran",
         message: "Silakan selesaikan pembayaran Anda sebelum batas waktu.",
       };
@@ -410,66 +421,265 @@ function OrderSuccessContent() {
                 </div>
               </motion.div>
 
-              {/* Payment Instructions (for pending VA payments) */}
-              {transactionData.paymentStatus === "pending" && payment?.va_number && (
+              {/* Payment Instructions (for pending payments) */}
+              {transactionData.paymentStatus === "pending" && payment && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-white rounded-2xl shadow-xl border-2 border-orange-200 p-6 sm:p-8 mb-6"
+                  className="bg-gradient-to-br from-[#fdf8d4] to-white rounded-2xl shadow-xl border-2 border-[#a3af87]/30 p-6 sm:p-8 mb-6"
                 >
-                  <h2 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-[#435664] mb-4 flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
                     Instruksi Pembayaran
                   </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-orange-700 mb-1 font-medium">Bank</p>
-                      <p className="text-lg font-bold text-orange-900 uppercase">{payment.bank}</p>
+
+                  {/* VA Number (Bank Transfer) */}
+                  {payment.va_number && (
+                    <div className="space-y-4">
+                      <div className="text-center mb-4">
+                        <div className="inline-block px-4 py-2 bg-[#ebfba8]/30 border border-[#a3af87] rounded-xl">
+                          <p className="text-sm font-bold text-[#435664]">
+                            Bayar dengan {payment.bank?.toUpperCase() || 'Bank Transfer'}
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#5a6c5b] mb-1 font-medium">Bank</p>
+                        <p className="text-lg font-bold text-[#435664] uppercase">{payment.bank}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#5a6c5b] mb-1 font-medium">Nomor Virtual Account</p>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 px-4 py-3 bg-white border-2 border-[#a3af87]/30 rounded-xl text-lg font-mono font-bold text-[#435664]">
+                            {payment.va_number}
+                          </code>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(payment.va_number);
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            }}
+                            className="p-3 bg-[#a3af87]/20 border-2 border-[#a3af87]/30 rounded-xl hover:bg-[#a3af87]/30 transition-colors"
+                          >
+                            {copied ? (
+                              <Check className="h-5 w-5 text-green-600" />
+                            ) : (
+                              <Copy className="h-5 w-5 text-[#435664]" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#5a6c5b] mb-1 font-medium">Total Pembayaran</p>
+                        <p className="text-2xl font-bold text-[#435664]">
+                          Rp {transactionData.total.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                      {payment.expiry_time && (
+                        <div className="p-4 bg-[#ebfba8]/20 border-2 border-[#a3af87]/30 rounded-xl">
+                          <p className="text-sm text-[#5a6c5b] mb-1 font-medium flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Batas Waktu Pembayaran
+                          </p>
+                          <p className="font-bold text-[#435664]">
+                            {new Date(payment.expiry_time).toLocaleString("id-ID", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-sm text-orange-700 mb-1 font-medium">Nomor Virtual Account</p>
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 px-4 py-3 bg-orange-50 border-2 border-orange-200 rounded-xl text-lg font-mono font-bold text-orange-900">
-                          {payment.va_number}
-                        </code>
+                  )}
+
+                  {/* QRIS */}
+                  {payment.payment_type === "qris" && payment.midtrans_response?.actions && (
+                    <div className="space-y-4">
+                      <div className="text-center mb-4">
+                        <div className="inline-block px-4 py-2 bg-[#ebfba8]/30 border border-[#a3af87] rounded-xl">
+                          <p className="text-sm font-bold text-[#435664]">
+                            Bayar dengan QRIS
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <p className="text-sm text-[#5a6c5b] mb-3 font-medium">Scan QR Code untuk membayar</p>
+                        <div className="bg-white p-4 rounded-xl border-2 border-[#a3af87]/30 shadow-lg">
+                          <img
+                            src={payment.midtrans_response.actions.find((a: any) => a.name === "generate-qr-code")?.url}
+                            alt="QRIS Code"
+                            className="w-64 h-64 object-contain"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-[#5a6c5b] mb-1 font-medium">Total Pembayaran</p>
+                        <p className="text-2xl font-bold text-[#435664]">
+                          Rp {transactionData.total.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                      {payment.expiry_time && (
+                        <div className="p-4 bg-[#ebfba8]/20 border-2 border-[#a3af87]/30 rounded-xl">
+                          <p className="text-sm text-[#5a6c5b] mb-1 font-medium flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Batas Waktu Pembayaran
+                          </p>
+                          <p className="font-bold text-[#435664]">
+                            {new Date(payment.expiry_time).toLocaleString("id-ID", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* E-Wallet (GoPay, ShopeePay) */}
+                  {(payment.payment_type === "gopay" || payment.payment_type === "shopeepay") && payment.midtrans_response?.actions && (
+                    <div className="space-y-4">
+                      <div className="text-center mb-4">
+                        <div className="inline-block px-4 py-2 bg-[#ebfba8]/30 border border-[#a3af87] rounded-xl">
+                          <p className="text-sm font-bold text-[#435664]">
+                            Bayar dengan {payment.payment_type === "gopay" ? "GoPay" : "ShopeePay"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center gap-4">
+                        <p className="text-sm text-[#5a6c5b] font-medium text-center">
+                          {payment.payment_type === "gopay"
+                            ? "Scan QR Code dengan aplikasi Gojek/GoPay"
+                            : "Scan QR Code dengan aplikasi Shopee/ShopeePay"}
+                        </p>
+                        {payment.midtrans_response.actions.find((a: any) => a.name === "generate-qr-code") && (
+                          <div className="bg-white p-4 rounded-xl border-2 border-[#a3af87]/30 shadow-lg">
+                            <img
+                              src={payment.midtrans_response.actions.find((a: any) => a.name === "generate-qr-code")?.url}
+                              alt={`${payment.payment_type} QR Code`}
+                              className="w-64 h-64 object-contain"
+                            />
+                          </div>
+                        )}
+                        {payment.midtrans_response.actions.find((a: any) => a.name === "deeplink-redirect") && (
+                          <a
+                            href={payment.midtrans_response.actions.find((a: any) => a.name === "deeplink-redirect")?.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full px-6 py-3 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-xl font-bold text-center hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
+                          >
+                            Buka di Aplikasi {payment.payment_type === "gopay" ? "Gojek" : "Shopee"}
+                          </a>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-[#5a6c5b] mb-1 font-medium">Total Pembayaran</p>
+                        <p className="text-2xl font-bold text-[#435664]">
+                          Rp {transactionData.total.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                      {payment.expiry_time && (
+                        <div className="p-4 bg-[#ebfba8]/20 border-2 border-[#a3af87]/30 rounded-xl">
+                          <p className="text-sm text-[#5a6c5b] mb-1 font-medium flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Batas Waktu Pembayaran
+                          </p>
+                          <p className="font-bold text-[#435664]">
+                            {new Date(payment.expiry_time).toLocaleString("id-ID", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Fallback: If payment method not selected yet, show Snap button */}
+                  {!payment.payment_type &&
+                   payment.snap_token && (
+                    <div className="space-y-5">
+                      <div className="text-center">
+                        <p className="text-sm text-[#5a6c5b] mb-4 font-medium">
+                          Pilih metode pembayaran untuk melanjutkan transaksi
+                        </p>
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(payment.va_number);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
+                            // @ts-ignore
+                            if (window.snap) {
+                              // @ts-ignore
+                              window.snap.pay(payment.snap_token, {
+                                onSuccess: function() {
+                                  console.log("Payment success!");
+                                  setTimeout(() => {
+                                    window.location.reload();
+                                  }, 1000);
+                                },
+                                onPending: function() {
+                                  console.log("Payment pending, reloading to show payment details...");
+                                  setTimeout(() => {
+                                    window.location.reload();
+                                  }, 1000);
+                                },
+                                onError: function() {
+                                  console.log("Payment error");
+                                },
+                                onClose: function() {
+                                  console.log("Payment popup closed");
+                                  setTimeout(() => {
+                                    window.location.reload();
+                                  }, 500);
+                                }
+                              });
+                            } else {
+                              alert("Midtrans belum siap. Silakan refresh halaman.");
+                            }
                           }}
-                          className="p-3 bg-orange-100 border-2 border-orange-200 rounded-xl hover:bg-orange-200 transition-colors"
+                          className="w-full px-8 py-4 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
                         >
-                          {copied ? (
-                            <Check className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <Copy className="h-5 w-5 text-orange-600" />
-                          )}
+                          <CreditCard className="h-5 w-5" />
+                          Pilih Metode Pembayaran
                         </button>
+                        <div className="mt-3 flex flex-wrap justify-center gap-2">
+                          <span className="px-3 py-1 bg-[#fdf8d4] border border-[#a3af87]/30 rounded-full text-xs font-medium text-[#435664]">
+                            Bank Transfer
+                          </span>
+                          <span className="px-3 py-1 bg-[#fdf8d4] border border-[#a3af87]/30 rounded-full text-xs font-medium text-[#435664]">
+                            QRIS
+                          </span>
+                          <span className="px-3 py-1 bg-[#fdf8d4] border border-[#a3af87]/30 rounded-full text-xs font-medium text-[#435664]">
+                            GoPay
+                          </span>
+                          <span className="px-3 py-1 bg-[#fdf8d4] border border-[#a3af87]/30 rounded-full text-xs font-medium text-[#435664]">
+                            ShopeePay
+                          </span>
+                          <span className="px-3 py-1 bg-[#fdf8d4] border border-[#a3af87]/30 rounded-full text-xs font-medium text-[#435664]">
+                            Credit Card
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <p className="text-sm text-orange-700 mb-1 font-medium">Total Pembayaran</p>
-                      <p className="text-2xl font-bold text-orange-900">
-                        Rp {transactionData.total.toLocaleString("id-ID")}
-                      </p>
-                    </div>
-                    {payment.expiry_time && (
-                      <div className="p-4 bg-orange-50 border-2 border-orange-200 rounded-xl">
-                        <p className="text-sm text-orange-700 mb-1 font-medium flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          Batas Waktu Pembayaran
-                        </p>
-                        <p className="font-bold text-orange-900">
-                          {new Date(payment.expiry_time).toLocaleString("id-ID", {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })}
+                      <div className="text-center p-4 bg-[#ebfba8]/20 border border-[#a3af87]/30 rounded-xl">
+                        <p className="text-sm text-[#5a6c5b] mb-1 font-medium">Total Pembayaran</p>
+                        <p className="text-3xl font-bold text-[#435664]">
+                          Rp {transactionData.total.toLocaleString("id-ID")}
                         </p>
                       </div>
-                    )}
-                  </div>
+                      {payment.expiry_time && (
+                        <div className="p-4 bg-[#ebfba8]/20 border-2 border-[#a3af87]/30 rounded-xl">
+                          <p className="text-sm text-[#5a6c5b] mb-1 font-medium flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Batas Waktu Pembayaran
+                          </p>
+                          <p className="font-bold text-[#435664]">
+                            {new Date(payment.expiry_time).toLocaleString("id-ID", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               )}
 

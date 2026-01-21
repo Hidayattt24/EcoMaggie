@@ -22,6 +22,7 @@ import {
   Headphones,
   BadgeCheck,
   Leaf,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -32,6 +33,7 @@ import { createPaymentTransaction } from "@/lib/api/payment.actions";
 import { snapClient } from "@/lib/midtrans/snap-client";
 import AddressFormFields from "@/components/auth/AddressFormFields";
 import { CheckoutSkeleton } from "@/components/checkout/CheckoutSkeleton";
+import LocationPicker from "@/components/supply/LocationPicker";
 
 // Types
 interface Address {
@@ -85,6 +87,11 @@ function CheckoutContent() {
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState<string | null>(null);
 
+  // Delivery Location States (for Eco-Maggie Delivery)
+  const [deliveryLatitude, setDeliveryLatitude] = useState<number | null>(null);
+  const [deliveryLongitude, setDeliveryLongitude] = useState<number | null>(null);
+  const [deliveryLocationAddress, setDeliveryLocationAddress] = useState<string>("");
+
   // Inline Form States
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -98,6 +105,23 @@ function CheckoutContent() {
     fullAddress: "",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Handler for location selection
+  const handleLocationSelect = (lat: number, lng: number, address: string) => {
+    console.log("🗺️ [Checkout] Location selected:", { lat, lng, address });
+    setDeliveryLatitude(lat);
+    setDeliveryLongitude(lng);
+    setDeliveryLocationAddress(address);
+  };
+
+  // Clear delivery location when shipping method changes
+  useEffect(() => {
+    if (selectedShipping !== "ecomaggie-delivery") {
+      setDeliveryLatitude(null);
+      setDeliveryLongitude(null);
+      setDeliveryLocationAddress("");
+    }
+  }, [selectedShipping]);
 
   // Fetch addresses and checkout data on mount
   useEffect(() => {
@@ -357,7 +381,9 @@ function CheckoutContent() {
   ];
 
   const canProceedToStep2 = selectedAddress !== null;
-  const canProceedToStep3 = selectedShipping !== "";
+  const canProceedToStep3 =
+    selectedShipping !== "" &&
+    (selectedShipping !== "ecomaggie-delivery" || (deliveryLatitude !== null && deliveryLongitude !== null));
   const canCompleteOrder = selectedPayment !== "";
 
   const handleNextStep = () => {
@@ -408,9 +434,17 @@ function CheckoutContent() {
         shippingCost,
         serviceFee,
         total,
+        // Delivery location for Eco-Maggie delivery
+        deliveryLatitude: selectedShipping === "ecomaggie-delivery" ? deliveryLatitude : undefined,
+        deliveryLongitude: selectedShipping === "ecomaggie-delivery" ? deliveryLongitude : undefined,
       };
 
       console.log("📦 Payment data:", paymentData);
+      console.log("🗺️ [Checkout] Delivery coordinates being sent:", {
+        deliveryLatitude: paymentData.deliveryLatitude,
+        deliveryLongitude: paymentData.deliveryLongitude,
+        shippingMethod: paymentData.shippingMethod.name,
+      });
 
       // Create payment transaction and get Snap token
       const result = await createPaymentTransaction(paymentData);
@@ -980,6 +1014,64 @@ function CheckoutContent() {
                         </div>
                       )}
                     </div>
+                  )}
+
+                  {/* Location Picker for Eco-Maggie Delivery */}
+                  {(() => {
+                    console.log("🗺️ [Checkout] LocationPicker Render Check:", {
+                      selectedShipping,
+                      isEcomaggie: selectedShipping === "ecomaggie-delivery",
+                      isLoadingShipping,
+                      shouldRender: selectedShipping === "ecomaggie-delivery" && !isLoadingShipping,
+                    });
+                    return null;
+                  })()}
+                  {selectedShipping === "ecomaggie-delivery" && !isLoadingShipping && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-6"
+                    >
+                      <div className="p-6 bg-gradient-to-br from-[#fdf8d4] to-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-2xl mb-6">
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="p-2 bg-[#a3af87] rounded-xl">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-[#435664] text-lg mb-1">
+                              Tandai Titik Lokasi di Peta
+                            </h3>
+                            <p className="text-sm text-[#435664]/80 font-medium">
+                              Untuk memudahkan driver menemukan lokasi Anda, mohon tandai titik presisi pengantaran di peta
+                            </p>
+                          </div>
+                        </div>
+
+                        <LocationPicker
+                          onLocationSelect={handleLocationSelect}
+                          initialLat={deliveryLatitude || undefined}
+                          initialLng={deliveryLongitude || undefined}
+                          defaultAddress={selectedAddress?.streetAddress}
+                        />
+
+                        {!deliveryLatitude && !deliveryLongitude && (
+                          <div className="mt-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
+                            <div className="flex items-start gap-3">
+                              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-sm font-bold text-amber-900 mb-1">
+                                  Lokasi Diperlukan
+                                </p>
+                                <p className="text-xs text-amber-700">
+                                  Silakan tandai titik lokasi di peta untuk melanjutkan. Driver memerlukan koordinat presisi untuk pengiriman.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">

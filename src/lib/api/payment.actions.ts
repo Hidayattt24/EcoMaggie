@@ -54,6 +54,9 @@ export interface CreatePaymentData {
   shippingCost: number;
   serviceFee: number;
   total: number;
+  // Delivery location coordinates for Eco-Maggie delivery
+  deliveryLatitude?: number | null;
+  deliveryLongitude?: number | null;
 }
 
 export interface PaymentResponse {
@@ -155,6 +158,15 @@ export async function createPaymentTransaction(
     const orderId = generateOrderId();
     console.log(`📋 Order ID: ${orderId}`);
 
+    // Log delivery coordinates if present
+    if (paymentData.deliveryLatitude && paymentData.deliveryLongitude) {
+      console.log(`🗺️ [createPaymentTransaction] Delivery coordinates detected:`, {
+        lat: paymentData.deliveryLatitude,
+        lng: paymentData.deliveryLongitude,
+        shippingMethod: paymentData.shippingMethod.name,
+      });
+    }
+
     // 3. Create transaction record in database
     const { data: transaction, error: transactionError } = await supabase
       .from("transactions")
@@ -176,6 +188,14 @@ export async function createPaymentTransaction(
         customer_phone: paymentData.shippingAddress.recipientPhone,
         customer_address: `${paymentData.shippingAddress.streetAddress}, ${paymentData.shippingAddress.district || ""}, ${paymentData.shippingAddress.village || ""}, ${paymentData.shippingAddress.city}, ${paymentData.shippingAddress.province} ${paymentData.shippingAddress.postalCode}`,
         expired_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+        // Store delivery location coordinates directly in columns
+        delivery_latitude: paymentData.deliveryLatitude || null,
+        delivery_longitude: paymentData.deliveryLongitude || null,
+        // Also store in metadata for backward compatibility
+        metadata: paymentData.deliveryLatitude && paymentData.deliveryLongitude ? {
+          deliveryLatitude: paymentData.deliveryLatitude,
+          deliveryLongitude: paymentData.deliveryLongitude,
+        } : undefined,
       })
       .select()
       .single();
@@ -563,10 +583,18 @@ export async function handlePaymentNotification(
     console.log(`   - New payment status: ${paymentStatus}`);
 
     // 5. Update transaction status
+    // IMPORTANT: Merge metadata to preserve delivery coordinates
+    const existingMetadata = transaction.metadata || {};
+    const mergedMetadata = {
+      ...existingMetadata, // Preserve existing data (e.g., deliveryLatitude, deliveryLongitude)
+      payment: notificationData, // Store Midtrans response under 'payment' key
+      lastUpdated: new Date().toISOString(),
+    };
+
     const updateData: any = {
       status: newStatus,
       updated_at: new Date().toISOString(),
-      metadata: notificationData, // Store raw Midtrans response
+      metadata: mergedMetadata, // Merge instead of replace
     };
 
     if (newStatus === "paid") {

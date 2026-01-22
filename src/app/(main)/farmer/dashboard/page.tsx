@@ -8,6 +8,7 @@ import {
   Truck,
   CalendarDays,
   Recycle,
+  RefreshCw,
 } from "lucide-react";
 import StatsTile from "@/components/farmer/dashboard/StatsTile";
 import SalesChart from "@/components/farmer/dashboard/SalesChart";
@@ -15,37 +16,13 @@ import ImpactTile from "@/components/farmer/dashboard/ImpactTile";
 import TopProducts from "@/components/farmer/dashboard/TopProducts";
 import OperationalAlerts from "@/components/farmer/dashboard/OperationalAlerts";
 import NotificationDropdown from "@/components/farmer/dashboard/NotificationDropdown";
-import { getFarmerDashboardStats } from "@/lib/api/farmer-dashboard.actions";
-import type { DashboardStats } from "@/lib/api/farmer-dashboard.actions";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 export default function FarmerDashboard() {
   const [currentDate, setCurrentDate] = useState<string>("");
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
-    totalSales: 0,
-    totalSalesLastMonth: 0,
-    salesGrowthPercentage: 0,
-    newOrders: 0,
-    needsShipping: 0,
-    pendingPickup: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch dashboard stats
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        setIsLoading(true);
-        const stats = await getFarmerDashboardStats();
-        setDashboardStats(stats);
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchStats();
-  }, []);
+  // Use SWR hook for caching - INI YANG MENGURANGI EGRESS!
+  const { stats: dashboardStats, isLoading, refresh } = useDashboardStats();
 
   // Handle hydration for date
   useEffect(() => {
@@ -80,6 +57,14 @@ export default function FarmerDashboard() {
               <CalendarDays className="h-4 w-4" />
               <span>{currentDate || "Loading..."}</span>
             </div>
+            {/* Manual Refresh Button */}
+            <button
+              onClick={() => refresh()}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Refresh Data"
+            >
+              <RefreshCw className="h-4 w-4 text-gray-500" />
+            </button>
             {/* Notification Dropdown */}
             <NotificationDropdown />
           </div>

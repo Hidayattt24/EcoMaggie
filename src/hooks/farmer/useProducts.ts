@@ -2,9 +2,11 @@
  * Product Hooks for Farmer Dashboard
  * ===========================================
  * Custom hooks for managing product state and data fetching
+ * OPTIMIZED WITH SWR CACHING
  */
 
 import { useState, useEffect, useCallback } from "react";
+import useSWR from "swr";
 import {
   getMyProducts,
   getProductAnalytics,
@@ -20,47 +22,37 @@ import {
   type SalesTrendSummary,
   type ProductRevenueStats,
 } from "@/lib/api/product.actions";
+import { adminSWRConfig, staticSWRConfig } from "@/lib/swr/config";
 
 // ===========================================
-// USE PRODUCTS HOOK
+// USE PRODUCTS HOOK - OPTIMIZED WITH SWR
 // ===========================================
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  const { data, error, isLoading, mutate } = useSWR(
+    "farmer-products",
+    async () => {
       const result = await getMyProducts();
-
       if (result.success && result.data) {
-        setProducts(result.data);
-      } else {
-        setError(result.message);
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil data produk");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+      throw new Error(result.message || "Gagal mengambil data produk");
+    },
+    adminSWRConfig
+  );
 
   const handleDelete = async (slug: string, productName: string) => {
     try {
       const result = await deleteProduct(slug);
 
       if (result.success) {
-        // Remove from local state
-        setProducts((prev) => prev.filter((p) => p.slug !== slug));
+        // Optimistically update cache
+        mutate(
+          (currentData) => currentData?.filter((p) => p.slug !== slug),
+          false
+        );
+        // Revalidate from server
+        mutate();
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.message };
@@ -72,134 +64,86 @@ export function useProducts() {
   };
 
   return {
-    products,
-    loading,
-    error,
-    refetch: fetchProducts,
+    products: data || [],
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
     handleDelete,
   };
 }
 
 // ===========================================
-// USE PRODUCT ANALYTICS HOOK
+// USE PRODUCT ANALYTICS HOOK - OPTIMIZED WITH SWR
 // ===========================================
 
 export function useProductAnalytics() {
-  const [analytics, setAnalytics] = useState<ProductAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchAnalytics = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  const { data, error, isLoading, mutate } = useSWR(
+    "farmer-product-analytics",
+    async () => {
       const result = await getProductAnalytics();
-
       if (result.success && result.data) {
-        setAnalytics(result.data);
-      } else {
-        setError(result.message);
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil data analytics");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+      throw new Error(result.message || "Gagal mengambil data analytics");
+    },
+    adminSWRConfig
+  );
 
   return {
-    analytics,
-    loading,
-    error,
-    refetch: fetchAnalytics,
+    analytics: data || null,
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
   };
 }
 
 // ===========================================
-// USE TOP PRODUCTS HOOK
+// USE TOP PRODUCTS HOOK - OPTIMIZED WITH SWR
 // ===========================================
 
 export function useTopProducts(limit: number = 3) {
-  const [topProducts, setTopProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchTopProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  const { data, error, isLoading, mutate } = useSWR(
+    `farmer-top-products-${limit}`,
+    async () => {
       const result = await getTopProducts(limit);
-
       if (result.success && result.data) {
-        setTopProducts(result.data);
-      } else {
-        setError(result.message);
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil produk terlaris");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [limit]);
-
-  useEffect(() => {
-    fetchTopProducts();
-  }, [fetchTopProducts]);
+      throw new Error(result.message || "Gagal mengambil produk terlaris");
+    },
+    adminSWRConfig
+  );
 
   return {
-    topProducts,
-    loading,
-    error,
-    refetch: fetchTopProducts,
+    topProducts: data || [],
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
   };
 }
 
 // ===========================================
-// USE LOW STOCK PRODUCTS HOOK
+// USE LOW STOCK PRODUCTS HOOK - OPTIMIZED WITH SWR
 // ===========================================
 
 export function useLowStockProducts() {
-  const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchLowStockProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  const { data, error, isLoading, mutate } = useSWR(
+    "farmer-low-stock-products",
+    async () => {
       const result = await getLowStockProducts();
-
       if (result.success && result.data) {
-        setLowStockProducts(result.data);
-      } else {
-        setError(result.message);
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil produk stok rendah");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchLowStockProducts();
-  }, [fetchLowStockProducts]);
+      throw new Error(result.message || "Gagal mengambil produk stok rendah");
+    },
+    adminSWRConfig
+  );
 
   return {
-    lowStockProducts,
-    loading,
-    error,
-    refetch: fetchLowStockProducts,
+    lowStockProducts: data || [],
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
   };
 }
 

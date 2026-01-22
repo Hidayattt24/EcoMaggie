@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import "./toast-animations.css";
 import StructuredData from "@/components/StructuredData";
+import { SWRProvider } from "@/lib/swr/provider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -173,7 +174,9 @@ export default function RootLayout({
         <StructuredData />
       </head>
       <body className={`${poppins.variable} font-sans antialiased`}>
-        {children}
+        <SWRProvider>
+          {children}
+        </SWRProvider>
       </body>
     </html>
   );

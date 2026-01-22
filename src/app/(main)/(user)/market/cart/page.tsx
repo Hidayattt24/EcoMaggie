@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart,
@@ -13,79 +13,54 @@ import {
   Tag,
   ChevronRight,
   ArrowLeft,
+  RefreshCw,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  getCartItems,
   updateCartItemQuantity,
   removeFromCart,
   type Cart,
   type CartItem,
 } from "@/lib/api/cart.actions";
-import { getFeaturedProducts } from "@/lib/api/product.actions";
 import { CartItemSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/hooks/useToast";
 import Toast from "@/components/ui/Toast";
 import Swal from "sweetalert2";
+import { useUserCart, useFeaturedProducts } from "@/hooks/useUserCart";
 
 export default function CartPage() {
   const router = useRouter();
   const { toast, success, error: showError, hideToast } = useToast();
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
 
-  // Fetch cart data
-  const fetchCart = async () => {
-    try {
-      const result = await getCartItems();
-      if (result.success && result.data) {
-        setCart(result.data);
-        // Auto select all items by default
-        setSelectedItems(result.data.items.map((item) => item.id));
-      } else if (result.error === "Unauthorized") {
-        Swal.fire({
-          icon: "warning",
-          title: "Login Diperlukan",
-          text: "Silakan login untuk melihat keranjang",
-          confirmButtonColor: "#A3AF87",
-        }).then(() => {
-          router.push("/auth/sign-in");
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Memuat Keranjang",
-        text: "Terjadi kesalahan saat memuat keranjang",
-        confirmButtonColor: "#A3AF87",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use SWR hooks for caching - INI YANG MENGURANGI EGRESS!
+  const { cart, isLoading, error: cartError, refresh } = useUserCart();
+  const { products: recommendedProducts } = useFeaturedProducts(8);
 
+  // Auto-select all items when cart loads
   useEffect(() => {
-    fetchCart();
-    fetchRecommendedProducts();
-  }, []);
-
-  const fetchRecommendedProducts = async () => {
-    try {
-      const result = await getFeaturedProducts(8);
-      if (result.success && result.data) {
-        setRecommendedProducts(result.data);
-      }
-    } catch (error) {
-      console.error("Error fetching recommended products:", error);
+    if (cart && cart.items.length > 0) {
+      setSelectedItems(cart.items.map((item) => item.id));
     }
-  };
+  }, [cart]);
+
+  // Handle unauthorized
+  useEffect(() => {
+    if (cartError === "Unauthorized") {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Diperlukan",
+        text: "Silakan login untuk melihat keranjang",
+        confirmButtonColor: "#A3AF87",
+      }).then(() => {
+        router.push("/auth/sign-in");
+      });
+    }
+  }, [cartError, router]);
 
   const toggleSelectAll = () => {
     if (!cart) return;
@@ -112,15 +87,8 @@ export default function CartPage() {
       const result = await updateCartItemQuantity(itemId, newQuantity);
 
       if (result.success) {
-        // Update local state optimistically
-        if (cart) {
-          setCart({
-            ...cart,
-            items: cart.items.map((item) =>
-              item.id === itemId ? { ...item, quantity: newQuantity } : item
-            ),
-          });
-        }
+        // Refresh cart cache from SWR
+        refresh();
 
         // Show success feedback with Toast
         success(
@@ -133,7 +101,7 @@ export default function CartPage() {
           result.message || "Gagal memperbarui jumlah produk"
         );
         // Refresh cart to get accurate data
-        fetchCart();
+        refresh();
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -180,21 +148,8 @@ export default function CartPage() {
       const response = await removeFromCart(itemId);
 
       if (response.success) {
-        // Update local state with animation
-        if (cart) {
-          setCart({
-            ...cart,
-            items: cart.items.filter((item) => item.id !== itemId),
-            totalItems:
-              cart.totalItems -
-              (cart.items.find((i) => i.id === itemId)?.quantity || 0),
-            totalPrice:
-              cart.totalPrice -
-              (cart.items.find((i) => i.id === itemId)?.product?.finalPrice ||
-                0) *
-                (cart.items.find((i) => i.id === itemId)?.quantity || 0),
-          });
-        }
+        // Refresh cart cache from SWR
+        refresh();
 
         // Remove from selected items
         setSelectedItems(selectedItems.filter((id) => id !== itemId));

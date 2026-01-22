@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -17,7 +17,6 @@ import {
   Download,
   CheckCircle2,
 } from "lucide-react";
-import { getFarmerOrders } from "@/lib/api/orders.actions";
 import type { Order as DbOrder } from "@/lib/api/orders.actions";
 import { CancelOrderModal } from "@/components/farmer/orders/CancelOrderModal";
 import { StatsTile } from "@/components/farmer/orders/StatsTile";
@@ -29,6 +28,7 @@ import {
   TableRowSkeleton,
 } from "@/components/farmer/orders/SkeletonComponents";
 import { exportOrdersToExcel, type OrderExportData } from "@/utils/exportExcel";
+import { useFarmerOrders } from "@/hooks/useFarmerOrders";
 
 // ============================================
 // TYPES
@@ -150,37 +150,24 @@ export default function FarmerOrdersPage() {
   const [sortBy, setSortBy] = useState<"date" | "price">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  // Data states
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Cancel modal state
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedOrderForCancel, setSelectedOrderForCancel] =
     useState<Order | null>(null);
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  // Use SWR hook for caching - INI YANG MENGURANGI EGRESS!
+  const {
+    orders: rawOrders,
+    isLoading,
+    error,
+    refresh,
+  } = useFarmerOrders();
 
-  const loadOrders = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await getFarmerOrders();
-      if (result.success && result.data) {
-        setOrders(result.data.map(transformDbOrderToOrder));
-      } else {
-        setError(result.message || "Gagal memuat pesanan");
-      }
-    } catch (err) {
-      console.error("Error loading orders:", err);
-      setError("Terjadi kesalahan saat memuat pesanan");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Transform DB orders to display format
+  const orders = useMemo(
+    () => rawOrders.map(transformDbOrderToOrder),
+    [rawOrders]
+  );
 
   const handleOpenCancelModal = useCallback(
     (order: Order, e: React.MouseEvent) => {
@@ -343,9 +330,9 @@ export default function FarmerOrdersPage() {
           <h2 className="text-2xl font-bold text-[#303646] mb-2">
             Gagal Memuat Pesanan
           </h2>
-          <p className="text-gray-500 mb-6">{error}</p>
+          <p className="text-gray-500 mb-6">{typeof error === "string" ? error : "Terjadi kesalahan"}</p>
           <button
-            onClick={loadOrders}
+            onClick={() => refresh()}
             className="px-6 py-3 bg-[#a3af87] text-white rounded-xl font-bold hover:bg-[#435664] transition-colors"
           >
             Coba Lagi
@@ -387,9 +374,10 @@ export default function FarmerOrdersPage() {
                   </span>
                 </button>
                 <button
-                  onClick={loadOrders}
+                  onClick={() => refresh()}
                   disabled={isLoading}
                   className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 border-2 border-[#a3af87]/30 rounded-xl hover:border-[#a3af87] transition-colors disabled:opacity-50"
+                  title="Refresh Data"
                 >
                   <RefreshCw
                     className={`h-4 w-4 text-[#435664] ${isLoading ? "animate-spin" : ""}`}
@@ -651,7 +639,7 @@ export default function FarmerOrdersPage() {
           setCancelModalOpen(false);
           setSelectedOrderForCancel(null);
         }}
-        onSuccess={loadOrders}
+        onSuccess={() => refresh()}
         orderId={selectedOrderForCancel?.orderId || ""}
         customerName={selectedOrderForCancel?.customer.name || ""}
         customerPhone={selectedOrderForCancel?.customer.phone}

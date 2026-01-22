@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
@@ -10,16 +10,17 @@ import {
   Star,
   TrendingUp,
   ArrowLeft,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  getUserWishlist,
   removeFromWishlist,
   type WishlistItem,
 } from "@/lib/api/product.actions";
 import Swal from "sweetalert2";
 import { ProductCardSkeleton } from "@/components/ui/Skeleton";
+import { useUserWishlist } from "@/hooks/useUserWishlist";
 
 // Category display names mapping
 const categoryDisplayNames: Record<string, string> = {
@@ -34,41 +35,28 @@ const categoryDisplayNames: Record<string, string> = {
 
 export default function WishlistPage() {
   const router = useRouter();
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  // Fetch wishlist data
-  const fetchWishlist = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const result = await getUserWishlist();
-      if (result.success && result.data) {
-        setWishlistItems(result.data.items);
-      } else if (result.error === "UNAUTHORIZED") {
-        Swal.fire({
-          icon: "warning",
-          title: "Login Diperlukan",
-          text: "Silakan login untuk melihat wishlist Anda",
-          confirmButtonColor: "#A3AF87",
-          confirmButtonText: "Login",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push("/login");
-          }
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching wishlist:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
+  // Use SWR hook for caching - INI YANG MENGURANGI EGRESS!
+  const { wishlistItems, isLoading, error, refresh } = useUserWishlist();
 
+  // Handle unauthorized
   useEffect(() => {
-    fetchWishlist();
-  }, [fetchWishlist]);
+    if (error === "UNAUTHORIZED") {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Diperlukan",
+        text: "Silakan login untuk melihat wishlist Anda",
+        confirmButtonColor: "#A3AF87",
+        confirmButtonText: "Login",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/login");
+        }
+      });
+    }
+  }, [error, router]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
     const item = wishlistItems.find((i) => i.productId === productId);
@@ -102,9 +90,9 @@ export default function WishlistPage() {
     try {
       const response = await removeFromWishlist(productId);
       if (response.success) {
-        setWishlistItems((prev) =>
-          prev.filter((i) => i.productId !== productId),
-        );
+        // Refresh wishlist cache from SWR
+        refresh();
+
         setSelectedItems((prev) => prev.filter((id) => id !== productId));
         Swal.fire({
           icon: "success",
@@ -307,6 +295,13 @@ export default function WishlistPage() {
                   {wishlistItems.length} produk tersimpan
                 </p>
               </div>
+              <button
+                onClick={() => refresh()}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Refresh Wishlist"
+              >
+                <RefreshCw className={`h-5 w-5 text-[#435664] ${isLoading ? "animate-spin" : ""}`} />
+              </button>
             </div>
 
             {wishlistItems.length > 0 && (

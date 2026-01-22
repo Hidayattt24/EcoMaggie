@@ -24,13 +24,13 @@ import {
   PackageX,
   Loader2,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import {
-  getFarmerSupplyOrders,
-  getSupplyDailyTrend,
   type SupplyWithUser,
 } from "@/lib/api/farmer-supply.actions";
 import { exportSupplyToExcel, type SupplyExportData } from "@/utils/exportExcel";
+import { useSupplyOrders, useSupplyTrend } from "@/hooks/useSupplyMonitoring";
 
 // Mock data - Real-time supply dari masyarakat
 const mockSupplyData = [
@@ -437,8 +437,6 @@ const statusConfig = {
 };
 
 export default function SupplyMonitoringPage() {
-  const [supplies, setSupplies] = useState<SupplyWithUser[]>([]);
-  const [isLoadingSupplies, setIsLoadingSupplies] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(0); // Default 7 days
@@ -448,60 +446,27 @@ export default function SupplyMonitoringPage() {
     null
   );
   const [mounted, setMounted] = useState(false);
-  const [trendData, setTrendData] = useState<any[]>([]);
-  const [growthPercentage, setGrowthPercentage] = useState<number>(0);
-  const [isLoadingTrend, setIsLoadingTrend] = useState(true);
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch supplies data
-  useEffect(() => {
-    async function fetchSupplies() {
-      setIsLoadingSupplies(true);
-      try {
-        const response = await getFarmerSupplyOrders();
-        if (response.success && response.data) {
-          setSupplies(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching supplies:", error);
-      } finally {
-        setIsLoadingSupplies(false);
-      }
-    }
-    fetchSupplies();
-  }, []);
+  // Use SWR hooks for caching - INI YANG MENGURANGI EGRESS!
+  const {
+    supplies,
+    isLoading: isLoadingSupplies,
+    refresh: refreshSupplies,
+  } = useSupplyOrders();
 
-  // Fetch trend data - OPTIMIZED: Re-fetch when date range changes
-  useEffect(() => {
-    async function fetchTrend() {
-      setIsLoadingTrend(true);
-      try {
-        let response;
-        if (useCustomRange && customRange.start && customRange.end) {
-          // Use custom date range
-          response = await getSupplyDailyTrend(undefined, customRange.start, customRange.end);
-        } else {
-          // Use preset days
-          const days = datePresets[selectedPreset].days;
-          response = await getSupplyDailyTrend(days);
-        }
-
-        if (response.success && response.data) {
-          setTrendData(response.data.data);
-          setGrowthPercentage(response.data.growthPercentage);
-        }
-      } catch (error) {
-        console.error("Error fetching trend:", error);
-        setTrendData([]);
-        setGrowthPercentage(0);
-      } finally {
-        setIsLoadingTrend(false);
-      }
-    }
-    fetchTrend();
-  }, [selectedPreset, useCustomRange, customRange.start, customRange.end]); // Re-fetch when filter changes
+  const {
+    trendData,
+    growthPercentage,
+    isLoading: isLoadingTrend,
+    refresh: refreshTrend,
+  } = useSupplyTrend(
+    useCustomRange ? undefined : datePresets[selectedPreset].days,
+    useCustomRange ? customRange.start : undefined,
+    useCustomRange ? customRange.end : undefined
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -689,6 +654,17 @@ export default function SupplyMonitoringPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  refreshSupplies();
+                  refreshTrend();
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-[#a3af87]/30 rounded-xl hover:bg-[#fdf8d4]/30 transition-colors"
+                title="Refresh Data"
+              >
+                <RefreshCw className="h-4 w-4 text-[#a3af87]" />
+                <span className="text-sm font-medium text-[#435664] hidden sm:inline">Refresh</span>
+              </button>
               <button
                 onClick={handleExportExcel}
                 disabled={isLoadingSupplies || filteredSupplies.length === 0}

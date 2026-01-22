@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import ProductCard, { Product } from "@/components/user/market/ProductCard";
 import FilterSidebar from "@/components/user/market/FilterSidebar";
@@ -8,16 +8,18 @@ import ProductsHeader from "@/components/user/market/ProductsHeader";
 import Pagination from "@/components/user/market/Pagination";
 import { ProductCardSkeleton } from "@/components/ui/Skeleton";
 import {
-  getMarketProducts,
-  getProductCategories,
-  getUserWishlistIds,
   toggleWishlist,
   MarketProduct,
   MarketProductFilters,
-  CategoryCount,
 } from "@/lib/api/product.actions";
 import { getCartProductIds } from "@/lib/api/cart.actions";
 import Swal from "sweetalert2";
+import {
+  useMarketProducts,
+  useProductCategories,
+  useWishlist,
+  useCartProducts,
+} from "@/hooks/useMarketProducts";
 
 // Category mapping for display names
 const categoryDisplayNames: Record<string, string> = {
@@ -54,21 +56,12 @@ function transformToCardProduct(product: MarketProduct): Product {
 }
 
 export default function MarketProductsPage() {
-  // State for products data
-  const [products, setProducts] = useState<Product[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sortBy, setSortBy] = useState("newest");
-  const [wishlist, setWishlist] = useState<string[]>([]);
-  const [cartProductIds, setCartProductIds] = useState<string[]>([]);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState<string | null>(
     null,
   );
@@ -85,108 +78,57 @@ export default function MarketProductsPage() {
     popular: "best_seller",
   };
 
-  // Fetch categories on mount
-  useEffect(() => {
-    async function fetchCategories() {
-      const result = await getProductCategories();
-      if (result.success && result.data) {
-        const categoryNames = result.data.map((c: CategoryCount) => c.category);
-        setCategories(categoryNames);
-      }
+  // Build filters for SWR - memoized to avoid unnecessary refetches
+  const filters = useMemo<MarketProductFilters>(() => {
+    const f: MarketProductFilters = {
+      page: currentPage,
+      limit: itemsPerPage,
+      sortBy: sortMapping[sortBy] || "newest",
+    };
+
+    if (selectedCategories.length > 0) {
+      f.category = selectedCategories[0];
     }
-    fetchCategories();
-  }, []);
 
-  // Fetch user's wishlist on mount
-  useEffect(() => {
-    async function fetchWishlist() {
-      const result = await getUserWishlistIds();
-      if (result.success && result.data) {
-        setWishlist(result.data.productIds);
-      }
+    if (minPrice > 0) {
+      f.minPrice = minPrice;
     }
-    fetchWishlist();
-  }, []);
 
-  // Fetch user's cart product IDs on mount
-  useEffect(() => {
-    async function fetchCartProductIds() {
-      const result = await getCartProductIds();
-      if (result.success && result.data) {
-        setCartProductIds(result.data);
-      }
+    if (maxPrice < 500000) {
+      f.maxPrice = maxPrice;
     }
-    fetchCartProductIds();
-  }, []);
 
-  // Fetch products when filters change
-  const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const filters: MarketProductFilters = {
-        page: currentPage,
-        limit: itemsPerPage,
-        sortBy: sortMapping[sortBy] || "newest",
-      };
-
-      // Apply category filter (only first selected category for now)
-      if (selectedCategories.length > 0) {
-        filters.category = selectedCategories[0];
-      }
-
-      // Apply price filters
-      if (minPrice > 0) {
-        filters.minPrice = minPrice;
-      }
-      if (maxPrice < 500000) {
-        filters.maxPrice = maxPrice;
-      }
-
-      // Apply search
-      if (searchQuery.trim()) {
-        filters.search = searchQuery.trim();
-      }
-
-      const result = await getMarketProducts(filters);
-
-      if (result.success && result.data) {
-        const transformedProducts = result.data.products.map(
-          transformToCardProduct,
-        );
-        setProducts(transformedProducts);
-        setTotalProducts(result.data.total);
-      } else {
-        setError(result.message || "Gagal mengambil data produk");
-        setProducts([]);
-        setTotalProducts(0);
-      }
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      setError("Terjadi kesalahan saat mengambil data produk");
-      setProducts([]);
-      setTotalProducts(0);
-    } finally {
-      setIsLoading(false);
+    if (searchQuery.trim()) {
+      f.search = searchQuery.trim();
     }
-  }, [
-    currentPage,
-    sortBy,
-    selectedCategories,
-    minPrice,
-    maxPrice,
-    searchQuery,
-  ]);
 
-  // Debounce search to avoid too many API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchProducts();
-    }, 300);
+    return f;
+  }, [currentPage, sortBy, selectedCategories, minPrice, maxPrice, searchQuery]);
 
-    return () => clearTimeout(timer);
-  }, [fetchProducts]);
+  // Use SWR hooks for caching - INI YANG MENGURANGI EGRESS!
+  const {
+    products: rawProducts,
+    total: totalProducts,
+    isLoading,
+    error,
+    refresh: refreshProducts,
+  } = useMarketProducts(filters);
+
+  const { categories: rawCategories } = useProductCategories();
+  const { wishlistIds, refresh: refreshWishlist } = useWishlist();
+  const { cartProductIds, refresh: refreshCart } = useCartProducts();
+
+  // Transform products
+  const products = useMemo(
+    () => rawProducts.map(transformToCardProduct),
+    [rawProducts]
+  );
+
+  // Transform categories
+  const categories = useMemo(
+    () => rawCategories.map((c) => c.category),
+    [rawCategories]
+  );
 
   // Reset page when filters change
   useEffect(() => {
@@ -209,13 +151,8 @@ export default function MarketProductsPage() {
       const result = await toggleWishlist(productIdStr);
 
       if (result.success && result.data) {
-        if (result.data.isWishlisted) {
-          setWishlist((prev) => [...prev, productIdStr]);
-          // Removed toast notification for wishlist
-        } else {
-          setWishlist((prev) => prev.filter((id) => id !== productIdStr));
-          // Removed toast notification for wishlist
-        }
+        // Refresh wishlist cache from SWR
+        refreshWishlist();
       } else if (result.error === "UNAUTHORIZED") {
         Swal.fire({
           icon: "warning",
@@ -470,10 +407,10 @@ export default function MarketProductsPage() {
                   Terjadi Kesalahan
                 </h3>
                 <p className="text-sm mb-4" style={{ color: "#435664" }}>
-                  {error}
+                  {typeof error === "string" ? error : "Terjadi kesalahan"}
                 </p>
                 <button
-                  onClick={() => fetchProducts()}
+                  onClick={() => refreshProducts()}
                   className="px-4 py-2 text-white rounded-lg font-semibold text-sm"
                   style={{ backgroundColor: "#A3AF87" }}
                 >
@@ -489,16 +426,12 @@ export default function MarketProductsPage() {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    wishlist={wishlist}
+                    wishlist={wishlistIds}
                     onToggleWishlist={handleToggleWishlist}
                     isInCart={cartProductIds.includes(product.id.toString())}
                     onAddToCart={() => {
-                      // Refresh cart product IDs after adding to cart
-                      getCartProductIds().then((result) => {
-                        if (result.success && result.data) {
-                          setCartProductIds(result.data);
-                        }
-                      });
+                      // Refresh cart cache from SWR
+                      refreshCart();
                     }}
                   />
                 ))}

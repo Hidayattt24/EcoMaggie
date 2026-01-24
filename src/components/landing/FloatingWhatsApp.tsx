@@ -19,7 +19,8 @@ export default function FloatingWhatsApp() {
       <button
         onClick={handleClick}
         className="hidden lg:block fixed bottom-6 right-6 z-40 group"
-        aria-label="Chat di WhatsApp"
+        aria-label="Chat dengan kami di WhatsApp"
+        title="Chat dengan kami di WhatsApp"
       >
         {/* Main Circle Button */}
         <div className="relative">

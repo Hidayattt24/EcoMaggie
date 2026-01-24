@@ -306,6 +306,8 @@ export default function ProductCard({
               : {}
           }
           transition={{ duration: 0.3 }}
+          aria-label={wishlist.includes(product.id) ? "Hapus dari wishlist" : "Tambah ke wishlist"}
+          title={wishlist.includes(product.id) ? "Hapus dari wishlist" : "Tambah ke wishlist"}
         >
           <motion.div
             animate={

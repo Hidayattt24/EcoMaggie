@@ -10,7 +10,19 @@ import type { Icon as LeafletIcon, DivIcon } from "leaflet";
 // Dynamic import for Leaflet to avoid SSR issues
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-full flex items-center justify-center" style={{ backgroundColor: "#fdf8d4" }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#a3af87] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm" style={{ color: "#435664" }}>
+            Memuat peta...
+          </p>
+        </div>
+      </div>
+    )
+  }
 );
 const TileLayer = dynamic(
   () => import("react-leaflet").then((mod) => mod.TileLayer),

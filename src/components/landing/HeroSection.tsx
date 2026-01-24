@@ -6,9 +6,9 @@ import { Package, ShoppingCart, ArrowRight, Sparkles, TrendingUp, Zap, CheckCirc
 
 export default function HeroSection() {
   const stats = [
-    { value: "60%", label: "Pengurangan Sampah", color: "#a3af87" },
+    { value: "60%", label: "Pengurangan Sampah", color: "#8a9670" },
     { value: "±1 Ton", label: "Terolah/Bulan", color: "#435664" },
-    { value: "50+", label: "Mitra UMKM", color: "#a3af87" },
+    { value: "50+", label: "Mitra UMKM", color: "#8a9670" },
     { value: "100%", label: "Ekonomi Sirkular", color: "#303646" },
   ];
 
@@ -99,7 +99,7 @@ export default function HeroSection() {
                 Ubah{" "}
                 <span
                   className="relative inline-block"
-                  style={{ color: "#a3af87" }}
+                  style={{ color: "#8a9670" }}
                 >
                   Limbah Organik
                   <motion.div
@@ -129,12 +129,12 @@ export default function HeroSection() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="space-y-2"
             >
-              <p className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-xl poppins-semibold" style={{ color: "#a3af87" }}>
+              <p className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-xl poppins-semibold" style={{ color: "#8a9670" }}>
                 Tahukah kamu?
               </p>
               <p className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-xl poppins-semibold" style={{ color: "#435664" }}>
                 Sampah organikmu bisa menyelamatkan lingkungan sekaligus menjadi sumber pakan berkualitas. EcoMaggie menghubungkan penghasil limbah dengan peternak maggot BSF untuk menciptakan ekosistem{" "}
-                <span className="poppins-bold" style={{ color: "#a3af87" }}>
+                <span className="poppins-bold" style={{ color: "#8a9670" }}>
                   ekonomi sirkular
                 </span>{" "}
                 yang produktif.
@@ -273,8 +273,8 @@ export default function HeroSection() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Zap className="h-3 w-3" style={{ color: "#a3af87" }} />
-                      <span className="text-xs poppins-semibold" style={{ color: "#a3af87" }}>
+                      <Zap className="h-3 w-3" style={{ color: "#8a9670" }} />
+                      <span className="text-xs poppins-semibold" style={{ color: "#8a9670" }}>
                         Active
                       </span>
                     </div>
@@ -409,8 +409,8 @@ export default function HeroSection() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" style={{ color: "#a3af87" }} />
-                      <span className="text-xs poppins-semibold" style={{ color: "#a3af87" }}>
+                      <CheckCircle2 className="h-4 w-4" style={{ color: "#8a9670" }} />
+                      <span className="text-xs poppins-semibold" style={{ color: "#8a9670" }}>
                         60% Reduksi Sampah Tercapai
                       </span>
                     </div>
@@ -424,7 +424,7 @@ export default function HeroSection() {
                       transition={{ duration: 0.5, delay: 1 }}
                       className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/60"
                     >
-                      <div className="text-lg poppins-bold" style={{ color: "#a3af87" }}>
+                      <div className="text-lg poppins-bold" style={{ color: "#8a9670" }}>
                         ±1 Ton
                       </div>
                       <div className="text-[10px] poppins-semibold" style={{ color: "#435664" }}>
@@ -472,7 +472,7 @@ export default function HeroSection() {
                     <div className="text-[10px] poppins-semibold" style={{ color: "#435664" }}>
                       Supply Connect
                     </div>
-                    <div className="text-xs poppins-bold" style={{ color: "#a3af87" }}>
+                    <div className="text-xs poppins-bold" style={{ color: "#8a9670" }}>
                       Limbah Terjemput ✓
                     </div>
                   </div>
@@ -488,7 +488,7 @@ export default function HeroSection() {
                 whileHover={{ scale: 1.05, rotate: 5 }}
               >
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" style={{ color: "#a3af87" }} />
+                  <TrendingUp className="h-4 w-4" style={{ color: "#8a9670" }} />
                   <div>
                     <div className="text-[10px] poppins-semibold" style={{ color: "#435664" }}>
                       Market Price

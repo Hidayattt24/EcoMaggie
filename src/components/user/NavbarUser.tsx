@@ -28,9 +28,17 @@ export function NavbarUser() {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [transactionCount, setTransactionCount] = useState(0);
 
-  // Fetch counts on mount and when pathname changes
+  // Fetch counts on mount and when pathname changes (only if logged in)
   useEffect(() => {
     const fetchCounts = async () => {
+      // Only fetch counts if user is logged in
+      if (!profile) {
+        setCartCount(0);
+        setWishlistCount(0);
+        setTransactionCount(0);
+        return;
+      }
+
       const [cart, wishlist, transaction] = await Promise.all([
         getCartItemCount(),
         getWishlistCount(),
@@ -43,15 +51,34 @@ export function NavbarUser() {
 
     fetchCounts();
 
-    // Refresh counts every 30 seconds
+    // Refresh counts every 30 seconds (only if logged in)
     const interval = setInterval(fetchCounts, 30000);
 
     return () => clearInterval(interval);
-  }, [pathname]); // Re-fetch when pathname changes
+  }, [pathname, profile]); // Re-fetch when pathname or profile changes
 
   const navItems = [
     {
-      name: "Market Maggot",
+      name: "Beranda",
+      link: "/",
+      icon: (
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      ),
+    },
+    {
+      name: "Produk",
       link: "/market/products",
       icon: (
         <svg
@@ -70,18 +97,59 @@ export function NavbarUser() {
       ),
     },
     {
-      name: "Supply Connect",
+      name: "Sektor Sampah",
       link: "/supply",
       icon: <Recycle className="h-4 w-4" />,
+    },
+    {
+      name: "Tentang",
+      link: "/about",
+      icon: (
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
     },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
+  // Check if user is logged in
+  const isLoggedIn = !!profile;
+
   const mobileNavItems = [
     {
-      name: "Market",
+      name: "Beranda",
+      link: "/",
+      icon: (
+        <svg
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      ),
+    },
+    {
+      name: "Produk",
       link: "/market/products",
       icon: (
         <svg
@@ -100,7 +168,7 @@ export function NavbarUser() {
       ),
     },
     {
-      name: "Supply",
+      name: "Sampah",
       link: "/supply",
       icon: <Recycle className="h-6 w-6" />,
     },
@@ -138,9 +206,13 @@ export function NavbarUser() {
     <>
       <Navbar>
         <NavBody>
-          <NavbarLogo src="/assets/logo.svg" alt="EcoMaggie" href="/" />
-          <NavItems items={navItems} pathname={pathname} />
-          <div className="flex items-center gap-4">
+          <div className="flex-shrink-0 w-[280px]">
+            <NavbarLogo src="/assets/logo.svg" alt="EcoMaggie" href="/" />
+          </div>
+          <div className="flex-1 flex justify-center">
+            <NavItems items={navItems} pathname={pathname} />
+          </div>
+          <div className="flex items-center justify-end gap-3 flex-shrink-0 w-[280px]">
             <Link
               href="/wishlist"
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
@@ -298,32 +370,60 @@ export function NavbarUser() {
             </Link>
 
             <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg hover:scale-105 overflow-hidden ${
-                  pathname?.startsWith("/profile")
-                    ? "shadow-xl scale-110 ring-2 ring-offset-2"
-                    : ""
-                }`}
-                style={
-                  {
+              {isLoggedIn ? (
+                <>
+                  <button
+                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg hover:scale-105 overflow-hidden ${
+                      pathname?.startsWith("/profile")
+                        ? "shadow-xl scale-110 ring-2 ring-offset-2"
+                        : ""
+                    }`}
+                    style={
+                      {
+                        backgroundColor: "#303646",
+                        borderColor: pathname?.startsWith("/profile")
+                          ? "#ebfba8"
+                          : undefined,
+                      } as React.CSSProperties
+                    }
+                    title="Profile"
+                  >
+                    {profile?.avatar ? (
+                      <img
+                        src={profile.avatar}
+                        alt={profile.name || "User"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <svg
+                        className="h-5 w-5 text-[#fdf8d4]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full transition-all hover:shadow-lg hover:scale-105"
+                  style={{
                     backgroundColor: "#303646",
-                    borderColor: pathname?.startsWith("/profile")
-                      ? "#ebfba8"
-                      : undefined,
-                  } as React.CSSProperties
-                }
-                title="Profile"
-              >
-                {profile?.avatar ? (
-                  <img
-                    src={profile.avatar}
-                    alt={profile.name || "User"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
+                    color: "#fdf8d4",
+                  }}
+                  title="Masuk"
+                >
                   <svg
-                    className="h-5 w-5 text-[#fdf8d4]"
+                    className="h-5 w-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -332,14 +432,15 @@ export function NavbarUser() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                     />
                   </svg>
-                )}
-              </button>
+                  <span className="font-medium text-sm">Masuk</span>
+                </Link>
+              )}
 
               {/* Dropdown Menu */}
-              {showProfileDropdown && (
+              {isLoggedIn && showProfileDropdown && (
                 <div className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden z-50">
                   {/* User Info Header */}
                   <div
@@ -629,28 +730,56 @@ export function NavbarUser() {
                 </Link>
 
                 <div className="relative" ref={mobileDropdownRef}>
-                  <button
-                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg active:scale-95 overflow-hidden ${
-                      pathname?.startsWith("/profile")
-                        ? "shadow-xl scale-105 ring-2"
-                        : ""
-                    }`}
-                    style={{
-                      backgroundColor: "#303646",
-                      borderColor: pathname?.startsWith("/profile") ? "#ebfba8" : undefined
-                    }}
-                    title="Profile"
-                  >
-                    {profile?.avatar ? (
-                      <img
-                        src={profile.avatar}
-                        alt={profile.name || "User"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
+                  {isLoggedIn ? (
+                    <>
+                      <button
+                        onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                        className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg active:scale-95 overflow-hidden ${
+                          pathname?.startsWith("/profile")
+                            ? "shadow-xl scale-105 ring-2"
+                            : ""
+                        }`}
+                        style={{
+                          backgroundColor: "#303646",
+                          borderColor: pathname?.startsWith("/profile") ? "#ebfba8" : undefined
+                        }}
+                        title="Profile"
+                      >
+                        {profile?.avatar ? (
+                          <img
+                            src={profile.avatar}
+                            alt={profile.name || "User"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <svg
+                            className="h-5 w-5 text-[#fdf8d4]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="flex items-center gap-2 px-3 py-2 rounded-full transition-all hover:shadow-lg active:scale-95"
+                      style={{
+                        backgroundColor: "#303646",
+                        color: "#fdf8d4",
+                      }}
+                      title="Masuk"
+                    >
                       <svg
-                        className="h-5 w-5 text-[#fdf8d4]"
+                        className="h-5 w-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -659,14 +788,15 @@ export function NavbarUser() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                         />
                       </svg>
-                    )}
-                  </button>
+                      <span className="font-medium text-xs">Masuk</span>
+                    </Link>
+                  )}
 
                   {/* Mobile Dropdown Menu */}
-                  {showProfileDropdown && (
+                  {isLoggedIn && showProfileDropdown && (
                     <div className="absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden z-50">
                       {/* User Info Header */}
                       <div

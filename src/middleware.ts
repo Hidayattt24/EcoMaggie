@@ -10,9 +10,12 @@ import { createServerClient } from "@supabase/ssr";
 
 // Routes yang memerlukan authentication
 const protectedRoutes = [
-  "/market",
+  "/market/cart",
+  "/market/checkout",
+  "/market/orders",
   "/profile",
-  "/supply",
+  "/supply/input",
+  "/supply/history",
   "/transaction",
   "/wishlist",
   "/farmer",
@@ -24,11 +27,14 @@ const authRoutes = ["/login", "/register", "/forgot-password", "/otp"];
 // Routes khusus untuk FARMER role
 const farmerOnlyRoutes = ["/farmer"];
 
-// Routes khusus untuk USER role
+// Routes khusus untuk USER role (excluding public market/products and supply pages)
 const userOnlyRoutes = [
-  "/market",
+  "/market/cart",
+  "/market/checkout",
+  "/market/orders",
   "/profile",
-  "/supply",
+  "/supply/input",
+  "/supply/history",
   "/transaction",
   "/wishlist",
 ];
@@ -36,6 +42,11 @@ const userOnlyRoutes = [
 export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
+
+  // Skip role checks for API routes and POST requests (server actions)
+  if (pathname.startsWith("/api") || request.method === "POST") {
+    return supabaseResponse;
+  }
 
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -62,50 +73,74 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // For authenticated users, get their role from database
+  // For authenticated users, get their role from session metadata (cached in JWT)
   if (user) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              supabaseResponse.cookies.set(name, value, options)
-            );
-          },
-        },
+    try {
+      // Get role from user metadata (cached in JWT - NO DATABASE CALL!)
+      let userRole = user.user_metadata?.role as string | undefined;
+
+      // Fallback: If role not in metadata (old users), get from database
+      if (!userRole) {
+        const supabase = createServerClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            cookies: {
+              getAll() {
+                return request.cookies.getAll();
+              },
+              setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  supabaseResponse.cookies.set(name, value, options)
+                );
+              },
+            },
+          }
+        );
+
+        try {
+          const result = await Promise.race([
+            supabase.from("users").select("role").eq("id", user.id).single(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Database timeout")), 5000)
+            )
+          ]);
+          
+          // Type guard to check if result has data property
+          if (result && typeof result === 'object' && 'data' in result) {
+            const data = result.data as { role?: string } | null;
+            userRole = data?.role || "USER";
+          } else {
+            userRole = "USER";
+          }
+        } catch (error) {
+          userRole = "USER";
+        }
       }
-    );
 
-    // Get user role from database
-    const { data: userData } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+      // Default to USER if still no role
+      userRole = userRole || "USER";
 
-    const userRole = userData?.role || "USER";
+      // Redirect authenticated users from auth routes to their dashboard
+      if (isAuthRoute) {
+        const dashboardUrl =
+          userRole === "FARMER" ? "/farmer/dashboard" : "/market/products";
+        return NextResponse.redirect(new URL(dashboardUrl, request.url));
+      }
 
-    // Redirect authenticated users from auth routes to their dashboard
-    if (isAuthRoute) {
-      const dashboardUrl =
-        userRole === "FARMER" ? "/farmer/dashboard" : "/market/products";
-      return NextResponse.redirect(new URL(dashboardUrl, request.url));
-    }
+      // Role-based access control
+      // FARMER trying to access USER-only routes
+      if (userRole === "FARMER" && isUserOnlyRoute) {
+        return NextResponse.redirect(new URL("/farmer/dashboard", request.url));
+      }
 
-    // Role-based access control
-    // FARMER trying to access USER-only routes
-    if (userRole === "FARMER" && isUserOnlyRoute) {
-      return NextResponse.redirect(new URL("/farmer/dashboard", request.url));
-    }
-
-    // USER trying to access FARMER-only routes
-    if (userRole === "USER" && isFarmerOnlyRoute) {
-      return NextResponse.redirect(new URL("/market/products", request.url));
+      // USER trying to access FARMER-only routes
+      if (userRole === "USER" && isFarmerOnlyRoute) {
+        return NextResponse.redirect(new URL("/market/products", request.url));
+      }
+    } catch (error) {
+      // If role check fails, allow request to continue
+      console.error("Middleware role check error:", error);
     }
   }
 
@@ -122,6 +157,6 @@ export const config = {
      * - public folder
      * - api routes (handled separately)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -1,23 +1,16 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  getMarketProductDetail,
-  getProductReviews,
   submitProductReview,
-  checkWishlistStatus,
-  toggleWishlist,
-  checkProductPurchaseStatus,
-  type MarketProductDetail,
   type ProductReview,
-  type ProductReviewsResponse,
-  type PurchaseStatus,
 } from "@/lib/api/product.actions";
 import { addToCart } from "@/lib/api/cart.actions";
 import { useToast } from "@/hooks/useToast";
 import Toast from "@/components/ui/Toast";
 import { ProductDetailSkeleton } from "@/components/ui/Skeleton";
+import { useProductDetailPage } from "@/hooks/useProductDetail";
 
 // Category display names mapping
 const categoryDisplayNames: Record<string, string> = {
@@ -63,13 +56,23 @@ export default function ProductDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { toast, success, error: showError, warning, hideToast } = useToast();
   const [slug, setSlug] = useState<string>("");
-  const [product, setProduct] = useState<MarketProductDetail | null>(null);
-  const [reviewsData, setReviewsData] = useState<ProductReviewsResponse | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  // Use SWR hook for all data fetching
+  const {
+    product,
+    isLoading,
+    error,
+    refresh,
+    reviewsData,
+    isLoadingReviews,
+    enableReviews,
+    refreshReviews,
+    isWishlisted,
+    isLoadingWishlist,
+    toggleWishlistStatus,
+    purchaseStatus,
+    isCheckingPurchase,
+  } = useProductDetailPage(slug || null);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -85,108 +88,25 @@ export default function ProductDetailPage({ params }: PageProps) {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Wishlist states
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
-
   // Cart states
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // Purchase status for review eligibility
-  const [purchaseStatus, setPurchaseStatus] = useState<PurchaseStatus | null>(
-    null,
-  );
-  const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
+  // Wishlist toggle states
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
-  // Fetch product data
+  // Resolve params to get slug
   useEffect(() => {
     params.then((resolvedParams) => {
       setSlug(resolvedParams.slug);
     });
   }, [params]);
 
+  // Enable reviews when tab is switched
   useEffect(() => {
-    if (!slug) return;
-
-    async function fetchProduct() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await getMarketProductDetail(slug);
-
-        if (result.success && result.data) {
-          setProduct(result.data);
-        } else {
-          setError(result.message || "Produk tidak ditemukan");
-        }
-      } catch (err) {
-        console.error("Error fetching product:", err);
-        setError("Terjadi kesalahan saat memuat produk");
-      } finally {
-        setIsLoading(false);
-      }
+    if (activeTab === "reviews") {
+      enableReviews();
     }
-
-    fetchProduct();
-  }, [slug]);
-
-  // Fetch reviews when product is loaded or when switching to reviews tab
-  const fetchReviews = useCallback(async () => {
-    if (!product?.id) return;
-
-    setIsLoadingReviews(true);
-    try {
-      const result = await getProductReviews(product.id);
-      if (result.success && result.data) {
-        setReviewsData(result.data);
-      }
-    } catch (err) {
-      console.error("Error fetching reviews:", err);
-    } finally {
-      setIsLoadingReviews(false);
-    }
-  }, [product?.id]);
-
-  useEffect(() => {
-    if (activeTab === "reviews" && product?.id && !reviewsData) {
-      fetchReviews();
-    }
-  }, [activeTab, product?.id, reviewsData, fetchReviews]);
-
-  // Check wishlist status when product is loaded
-  useEffect(() => {
-    async function checkWishlist() {
-      if (!product?.id) return;
-
-      const result = await checkWishlistStatus(product.id);
-      if (result.success && result.data) {
-        setIsWishlisted(result.data.isWishlisted);
-      }
-    }
-    checkWishlist();
-  }, [product?.id]);
-
-  // Check purchase status when switching to reviews tab
-  useEffect(() => {
-    async function checkPurchase() {
-      if (!product?.id || activeTab !== "reviews") return;
-      if (purchaseStatus !== null) return; // Already checked
-
-      setIsCheckingPurchase(true);
-      try {
-        const result = await checkProductPurchaseStatus(product.id);
-        if (result.success && result.data) {
-          setPurchaseStatus(result.data);
-        }
-      } catch (err) {
-        console.error("Error checking purchase status:", err);
-      } finally {
-        setIsCheckingPurchase(false);
-      }
-    }
-    checkPurchase();
-  }, [product?.id, activeTab, purchaseStatus]);
+  }, [activeTab, enableReviews]);
 
   // Handle add to cart
   const handleAddToCart = async () => {
@@ -225,10 +145,9 @@ export default function ProductDetailPage({ params }: PageProps) {
 
     setIsTogglingWishlist(true);
     try {
-      const result = await toggleWishlist(product.id);
+      const result = await toggleWishlistStatus();
 
       if (result.success) {
-        setIsWishlisted(!isWishlisted);
         success(
           result.message.includes("ditambahkan")
             ? "Ditambahkan ke Wishlist!"
@@ -274,8 +193,8 @@ export default function ProductDetailPage({ params }: PageProps) {
         setReviewText("");
         setReviewRating(5);
         setReviewImages([]);
-        // Refresh reviews
-        fetchReviews();
+        // Refresh reviews and purchase status
+        refreshReviews();
       } else if (result.error === "UNAUTHORIZED") {
         warning("Login Diperlukan", "Silakan login untuk memberikan ulasan");
       } else {
@@ -442,26 +361,53 @@ export default function ProductDetailPage({ params }: PageProps) {
         )}
 
         <div className="max-w-6xl mx-auto px-4 py-4">
-          {/* Back Button */}
-          <Link
-            href="/market/products"
-            className="inline-flex items-center gap-1.5 mb-4 text-sm text-[#435664] hover:text-[#303646] transition-colors"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Back Button & Refresh Button */}
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/market/products"
+              className="inline-flex items-center gap-1.5 text-sm text-[#435664] hover:text-[#303646] transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <span className="font-medium">Kembali</span>
+            </Link>
+
+            {/* Manual Refresh Button */}
+            <button
+              onClick={() => {
+                refresh();
+                refreshReviews();
+              }}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#435664] bg-white border-2 border-[#435664]/20 rounded-lg hover:bg-[#fdf8d4] hover:border-[#435664]/40 transition-all active:scale-95"
+              title="Refresh data produk"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
                 strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            <span className="font-medium">Kembali</span>
-          </Link>
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              <span>Refresh</span>
+            </button>
+          </div>
 
           {/* Main Content - Compact Layout */}
           <div className="grid lg:grid-cols-5 gap-4 mb-4">

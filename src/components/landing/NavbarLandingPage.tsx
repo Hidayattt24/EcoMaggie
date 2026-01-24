@@ -120,11 +120,11 @@ const UserAddIcon = () => (
 );
 
 const navigationItems = [
-  { name: "Beranda", href: "#beranda-section", icon: HomeIcon },
-  { name: "Tentang", href: "#tentang-section", icon: InfoIcon },
-  { name: "Solusi", href: "#solusi-section", icon: LightbulbIcon },
-  { name: "Dampak", href: "#dampak-section", icon: ChartIcon },
-  { name: "Testimoni", href: "#testimoni-section", icon: StarIcon },
+  { name: "Beranda", href: "/", icon: HomeIcon },
+  { name: "Tentang", href: "/about", icon: InfoIcon },
+  { name: "Solusi", href: "/#solusi-section", icon: LightbulbIcon },
+  { name: "Dampak", href: "/#dampak-section", icon: ChartIcon },
+  { name: "Testimoni", href: "/#testimoni-section", icon: StarIcon },
 ];
 
 export default function NavbarLandingPage() {

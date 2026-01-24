@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import NavbarLandingPage from "@/components/landing/NavbarLandingPage";
+import { NavbarUser } from "@/components/user/NavbarUser";
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-white">
-      <NavbarLandingPage />
+      <NavbarUser />
       
       {/* Spacer for fixed navbar */}
       <div className="h-24 lg:h-28"></div>
@@ -105,11 +105,36 @@ export default function PrivacyPolicyPage() {
                 <p className="text-base leading-relaxed mb-4 poppins-regular" style={{ color: "#444" }}>
                   Kami dapat membagikan informasi Anda dengan pihak ketiga terpercaya hanya dalam situasi berikut:
                 </p>
-                <ul className="list-disc pl-6 space-y-2 poppins-regular" style={{ color: "#444" }}>
-                  <li>Penyedia layanan pembayaran (Midtrans) untuk memproses transaksi secara aman</li>
-                  <li>Mitra logistik untuk pengiriman produk ke alamat Anda</li>
-                  <li>Otoritas hukum jika diwajibkan oleh peraturan perundang-undangan yang berlaku</li>
+                <ul className="list-disc pl-6 space-y-3 poppins-regular" style={{ color: "#444" }}>
+                  <li>
+                    <strong>Penyedia layanan pembayaran (Midtrans)</strong> - Untuk memproses transaksi secara aman. 
+                    Informasi pembayaran Anda (seperti nomor kartu kredit) dienkripsi dan diproses langsung oleh Midtrans 
+                    sesuai standar keamanan PCI DSS Level 1. EcoMaggie tidak menyimpan atau memiliki akses ke informasi 
+                    kartu pembayaran Anda.
+                  </li>
+                  <li>
+                    <strong>Mitra logistik</strong> - Untuk pengiriman produk ke alamat Anda. Kami hanya membagikan 
+                    informasi yang diperlukan seperti nama, nomor telepon, dan alamat pengiriman.
+                  </li>
+                  <li>
+                    <strong>Otoritas hukum</strong> - Jika diwajibkan oleh peraturan perundang-undangan yang berlaku 
+                    atau untuk melindungi hak, properti, atau keselamatan EcoMaggie, pengguna kami, atau publik.
+                  </li>
                 </ul>
+                <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: "#F0F9FF", borderLeft: "4px solid #A3AF87" }}>
+                  <p className="text-sm poppins-medium mb-2" style={{ color: "#303646" }}>
+                    🔒 Keamanan Pembayaran dengan Midtrans
+                  </p>
+                  <p className="text-sm poppins-regular mb-2" style={{ color: "#666" }}>
+                    Midtrans adalah payment gateway tersertifikasi yang memenuhi standar keamanan internasional:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1 text-sm poppins-regular" style={{ color: "#666" }}>
+                    <li>Tersertifikasi PCI DSS Level 1 (standar keamanan tertinggi untuk pemrosesan kartu)</li>
+                    <li>Terdaftar dan diawasi oleh Bank Indonesia</li>
+                    <li>Enkripsi end-to-end untuk semua transaksi</li>
+                    <li>Sistem deteksi fraud 24/7</li>
+                  </ul>
+                </div>
               </div>
 
               {/* Section 5 */}
@@ -199,17 +224,47 @@ export default function PrivacyPolicyPage() {
       {/* Footer */}
       <footer className="py-8 border-t" style={{ backgroundColor: "#FAFAFA", borderColor: "#eee" }}>
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm poppins-regular" style={{ color: "#666" }}>
-              © {new Date().getFullYear()} PT EcoMaggie Indonesia. Hak Cipta Dilindungi.
-            </p>
-            <div className="flex items-center gap-6 text-sm">
-              <Link href="/terms-conditions" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
-                Syarat & Ketentuan
-              </Link>
-              <Link href="/" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
-                Beranda
-              </Link>
+          <div className="max-w-4xl mx-auto">
+            {/* Payment Gateway Info */}
+            <div className="mb-6 pb-6 border-b" style={{ borderColor: "#eee" }}>
+              <p className="text-sm poppins-medium mb-3 text-center" style={{ color: "#303646" }}>
+                Pembayaran Aman & Terpercaya
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4 mb-3">
+                <div className="px-4 py-2 rounded-lg border" style={{ backgroundColor: "#F0F9FF", borderColor: "#A3AF87" }}>
+                  <p className="text-xs poppins-regular" style={{ color: "#666" }}>
+                    Powered by <span className="font-semibold" style={{ color: "#A3AF87" }}>Midtrans</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs poppins-regular" style={{ color: "#666" }}>
+                  <span>Transfer Bank</span>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: "#A3AF87" }} />
+                  <span>E-Wallet</span>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: "#A3AF87" }} />
+                  <span>Kartu Kredit</span>
+                </div>
+              </div>
+              <p className="text-xs poppins-regular text-center" style={{ color: "#999" }}>
+                Semua transaksi pembayaran diproses melalui payment gateway resmi Midtrans yang terdaftar dan diawasi oleh Bank Indonesia
+              </p>
+            </div>
+
+            {/* Footer Links */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="text-sm poppins-regular" style={{ color: "#666" }}>
+                © {new Date().getFullYear()} PT EcoMaggie Indonesia. Hak Cipta Dilindungi.
+              </p>
+              <div className="flex items-center gap-6 text-sm">
+                <Link href="/privacy-policy" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
+                  Kebijakan Privasi
+                </Link>
+                <Link href="/terms-conditions" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
+                  Syarat & Ketentuan
+                </Link>
+                <Link href="/" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
+                  Beranda
+                </Link>
+              </div>
             </div>
           </div>
         </div>

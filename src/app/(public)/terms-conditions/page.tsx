@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import NavbarLandingPage from "@/components/landing/NavbarLandingPage";
+import { NavbarUser } from "@/components/user/NavbarUser";
 
 export default function TermsConditionsPage() {
   return (
     <div className="min-h-screen bg-white">
-      <NavbarLandingPage />
+      <NavbarUser />
       
       {/* Spacer for fixed navbar */}
       <div className="h-24 lg:h-28"></div>
@@ -151,12 +151,23 @@ export default function TermsConditionsPage() {
                   10. Pembayaran
                 </h2>
                 <ul className="list-disc pl-6 space-y-3 poppins-regular" style={{ color: "#444" }}>
-                  <li>Semua transaksi pembayaran diproses melalui payment gateway resmi Midtrans yang terdaftar dan diawasi oleh Bank Indonesia.</li>
+                  <li>Semua transaksi pembayaran diproses melalui payment gateway resmi <strong>Midtrans</strong> yang terdaftar dan diawasi oleh Bank Indonesia.</li>
                   <li>Metode pembayaran yang tersedia meliputi: Transfer Bank, Virtual Account, E-Wallet (GoPay, OVO, DANA, ShopeePay), dan Kartu Kredit/Debit.</li>
                   <li>Harga yang tertera sudah termasuk PPN sesuai ketentuan perpajakan Indonesia.</li>
                   <li>Dana pembayaran akan ditahan (escrow) hingga Pembeli mengkonfirmasi penerimaan barang.</li>
                   <li>Pembayaran harus diselesaikan dalam batas waktu yang ditentukan, atau pesanan akan dibatalkan secara otomatis.</li>
+                  <li>Dengan melakukan pembayaran melalui Midtrans, Anda setuju untuk terikat dengan syarat dan ketentuan layanan Midtrans.</li>
+                  <li>EcoMaggie tidak menyimpan informasi kartu kredit/debit Anda. Semua data pembayaran dienkripsi dan diproses langsung oleh Midtrans sesuai standar keamanan PCI DSS Level 1.</li>
                 </ul>
+                <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: "#FFF9E6", borderLeft: "4px solid #A3AF87" }}>
+                  <p className="text-sm poppins-medium mb-2" style={{ color: "#303646" }}>
+                    ℹ️ Tentang Midtrans
+                  </p>
+                  <p className="text-sm poppins-regular" style={{ color: "#666" }}>
+                    Midtrans adalah payment gateway terpercaya yang telah tersertifikasi PCI DSS dan diawasi oleh Bank Indonesia. 
+                    Untuk informasi lebih lanjut tentang keamanan pembayaran, kunjungi <a href="https://midtrans.com" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "#A3AF87" }}>midtrans.com</a>
+                  </p>
+                </div>
               </div>
 
               {/* Section 11 - Privacy Policy */}
@@ -270,17 +281,47 @@ export default function TermsConditionsPage() {
       {/* Footer */}
       <footer className="py-8 border-t" style={{ backgroundColor: "#FAFAFA", borderColor: "#eee" }}>
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm poppins-regular" style={{ color: "#666" }}>
-              © {new Date().getFullYear()} PT EcoMaggie Indonesia. Hak Cipta Dilindungi.
-            </p>
-            <div className="flex items-center gap-6 text-sm">
-              <Link href="/privacy-policy" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
-                Kebijakan Privasi
-              </Link>
-              <Link href="/" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
-                Beranda
-              </Link>
+          <div className="max-w-4xl mx-auto">
+            {/* Payment Gateway Info */}
+            <div className="mb-6 pb-6 border-b" style={{ borderColor: "#eee" }}>
+              <p className="text-sm poppins-medium mb-3 text-center" style={{ color: "#303646" }}>
+                Pembayaran Aman & Terpercaya
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4 mb-3">
+                <div className="px-4 py-2 rounded-lg border" style={{ backgroundColor: "#F0F9FF", borderColor: "#A3AF87" }}>
+                  <p className="text-xs poppins-regular" style={{ color: "#666" }}>
+                    Powered by <span className="font-semibold" style={{ color: "#A3AF87" }}>Midtrans</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs poppins-regular" style={{ color: "#666" }}>
+                  <span>Transfer Bank</span>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: "#A3AF87" }} />
+                  <span>E-Wallet</span>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: "#A3AF87" }} />
+                  <span>Kartu Kredit</span>
+                </div>
+              </div>
+              <p className="text-xs poppins-regular text-center" style={{ color: "#999" }}>
+                Semua transaksi pembayaran diproses melalui payment gateway resmi Midtrans yang terdaftar dan diawasi oleh Bank Indonesia
+              </p>
+            </div>
+
+            {/* Footer Links */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="text-sm poppins-regular" style={{ color: "#666" }}>
+                © {new Date().getFullYear()} PT EcoMaggie Indonesia. Hak Cipta Dilindungi.
+              </p>
+              <div className="flex items-center gap-6 text-sm">
+                <Link href="/privacy-policy" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
+                  Kebijakan Privasi
+                </Link>
+                <Link href="/terms-conditions" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
+                  Syarat & Ketentuan
+                </Link>
+                <Link href="/" className="poppins-regular transition-colors hover:underline" style={{ color: "#A3AF87" }}>
+                  Beranda
+                </Link>
+              </div>
             </div>
           </div>
         </div>

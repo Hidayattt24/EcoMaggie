@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,9 +32,10 @@ import {
   Trash2,
   CheckSquare,
   Square,
+  RefreshCw,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
-import { getUserSupplies, type UserSupply } from "@/lib/api/supply.actions";
+import { useUserSupplies, type UserSupply } from "@/hooks/useUserSupplies";
 import DeleteSupplyModal from "@/components/supply/DeleteSupplyModal";
 import dynamic from "next/dynamic";
 
@@ -135,77 +136,47 @@ export default function SupplyHistoryPage() {
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<TransformedSupply | null>(null);
-  
-  // State for supplies data
-  const [supplyHistory, setSupplyHistory] = useState<TransformedSupply[]>([]);
-  const [isLoadingSupplies, setIsLoadingSupplies] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // State for delete functionality
   const [selectedSupplies, setSelectedSupplies] = useState<Set<string>>(new Set());
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
-  // Fetch supplies from database
-  useEffect(() => {
-    async function fetchSupplies() {
-      if (!isSupplyConnectAvailable || locationLoading) return;
-      
-      setIsLoadingSupplies(true);
-      setError(null);
-      
-      try {
-        const response = await getUserSupplies();
-        
-        if (response.success && response.data) {
-          // Transform database data to component format
-          const transformed: TransformedSupply[] = response.data.map((supply) => {
-            const weightValue = parseInt(supply.estimatedWeight);
+  // Use SWR hook for data fetching with caching
+  const { supplies, isLoading: isLoadingSupplies, error, refresh } = useUserSupplies();
 
-            return {
-              id: supply.id,
-              supplyNumber: supply.supplyNumber,
-              date: supply.createdAt,
-              weight: weightValue,
-              type: wasteTypeLabels[supply.wasteType] || supply.wasteType,
-              status: mapDatabaseStatus(supply.status),
-              pickupDate: supply.pickupDate,
-              pickupTime: supply.pickupTimeRange,
-              address: supply.pickupAddress,
-              latitude: supply.pickupLatitude,
-              longitude: supply.pickupLongitude,
-              notes: supply.notes,
-              courier: supply.courierName && supply.courierPhone
-                ? {
-                    name: supply.courierName,
-                    phone: supply.courierPhone,
-                    photo: null,
-                  }
-                : null,
-              farmer: null, // Not implemented yet
-              photo: supply.photoUrl,
-            };
-          });
-          
-          setSupplyHistory(transformed);
-          
-          // Auto-select first item if available
-          if (transformed.length > 0 && !selectedItem) {
-            setSelectedItem(transformed[0]);
-          }
-        } else {
-          setError(response.message || "Gagal memuat riwayat supply");
-        }
-      } catch (err) {
-        console.error("Error fetching supplies:", err);
-        setError("Terjadi kesalahan saat memuat data");
-      } finally {
-        setIsLoadingSupplies(false);
-      }
-    }
-    
-    fetchSupplies();
-  }, [isSupplyConnectAvailable, locationLoading]);
+  // Transform supplies to component format
+  const supplyHistory = useMemo(() => {
+    if (!isSupplyConnectAvailable || locationLoading) return [];
+
+    return supplies.map((supply) => {
+      const weightValue = parseInt(supply.estimatedWeight);
+
+      return {
+        id: supply.id,
+        supplyNumber: supply.supplyNumber,
+        date: supply.createdAt,
+        weight: weightValue,
+        type: wasteTypeLabels[supply.wasteType] || supply.wasteType,
+        status: mapDatabaseStatus(supply.status),
+        pickupDate: supply.pickupDate,
+        pickupTime: supply.pickupTimeRange,
+        address: supply.pickupAddress,
+        latitude: supply.pickupLatitude,
+        longitude: supply.pickupLongitude,
+        notes: supply.notes,
+        courier: supply.courierName && supply.courierPhone
+          ? {
+              name: supply.courierName,
+              phone: supply.courierPhone,
+              photo: null,
+            }
+          : null,
+        farmer: null, // Not implemented yet
+        photo: supply.photoUrl,
+      } as TransformedSupply;
+    });
+  }, [supplies, isSupplyConnectAvailable, locationLoading]);
 
   // Handle selection toggle
   const toggleSelection = (id: string) => {
@@ -242,50 +213,8 @@ export default function SupplyHistoryPage() {
   const handleDeleteSuccess = () => {
     setSelectedSupplies(new Set());
     setIsSelectionMode(false);
-    // Refresh data
-    const fetchSupplies = async () => {
-      setIsLoadingSupplies(true);
-      try {
-        const response = await getUserSupplies();
-        if (response.success && response.data) {
-          const transformed: TransformedSupply[] = response.data.map((supply) => {
-            const weightValue = parseInt(supply.estimatedWeight);
-            return {
-              id: supply.id,
-              supplyNumber: supply.supplyNumber,
-              date: supply.createdAt,
-              weight: weightValue,
-              type: wasteTypeLabels[supply.wasteType] || supply.wasteType,
-              status: mapDatabaseStatus(supply.status),
-              pickupDate: supply.pickupDate,
-              pickupTime: supply.pickupTimeRange,
-              address: supply.pickupAddress,
-              latitude: supply.pickupLatitude,
-              longitude: supply.pickupLongitude,
-              notes: supply.notes,
-              courier: supply.courierName && supply.courierPhone
-                ? {
-                    name: supply.courierName,
-                    phone: supply.courierPhone,
-                    photo: null,
-                  }
-                : null,
-              farmer: null,
-              photo: supply.photoUrl,
-            };
-          });
-          setSupplyHistory(transformed);
-          if (transformed.length > 0 && !selectedItem) {
-            setSelectedItem(transformed[0]);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching supplies:", err);
-      } finally {
-        setIsLoadingSupplies(false);
-      }
-    };
-    fetchSupplies();
+    // Refresh data using SWR
+    refresh();
   };
 
   const filteredSupply = supplyHistory.filter((item) => {
@@ -514,6 +443,18 @@ export default function SupplyHistoryPage() {
 
           {/* Stats Cards - Desktop */}
           <div className="hidden lg:flex items-center gap-3 ml-auto">
+            {/* Refresh Button */}
+            <button
+              onClick={() => refresh()}
+              disabled={isLoadingSupplies}
+              className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-[#435664]/20 text-[#435664] rounded-2xl font-bold text-sm transition-all shadow-lg hover:bg-[#435664]/10 disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-5 w-5 ${isLoadingSupplies ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
+
             {/* Delete Mode Toggle */}
             {deletableCount > 0 && (
               <button

@@ -15,6 +15,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function FooterSection() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -33,11 +34,11 @@ export default function FooterSection() {
   };
 
   const quickLinks = [
-    { name: "Beranda", href: "#beranda-section" },
-    { name: "Tentang", href: "#tentang-section" },
-    { name: "Solusi", href: "#solusi-section" },
-    { name: "Dampak", href: "#dampak-section" },
-    { name: "Testimoni", href: "#testimoni-section" },
+    { name: "Beranda", href: "/" },
+    { name: "Tentang Kami", href: "/about" },
+    { name: "Solusi", href: "/#solusi-section" },
+    { name: "Dampak", href: "/#dampak-section" },
+    { name: "Testimoni", href: "/#testimoni-section" },
   ];
 
   const services = [
@@ -89,7 +90,7 @@ export default function FooterSection() {
   return (
     <footer className="relative overflow-hidden bg-[#a3af87]">
       {/* Decorative Top Border */}
-      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#fdf8d4] via-[#ebfba8] to-[#435664]" />
+      <div className="absolute top-0 left-0 w-full h-2 bg-[#ebfba8]" />
 
       {/* Decorative Elements */}
       <div className="absolute top-10 left-10 w-64 h-64 rounded-full blur-3xl bg-[#ebfba8]/10" />
@@ -110,7 +111,13 @@ export default function FooterSection() {
 
       <div className="container mx-auto px-4 py-16 relative z-10">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12"
+        >
           {/* Company Info */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-6 group">
@@ -189,7 +196,7 @@ export default function FooterSection() {
                     href={service.href}
                     className="block group"
                   >
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-[#ebfba8]/30">
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-[#ebfba8]/30 hover:border-[#ebfba8]">
                       <div className="w-10 h-10 rounded-lg bg-[#fdf8d4] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                         <IconComponent className="w-5 h-5 text-[#303646]" />
                       </div>
@@ -263,10 +270,57 @@ export default function FooterSection() {
               </li>
             </ul>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Payment Gateway Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="pt-8 pb-6 border-t border-[#ebfba8]/30"
+        >
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-sm poppins-medium text-white/90 text-center">
+              Pembayaran Aman & Terpercaya
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-[#ebfba8]/30">
+                <p className="text-xs poppins-regular text-white/80">
+                  Powered by <span className="font-semibold text-[#ebfba8]">Midtrans</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs poppins-regular text-white/70">
+                <span>Transfer Bank</span>
+                <span className="w-1 h-1 rounded-full bg-white/40" />
+                <span>E-Wallet</span>
+                <span className="w-1 h-1 rounded-full bg-white/40" />
+                <span>Kartu Kredit</span>
+              </div>
+            </div>
+            <p className="text-xs poppins-regular text-white/60 text-center max-w-2xl">
+              Semua transaksi pembayaran diproses melalui payment gateway resmi Midtrans yang terdaftar dan diawasi oleh Bank Indonesia. 
+              Dengan menggunakan layanan kami, Anda setuju dengan{" "}
+              <Link href="/terms-conditions" className="text-[#ebfba8] hover:underline font-medium">
+                Syarat & Ketentuan
+              </Link>
+              {" "}dan{" "}
+              <Link href="/privacy-policy" className="text-[#ebfba8] hover:underline font-medium">
+                Kebijakan Privasi
+              </Link>
+              {" "}kami terkait pemrosesan pembayaran dan perlindungan data pribadi Anda.
+            </p>
+          </div>
+        </motion.div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/20">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="pt-6 border-t border-[#ebfba8]/30"
+        >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm poppins-regular text-center md:text-left text-white/80">
               © {new Date().getFullYear()} EcoMaggie. Platform Ekonomi Sirkular
@@ -275,20 +329,20 @@ export default function FooterSection() {
             <div className="flex items-center gap-6 text-sm">
               <Link
                 href="/privacy-policy"
-                className="transition-colors poppins-regular text-white/80 hover:text-[#ebfba8]"
+                className="transition-colors poppins-regular text-white/80 hover:text-[#ebfba8] hover:underline"
               >
                 Kebijakan Privasi
               </Link>
               <span className="w-1 h-1 rounded-full bg-white/40" />
               <Link
                 href="/terms-conditions"
-                className="transition-colors poppins-regular text-white/80 hover:text-[#ebfba8]"
+                className="transition-colors poppins-regular text-white/80 hover:text-[#ebfba8] hover:underline"
               >
                 Syarat & Ketentuan
               </Link>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Scroll to Top Button */}

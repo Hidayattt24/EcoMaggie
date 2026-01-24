@@ -1,11 +1,6 @@
 "use client";
 
-import { MessageCircle, X } from "lucide-react";
-import { useState } from "react";
-
 export default function FloatingWhatsApp() {
-  const [isOpen, setIsOpen] = useState(false);
-
   // Nomor WhatsApp CS (ganti dengan nomor yang sebenarnya)
   const whatsappNumber = "6281234567890"; // Format: 62 + nomor tanpa 0 di awal
   const message = "Halo EcoMaggie! Saya ingin bertanya tentang layanan Anda.";
@@ -20,10 +15,10 @@ export default function FloatingWhatsApp() {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Hidden on mobile, visible on desktop */}
       <button
         onClick={handleClick}
-        className="fixed bottom-6 right-6 z-50 group"
+        className="hidden lg:block fixed bottom-6 right-6 z-40 group"
         aria-label="Chat di WhatsApp"
       >
         {/* Main Circle Button */}

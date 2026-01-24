@@ -22,13 +22,14 @@ import {
   UserCircle,
   Store,
   Info,
+  RefreshCw,
 } from "lucide-react";
 import {
-  getFarmerProfile,
   updateFarmerProfile,
   changeFarmerPassword,
   type FarmerProfile,
 } from "@/lib/api/farmer-profile.actions";
+import { useFarmerProfile } from "@/hooks/useFarmerProfile";
 import { useToast } from "@/hooks/useToast";
 import Toast from "@/components/ui/Toast";
 
@@ -58,10 +59,11 @@ function ProfileSkeleton() {
 }
 
 export default function FarmerProfilePage() {
-  const [profile, setProfile] = useState<FarmerProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Use SWR hook for profile data
+  const { profile, isLoading: loading, error: profileError, refresh } = useFarmerProfile();
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const { toast, success, error: showError, hideToast } = useToast();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Profile form state
   const [name, setName] = useState("");
@@ -81,27 +83,30 @@ export default function FarmerProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Populate form when profile data is loaded
   useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    setLoading(true);
-    const result = await getFarmerProfile();
-
-    if (result.success && result.data) {
-      setProfile(result.data);
-      setName(result.data.name || "");
-      setEmail(result.data.email || "");
-      setPhone(result.data.phone || "");
-      setFarmName(result.data.farmName || "");
-      setDescription(result.data.description || "");
-      setLocation(result.data.location || "");
-    } else {
-      showError("Gagal Memuat Profile", result.message);
+    if (profile) {
+      setName(profile.name || "");
+      setEmail(profile.email || "");
+      setPhone(profile.phone || "");
+      setFarmName(profile.farmName || "");
+      setDescription(profile.description || "");
+      setLocation(profile.location || "");
     }
+  }, [profile]);
 
-    setLoading(false);
+  // Show error toast if profile loading fails
+  useEffect(() => {
+    if (profileError) {
+      showError("Gagal Memuat Profile", profileError);
+    }
+  }, [profileError]);
+
+  // Manual refresh handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refresh();
+    setTimeout(() => setIsRefreshing(false), 500);
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -121,7 +126,7 @@ export default function FarmerProfilePage() {
 
     if (result.success) {
       success("Profile Berhasil Diupdate!", "Perubahan telah disimpan");
-      loadProfile();
+      refresh(); // Use SWR refresh instead of manual loadProfile
     } else {
       showError("Gagal Update Profile", result.message);
     }
@@ -187,9 +192,20 @@ export default function FarmerProfilePage() {
               Kelola informasi akun dan keamanan Anda
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 rounded-xl border border-[#a3af87]/30">
-            <Settings className="h-5 w-5 text-[#a3af87]" />
-            <span className="text-sm font-medium text-[#435664]">Settings</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 hover:bg-[#fdf8d4] rounded-xl border border-[#a3af87]/30 transition-all disabled:opacity-50"
+              title="Refresh data"
+            >
+              <RefreshCw className={`h-5 w-5 text-[#a3af87] ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-medium text-[#435664]">Refresh</span>
+            </button>
+            <div className="flex items-center gap-2 px-4 py-2 bg-[#fdf8d4]/50 rounded-xl border border-[#a3af87]/30">
+              <Settings className="h-5 w-5 text-[#a3af87]" />
+              <span className="text-sm font-medium text-[#435664]">Settings</span>
+            </div>
           </div>
         </div>
       </motion.div>

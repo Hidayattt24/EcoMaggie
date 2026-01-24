@@ -24,8 +24,11 @@ export default function PWAInstallBanner() {
       return;
     }
 
-    // Always show banner on page load (removed localStorage check)
-    // Banner will show every time user visits or refreshes the page
+    // Check if user has dismissed the banner permanently
+    const hasSeenBanner = localStorage.getItem("pwa-install-banner-dismissed");
+    if (hasSeenBanner === "true") {
+      return; // Don't show banner if user has dismissed it before
+    }
 
     // Listen for beforeinstallprompt event
     const handler = (e: Event) => {
@@ -52,7 +55,7 @@ export default function PWAInstallBanner() {
       if (!isInstalled) {
         setShowBanner(true);
       }
-    }, 1000); // Show after 1 second
+    }, 2000); // Show after 2 seconds
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
@@ -66,6 +69,9 @@ export default function PWAInstallBanner() {
       alert(
         "Untuk install di iOS:\n1. Tap tombol Share (ikon kotak dengan panah)\n2. Scroll dan pilih 'Add to Home Screen'\n3. Tap 'Add'"
       );
+      // Mark as dismissed after showing instructions
+      localStorage.setItem("pwa-install-banner-dismissed", "true");
+      setShowBanner(false);
       return;
     }
 
@@ -75,15 +81,16 @@ export default function PWAInstallBanner() {
     if (outcome === "accepted") {
       setShowBanner(false);
       setIsInstalled(true);
+      localStorage.setItem("pwa-install-banner-dismissed", "true");
     }
 
     setDeferredPrompt(null);
   };
 
   const handleClose = () => {
-    // Only hide banner temporarily (until page refresh)
+    // Save to localStorage that user has dismissed the banner
+    localStorage.setItem("pwa-install-banner-dismissed", "true");
     setShowBanner(false);
-    // Removed localStorage to ensure banner shows again on refresh
   };
 
   if (!showBanner || isInstalled) return null;

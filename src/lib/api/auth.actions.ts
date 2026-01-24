@@ -239,6 +239,25 @@ export async function loginUser(
       };
     }
 
+    // Sync user metadata with database role
+    // This ensures metadata is always up-to-date with database
+    if (data.user) {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      const dbRole = userData?.role || "USER";
+
+      // Update metadata if role changed in database
+      if (dbRole !== data.user.user_metadata?.role) {
+        await supabase.auth.updateUser({
+          data: { ...data.user.user_metadata, role: dbRole }
+        });
+      }
+    }
+
     // Get user role from metadata or database
     const userRole = data.user?.user_metadata?.role || "USER";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Eye,
   EyeOff,
@@ -16,16 +16,17 @@ import {
   Check,
   RotateCcw,
   ZoomIn,
+  RefreshCw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
-  getCurrentUserProfile,
   updateUserProfile,
   changePassword,
   type UserProfile,
   type UpdateProfileData,
   type ChangePasswordData,
 } from "@/lib/api/profile.actions";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import Swal from "sweetalert2";
 import Cropper from "react-easy-crop";
 import { Area } from "react-easy-crop";
@@ -34,23 +35,22 @@ import { ProfileInfoSkeleton } from "@/components/ui/Skeleton";
 export default function ProfileSettings() {
   const router = useRouter();
 
+  // Use SWR hook for data fetching with caching
+  const { profile, isLoading, error, refresh } = useUserProfile();
+
   // Account States
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Profile Data from Database
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  // Editable Profile Data
+  // Editable Profile Data - Initialize from profile when available
   const [profileData, setProfileData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    userType: "",
+    name: profile?.name || "",
+    email: profile?.email || "",
+    phone: profile?.phone || "",
+    userType: profile?.userType || "UMKM",
   });
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(profile?.avatar || null);
 
   // Image Crop States
   const [showCropModal, setShowCropModal] = useState(false);
@@ -74,34 +74,18 @@ export default function ProfileSettings() {
   const [passwordError, setPasswordError] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  // Fetch Profile Data on Mount
+  // Update local state when profile data changes from SWR
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    setIsLoading(true);
-    const result = await getCurrentUserProfile();
-
-    if (result.success && result.data) {
-      setProfile(result.data);
+    if (profile) {
       setProfileData({
-        name: result.data.name || "",
-        email: result.data.email || "",
-        phone: result.data.phone || "",
-        userType: result.data.userType || "UMKM",
+        name: profile.name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        userType: profile.userType || "UMKM",
       });
-      setImagePreview(result.data.avatar);
-    } else {
-      await Swal.fire({
-        title: "Error!",
-        text: result.message,
-        icon: "error",
-        confirmButtonColor: "#EF4444",
-      });
+      setImagePreview(profile.avatar || null);
     }
-    setIsLoading(false);
-  };
+  }, [profile]);
 
   // Handle Image Change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,7 +184,8 @@ export default function ProfileSettings() {
       });
       setIsEditMode(false);
       if (result.data) {
-        setProfile(result.data);
+        // Refresh SWR cache
+        refresh();
         window.location.reload();
       }
     } else {
@@ -368,6 +353,37 @@ export default function ProfileSettings() {
     );
   }
 
+  // Error State
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-10 w-10 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Terjadi Kesalahan
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">{error}</p>
+          <button
+            onClick={() => refresh()}
+            className="w-full flex items-center justify-center gap-2 bg-[#A3AF87] text-white py-3.5 rounded-xl font-semibold mb-3 hover:bg-[#95a17a] transition-colors"
+          >
+            <RefreshCw className="h-5 w-5" />
+            Coba Lagi
+          </button>
+          <button
+            onClick={() => router.back()}
+            className="w-full flex items-center justify-center gap-2 text-gray-600 py-3 font-medium hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-6">
       {/* Image Crop Modal */}
@@ -474,13 +490,25 @@ export default function ProfileSettings() {
       {/* Header */}
       <div className="bg-white border-b-2 border-gray-100 sticky top-0 z-10 lg:static">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 mb-3 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
-          >
-            <ArrowLeft className="h-5 w-5 text-[#435664] group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-medium text-gray-700">Kembali</span>
-          </button>
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-2 px-3 py-2 lg:px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all group"
+            >
+              <ArrowLeft className="h-5 w-5 text-[#435664] group-hover:-translate-x-1 transition-transform" />
+              <span className="text-sm font-medium text-gray-700">Kembali</span>
+            </button>
+            <button
+              onClick={() => refresh()}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 px-3 py-2 lg:px-4 bg-[#435664]/10 hover:bg-[#435664]/20 text-[#435664] text-sm font-medium rounded-lg transition-all disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#303646]">
             Pengaturan Akun
           </h1>

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import NavbarLandingPage from "@/components/landing/NavbarLandingPage";
+import { NavbarUser } from "@/components/user/NavbarUser";
 import HeroSection from "@/components/landing/HeroSection";
-import Headline from "@/components/landing/Headline";
-import TentangSection from "@/components/landing/TentangSection";
-import SolusiSection from "@/components/landing/SolusiSection";
-import DampakSection from "@/components/landing/DampakSection";
+// import Headline from "@/components/landing/Headline";
+// import TentangSection from "@/components/landing/TentangSection";
+// import SolusiSection from "@/components/landing/SolusiSection";
+// import DampakSection from "@/components/landing/DampakSection";
+import FeaturedProductsSection from "@/components/landing/FeaturedProductsSection";
+import SupplyConnectMapSection from "@/components/landing/SupplyConnectMapSection";
+import AdvantagesSection from "@/components/landing/AdvantagesSection";
 import TestimoniSection from "@/components/landing/TestimoniSection";
 import FooterSection from "@/components/landing/FooterSection";
 import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
@@ -60,56 +63,55 @@ export default function Home() {
       </Suspense>
 
       {/* Navbar Fixed */}
-      <NavbarLandingPage />
+      <NavbarUser />
 
       {/* Scroll Sections */}
       <main className="scroll-smooth">
         {/* Hero Section - Introduction to EcoMaggie */}
         <HeroSection />
 
-        {/* Headline 1 - Value Proposition */}
+        {/* Featured Products Section - Produk Unggulan */}
+        <FeaturedProductsSection />
+
+        {/* Supply Connect Map Section - Jangkauan Layanan */}
+        <SupplyConnectMapSection />
+
+        {/* Advantages Section - Keunggulan Kami */}
+        <AdvantagesSection />
+
+        {/* Customer Testimonials */}
+        <TestimoniSection />
+
+        {/* OLD SECTIONS - Commented out for now */}
+        {/*
         <Headline
           text="TRANSFORMASI SAMPAH JADI PROFIT"
           backgroundColor="#fdf8d4"
           textColor="#303646"
           dotColor="#ebfba8"
         />
-
-        {/* About EcoMaggie - Mission and Vision */}
         <TentangSection />
-
-        {/* Headline 2 - Partnership Growth */}
         <Headline
           text="BERGABUNG DENGAN 500+ MITRA SUKSES"
           backgroundColor="#a3af87"
           textColor="#ffffff"
           dotColor="#ebfba8"
         />
-
-        {/* Solutions - Supply Connect & Maggot Market */}
         <SolusiSection />
-
-        {/* Headline 3 - Call to Action */}
         <Headline
           text="MULAI HASILKAN PASSIVE INCOME HARI INI"
           backgroundColor="#435664"
           textColor="#ffffff"
           dotColor="#ebfba8"
         />
-
-        {/* Environmental Impact - Sustainability Benefits */}
         <DampakSection />
-
-        {/* Headline 4 - Environmental Impact */}
         <Headline
           text="BERSAMA MENCIPTAKAN INDONESIA LEBIH HIJAU"
           backgroundColor="#303646"
           textColor="#ffffff"
           dotColor="#ebfba8"
         />
-
-        {/* Customer Testimonials */}
-        <TestimoniSection />
+        */}
       </main>
 
       {/* Footer with Contact Information */}

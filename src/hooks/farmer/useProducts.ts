@@ -5,7 +5,7 @@
  * OPTIMIZED WITH SWR CACHING
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import useSWR from "swr";
 import {
   getMyProducts,
@@ -148,50 +148,32 @@ export function useLowStockProducts() {
 }
 
 // ===========================================
-// USE SINGLE PRODUCT HOOK
+// USE SINGLE PRODUCT HOOK - OPTIMIZED WITH SWR
 // ===========================================
 
 export function useProduct(slug: string) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, error, isLoading, mutate } = useSWR(
+    slug ? `product-${slug}` : null,
+    async () => {
+      if (!slug) return null;
 
-  const fetchProduct = useCallback(async () => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
       const result = await getProductBySlug(slug);
 
       if (result.success && result.data) {
-        setProduct(result.data);
-        // Increment view count
-        await incrementViewCount(slug);
-      } else {
-        setError(result.message);
+        // Increment view count (fire and forget)
+        incrementViewCount(slug).catch(console.error);
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil data produk");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [slug]);
-
-  useEffect(() => {
-    fetchProduct();
-  }, [fetchProduct]);
+      throw new Error(result.message || "Gagal mengambil data produk");
+    },
+    staticSWRConfig // Products rarely change
+  );
 
   return {
-    product,
-    loading,
-    error,
-    refetch: fetchProduct,
+    product: data || null,
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
   };
 }
 
@@ -226,90 +208,76 @@ export const defaultSalesTrend: SalesTrendSummary = {
 };
 
 // ===========================================
-// USE SALES TREND HOOK
+// USE SALES TREND HOOK - OPTIMIZED WITH SWR
 // ===========================================
 
 export function useSalesTrend(productId: string | undefined, days: number = 7) {
-  const [salesTrend, setSalesTrend] =
-    useState<SalesTrendSummary>(defaultSalesTrend);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Helper function to generate empty trend data
+  const generateEmptyTrend = useCallback(() => {
+    const today = new Date();
+    const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
 
-  const fetchSalesTrend = useCallback(async () => {
-    if (!productId) {
-      setLoading(false);
-      return;
+    const emptyTrend = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      emptyTrend.push({
+        saleDate: date.toISOString().split("T")[0],
+        dayName: dayNames[date.getDay()],
+        dateLabel: `${date.getDate()} ${monthNames[date.getMonth()]}`,
+        quantitySold: 0,
+        revenue: 0,
+        ordersCount: 0,
+      });
     }
 
-    setLoading(true);
-    setError(null);
+    return {
+      ...defaultSalesTrend,
+      trend: emptyTrend,
+    };
+  }, [days]);
 
-    try {
+  const { data, error, isLoading, mutate } = useSWR(
+    productId ? `sales-trend-${productId}-${days}` : null,
+    async () => {
+      if (!productId) return generateEmptyTrend();
+
       const result = await getProductSalesTrend(productId, days);
 
       if (result.success && result.data) {
-        setSalesTrend(result.data);
-      } else {
-        setError(result.message);
-        // Set default empty trend with proper dates
-        const today = new Date();
-        const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-        const monthNames = [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "Mei",
-          "Jun",
-          "Jul",
-          "Agu",
-          "Sep",
-          "Okt",
-          "Nov",
-          "Des",
-        ];
-
-        const emptyTrend = [];
-        for (let i = days - 1; i >= 0; i--) {
-          const date = new Date(today);
-          date.setDate(date.getDate() - i);
-          emptyTrend.push({
-            saleDate: date.toISOString().split("T")[0],
-            dayName: dayNames[date.getDay()],
-            dateLabel: `${date.getDate()} ${monthNames[date.getMonth()]}`,
-            quantitySold: 0,
-            revenue: 0,
-            ordersCount: 0,
-          });
-        }
-
-        setSalesTrend({
-          ...defaultSalesTrend,
-          trend: emptyTrend,
-        });
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil data trend penjualan");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [productId, days]);
 
-  useEffect(() => {
-    fetchSalesTrend();
-  }, [fetchSalesTrend]);
+      // Return empty trend if no data
+      return generateEmptyTrend();
+    },
+    adminSWRConfig // Dashboard data - refresh every 30s
+  );
 
   return {
-    salesTrend,
-    loading,
-    error,
-    refetch: fetchSalesTrend,
+    salesTrend: data || generateEmptyTrend(),
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
   };
 }
 
 // ===========================================
-// USE PRODUCT REVENUE HOOK (ALL TIME)
+// USE PRODUCT REVENUE HOOK (ALL TIME) - OPTIMIZED WITH SWR
 // ===========================================
 
 export const defaultRevenueStats: ProductRevenueStats = {
@@ -319,45 +287,28 @@ export const defaultRevenueStats: ProductRevenueStats = {
 };
 
 export function useProductRevenue(productId: string | undefined) {
-  const [revenueStats, setRevenueStats] = useState<ProductRevenueStats>(defaultRevenueStats);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, error, isLoading, mutate } = useSWR(
+    productId ? `product-revenue-${productId}` : null,
+    async () => {
+      if (!productId) return defaultRevenueStats;
 
-  const fetchRevenue = useCallback(async () => {
-    if (!productId) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
       const result = await getProductTotalRevenue(productId);
 
       if (result.success && result.data) {
-        setRevenueStats(result.data);
-      } else {
-        setError(result.message);
-        setRevenueStats(defaultRevenueStats);
+        return result.data;
       }
-    } catch (err) {
-      setError("Gagal mengambil data pendapatan");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [productId]);
 
-  useEffect(() => {
-    fetchRevenue();
-  }, [fetchRevenue]);
+      // Return default stats if no data
+      return defaultRevenueStats;
+    },
+    adminSWRConfig // Dashboard data - refresh every 30s
+  );
 
   return {
-    revenueStats,
-    loading,
-    error,
-    refetch: fetchRevenue,
+    revenueStats: data || defaultRevenueStats,
+    loading: isLoading,
+    error: error?.message || null,
+    refetch: mutate,
   };
 }
 

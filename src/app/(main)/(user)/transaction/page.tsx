@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -12,8 +12,7 @@ import {
 import { StatusTabs } from "@/components/user/transaction/StatusTabs";
 import { TransactionCard } from "@/components/user/transaction/TransactionCard";
 import { TrackingDetail } from "@/components/user/transaction/TrackingDetail";
-import { getCustomerOrders } from "@/lib/api/orders.actions";
-import type { Order as DbOrder } from "@/lib/api/orders.actions";
+import { useUserOrders, type Order as DbOrder } from "@/hooks/useUserOrders";
 
 // ============================================
 // TYPES
@@ -205,53 +204,15 @@ function TransactionSkeleton() {
 export default function TransactionPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [trackingTransaction, setTrackingTransaction] = useState<Transaction | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch transactions from database
-  useEffect(() => {
-    loadTransactions();
-  }, []);
+  // Use SWR hook for data fetching with caching
+  const { orders, isLoading, error, refresh } = useUserOrders();
 
-  const loadTransactions = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = await getCustomerOrders();
-
-      if (result.success && result.data) {
-        // Debug: Log first order to check data structure (DISABLED)
-        // if (result.data.length > 0) {
-        //   console.log("🔍 [Transaction Debug] First order items:", result.data[0].items);
-        // }
-
-        const transformedTransactions = result.data.map(transformDbOrderToTransaction);
-
-        // Debug: Log transformed data (DISABLED)
-        // if (transformedTransactions.length > 0) {
-        //   console.log("✅ [Transaction Debug] First transformed transaction:", {
-        //     products: transformedTransactions[0].products.map(p => ({
-        //       name: p.name,
-        //       slug: p.slug,
-        //       productId: p.productId
-        //     }))
-        //   });
-        // }
-
-        setTransactions(transformedTransactions);
-      } else {
-        setError(result.message || "Gagal memuat transaksi");
-      }
-    } catch (err) {
-      console.error("Error loading transactions:", err);
-      setError("Terjadi kesalahan saat memuat transaksi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Transform orders to transactions
+  const transactions = useMemo(() => {
+    return orders.map(transformDbOrderToTransaction);
+  }, [orders]);
 
   // Calculate counts for each tab
   const counts = useMemo(() => ({
@@ -287,10 +248,6 @@ export default function TransactionPage() {
     setTrackingTransaction(transaction);
   };
 
-  const handleRefresh = () => {
-    loadTransactions();
-  };
-
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-6">
       {/* Header */}
@@ -311,7 +268,7 @@ export default function TransactionPage() {
               </div>
             </div>
             <button
-              onClick={handleRefresh}
+              onClick={() => refresh()}
               disabled={isLoading}
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#435664]/10 hover:bg-[#435664]/20 text-[#435664] text-sm font-medium rounded-xl transition-all disabled:opacity-50"
             >
@@ -358,7 +315,7 @@ export default function TransactionPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
             <p className="text-red-600 text-sm">{error}</p>
             <button
-              onClick={handleRefresh}
+              onClick={() => refresh()}
               className="mt-2 text-sm text-red-700 font-medium hover:underline"
             >
               Coba lagi
@@ -447,7 +404,7 @@ export default function TransactionPage() {
                   <TransactionCard
                     transaction={transaction}
                     onTrack={handleTrack}
-                    onCancelSuccess={loadTransactions}
+                    onCancelSuccess={() => refresh()}
                   />
                 </motion.div>
               ))}

@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/ui/marquee";
-import { Star } from "lucide-react";
+import { Star, MessageSquareQuote } from "lucide-react";
+import { motion } from "framer-motion";
 
 const reviews = [
   {
@@ -120,19 +121,59 @@ export default function TestimoniSection() {
   return (
     <section
       id="testimoni-section"
-      className="relative py-16 lg:py-20 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
+      className="relative py-16 lg:py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
     >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12 lg:mb-16"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4" style={{ backgroundColor: "#fdf8d4", border: "2px solid #a3af87" }}>
+            <MessageSquareQuote className="h-4 w-4" style={{ color: "#435664" }} />
+            <span className="text-xs font-bold tracking-wider uppercase" style={{ color: "#303646" }}>
+              Testimoni
+            </span>
+          </div>
+          <h2 className="text-3xl lg:text-5xl font-bold mb-4" style={{ color: "#303646" }}>
+            Apa Kata <span style={{ color: "#a3af87" }}>Pelanggan Kami?</span>
+          </h2>
+          <p className="text-base lg:text-lg max-w-2xl mx-auto" style={{ color: "#435664" }}>
+            Bergabunglah dengan ribuan pelanggan yang puas dan rasakan manfaatnya
+          </p>
+        </motion.div>
+      </div>
+
       <div className="relative flex w-full flex-col items-center justify-center">
-        <Marquee pauseOnHover className="[--duration:40s]">
-          {firstRow.map((review) => (
-            <ReviewCard key={review.name} {...review} />
-          ))}
-        </Marquee>
-        <Marquee reverse pauseOnHover className="[--duration:40s]">
-          {secondRow.map((review) => (
-            <ReviewCard key={review.name} {...review} />
-          ))}
-        </Marquee>
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="w-full"
+        >
+          <Marquee pauseOnHover className="[--duration:40s]">
+            {firstRow.map((review) => (
+              <ReviewCard key={review.name} {...review} />
+            ))}
+          </Marquee>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 100 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="w-full"
+        >
+          <Marquee reverse pauseOnHover className="[--duration:40s]">
+            {secondRow.map((review) => (
+              <ReviewCard key={review.name} {...review} />
+            ))}
+          </Marquee>
+        </motion.div>
 
         {/* Gradient Overlays */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white to-transparent"></div>

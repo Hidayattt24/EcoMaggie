@@ -138,7 +138,7 @@ export default function InvoiceTemplate({
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-[#A3AF87]" />
-                    <p className="text-sm text-gray-600">info@ecomaggie.id</p>
+                    <p className="text-sm text-gray-600">info@ecomaggie.com</p>
                   </div>
                 </div>
               </div>

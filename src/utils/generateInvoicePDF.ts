@@ -87,7 +87,7 @@ export function generateInvoicePDF(data: InvoiceData) {
     yPos
   );
   doc.text(
-    "Email: cs@Ecomaggie.id  |  Telp: +62 822-8895-3268",
+    "Email: cs@ecomaggie.com  |  Telp: +62 822-8895-3268",
     margin,
     yPos + 5
   );
@@ -388,7 +388,7 @@ export function generateInvoicePDF(data: InvoiceData) {
   doc.text("Hubungi Kami", col2X, footerY);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.text("Email: cs@Ecomaggie.id", col2X, footerY + 5);
+  doc.text("Email: cs@ecomaggie.com", col2X, footerY + 5);
   doc.text("Telp: +62 822-8895-3268", col2X, footerY + 10);
 
   // Column 3 - Legal
@@ -409,7 +409,7 @@ export function generateInvoicePDF(data: InvoiceData) {
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.text(
-    "www.ecomaggie.id  |  Jl. T. Batee Treun Gampong Ganoe, Lamdingin, Kuta Alam, Banda Aceh",
+    "www.ecomaggie.com  |  Jl. T. Batee Treun Gampong Ganoe, Lamdingin, Kuta Alam, Banda Aceh",
     pageWidth / 2,
     pageHeight - 3,
     { align: "center" }

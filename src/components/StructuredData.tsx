@@ -19,7 +19,7 @@ export default function StructuredData() {
         },
         description:
           "Platform digital untuk pengelolaan sampah organik dan budidaya maggot BSF di Indonesia",
-        email: "info@ecomaggie.id",
+        email: "info@ecomaggie.com",
         telephone: "+6281234567890",
         address: {
           "@type": "PostalAddress",
@@ -114,7 +114,7 @@ export default function StructuredData() {
           "Platform digital pengelolaan sampah organik dan budidaya maggot BSF",
         url: baseUrl,
         telephone: "+6281234567890",
-        email: "info@ecomaggie.id",
+        email: "info@ecomaggie.com",
         address: {
           "@type": "PostalAddress",
           addressCountry: "ID",

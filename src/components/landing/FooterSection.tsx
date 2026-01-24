@@ -229,10 +229,10 @@ export default function FooterSection() {
                 <div>
                   <p className="font-semibold mb-1 text-white">Email</p>
                   <a
-                    href="mailto:cs@Ecomaggie.id"
+                    href="mailto:cs@ecomaggie.com"
                     className="transition-colors text-white/80 hover:text-[#ebfba8]"
                   >
-                    cs@Ecomaggie.id
+                    cs@ecomaggie.com
                   </a>
                 </div>
               </li>

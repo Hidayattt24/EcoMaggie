@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
               {/* Introduction */}
               <div className="mb-10">
                 <p className="text-base leading-relaxed poppins-regular" style={{ color: "#444" }}>
-                  PT EcoMaggie Indonesia (&quot;EcoMaggie&quot;, &quot;kami&quot;, &quot;kita&quot;) memahami bahwa masalah privasi sangat penting bagi pelanggan kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda saat menggunakan situs web ecomaggie.id (&quot;Situs&quot;) dan layanan kami.
+                  PT EcoMaggie Indonesia (&quot;EcoMaggie&quot;, &quot;kami&quot;, &quot;kita&quot;) memahami bahwa masalah privasi sangat penting bagi pelanggan kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda saat menggunakan situs web www.ecomaggie.com (&quot;Situs&quot;) dan layanan kami.
                 </p>
               </div>
 
@@ -208,7 +208,7 @@ export default function PrivacyPolicyPage() {
                     WhatsApp: <a href="https://wa.me/6289534198039" className="hover:underline" style={{ color: "#A3AF87" }}>+62 895-3419-80391</a>
                   </p>
                   <p className="poppins-regular text-sm mb-1" style={{ color: "#666" }}>
-                    Email: <a href="mailto:cs@ecomaggie.id" className="hover:underline" style={{ color: "#A3AF87" }}>cs@ecomaggie.id</a>
+                    Email: <a href="mailto:cs@ecomaggie.com" className="hover:underline" style={{ color: "#8a9670" }}>cs@ecomaggie.com</a>
                   </p>
                   <p className="poppins-regular text-sm" style={{ color: "#666" }}>
                     Alamat: Jl. T. Batee Treun Gampong Ganoe, Desa Lamdingin, Kec. Kuta Alam, Banda Aceh

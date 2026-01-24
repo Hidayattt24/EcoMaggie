@@ -42,7 +42,7 @@ export default function TermsConditionsPage() {
                   1. Ketentuan Penggunaan
                 </h2>
                 <p className="text-base leading-relaxed poppins-regular" style={{ color: "#444" }}>
-                  EcoMaggie ditawarkan kepada Anda, pengguna, dengan syarat penerimaan Anda atas syarat, ketentuan, dan pemberitahuan yang terkandung di sini dan syarat serta ketentuan tambahan yang mungkin berlaku untuk halaman atau bagian mana pun dari Situs ecomaggie.id (&quot;Situs&quot;).
+                  EcoMaggie ditawarkan kepada Anda, pengguna, dengan syarat penerimaan Anda atas syarat, ketentuan, dan pemberitahuan yang terkandung di sini dan syarat serta ketentuan tambahan yang mungkin berlaku untuk halaman atau bagian mana pun dari Situs www.ecomaggie.com (&quot;Situs&quot;).
                 </p>
               </div>
 
@@ -258,7 +258,7 @@ export default function TermsConditionsPage() {
                     WhatsApp: <a href="https://wa.me/6289534198039" className="hover:underline" style={{ color: "#A3AF87" }}>+62 895-3419-80391</a>
                   </p>
                   <p className="poppins-regular text-sm mb-1" style={{ color: "#666" }}>
-                    Email: <a href="mailto:cs@ecomaggie.id" className="hover:underline" style={{ color: "#A3AF87" }}>cs@ecomaggie.id</a>
+                    Email: <a href="mailto:cs@ecomaggie.com" className="hover:underline" style={{ color: "#8a9670" }}>cs@ecomaggie.com</a>
                   </p>
                   <p className="poppins-regular text-sm" style={{ color: "#666" }}>
                     Alamat: Jl. T. Batee Treun Gampong Ganoe, Desa Lamdingin, Kec. Kuta Alam, Banda Aceh

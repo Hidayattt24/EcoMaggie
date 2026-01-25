@@ -192,6 +192,13 @@ export async function updateUserProfile(
       };
     }
 
+    // Get current profile from database to compare changes
+    const { data: currentProfile } = await supabase
+      .from("users")
+      .select("name, email, phone")
+      .eq("id", user.id)
+      .single();
+
     // Prepare update object
     const updates: any = {
       updated_at: new Date().toISOString(),
@@ -226,32 +233,42 @@ export async function updateUserProfile(
       const avatarUrl = await uploadProfilePicture(updateData.avatar, user.id);
       if (avatarUrl) {
         updates.avatar = avatarUrl;
+      } else {
+        return {
+          success: false,
+          message: "Gagal upload foto profil. Silakan coba lagi.",
+        };
       }
     } else if (updateData.avatar) {
       updates.avatar = updateData.avatar;
     }
 
-    // Update Supabase Auth (email, display name, phone) FIRST using Admin API
+    // Update Supabase Auth ONLY if there are actual changes
     const authUpdates: { email?: string; phone?: string; user_metadata?: { name?: string; phone?: string } } = {};
-    
-    if (updateData.email !== undefined && updateData.email !== user.email) {
+
+    // Check if email actually changed
+    if (updateData.email !== undefined && updateData.email !== currentProfile?.email) {
       authUpdates.email = updateData.email;
     }
-    
-    if (updateData.name !== undefined || updateData.phone !== undefined) {
+
+    // Check if name or phone actually changed
+    const nameChanged = updateData.name !== undefined && updateData.name.trim() !== currentProfile?.name;
+    const phoneChanged = updateData.phone !== undefined && updateData.phone !== currentProfile?.phone;
+
+    if (nameChanged || phoneChanged) {
       authUpdates.user_metadata = {};
-      if (updateData.name !== undefined) {
-        authUpdates.user_metadata.name = updateData.name.trim();
+      if (nameChanged) {
+        authUpdates.user_metadata.name = updateData.name!.trim();
       }
-      if (updateData.phone !== undefined) {
-        authUpdates.user_metadata.phone = updateData.phone;
+      if (phoneChanged) {
+        authUpdates.user_metadata.phone = updateData.phone!;
       }
     }
-    
-    // Also update phone at auth level if provided
-    if (updateData.phone !== undefined) {
+
+    // Also update phone at auth level if it actually changed
+    if (phoneChanged) {
       // Format phone for Supabase Auth (needs E.164 format: +62xxx)
-      let formattedPhone = updateData.phone;
+      let formattedPhone = updateData.phone!;
       if (formattedPhone.startsWith('08')) {
         formattedPhone = '+62' + formattedPhone.substring(1);
       } else if (formattedPhone.startsWith('62')) {
@@ -372,7 +389,8 @@ async function uploadProfilePicture(
   userId: string
 ): Promise<string | null> {
   try {
-    const supabase = await createClient();
+    // Use admin client to bypass RLS for authenticated uploads
+    const adminClient = createAdminClient();
 
     // Convert base64 to blob
     const base64Data = base64Image.split(",")[1];
@@ -384,8 +402,8 @@ async function uploadProfilePicture(
     const fileName = `${userId}_${Date.now()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
 
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    // Upload to Supabase Storage using admin client
+    const { data: uploadData, error: uploadError } = await adminClient.storage
       .from("profiles") // Make sure this bucket exists
       .upload(filePath, buffer, {
         contentType: mimeType,
@@ -400,7 +418,7 @@ async function uploadProfilePicture(
     // Get public URL
     const {
       data: { publicUrl },
-    } = supabase.storage.from("profiles").getPublicUrl(filePath);
+    } = adminClient.storage.from("profiles").getPublicUrl(filePath);
 
     return publicUrl;
   } catch (error) {

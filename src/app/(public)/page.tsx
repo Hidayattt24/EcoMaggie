@@ -74,12 +74,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
     description:
-     "Tahukah kamu? EcoMaggie membangun sistem ekonomi sirkular di Gampong Rukoh dengan menghubungkan sumber limbah organik langsung ke petani maggot melalui platform digital. Bersama-sama, kita mengurangi beban sampah di TPA sekaligus menciptakan produk pakan ternak bernilai ekonomi bagi kesejahteraan masyarakat lokal.",
-    url: "https://eco-maggie.vercel.app",
+      "Tahukah Anda sampah organik bisa jadi sumber penghasilan? Bergabunglah dengan 500+ mitra sukses yang sudah menghasilkan passive income dari sampah. Mulai transformasi Anda hari ini!",
+    url: "https://www.ecomaggie.com",
     type: "website",
   },
   alternates: {
-    canonical: "https://eco-maggie.vercel.app",
+    canonical: "https://www.ecomaggie.com",
   },
 };
 

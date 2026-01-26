@@ -18,7 +18,7 @@ Allow: /login
 Allow: /register
 
 # Sitemap location
-Sitemap: https://eco-maggie.vercel.app/sitemap.xml
+Sitemap: https://www.ecomaggie.com/sitemap.xml
 
 # Crawl-delay to prevent server overload
 Crawl-delay: 1

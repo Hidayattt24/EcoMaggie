@@ -26,7 +26,7 @@ export const landingPageMetadata: Metadata = {
     title: "EcoMaggie - Platform Sampah Organik & Budidaya Maggot",
     description:
       "Platform digital untuk menghubungkan penghasil sampah organik dengan peternak maggot BSF. Ciptakan ekonomi sirkular berkelanjutan bersama EcoMaggie.",
-    url: "https://eco-maggie.vercel.app",
+    url: "https://www.ecomaggie.com",
     siteName: "EcoMaggie",
     type: "website",
     locale: "id_ID",
@@ -47,6 +47,6 @@ export const landingPageMetadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   alternates: {
-    canonical: "https://eco-maggie.vercel.app",
+    canonical: "https://www.ecomaggie.com",
   },
 };

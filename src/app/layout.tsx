@@ -14,7 +14,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://eco-maggie.vercel.app"),
+  metadataBase: new URL("https://www.ecomaggie.com"),
   title: {
     default:
       "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "https://eco-maggie.vercel.app",
+    url: "https://www.ecomaggie.com",
     siteName: "EcoMaggie",
     title:  "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
     description:
@@ -124,9 +124,9 @@ export const metadata: Metadata = {
     // bing: "your-bing-verification-code",
   },
   alternates: {
-    canonical: "https://eco-maggie.vercel.app",
+    canonical: "https://www.ecomaggie.com",
     languages: {
-      "id-ID": "https://eco-maggie.vercel.app",
+      "id-ID": "https://www.ecomaggie.com",
     },
   },
   category: "Technology",

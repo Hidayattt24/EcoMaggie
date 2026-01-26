@@ -237,7 +237,7 @@ Currently minimal third-party scripts. Keep it that way!
 ### 1. PageSpeed Insights
 ```
 https://pagespeed.web.dev/
-Test URL: https://eco-maggie.vercel.app
+Test URL: https://www.ecomaggie.com
 ```
 
 ### 2. Lighthouse (Chrome DevTools)
@@ -251,7 +251,7 @@ Test URL: https://eco-maggie.vercel.app
 ### 3. WebPageTest
 ```
 https://www.webpagetest.org/
-Test URL: https://eco-maggie.vercel.app
+Test URL: https://www.ecomaggie.com
 Location: Tokyo, Japan (closest to Indonesia)
 Connection: 4G LTE
 ```
@@ -259,7 +259,7 @@ Connection: 4G LTE
 ### 4. GTmetrix
 ```
 https://gtmetrix.com/
-Test URL: https://eco-maggie.vercel.app
+Test URL: https://www.ecomaggie.com
 ```
 
 ---

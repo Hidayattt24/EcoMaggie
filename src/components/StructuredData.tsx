@@ -1,7 +1,7 @@
 import Script from "next/script";
 
 export default function StructuredData() {
-  const baseUrl = "https://eco-maggie.vercel.app";
+  const baseUrl = "https://www.ecomaggie.com";
 
   const structuredData = {
     "@context": "https://schema.org",

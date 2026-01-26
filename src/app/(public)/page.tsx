@@ -40,11 +40,11 @@ export const metadata: Metadata = {
     title: "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
     description:
       "Tahukah Anda sampah organik bisa jadi sumber penghasilan? Bergabunglah dengan 500+ mitra sukses yang sudah menghasilkan passive income dari sampah. Mulai transformasi Anda hari ini!",
-    url: "https://eco-maggie.vercel.app",
+    url: "https://www.ecomaggie.com",
     type: "website",
   },
   alternates: {
-    canonical: "https://eco-maggie.vercel.app",
+    canonical: "https://www.ecomaggie.com",
   },
 };
 

@@ -97,9 +97,9 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: "https://www.ecomaggie.com",
     siteName: "EcoMaggie",
-    title: "EcoMaggie - Menghubungkan Solusi Limbah dengan Budidaya Maggot",
+    title:  "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
     description:
-      "EcoMaggie adalah platform jembatan antara penghasil limbah organik dan petani maggot. Kami menciptakan rantai pasok yang stabil, efisien, dan berkelanjutan untuk ekonomi sirkular yang lebih baik.",
+     "Tahukah kamu? EcoMaggie membangun sistem ekonomi sirkular di Gampong Rukoh dengan menghubungkan sumber limbah organik langsung ke petani maggot melalui platform digital. Bersama-sama, kita mengurangi beban sampah di TPA sekaligus menciptakan produk pakan ternak bernilai ekonomi bagi kesejahteraan masyarakat lokal.",
     images: [
       {
         url: "/og-image.jpg",
@@ -112,9 +112,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "EcoMaggie - Ubah Sampah Jadi Profit! Platform #1 Maggot BSF Indonesia",
+       "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
     description:
-      "Apakah Anda tahu limbah organik bisa jadi sumber penghasilan? 500+ mitra sudah sukses! Waktunya Anda bergabung dalam revolusi ekonomi sirkular Indonesia bersama EcoMaggie.",
+      "Tahukah kamu? EcoMaggie membangun sistem ekonomi sirkular di Gampong Rukoh dengan menghubungkan sumber limbah organik langsung ke petani maggot melalui platform digital. Bersama-sama, kita mengurangi beban sampah di TPA sekaligus menciptakan produk pakan ternak bernilai ekonomi bagi kesejahteraan masyarakat lokal.",
     images: ["/og-image.jpg"],
     creator: "@ecomaggie",
   },

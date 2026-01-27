@@ -12,6 +12,7 @@ import {
   Package,
   X,
   AlertTriangle,
+  Recycle,
 } from "lucide-react";
 import { getOperationalAlerts } from "@/lib/api/farmer-dashboard.actions";
 import type { Alert } from "@/lib/api/farmer-dashboard.actions";
@@ -63,7 +64,7 @@ export default function NotificationDropdown() {
       case "new_order":
         return <ShoppingBag className="h-4 w-4" />;
       case "new_supply_request":
-        return <Truck className="h-4 w-4" />;
+        return <Recycle className="h-4 w-4" />;
       case "low_stock":
         return <PackageX className="h-4 w-4" />;
       default:
@@ -83,10 +84,10 @@ export default function NotificationDropdown() {
         };
       case "new_supply_request":
         return {
-          bg: "bg-gradient-to-r from-blue-50 to-blue-100/50",
-          border: "border-blue-200",
-          text: "text-blue-800",
-          iconBg: "bg-blue-100",
+          bg: "bg-gradient-to-r from-[#A3AF87]/10 to-[#A3AF87]/20",
+          border: "border-[#A3AF87]/30",
+          text: "text-[#435664]",
+          iconBg: "bg-[#A3AF87]/20",
         };
       case "low_stock":
         return {
@@ -174,11 +175,11 @@ export default function NotificationDropdown() {
                 </p>
                 <p className="text-[10px] text-emerald-600 font-medium">Pesanan</p>
               </div>
-              <div className="text-center p-2 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg border border-blue-200/50">
-                <p className="text-lg font-bold text-blue-700">
+              <div className="text-center p-2 bg-gradient-to-br from-[#A3AF87]/10 to-[#A3AF87]/20 rounded-lg border border-[#A3AF87]/30">
+                <p className="text-lg font-bold text-[#435664]">
                   {alerts.filter((a) => a.type === "new_supply_request").length}
                 </p>
-                <p className="text-[10px] text-blue-600 font-medium">Pickup</p>
+                <p className="text-[10px] text-[#5a6c5b] font-medium">Supply</p>
               </div>
               <div className="text-center p-2 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-lg border border-amber-200/50">
                 <p className="text-lg font-bold text-amber-700">
@@ -234,21 +235,28 @@ export default function NotificationDropdown() {
                           {alert.message}
                         </p>
                         {alert.metadata && (
-                          <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-1">
-                            {alert.metadata.customerName && (
-                              <span className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                {alert.metadata.customerName}
-                              </span>
+                          <div className="space-y-1">
+                            {alert.metadata.productName && (
+                              <p className="text-xs text-gray-600 font-medium">
+                                {alert.metadata.productName}
+                              </p>
                             )}
-                            {alert.metadata.amount && (
-                              <span className="flex items-center gap-1">
-                                <Package className="h-3 w-3" />
-                                {alert.type === "new_supply_request"
-                                  ? `${alert.metadata.amount}kg`
-                                  : `Rp ${alert.metadata.amount.toLocaleString("id-ID")}`}
-                              </span>
-                            )}
+                            <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                              {alert.metadata.customerName && (
+                                <span className="flex items-center gap-1">
+                                  <User className="h-3 w-3" />
+                                  {alert.metadata.customerName}
+                                </span>
+                              )}
+                              {alert.metadata.amount && (
+                                <span className="flex items-center gap-1">
+                                  <Package className="h-3 w-3" />
+                                  {alert.type === "new_supply_request"
+                                    ? `~${alert.metadata.amount} kg`
+                                    : `Rp ${alert.metadata.amount.toLocaleString("id-ID")}`}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
                         <p className="text-xs text-gray-400 flex items-center gap-1">

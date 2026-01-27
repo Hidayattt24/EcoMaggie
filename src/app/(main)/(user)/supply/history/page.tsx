@@ -70,10 +70,11 @@ const weightLabels: Record<string, string> = {
 };
 
 // Map database status to component status
-const mapDatabaseStatus = (dbStatus: string): "waiting" | "picked_up" | "completed" => {
+const mapDatabaseStatus = (dbStatus: string): "waiting" | "picked_up" | "completed" | "cancelled" => {
   if (dbStatus === "PENDING" || dbStatus === "SCHEDULED") return "waiting";
   if (dbStatus === "ON_THE_WAY" || dbStatus === "PICKED_UP") return "picked_up";
   if (dbStatus === "COMPLETED") return "completed";
+  if (dbStatus === "CANCELLED") return "cancelled";
   return "waiting"; // default
 };
 
@@ -102,6 +103,14 @@ const statusConfig = {
     iconColor: "text-green-600",
     dotColor: "bg-green-500",
   },
+  cancelled: {
+    label: "Dibatalkan",
+    color: "bg-red-50 text-red-700 border-red-200",
+    icon: X,
+    iconBg: "bg-red-100",
+    iconColor: "text-red-600",
+    dotColor: "bg-red-500",
+  },
 };
 
 // Transform UserSupply to component format
@@ -110,7 +119,7 @@ interface TransformedSupply {
   date: string;
   weight: number;
   type: string;
-  status: "waiting" | "picked_up" | "completed";
+  status: "waiting" | "picked_up" | "completed" | "cancelled";
   pickupDate: string | null;
   pickupTime: string | null;
   address: string;
@@ -132,7 +141,7 @@ export default function SupplyHistoryPage() {
     useUserLocation();
 
   const [activeTab, setActiveTab] = useState<
-    "all" | "waiting" | "picked_up" | "completed"
+    "all" | "waiting" | "picked_up" | "completed" | "cancelled"
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<TransformedSupply | null>(null);
@@ -585,9 +594,9 @@ export default function SupplyHistoryPage() {
               {/* Tabs */}
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {[
-                  { 
-                    key: "all", 
-                    label: "Semua", 
+                  {
+                    key: "all",
+                    label: "Semua",
                     count: supplyHistory.length,
                     icon: Package,
                   },
@@ -610,6 +619,13 @@ export default function SupplyHistoryPage() {
                     label: "Selesai",
                     count: completedCount,
                     icon: CheckCircle,
+                  },
+                  {
+                    key: "cancelled",
+                    label: "Dibatalkan",
+                    count: supplyHistory.filter((s) => s.status === "cancelled")
+                      .length,
+                    icon: X,
                   },
                 ].map((tab) => {
                   const TabIcon = tab.icon;

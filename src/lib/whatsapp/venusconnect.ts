@@ -860,3 +860,51 @@ _Supporting Local Farmers, Sustaining Nature_
     message,
   });
 }
+
+/**
+ * Send supply cancellation notification to user
+ */
+export async function sendCancellationNotificationToUser(
+  userPhone: string,
+  userName: string,
+  supplyNumber: string,
+  wasteType: string,
+  pickupDate: string,
+  reason: string
+): Promise<WhatsAppResponse> {
+  const message = `
+*ECO-MAGGIE*
+Penjemputan Dibatalkan
+
+Dear *${userName}*,
+
+Mohon maaf, permintaan penjemputan sampah organik Anda tidak dapat diproses saat ini.
+
+*Informasi Penjemputan*
+Supply ID: ${supplyNumber}
+Jenis Sampah: ${wasteType}
+Tanggal: ${new Date(pickupDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+Status: Dibatalkan
+
+*Alasan Pembatalan*
+${reason}
+
+*Langkah Selanjutnya*
+Anda dapat membuat permintaan penjemputan baru kapan saja melalui aplikasi Eco-Maggie. Kami siap melayani Anda dengan lebih baik di lain waktu.
+
+Mohon maaf atas ketidaknyamanan ini. Jika ada pertanyaan, jangan ragu untuk menghubungi kami.
+
+*Customer Support*
+WhatsApp: +62 822 8895 3268
+Email: support@ecomaggie.com
+
+Terima kasih atas pengertian Anda,
+*Eco-Maggie Team*
+_Supporting Local Farmers, Sustaining Nature_
+  `.trim();
+
+  return await sendWhatsAppMessage({
+    to: userPhone,
+    message,
+  });
+}

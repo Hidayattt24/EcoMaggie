@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Package,
   TrendingUp,
@@ -25,6 +25,8 @@ import {
   Loader2,
   Download,
   RefreshCw,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import {
   type SupplyWithUser,
@@ -434,6 +436,11 @@ const statusConfig = {
     color: "bg-[#A3AF87]/20 text-[#5a6c5b] border-[#A3AF87]",
     dotColor: "bg-[#A3AF87]",
   },
+  cancelled: {
+    label: "Dibatalkan",
+    color: "bg-red-50 text-red-700 border-red-200",
+    dotColor: "bg-red-500",
+  },
 };
 
 export default function SupplyMonitoringPage() {
@@ -449,6 +456,16 @@ export default function SupplyMonitoringPage() {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Reject modal state
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedSupplyToReject, setSelectedSupplyToReject] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [isRejecting, setIsRejecting] = useState(false);
+
+  // Toast notification state
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: "", description: "", type: "success" as "success" | "error" });
 
   // Use SWR hooks for caching - INI YANG MENGURANGI EGRESS!
   const {
@@ -596,6 +613,7 @@ export default function SupplyMonitoringPage() {
     if (dbStatus === "SCHEDULED") return "scheduled";
     if (dbStatus === "ON_THE_WAY") return "on_route";
     if (dbStatus === "PICKED_UP" || dbStatus === "COMPLETED") return "completed";
+    if (dbStatus === "CANCELLED") return "cancelled";
     return "waiting";
   };
   
@@ -607,7 +625,7 @@ export default function SupplyMonitoringPage() {
     const exportData: SupplyExportData[] = filteredSupplies.map((supply) => {
       const mappedStatus = mapStatus(supply.status);
       const status = statusConfig[mappedStatus as keyof typeof statusConfig];
-      
+
       return {
         supplyId: supply.supplyNumber,
         supplierName: supply.userName,
@@ -633,6 +651,62 @@ export default function SupplyMonitoringPage() {
     });
 
     exportSupplyToExcel(exportData, "supply-monitoring");
+  };
+
+  // Handle reject supply
+  const handleRejectClick = (supplyId: string) => {
+    setSelectedSupplyToReject(supplyId);
+    setRejectionReason("");
+    setShowRejectModal(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!selectedSupplyToReject) return;
+
+    setIsRejecting(true);
+    try {
+      const { rejectSupplyByFarmer } = await import("@/lib/api/supply.actions");
+      const result = await rejectSupplyByFarmer(
+        selectedSupplyToReject,
+        rejectionReason || "Supply tidak dapat diproses saat ini"
+      );
+
+      if (result.success) {
+        // Close modal and refresh data
+        setShowRejectModal(false);
+        setSelectedSupplyToReject(null);
+        setRejectionReason("");
+        refreshSupplies();
+
+        // Show success toast notification
+        setToastMessage({
+          title: "Supply Berhasil Ditolak",
+          description: "Notifikasi telah dikirim ke user melalui WhatsApp",
+          type: "success"
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
+      } else {
+        setToastMessage({
+          title: "Gagal Menolak Supply",
+          description: result.message || "Terjadi kesalahan saat menolak supply",
+          type: "error"
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
+      }
+    } catch (error) {
+      console.error("Error rejecting supply:", error);
+      setToastMessage({
+        title: "Terjadi Kesalahan",
+        description: "Tidak dapat menolak supply. Silakan coba lagi.",
+        type: "error"
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+    } finally {
+      setIsRejecting(false);
+    }
   };
 
   return (
@@ -1127,6 +1201,7 @@ export default function SupplyMonitoringPage() {
                 { value: "scheduled", label: "Terjadwal" },
                 { value: "on_route", label: "Dalam Perjalanan" },
                 { value: "completed", label: "Selesai" },
+                { value: "cancelled", label: "Dibatalkan" },
               ].map((tab) => (
                 <button
                   key={tab.value}
@@ -1327,16 +1402,29 @@ export default function SupplyMonitoringPage() {
                           <Link
                             href={`/farmer/supply-monitoring/${supply.id}`}
                             className="p-2 bg-[#fdf8d4]/50 rounded-lg hover:bg-[#fdf8d4] transition-colors group/btn border border-[#a3af87]/30"
+                            title="Lihat Detail"
                           >
                             <Eye className="h-4 w-4 text-[#a3af87] group-hover/btn:text-[#435664]" />
                           </Link>
                           {supply.status !== "COMPLETED" && supply.status !== "CANCELLED" && (
-                            <Link
-                              href={`/farmer/supply-monitoring/action/${supply.id}`}
-                              className="p-2 bg-[#a3af87] rounded-lg hover:bg-[#435664] transition-colors group/btn"
-                            >
-                              <ArrowRight className="h-4 w-4 text-white" />
-                            </Link>
+                            <>
+                              <Link
+                                href={`/farmer/supply-monitoring/action/${supply.id}`}
+                                className="p-2 bg-[#a3af87] rounded-lg hover:bg-[#435664] transition-colors group/btn"
+                                title="Proses Supply"
+                              >
+                                <ArrowRight className="h-4 w-4 text-white" />
+                              </Link>
+                              {(supply.status === "PENDING" || supply.status === "SCHEDULED") && (
+                                <button
+                                  onClick={() => handleRejectClick(supply.id)}
+                                  className="p-2 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors group/btn"
+                                  title="Tolak Supply"
+                                >
+                                  <X className="h-4 w-4 text-red-600" />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
@@ -1355,6 +1443,191 @@ export default function SupplyMonitoringPage() {
             </div>
           )}
         </motion.div>
+
+        {/* Reject Supply Modal */}
+        <AnimatePresence>
+          {showRejectModal && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => !isRejecting && setShowRejectModal(false)}
+                className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+              >
+                {/* Modal */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                >
+                  {/* Header */}
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 border-b-2 border-red-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-red-900">
+                          Tolak Supply
+                        </h3>
+                        <p className="text-sm text-red-700">
+                          Tindakan ini akan membatalkan permintaan
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 space-y-4">
+                    <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-amber-900 mb-1">
+                            Perhatian
+                          </p>
+                          <p className="text-sm text-amber-800">
+                            User akan menerima notifikasi WhatsApp bahwa supply mereka ditolak.
+                            Pastikan Anda memberikan alasan yang jelas.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reason Input */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Alasan Penolakan (Opsional)
+                      </label>
+                      <textarea
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        placeholder="Contoh: Kapasitas penjemputan penuh, lokasi di luar jangkauan, dll."
+                        disabled={isRejecting}
+                        rows={4}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-4 focus:ring-red-100 transition-all resize-none text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Jika tidak diisi, akan menggunakan alasan default
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="bg-gray-50 px-6 py-4 flex gap-3 border-t border-gray-100">
+                    <button
+                      onClick={() => setShowRejectModal(false)}
+                      disabled={isRejecting}
+                      className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={handleRejectConfirm}
+                      disabled={isRejecting}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                    >
+                      {isRejecting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <X className="h-4 w-4" />
+                          Tolak Supply
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {showToast && (
+            <motion.div
+              initial={{ opacity: 0, y: -50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.95 }}
+              className="fixed top-6 right-6 z-[100] max-w-md"
+            >
+              <div
+                className={`rounded-2xl shadow-2xl border-2 overflow-hidden ${
+                  toastMessage.type === "success"
+                    ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
+                    : "bg-gradient-to-br from-red-50 to-rose-50 border-red-200"
+                }`}
+              >
+                <div className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        toastMessage.type === "success"
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                      }`}
+                    >
+                      {toastMessage.type === "success" ? (
+                        <CheckCircle className="h-6 w-6 text-white" />
+                      ) : (
+                        <AlertTriangle className="h-6 w-6 text-white" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4
+                        className={`font-bold text-lg mb-1 ${
+                          toastMessage.type === "success"
+                            ? "text-green-900"
+                            : "text-red-900"
+                        }`}
+                      >
+                        {toastMessage.title}
+                      </h4>
+                      <p
+                        className={`text-sm ${
+                          toastMessage.type === "success"
+                            ? "text-green-700"
+                            : "text-red-700"
+                        }`}
+                      >
+                        {toastMessage.description}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowToast(false)}
+                      className={`p-1 rounded-lg transition-colors flex-shrink-0 ${
+                        toastMessage.type === "success"
+                          ? "hover:bg-green-100 text-green-600"
+                          : "hover:bg-red-100 text-red-600"
+                      }`}
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <motion.div
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{ duration: 5, ease: "linear" }}
+                  className={`h-1 ${
+                    toastMessage.type === "success"
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  }`}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

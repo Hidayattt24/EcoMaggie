@@ -859,6 +859,138 @@ export async function deleteMultipleSupplies(
 }
 
 // ==========================================
+// REJECT SUPPLY BY FARMER
+// ==========================================
+
+export async function rejectSupplyByFarmer(
+  supplyId: string,
+  rejectionReason?: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        message: "Anda harus login untuk menolak supply",
+        error: "Unauthorized",
+      };
+    }
+
+    // Verify user is a farmer
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (userError || !userData || userData.role !== "FARMER") {
+      return {
+        success: false,
+        message: "Hanya farmer yang dapat menolak supply",
+        error: "Forbidden",
+      };
+    }
+
+    // Get supply details
+    const { data: supply, error: fetchError } = await supabase
+      .from("user_supplies")
+      .select("*, users!user_supplies_user_id_fkey(name, phone)")
+      .eq("id", supplyId)
+      .single();
+
+    if (fetchError || !supply) {
+      return {
+        success: false,
+        message: "Supply tidak ditemukan",
+        error: fetchError?.message || "Not found",
+      };
+    }
+
+    // Check if supply can be rejected (only PENDING or SCHEDULED)
+    if (!["PENDING", "SCHEDULED"].includes(supply.status)) {
+      return {
+        success: false,
+        message: "Supply tidak dapat ditolak karena sudah dalam proses",
+        error: "Invalid status",
+      };
+    }
+
+    // Update status to CANCELLED
+    const { error: updateError } = await supabase
+      .from("user_supplies")
+      .update({
+        status: "CANCELLED",
+        notes: rejectionReason
+          ? `${supply.notes || ""}\n\nDitolak oleh farmer: ${rejectionReason}`.trim()
+          : supply.notes
+      })
+      .eq("id", supplyId);
+
+    if (updateError) {
+      console.error("Reject supply error:", updateError);
+      return {
+        success: false,
+        message: "Gagal menolak supply",
+        error: updateError.message,
+      };
+    }
+
+    // Send WhatsApp notification to user
+    console.log("📱 Sending rejection notification to user...");
+    try {
+      const userPhone = supply.users?.phone;
+      const userName = supply.users?.name || "Pengguna";
+
+      if (userPhone) {
+        // Import sendCancellationNotificationToUser from whatsapp module
+        const { sendCancellationNotificationToUser } = await import("@/lib/whatsapp/venusconnect");
+
+        const whatsappResult = await sendCancellationNotificationToUser(
+          userPhone,
+          userName,
+          supply.supply_number || "N/A",
+          supply.waste_type,
+          supply.pickup_date,
+          rejectionReason || "Supply tidak dapat diproses saat ini"
+        );
+
+        if (whatsappResult.success) {
+          console.log(`✅ WhatsApp notification sent to user: ${userName}`);
+        } else {
+          console.error(`⚠️ Failed to send WhatsApp to user: ${whatsappResult.message}`);
+        }
+      }
+    } catch (whatsappError) {
+      console.error("⚠️ WhatsApp notification error:", whatsappError);
+      // Don't fail the rejection if WhatsApp fails
+    }
+
+    // Revalidate pages
+    revalidatePath("/farmer/supply-monitoring");
+    revalidatePath("/supply/history");
+
+    return {
+      success: true,
+      message: "Supply berhasil ditolak",
+    };
+  } catch (error) {
+    console.error("Reject supply error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat menolak supply",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ==========================================
 // GET SUPPLY STATISTICS
 // ==========================================
 

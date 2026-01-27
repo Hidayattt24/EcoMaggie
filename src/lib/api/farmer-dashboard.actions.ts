@@ -492,25 +492,59 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
   // 2. Check for PENDING SUPPLY REQUESTS from community (last 10 hours)
   const { data: pendingSupplies } = await supabase
     .from("user_supplies")
-    .select("id, user_id, waste_type, estimated_weight, status, created_at, users:user_id(name, full_name)")
+    .select(`
+      id,
+      user_id,
+      waste_type,
+      estimated_weight,
+      supply_number,
+      status,
+      pickup_date,
+      created_at,
+      users!user_supplies_user_id_fkey(name, phone)
+    `)
     .in("status", ["PENDING", "SCHEDULED"])
     .gte("created_at", tenHoursAgo)
     .order("created_at", { ascending: false })
     .limit(10);
 
   if (pendingSupplies) {
+    // Map waste type labels
+    const wasteTypeLabels: Record<string, string> = {
+      sisa_makanan: "Sisa Makanan",
+      sayuran_buah: "Sayuran & Buah",
+      sisa_dapur: "Sisa Dapur",
+      campuran: "Campuran Organik",
+      produk_susu: "Produk Susu",
+    };
+
+    // Map weight labels
+    const weightLabels: Record<string, string> = {
+      "1": "1 kg",
+      "3": "1-3 kg",
+      "5": "3-5 kg",
+      "10": "5-10 kg",
+      "15": "10-15 kg",
+    };
+
     pendingSupplies.forEach((supply: any) => {
-      const userName = supply.users?.full_name || supply.users?.name || "Penyuplai";
+      const userName = supply.users?.name || "Penyuplai";
+      const wasteTypeName = wasteTypeLabels[supply.waste_type] || supply.waste_type;
+      const weightLabel = weightLabels[supply.estimated_weight] || `${supply.estimated_weight} kg`;
+
+      // Convert estimated weight to number for metadata
+      const estimatedWeightNum = parseInt(supply.estimated_weight) || 0;
+
       alerts.push({
         id: `supply-${supply.id}`,
         type: "new_supply_request",
-        message: `Permintaan pickup sampah ${supply.waste_type} (${supply.estimated_weight}kg) dari ${userName}`,
+        message: `Permintaan pickup ${wasteTypeName} dari ${userName}`,
         createdAt: supply.created_at,
         metadata: {
           supplyId: supply.id,
           customerName: userName,
-          productName: supply.waste_type,
-          amount: supply.estimated_weight,
+          productName: `${wasteTypeName} (${weightLabel})`,
+          amount: estimatedWeightNum, // Show weight in kg as number
         },
       });
     });

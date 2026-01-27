@@ -34,6 +34,7 @@ import {
   Sun,
   Sunset,
   History,
+  Coffee,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useDefaultAddress } from "@/hooks/useDefaultAddress";
@@ -87,6 +88,14 @@ const wasteTypes = [
     desc: "Ampas dari olahan kedelai",
     color: "bg-yellow-100 text-yellow-700",
     borderColor: "border-yellow-200",
+  },
+  {
+    id: "produk_susu",
+    name: "Produk Susu",
+    icon: Coffee,
+    desc: "Susu, yogurt, keju",
+    color: "bg-blue-100 text-blue-600",
+    borderColor: "border-blue-200",
   },
   {
     id: "bahan_nabati_lain",
@@ -516,6 +525,7 @@ export default function SupplyInputPage() {
       nasi_mie_karbohidrat: "Nasi, Mie & Karbohidrat",
       roti_kue: "Roti & Kue",
       ampas_tahu_tempe: "Ampas Tahu & Tempe",
+      produk_susu: "Produk Susu",
       bahan_nabati_lain: "Bahan Nabati Lainnya",
     };
 
@@ -749,46 +759,59 @@ export default function SupplyInputPage() {
                       className="space-y-8"
                     >
                       {/* Waste Type */}
-                      <div>
-                        <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Jenis Sampah Organik Nabati
+                      <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-2 sm:border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
+                        <label className="flex items-center gap-2 sm:gap-2.5 text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-5">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                            <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                          </div>
+                          <span className="text-[#435664] leading-tight">
+                            Pilih Jenis Sampah Organik Nabati
+                          </span>
                         </label>
-                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 lg:gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4">
                           {wasteTypes.map((type) => {
                             const Icon = type.icon;
                             const isSelected = formData.wasteType === type.id;
                             return (
                               <motion.button
                                 key={type.id}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
                                 onClick={() =>
                                   setFormData({
                                     ...formData,
                                     wasteType: type.id,
                                   })
                                 }
-                                className={`p-4 lg:p-5 rounded-2xl border-2 text-left transition-all ${
+                                className={`p-3 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl border-2 sm:border-3 text-left transition-all ${
                                   isSelected
-                                    ? "border-[#435664] bg-[#435664]/5 shadow-md"
-                                    : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm`
+                                    ? "border-[#435664] bg-gradient-to-br from-[#435664] to-[#303646] shadow-xl ring-2 sm:ring-4 ring-[#435664]/30"
+                                    : `border-gray-200 bg-white hover:border-[#A3AF87] hover:shadow-lg hover:ring-2 hover:ring-[#A3AF87]/20`
                                 }`}
                               >
                                 <div
-                                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${type.color}`}
+                                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-3 transition-all ${
+                                    isSelected
+                                      ? "bg-white/20"
+                                      : type.color
+                                  }`}
                                 >
-                                  <Icon className="h-6 w-6" />
+                                  <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${isSelected ? "text-white" : ""}`} />
                                 </div>
                                 <p
-                                  className={`font-semibold text-sm lg:text-base ${
+                                  className={`font-bold text-xs sm:text-sm lg:text-base leading-tight ${
                                     isSelected
-                                      ? "text-[#435664]"
+                                      ? "text-white"
                                       : "text-gray-900"
                                   }`}
                                 >
                                   {type.name}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 leading-tight ${
+                                  isSelected
+                                    ? "text-white/80"
+                                    : "text-gray-500"
+                                }`}>
                                   {type.desc}
                                 </p>
                               </motion.button>
@@ -798,31 +821,36 @@ export default function SupplyInputPage() {
                       </div>
 
                       {/* Weight */}
-                      <div>
-                        <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Perkiraan Berat Sampah
+                      <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-2 sm:border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
+                        <label className="flex items-center gap-2 sm:gap-2.5 text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-5">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                            <Scale className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                          </div>
+                          <span className="text-[#435664] leading-tight">
+                            Pilih Perkiraan Berat Sampah
+                          </span>
                         </label>
-                        <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                           {weightOptions.map((option) => {
                             const isSelected = formData.weight === option.value;
                             return (
                               <motion.button
                                 key={option.value}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
                                 onClick={() =>
                                   setFormData({
                                     ...formData,
                                     weight: option.value,
                                   })
                                 }
-                                className={`p-4 rounded-xl text-center transition-all ${
+                                className={`p-3 sm:p-4 rounded-lg sm:rounded-xl text-center transition-all border-2 ${
                                   isSelected
-                                    ? "bg-[#435664] text-white shadow-lg"
-                                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                    ? "bg-gradient-to-br from-[#435664] to-[#303646] text-white shadow-xl ring-2 sm:ring-4 ring-[#435664]/30 border-[#435664]"
+                                    : "bg-white text-gray-700 hover:bg-[#A3AF87]/10 hover:shadow-lg hover:border-[#A3AF87] hover:ring-2 hover:ring-[#A3AF87]/20 border-gray-200"
                                 }`}
                               >
-                                <p className="font-bold text-lg">
+                                <p className="font-bold text-sm sm:text-base lg:text-lg">
                                   {option.label}
                                 </p>
                                 <p
@@ -841,9 +869,15 @@ export default function SupplyInputPage() {
                       </div>
 
                       {/* Photo/Video Upload */}
-                      <div>
-                        <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Foto Sampah <span className="text-red-500">*</span>
+                      <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-2 sm:border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
+                        <label className="flex items-center gap-2 sm:gap-2.5 text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-5">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                            <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                          </div>
+                          <span className="text-[#435664] leading-tight">
+                            Upload Foto Sampah
+                          </span>
+                          <span className="text-red-500 text-sm sm:text-base">*</span>
                         </label>
                         <MediaUploader
                           onPhotoChange={handlePhotoChange}
@@ -880,41 +914,48 @@ export default function SupplyInputPage() {
                     >
                       {/* Address & Location Section - Redesigned */}
                       <div className="space-y-4 sm:space-y-6">
-                        {/* Section Header */}
-                        <div>
-                          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
-                            Lokasi Penjemputan
-                          </h3>
-                          <p className="text-xs sm:text-sm text-gray-600">
-                            Tentukan alamat dan titik lokasi untuk memudahkan kurir menemukan sampah Anda
-                          </p>
+                        {/* Section Header - More Prominent */}
+                        <div className="bg-gradient-to-r from-[#A3AF87] to-[#8a9670] rounded-xl sm:rounded-xl p-3.5 sm:p-4 lg:p-5 shadow-lg">
+                          <div className="flex items-center gap-2.5 sm:gap-3">
+                            <div className="p-2 sm:p-2.5 lg:p-3 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex-shrink-0">
+                              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm sm:text-base lg:text-xl font-bold text-white mb-0.5 sm:mb-1 leading-tight">
+                                Pilih Lokasi Penjemputan
+                              </h3>
+                              <p className="text-[10px] sm:text-xs lg:text-sm text-white/90 font-medium leading-tight">
+                                Tentukan alamat dan titik lokasi untuk memudahkan kurir
+                              </p>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Step 1: Address Selection */}
-                        <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#435664]">
+                        <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
                           <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#435664] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
+                            <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-[#435664] to-[#303646] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-base shadow-md">
                               1
                             </div>
-                            <h4 className="font-bold text-gray-900 text-sm sm:text-base">Pilih Alamat</h4>
+                            <h4 className="font-bold text-[#435664] text-base sm:text-lg">Pilih Alamat Penjemputan</h4>
                           </div>
 
                           {/* Default Address Option */}
                           {!useCustomAddress && (
                             <div className="space-y-2 sm:space-y-3">
-                              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-[#A3AF87] shadow-sm">
+                              <div className="bg-gradient-to-br from-white to-[#A3AF87]/5 rounded-lg sm:rounded-xl p-4 sm:p-5 border-3 border-[#A3AF87] shadow-md ring-2 ring-[#A3AF87]/20">
                                 <div className="flex items-start gap-2 sm:gap-3">
-                                  <div className="p-1.5 sm:p-2 bg-[#A3AF87]/10 rounded-lg">
-                                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-[#A3AF87]" />
+                                  <div className="p-2 sm:p-2.5 bg-[#A3AF87] rounded-xl shadow-sm">
+                                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                                      <p className="text-[10px] sm:text-xs font-semibold text-[#A3AF87]">
-                                        ALAMAT TERPILIH
+                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
+                                      <p className="text-xs sm:text-sm font-bold text-[#A3AF87]">
+                                        ✓ ALAMAT TERPILIH
                                       </p>
-                                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-[#A3AF87]" />
+                                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[#A3AF87]" />
                                     </div>
-                                    <p className="text-xs sm:text-sm text-gray-900 font-medium break-words">
+                                    <p className="text-sm sm:text-base text-gray-900 font-semibold break-words leading-relaxed">
                                       {defaultAddress}
                                     </p>
                                   </div>
@@ -932,9 +973,9 @@ export default function SupplyInputPage() {
                                     addressId: null,
                                   });
                                 }}
-                                className="w-full py-2.5 sm:py-3 px-3 sm:px-4 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-gray-700 font-medium text-xs sm:text-sm hover:border-[#A3AF87] hover:bg-[#A3AF87]/5 transition-all flex items-center justify-center gap-2"
+                                className="w-full py-3 sm:py-3.5 px-3 sm:px-4 bg-white border-2 border-[#A3AF87]/30 rounded-lg sm:rounded-xl text-[#435664] font-semibold text-sm sm:text-base hover:border-[#A3AF87] hover:bg-[#A3AF87]/10 hover:shadow-md transition-all flex items-center justify-center gap-2"
                               >
-                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                                 Gunakan Alamat Lain
                               </button>
                             </div>
@@ -991,31 +1032,31 @@ export default function SupplyInputPage() {
                         </div>
 
                         {/* Step 2: Pin Location (Recommended) */}
-                        <div className="bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-[#435664]">
+                        <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4">
                             <div className="flex items-center gap-2 sm:gap-3">
-                              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#435664] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
+                              <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-[#435664] to-[#303646] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-base shadow-md">
                                 2
                               </div>
                               <div>
-                                <h4 className="font-bold text-gray-900 text-sm sm:text-base">
+                                <h4 className="font-bold text-[#435664] text-base sm:text-lg">
                                   Tandai Titik Lokasi di Peta
                                 </h4>
-                                <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
+                                <p className="text-xs sm:text-sm text-[#435664]/80 mt-0.5 font-medium">
                                   Direkomendasikan untuk akurasi pickup
                                 </p>
                               </div>
                             </div>
-                            <div className="px-2.5 sm:px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] sm:text-xs font-bold self-start">
-                              REKOMENDASI
+                            <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-full text-xs sm:text-sm font-bold self-start shadow-md">
+                              ⭐ REKOMENDASI
                             </div>
                           </div>
 
                           {/* Info Box */}
-                          <div className="mb-3 sm:mb-4 flex items-start gap-2 p-2.5 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl border border-blue-200">
-                            <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-[10px] sm:text-xs text-blue-900">
-                              <span className="font-semibold">Mengapa perlu?</span> Titik lokasi yang presisi membantu kurir menemukan lokasi penjemputan dengan cepat dan tepat.
+                          <div className="mb-3 sm:mb-4 flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg sm:rounded-xl shadow-md">
+                            <Info className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5" />
+                            <p className="text-xs sm:text-sm text-white font-medium">
+                              <span className="font-bold">💡 Mengapa perlu?</span> Titik lokasi yang presisi membantu kurir menemukan lokasi penjemputan dengan cepat dan tepat.
                             </p>
                           </div>
 
@@ -1033,30 +1074,35 @@ export default function SupplyInputPage() {
                       {/* Date & Time Grid */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Date Picker Custom */}
-                        <div>
-                          <label className="block text-base font-semibold text-gray-900 mb-4">
-                            Tanggal Pickup
+                        <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-2 sm:border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
+                          <label className="flex items-center gap-2 sm:gap-2.5 text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-5">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                            </div>
+                            <span className="text-[#435664] leading-tight">
+                              Pilih Tanggal Pickup
+                            </span>
                           </label>
                           <div className="relative">
                             <button
                               type="button"
                               onClick={() => setShowDatePicker(!showDatePicker)}
-                              className="w-full px-5 py-4 bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#435664] rounded-2xl text-left hover:shadow-md transition-all group"
+                              className="w-full px-3.5 sm:px-4 lg:px-5 py-3 sm:py-3.5 lg:py-4 bg-white border-2 sm:border-3 border-[#A3AF87] rounded-xl sm:rounded-2xl text-left hover:shadow-lg hover:border-[#8a9670] hover:ring-2 sm:hover:ring-4 hover:ring-[#A3AF87]/20 transition-all group"
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-[#435664]/20 rounded-xl group-hover:bg-[#435664]/30 transition-colors">
-                                  <Calendar className="h-5 w-5 text-[#435664]" />
+                              <div className="flex items-center gap-2.5 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 bg-[#A3AF87]/20 rounded-lg sm:rounded-xl group-hover:bg-[#A3AF87]/30 transition-colors flex-shrink-0">
+                                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-[#435664]" />
                                 </div>
-                                <div className="flex-1">
-                                  <p className="text-sm text-gray-600 font-medium">
-                                    Pilih Tanggal
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs sm:text-sm text-gray-600 font-semibold">
+                                    Tanggal Terpilih
                                   </p>
-                                  <p className="text-base font-semibold text-gray-900">
+                                  <p className="text-sm sm:text-base font-bold text-gray-900 truncate">
                                     {formatDateDisplay(formData.date)}
                                   </p>
                                 </div>
                                 <ChevronRight
-                                  className={`h-5 w-5 text-[#435664] transition-transform ${
+                                  className={`h-4 w-4 sm:h-5 sm:w-5 text-[#435664] transition-transform flex-shrink-0 ${
                                     showDatePicker ? "rotate-90" : ""
                                   }`}
                                 />
@@ -1206,11 +1252,16 @@ export default function SupplyInputPage() {
                         </div>
 
                         {/* Time Slot - Icon Based */}
-                        <div>
-                          <label className="block text-base font-semibold text-gray-900 mb-4">
-                            Waktu Pickup
+                        <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-2 sm:border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
+                          <label className="flex items-center gap-2 sm:gap-2.5 text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-5">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                            </div>
+                            <span className="text-[#435664] leading-tight">
+                              Pilih Waktu Pickup
+                            </span>
                           </label>
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-3 gap-2 sm:gap-3">
                             {timeSlots.map((slot) => {
                               const isSelected = formData.timeSlot === slot.id;
                               const IconComponent = slot.icon;
@@ -1218,35 +1269,35 @@ export default function SupplyInputPage() {
                                 <motion.button
                                   key={slot.id}
                                   type="button"
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
+                                  whileHover={{ scale: 1.03 }}
+                                  whileTap={{ scale: 0.97 }}
                                   onClick={() =>
                                     setFormData({
                                       ...formData,
                                       timeSlot: slot.id,
                                     })
                                   }
-                                  className={`p-4 rounded-2xl transition-all group ${
+                                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all group border-2 sm:border-3 ${
                                     isSelected
-                                      ? "bg-gradient-to-br from-[#303646] to-[#435664] shadow-xl border-2 border-[#303646]"
-                                      : "bg-white border-2 border-gray-200 hover:border-[#435664] hover:shadow-lg"
+                                      ? "bg-gradient-to-br from-[#303646] to-[#435664] shadow-xl ring-2 sm:ring-4 ring-[#435664]/30 border-[#303646]"
+                                      : "bg-white border-gray-200 hover:border-[#A3AF87] hover:shadow-lg hover:ring-2 hover:ring-[#A3AF87]/20"
                                   }`}
                                 >
                                   <div
-                                    className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center transition-all ${
+                                    className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 rounded-full flex items-center justify-center transition-all ${
                                       isSelected
                                         ? "bg-white/20"
                                         : "bg-gray-50 group-hover:bg-[#fdf8d4]"
                                     }`}
                                   >
                                     <IconComponent
-                                      className={`h-6 w-6 ${
+                                      className={`h-5 w-5 sm:h-6 sm:w-6 ${
                                         isSelected ? "text-white" : slot.color
                                       }`}
                                     />
                                   </div>
                                   <p
-                                    className={`font-bold text-sm ${
+                                    className={`font-bold text-xs sm:text-sm leading-tight ${
                                       isSelected
                                         ? "text-white"
                                         : "text-gray-900"
@@ -1255,7 +1306,7 @@ export default function SupplyInputPage() {
                                     {slot.label}
                                   </p>
                                   <p
-                                    className={`text-xs mt-1 ${
+                                    className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 leading-tight ${
                                       isSelected
                                         ? "text-white/80"
                                         : "text-gray-500"
@@ -1271,10 +1322,17 @@ export default function SupplyInputPage() {
                       </div>
 
                       {/* Notes */}
-                      <div>
-                        <label className="block text-base font-semibold text-gray-900 mb-4">
-                          Catatan untuk Kurir{" "}
-                          <span className="font-normal text-gray-400">
+                      <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-2 sm:border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
+                        <label className="flex items-center gap-2 sm:gap-2.5 text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-5 flex-wrap">
+                          <div className="flex items-center gap-2 sm:gap-2.5">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#435664] to-[#303646] rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                              <Info className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                            </div>
+                            <span className="text-[#435664] leading-tight">
+                              Catatan untuk Kurir
+                            </span>
+                          </div>
+                          <span className="text-xs sm:text-sm font-normal text-gray-400">
                             (opsional)
                           </span>
                         </label>
@@ -1285,7 +1343,7 @@ export default function SupplyInputPage() {
                           }
                           placeholder="Contoh: Sampah di depan pagar, warna kantong hitam..."
                           rows={3}
-                          className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#a3af87] focus:ring-2 focus:ring-[#a3af87]/20 transition-all resize-none text-gray-900"
+                          className="w-full px-3.5 sm:px-4 py-3 sm:py-4 bg-white border-2 sm:border-3 border-[#A3AF87] rounded-xl sm:rounded-2xl focus:outline-none focus:border-[#8a9670] focus:ring-2 sm:focus:ring-4 focus:ring-[#a3af87]/20 hover:border-[#8a9670] transition-all resize-none text-sm sm:text-base text-gray-900 font-medium shadow-sm"
                         />
                       </div>
 

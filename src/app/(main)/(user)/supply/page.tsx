@@ -116,6 +116,7 @@ export default function SupplyPage() {
     { name: "Nasi & Mie", icon: UtensilsCrossed, color: "text-amber-600" },
     { name: "Ampas Tahu", icon: Wheat, color: "text-yellow-700" },
     { name: "Roti & Kue", icon: Cake, color: "text-pink-600" },
+    { name: "Produk Susu", icon: Coffee, color: "text-amber-700" },
     { name: "Sisa Bahan Nabati", icon: Leaf, color: "text-emerald-600" },
   ];
 
@@ -131,7 +132,6 @@ export default function SupplyPage() {
   const notAcceptedWastes = [
     { name: "Daging & Tulang", icon: Bone, color: "text-red-600" },
     { name: "Ikan & Seafood", icon: Fish, color: "text-blue-700" },
-    { name: "Produk Susu", icon: Coffee, color: "text-amber-700" },
     { name: "Sampah Berminyak", icon: Droplet, color: "text-orange-700" },
     { name: "Sampah Campuran", icon: Ban, color: "text-gray-700" },
   ];
@@ -494,7 +494,7 @@ export default function SupplyPage() {
                   Jenis yang Diterima
                 </h3>
               </div>
-              <div className="grid grid-cols-2 gap-2 lg:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 lg:gap-3">
                 {acceptedWastes.map((waste, index) => {
                   const Icon = waste.icon;
                   return (
@@ -554,7 +554,7 @@ export default function SupplyPage() {
                   Yang Tidak Diterima
                 </h3>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
                 {notAcceptedWastes.map((waste, index) => {
                   const Icon = waste.icon;
                   return (

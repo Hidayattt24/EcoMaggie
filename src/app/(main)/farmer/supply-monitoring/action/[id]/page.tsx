@@ -20,6 +20,7 @@ import {
   Phone,
   Loader2,
   Image as ImageIcon,
+  ExternalLink,
 } from "lucide-react";
 import {
   getFarmerSupplyById,
@@ -74,13 +75,7 @@ const statusConfig = {
   },
 };
 
-// Map waste type to display label
-const wasteTypeLabels: Record<string, string> = {
-  sisa_makanan: "Sisa Makanan",
-  sayuran_buah: "Sayuran & Buah",
-  sisa_dapur: "Sisa Dapur",
-  campuran: "Campuran Organik",
-};
+// Waste type is now stored as proper name in database, no need for mapping
 
 // Map weight to display label
 const weightLabels: Record<string, string> = {
@@ -485,7 +480,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 <div>
                   <p className="text-sm text-[#435664]">Jenis</p>
                   <p className="font-semibold text-[#303646]">
-                    {wasteTypeLabels[supply.wasteType] || supply.wasteType}
+                    {supply.wasteType}
                   </p>
                 </div>
                 <div>
@@ -547,32 +542,90 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                 <MapPin className="h-5 w-5 text-[#a3af87]" />
                 Penjemputan
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
+                {/* Address Details */}
                 <div>
-                  <p className="text-sm text-[#435664]">Alamat</p>
-                  <p className="text-sm text-[#303646]">{supply.pickupAddress}</p>
+                  <p className="text-sm text-[#435664] mb-2 font-semibold">Alamat Lengkap</p>
+                  {supply.addressLabel && (
+                    <p className="text-xs font-bold text-[#a3af87] mb-1">
+                      📍 {supply.addressLabel}
+                    </p>
+                  )}
+                  {supply.addressStreet ? (
+                    <div className="bg-white rounded-xl p-3 border-2 border-[#a3af87]/20">
+                      <p className="text-sm text-[#303646] font-semibold mb-2">
+                        {supply.addressStreet}
+                      </p>
+                      <div className="space-y-1 text-xs text-[#435664]">
+                        {supply.addressVillage && (
+                          <p>Desa/Kelurahan: <span className="font-medium text-[#303646]">{supply.addressVillage}</span></p>
+                        )}
+                        {supply.addressDistrict && (
+                          <p>Kecamatan: <span className="font-medium text-[#303646]">{supply.addressDistrict}</span></p>
+                        )}
+                        {supply.addressCity && (
+                          <p>Kota/Kabupaten: <span className="font-medium text-[#303646]">{supply.addressCity}</span></p>
+                        )}
+                        {supply.addressProvince && (
+                          <p>Provinsi: <span className="font-medium text-[#303646]">{supply.addressProvince}</span></p>
+                        )}
+                        {supply.addressPostalCode && (
+                          <p>Kode Pos: <span className="font-medium text-[#303646]">{supply.addressPostalCode}</span></p>
+                        )}
+                      </div>
+                      {supply.pickupLatitude && supply.pickupLongitude && (
+                        <a
+                          href={`https://www.google.com/maps?q=${supply.pickupLatitude},${supply.pickupLongitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold text-xs transition-all shadow-md hover:shadow-lg"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Buka di Google Maps
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl p-3 border-2 border-[#a3af87]/20">
+                      <p className="text-sm text-[#303646]">{supply.pickupAddress}</p>
+                      {supply.pickupLatitude && supply.pickupLongitude && (
+                        <a
+                          href={`https://www.google.com/maps?q=${supply.pickupLatitude},${supply.pickupLongitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold text-xs transition-all shadow-md hover:shadow-lg"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Buka di Google Maps
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm text-[#435664] flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Tanggal
-                  </p>
-                  <p className="font-semibold text-[#303646]">
-                    {new Date(supply.pickupDate).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    })}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-[#435664] flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Waktu
-                  </p>
-                  <p className="font-semibold text-[#303646]">
-                    {supply.pickupTimeRange || supply.pickupTimeSlot}
-                  </p>
+
+                {/* Date & Time */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-xl p-3 border border-[#a3af87]/20">
+                    <p className="text-xs text-[#435664] mb-1 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Tanggal
+                    </p>
+                    <p className="font-semibold text-sm text-[#303646]">
+                      {new Date(supply.pickupDate).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl p-3 border border-[#a3af87]/20">
+                    <p className="text-xs text-[#435664] mb-1 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Waktu
+                    </p>
+                    <p className="font-semibold text-sm text-[#303646]">
+                      {supply.pickupTimeRange || supply.pickupTimeSlot}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

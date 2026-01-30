@@ -15,10 +15,12 @@ Pastikan file `.env` Anda sudah memiliki konfigurasi berikut:
 ```env
 # VenusConnect WhatsApp API
 VENUSCONNECT_API_KEY=ec8fcfbe1a0c42bca5bd5a119df36e7f51f88d47ca1042358b51a47b1ce3f72c
-VENUSCONNECT_SESSION_ID=default
+VENUSCONNECT_SESSION_ID=default1
 ```
 
-✅ **Sudah dikonfigurasi** - Anda tidak perlu melakukan apa-apa untuk step ini.
+✅ **Sudah dikonfigurasi** - Pastikan `VENUSCONNECT_SESSION_ID` sesuai dengan session yang Anda buat di VenusConnect dashboard.
+
+⚠️ **PENTING:** Jika Anda membuat session dengan ID berbeda (misalnya "default1", "production", dll), pastikan untuk mengupdate `VENUSCONNECT_SESSION_ID` di file `.env` agar sesuai.
 
 ### 2. Setup WhatsApp Session
 
@@ -33,7 +35,7 @@ VENUSCONNECT_SESSION_ID=default
 3. Klik **"Create New Session"**
 
 4. Isi form:
-   - Session ID: `default`
+   - Session ID: `default1` (atau nama session Anda)
    - Webhook URL: (kosongkan/optional)
 
 5. Klik **"Create Session"**
@@ -54,14 +56,14 @@ VENUSCONNECT_SESSION_ID=default
 curl -X POST https://whatsapp.venusverse.me/api/session/create \
   -H "x-api-key: ec8fcfbe1a0c42bca5bd5a119df36e7f51f88d47ca1042358b51a47b1ce3f72c" \
   -H "Content-Type: application/json" \
-  -d '{"session_id": "default"}'
+  -d '{"session_id": "default1"}'
 
 # 2. Get QR code
-curl https://whatsapp.venusverse.me/api/session/default/qr \
+curl https://whatsapp.venusverse.me/api/session/default1/qr \
   -H "x-api-key: ec8fcfbe1a0c42bca5bd5a119df36e7f51f88d47ca1042358b51a47b1ce3f72c"
 
 # 3. Check session status
-curl https://whatsapp.venusverse.me/api/session/default/status \
+curl https://whatsapp.venusverse.me/api/session/default1/status \
   -H "x-api-key: ec8fcfbe1a0c42bca5bd5a119df36e7f51f88d47ca1042358b51a47b1ce3f72c"
 ```
 
@@ -80,7 +82,7 @@ Response yang sukses:
   "success": true,
   "data": [
     {
-      "session_id": "default",
+      "session_id": "default1",
       "status": "connected",
       "connected": true,
       "phone_number": "628xxxxxxxxxx",
@@ -104,7 +106,7 @@ npm run dev
 Atau test langsung via API:
 
 ```bash
-curl -X POST https://whatsapp.venusverse.me/api/session/default/send \
+curl -X POST https://whatsapp.venusverse.me/api/session/default1/send \
   -H "x-api-key: ec8fcfbe1a0c42bca5bd5a119df36e7f51f88d47ca1042358b51a47b1ce3f72c" \
   -H "Content-Type: application/json" \
   -d '{
@@ -123,9 +125,10 @@ curl -X POST https://whatsapp.venusverse.me/api/session/default/send \
 
 **Solusi:**
 1. Buka https://whatsapp.venusverse.me
-2. Create session baru dengan ID: `default`
+2. Create session baru dengan ID yang sesuai (misalnya: `default1`)
 3. Scan QR code dengan WhatsApp
-4. Restart development server
+4. Update `VENUSCONNECT_SESSION_ID` di file `.env` sesuai dengan session ID yang dibuat
+5. Restart development server
 
 ### Session Disconnected
 
@@ -150,7 +153,7 @@ curl -X POST https://whatsapp.venusverse.me/api/session/default/send \
 **Checklist:**
 - ✅ Session WhatsApp sudah connected (cek di dashboard)
 - ✅ Environment variable `VENUSCONNECT_API_KEY` sudah diset
-- ✅ Environment variable `VENUSCONNECT_SESSION_ID` = `default`
+- ✅ Environment variable `VENUSCONNECT_SESSION_ID` sesuai dengan session yang dibuat (misalnya: `default1`)
 - ✅ Nomor telepon user ada di database
 - ✅ Format nomor telepon valid (08xxx atau 628xxx)
 - ✅ Development server sudah di-restart setelah update .env
@@ -189,6 +192,12 @@ curl -X POST https://whatsapp.venusverse.me/api/session/default/send \
 - **Trigger:** Saat pesanan dikonfirmasi selesai (auto-complete)
 - **Dikirim ke:** Customer phone number
 - **Function:** `sendOrderCompletedWhatsApp()`
+
+### 6. **Supply Dibatalkan** ❌
+- **Trigger:** Saat farmer membatalkan supply monitoring
+- **Dikirim ke:** User phone number
+- **Function:** `sendCancellationNotificationToUser()`
+- **Special:** Menampilkan alasan pembatalan dari farmer
 
 ---
 

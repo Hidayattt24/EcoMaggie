@@ -431,8 +431,26 @@ export async function updateAddress(
       updates.latitude = updateData.latitude;
     if (updateData.longitude !== undefined)
       updates.longitude = updateData.longitude;
-    if (updateData.isDefault !== undefined)
+
+    // Handle isDefault separately to ensure only one default address
+    if (updateData.isDefault !== undefined && updateData.isDefault === true) {
+      // First, unset all user's addresses as default
+      const { error: unsetError } = await supabase
+        .from("addresses")
+        .update({ is_default: false })
+        .eq("user_id", user.id);
+
+      if (unsetError) {
+        console.error("Unset default addresses error:", unsetError);
+        return {
+          success: false,
+          message: "Gagal mengatur alamat utama",
+        };
+      }
+      updates.is_default = true;
+    } else if (updateData.isDefault !== undefined) {
       updates.is_default = updateData.isDefault;
+    }
 
     // Update address
     const { data: updatedAddress, error: updateError } = await supabase
@@ -611,7 +629,21 @@ export async function setDefaultAddress(
       };
     }
 
-    // Update: set this address as default (trigger will handle others)
+    // First, unset all user's addresses as default
+    const { error: unsetError } = await supabase
+      .from("addresses")
+      .update({ is_default: false })
+      .eq("user_id", user.id);
+
+    if (unsetError) {
+      console.error("Unset default addresses error:", unsetError);
+      return {
+        success: false,
+        message: "Gagal mengatur alamat utama",
+      };
+    }
+
+    // Then, set this address as default
     const { data: updatedAddress, error: updateError } = await supabase
       .from("addresses")
       .update({ is_default: true })

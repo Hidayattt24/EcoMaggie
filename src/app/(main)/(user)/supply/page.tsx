@@ -35,37 +35,124 @@ import {
   TriangleAlert,
   Coffee,
   Salad,
+  Check,
+  ChevronDown,
 } from "lucide-react";
-import { useUserLocation } from "@/hooks/useUserLocation";
+import { getUserAddresses } from "@/lib/api/address.actions";
+import { getCurrentUserProfile } from "@/lib/api/profile.actions";
+import { isLocationSupported } from "@/lib/utils/region-validator";
 
 type LocationStatus = "loading" | "allowed" | "not_allowed" | "not_registered";
 
-export default function SupplyPage() {
-  const { userLocation, isSupplyConnectAvailable, isLoading, hasAddress } =
-    useUserLocation();
-  const [locationStatus, setLocationStatus] =
-    useState<LocationStatus>("loading");
+interface Address {
+  id: string;
+  label: string;
+  recipientName: string;
+  recipientPhone: string;
+  streetAddress: string;
+  city: string;
+  province: string;
+  district?: string;
+  village?: string;
+  postalCode: string;
+  isDefault: boolean;
+}
 
-  // Determine location status based on user address data from database
+export default function SupplyPage() {
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>("loading");
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+
+  // Fetch addresses on mount
+  useEffect(() => {
+    async function fetchAddresses() {
+      setIsLoading(true);
+      try {
+        // Fetch addresses from addresses table
+        const addressResult = await getUserAddresses();
+        let allAddresses: Address[] = [];
+
+        if (addressResult.success && addressResult.data && addressResult.data.length > 0) {
+          allAddresses = addressResult.data.map((addr) => ({
+            id: addr.id,
+            label: addr.label,
+            recipientName: addr.recipientName,
+            recipientPhone: addr.recipientPhone,
+            streetAddress: addr.streetAddress,
+            city: addr.city,
+            province: addr.province,
+            district: addr.district,
+            village: addr.village,
+            postalCode: addr.postalCode,
+            isDefault: addr.isDefault,
+          }));
+        } else {
+          // Only use profile address as fallback if NO addresses exist in table
+          const profileResult = await getCurrentUserProfile();
+          if (profileResult.success && profileResult.data) {
+            const profile = profileResult.data;
+
+            // Check if user has address data in profile
+            if (profile.province && profile.city && profile.postalCode) {
+              // Create a virtual address from profile data
+              const profileAddress: Address = {
+                id: "profile-address",
+                label: "Alamat Profil",
+                recipientName: profile.name || "",
+                recipientPhone: profile.phone || "",
+                streetAddress: profile.fullAddress || "",
+                city: profile.city,
+                province: profile.province,
+                district: profile.district || undefined,
+                village: profile.village || undefined,
+                postalCode: profile.postalCode,
+                isDefault: true,
+              };
+
+              allAddresses.push(profileAddress);
+            }
+          }
+        }
+
+        setAddresses(allAddresses);
+
+        // Set default address as selected
+        const defaultAddr = allAddresses.find(a => a.isDefault) || allAddresses[0];
+        if (defaultAddr) {
+          setSelectedAddress(defaultAddr);
+        }
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAddresses();
+  }, []);
+
+  // Determine location status based on selected address
   useEffect(() => {
     if (isLoading) {
       setLocationStatus("loading");
       return;
     }
 
-    // User belum set alamat di database
-    if (!hasAddress || !userLocation) {
+    if (!selectedAddress) {
       setLocationStatus("not_registered");
       return;
     }
 
-    // User sudah set alamat, cek apakah di wilayah layanan
-    if (isSupplyConnectAvailable) {
+    // Check if selected address is in supported region
+    const isSupported = isLocationSupported(selectedAddress.province, selectedAddress.city);
+    if (isSupported) {
       setLocationStatus("allowed");
     } else {
       setLocationStatus("not_allowed");
     }
-  }, [userLocation, isSupplyConnectAvailable, isLoading, hasAddress]);
+  }, [selectedAddress, isLoading]);
 
   const isLocationAllowed = locationStatus === "allowed";
 
@@ -190,27 +277,115 @@ export default function SupplyPage() {
               variants={itemVariants}
               className="lg:col-span-6 rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#435664] to-[#303646]"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-white/20 rounded-xl">
-                  {locationStatus === "loading" ? (
-                    <Loader2 className="h-6 w-6 text-white animate-spin" />
-                  ) : locationStatus === "allowed" ? (
-                    <MapPin className="h-6 w-6 text-white" />
-                  ) : locationStatus === "not_allowed" ? (
-                    <MapPinOff className="h-6 w-6 text-white" />
-                  ) : (
-                    <UserCircle className="h-6 w-6 text-white" />
-                  )}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    {locationStatus === "loading" ? (
+                      <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    ) : locationStatus === "allowed" ? (
+                      <MapPin className="h-6 w-6 text-white" />
+                    ) : locationStatus === "not_allowed" ? (
+                      <MapPinOff className="h-6 w-6 text-white" />
+                    ) : (
+                      <UserCircle className="h-6 w-6 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white text-base lg:text-lg">
+                      Status Wilayah Layanan
+                    </h3>
+                    <p className="text-xs text-white/70">
+                      Pilih alamat untuk cek layanan
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-white text-base lg:text-lg">
-                    Status Wilayah Layanan
-                  </h3>
-                  <p className="text-xs text-white/70">
-                    Berdasarkan alamat pendaftaran
-                  </p>
-                </div>
+                <Link
+                  href="/profile/addresses"
+                  className="px-3 py-2 text-xs font-semibold text-white bg-white/20 hover:bg-white/30 rounded-lg transition-all flex items-center gap-2"
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Kelola</span>
+                </Link>
               </div>
+
+              {/* Address Selector */}
+              {addresses.length > 0 && !isLoading && (
+                <div className="mb-4 relative">
+                  <button
+                    onClick={() => setShowAddressDropdown(!showAddressDropdown)}
+                    className="w-full bg-white/90 rounded-xl p-3 text-left flex items-center justify-between hover:bg-white transition-all"
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#435664]">
+                        {selectedAddress?.label || "Pilih Alamat"}
+                      </p>
+                      {selectedAddress && (
+                        <p className="text-xs text-[#435664]/70 mt-0.5">
+                          {selectedAddress.city}, {selectedAddress.province}
+                        </p>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-5 w-5 text-[#435664] transition-transform ${showAddressDropdown ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Dropdown List */}
+                  <AnimatePresence>
+                    {showAddressDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto"
+                      >
+                        {addresses.map((address) => (
+                          <button
+                            key={address.id}
+                            onClick={() => {
+                              setSelectedAddress(address);
+                              setShowAddressDropdown(false);
+                            }}
+                            className={`w-full p-3 text-left hover:bg-[#fdf8d4] transition-all border-b border-gray-100 last:border-0 ${
+                              selectedAddress?.id === address.id ? "bg-[#fdf8d4]" : ""
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div
+                                className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center flex-shrink-0 ${
+                                  selectedAddress?.id === address.id
+                                    ? "border-[#a3af87] bg-[#a3af87]"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {selectedAddress?.id === address.id && (
+                                  <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-bold text-[#435664]">
+                                    {address.label}
+                                  </p>
+                                  {address.isDefault && (
+                                    <span className="px-2 py-0.5 bg-[#a3af87] text-white text-xs font-bold rounded">
+                                      Utama
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-[#435664]/70 mt-0.5">
+                                  {address.streetAddress}
+                                </p>
+                                <p className="text-xs text-[#435664]/70">
+                                  {address.city}, {address.province}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {/* Location Status Display */}
               <AnimatePresence mode="wait">
@@ -254,7 +429,7 @@ export default function SupplyPage() {
                   </motion.div>
                 )}
 
-                {locationStatus === "allowed" && userLocation && (
+                {locationStatus === "allowed" && selectedAddress && (
                   <motion.div
                     key="allowed"
                     initial={{ opacity: 0, height: 0 }}
@@ -266,7 +441,7 @@ export default function SupplyPage() {
                       <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-gray-900 font-medium">
-                          {userLocation.kabupatenKota}, {userLocation.provinsi}
+                          {selectedAddress.city}, {selectedAddress.province}
                         </p>
                         <p className="text-xs text-gray-600 mt-1">
                           Lokasi terverifikasi! Anda dapat menggunakan Supply Connect.
@@ -276,7 +451,7 @@ export default function SupplyPage() {
                   </motion.div>
                 )}
 
-                {locationStatus === "not_allowed" && userLocation && (
+                {locationStatus === "not_allowed" && selectedAddress && (
                   <motion.div
                     key="not_allowed"
                     initial={{ opacity: 0, height: 0 }}
@@ -291,9 +466,9 @@ export default function SupplyPage() {
                           Di Luar Jangkauan Layanan
                         </p>
                         <p className="text-xs text-gray-600 mt-1">
-                          Alamat Anda ({userLocation.kabupatenKota},{" "}
-                          {userLocation.provinsi}) berada di luar wilayah
-                          layanan.
+                          Alamat "{selectedAddress.label}" ({selectedAddress.city},{" "}
+                          {selectedAddress.province}) berada di luar wilayah
+                          layanan. Silakan pilih alamat lain atau tambahkan alamat di Banda Aceh.
                         </p>
                       </div>
                     </div>
@@ -311,9 +486,18 @@ export default function SupplyPage() {
                   Tambah Alamat
                 </Link>
               ) : locationStatus === "not_allowed" ? (
-                <div className="text-center py-3 px-4 rounded-xl bg-white/20 text-white/80 text-sm">
-                  <MapPinOff className="h-4 w-4 inline mr-2" />
-                  Layanan tidak tersedia
+                <div className="space-y-2">
+                  <div className="text-center py-2 px-4 rounded-xl bg-white/10 text-white/80 text-xs">
+                    <MapPinOff className="h-4 w-4 inline mr-2" />
+                    Alamat ini di luar jangkauan
+                  </div>
+                  <Link
+                    href="/profile/addresses"
+                    className="w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all bg-white/20 text-white hover:bg-white/30 shadow-lg hover:shadow-xl"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    Kelola Alamat
+                  </Link>
                 </div>
               ) : locationStatus === "allowed" ? (
                 <div className="text-center py-3 px-4 rounded-xl bg-white/20 text-white text-sm font-medium">

@@ -9,12 +9,10 @@ import {
   Package,
   ChevronRight,
   Check,
-  Plus,
   Store,
   Clock,
   ShoppingBag,
   Bike,
-  Minus,
   ArrowLeft,
   Shield,
   Lock,
@@ -26,12 +24,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getUserAddresses, createAddress, type CreateAddressData } from "@/lib/api/address.actions";
+import { getUserAddresses } from "@/lib/api/address.actions";
+import { getCurrentUserProfile } from "@/lib/api/profile.actions";
 import { getCheckoutData, type CheckoutProduct } from "@/lib/api/checkout.actions";
 import { getShippingOptions, transformCartToBiteshipItems, type ShippingOption } from "@/lib/api/biteship.actions";
 import { createPaymentTransaction } from "@/lib/api/payment.actions";
 import { snapClient } from "@/lib/midtrans/snap-client";
-import AddressFormFields from "@/components/auth/AddressFormFields";
 import { CheckoutSkeleton } from "@/components/checkout/CheckoutSkeleton";
 import LocationPicker from "@/components/supply/LocationPicker";
 
@@ -92,20 +90,6 @@ function CheckoutContent() {
   const [deliveryLongitude, setDeliveryLongitude] = useState<number | null>(null);
   const [deliveryLocationAddress, setDeliveryLocationAddress] = useState<string>("");
 
-  // Inline Form States
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    province: "",
-    city: "",
-    district: "",
-    village: "",
-    postalCode: "",
-    fullAddress: "",
-  });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
   // Handler for location selection
   const handleLocationSelect = (lat: number, lng: number, address: string) => {
     console.log("🗺️ [Checkout] Location selected:", { lat, lng, address });
@@ -130,10 +114,12 @@ function CheckoutContent() {
       setError(null);
 
       try {
-        // Fetch addresses
+        // Fetch addresses from addresses table
         const addressResult = await getUserAddresses();
-        if (addressResult.success && addressResult.data) {
-          const transformedAddresses: Address[] = addressResult.data.map((addr) => ({
+        let transformedAddresses: Address[] = [];
+
+        if (addressResult.success && addressResult.data && addressResult.data.length > 0) {
+          transformedAddresses = addressResult.data.map((addr) => ({
             id: addr.id,
             label: addr.label,
             recipientName: addr.recipientName,
@@ -147,11 +133,49 @@ function CheckoutContent() {
             isDefault: addr.isDefault,
           }));
           setAddresses(transformedAddresses);
-          
+
           // Set default address if exists
           const defaultAddr = transformedAddresses.find(a => a.isDefault);
           if (defaultAddr) {
             setSelectedAddress(defaultAddr);
+          }
+        } else {
+          // Only use profile address as fallback if NO addresses exist in table
+          console.log("⚠️ [Checkout] No addresses in addresses table, checking user profile...");
+
+          const profileResult = await getCurrentUserProfile();
+
+          if (profileResult.success && profileResult.data) {
+            const profile = profileResult.data;
+
+            // Check if user has address data in profile
+            if (profile.province && profile.city && profile.postalCode) {
+              console.log("✅ [Checkout] Address found in user profile:", {
+                province: profile.province,
+                city: profile.city,
+              });
+
+              // Create a virtual address from profile data (only if no addresses in table)
+              const profileAddress: Address = {
+                id: "profile-address",
+                label: "Alamat Profil",
+                recipientName: profile.name || "",
+                recipientPhone: profile.phone || "",
+                streetAddress: profile.fullAddress || "",
+                city: profile.city,
+                province: profile.province,
+                district: profile.district || undefined,
+                village: profile.village || undefined,
+                postalCode: profile.postalCode,
+                isDefault: true,
+              };
+
+              transformedAddresses = [profileAddress];
+              setAddresses(transformedAddresses);
+              setSelectedAddress(profileAddress);
+            } else {
+              console.log("⚠️ [Checkout] No address found in user profile either");
+            }
           }
         }
 
@@ -254,82 +278,6 @@ function CheckoutContent() {
       console.log("⏹️ Cancelled pending shipping API call");
     };
   }, [selectedAddress, checkoutProducts]);
-
-  // Handlers
-  const handleFormChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user types
-    if (formErrors[field]) {
-      setFormErrors(prev => ({ ...prev, [field]: "" }));
-    }
-  };
-
-  const handleSaveAddress = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate form
-    const errors: Record<string, string> = {};
-    if (!formData.name.trim()) errors.name = "Label alamat wajib diisi";
-    if (!formData.phone.trim()) errors.phone = "Nomor telepon wajib diisi";
-    if (!formData.province.trim()) errors.province = "Provinsi wajib dipilih";
-    if (!formData.city.trim()) errors.city = "Kota/Kabupaten wajib dipilih";
-    if (!formData.district.trim()) errors.district = "Kecamatan wajib dipilih";
-    if (!formData.village.trim()) errors.village = "Kelurahan/Desa wajib diisi";
-    if (!formData.postalCode.trim()) errors.postalCode = "Kode pos wajib diisi";
-    if (!formData.fullAddress.trim()) errors.fullAddress = "Alamat lengkap wajib diisi";
-    
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-    
-    const addressData: CreateAddressData = {
-      label: formData.name,
-      recipientName: formData.name,
-      recipientPhone: formData.phone,
-      streetAddress: formData.fullAddress,
-      city: formData.city,
-      province: formData.province,
-      district: formData.district,
-      village: formData.village,
-      postalCode: formData.postalCode,
-    };
-
-    const result = await createAddress(addressData);
-    
-    if (result.success && result.data) {
-      const newAddress: Address = {
-        id: result.data.id,
-        label: result.data.label,
-        recipientName: result.data.recipientName,
-        recipientPhone: result.data.recipientPhone,
-        streetAddress: result.data.streetAddress,
-        city: result.data.city,
-        province: result.data.province,
-        district: result.data.district,
-        village: result.data.village,
-        postalCode: result.data.postalCode,
-        isDefault: result.data.isDefault,
-      };
-      
-      setAddresses([...addresses, newAddress]);
-      setSelectedAddress(newAddress);
-      setShowAddressForm(false);
-      setFormData({
-        name: "",
-        phone: "",
-        province: "",
-        city: "",
-        district: "",
-        village: "",
-        postalCode: "",
-        fullAddress: "",
-      });
-      setFormErrors({});
-    } else {
-      alert(result.message || "Gagal menyimpan alamat");
-    }
-  };
 
   // Map shipping option type to icon
   const getShippingIcon = (type: string, courierCode: string): React.ElementType => {
@@ -694,114 +642,14 @@ function CheckoutContent() {
                         Alamat Pengiriman
                       </h2>
                     </div>
-                    <button
-                      onClick={() => setShowAddressForm(!showAddressForm)}
-                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-[#435664] hover:text-white bg-white border-2 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
-                      style={{
-                        borderColor: "#a3af87",
-                      }}
+                    <Link
+                      href="/profile/addresses"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#a3af87] to-[#8a9670] hover:from-[#8a9670] hover:to-[#a3af87] border-2 border-[#a3af87] rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
                     >
-                      {showAddressForm ? (
-                        <Minus className="h-4 w-4" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                      <span>{showAddressForm ? "Tutup" : "Tambah Alamat"}</span>
-                    </button>
+                      <MapPin className="h-4 w-4" />
+                      <span>Kelola Alamat</span>
+                    </Link>
                   </div>
-
-                  {/* Inline Address Form */}
-                  <AnimatePresence>
-                    {showAddressForm && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden mb-6"
-                      >
-                        <form
-                          onSubmit={handleSaveAddress}
-                          className="border-2 rounded-2xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 shadow-xl"
-                          style={{
-                            borderColor: "rgba(163, 175, 135, 0.2)",
-                            background:
-                              "linear-gradient(to bottom right, white, rgba(163, 175, 135, 0.05))",
-                            boxShadow:
-                              "0 20px 50px -12px rgba(163, 175, 135, 0.15)",
-                          }}
-                        >
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-bold text-[#435664] mb-2">
-                                Label Alamat <span className="text-red-500">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                required
-                                placeholder="Rumah, Kantor, dll"
-                                value={formData.name}
-                                onChange={(e) => handleFormChange("name", e.target.value)}
-                                className={`w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white ${
-                                  formErrors.name ? "border-red-500" : "border-gray-300"
-                                }`}
-                                style={{ color: "#5a6c5b" }}
-                              />
-                              {formErrors.name && (
-                                <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-bold text-[#435664] mb-2">
-                                Nomor Telepon <span className="text-red-500">*</span>
-                              </label>
-                              <input
-                                type="tel"
-                                required
-                                placeholder="08xxxxxxxxxx"
-                                value={formData.phone}
-                                onChange={(e) => handleFormChange("phone", e.target.value)}
-                                className={`w-full px-4 py-3 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all bg-white ${
-                                  formErrors.phone ? "border-red-500" : "border-gray-300"
-                                }`}
-                                style={{ color: "#5a6c5b" }}
-                              />
-                              {formErrors.phone && (
-                                <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Address Form Fields Component */}
-                          <AddressFormFields
-                            formData={formData}
-                            errors={formErrors}
-                            onChange={handleFormChange}
-                          />
-
-                          <div className="flex gap-3 pt-5 border-t-2 border-[#5a6c5b]/10">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowAddressForm(false);
-                                setFormErrors({});
-                              }}
-                              className="px-6 py-3 text-sm font-bold text-[#435664]/70 hover:text-[#435664] hover:bg-[#fdf8d4] rounded-xl transition-all"
-                            >
-                              Batal
-                            </button>
-                            <button
-                              type="submit"
-                              className="px-8 py-3 bg-gradient-to-r from-[#a3af87] to-[#95a17a]/90 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all"
-                            >
-                              Simpan Alamat
-                            </button>
-                          </div>
-                        </form>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
 
                   {/* Saved Addresses */}
                   <div className="space-y-3">

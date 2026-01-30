@@ -252,14 +252,20 @@ export default function AddressFormWithAPI({
   };
 
   const handleVillageChange = (value: string) => {
+    console.log("🏘️ [handleVillageChange] Selected value:", value);
     const selectedVillage = villages.find((v) => v.code === value);
+    console.log("🏘️ [handleVillageChange] Found village:", selectedVillage);
+
     if (selectedVillage) {
+      console.log("✅ [handleVillageChange] Setting village:", selectedVillage.name);
       onChange("village", selectedVillage.name);
       // Auto-fill postal code if available
       if (selectedVillage.postal_codes.length > 0) {
+        console.log("📮 [handleVillageChange] Setting postal code:", selectedVillage.postal_codes[0]);
         onChange("postalCode", selectedVillage.postal_codes[0]);
       }
     } else {
+      console.log("⚠️ [handleVillageChange] Village not found, using raw value:", value);
       onChange("village", value);
     }
   };
@@ -570,7 +576,10 @@ export default function AddressFormWithAPI({
                     <button
                       key={option.value}
                       type="button"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("🖱️ [Village Button] Clicked:", option.label, "Code:", option.value);
                         handleVillageChange(option.value);
                         setShowVillageDropdown(false);
                         setVillageSearch("");

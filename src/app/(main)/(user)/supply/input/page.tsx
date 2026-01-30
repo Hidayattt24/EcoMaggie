@@ -205,7 +205,9 @@ export default function SupplyInputPage() {
 
   const formatDateDisplay = (dateStr: string) => {
     if (!dateStr) return "Pilih tanggal";
-    const date = new Date(dateStr);
+    // Parse tanggal manual untuk menghindari timezone issue
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     const days = [
       "Minggu",
       "Senin",
@@ -237,8 +239,8 @@ export default function SupplyInputPage() {
   const handleDateSelect = (day: number) => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
-    const selectedDate = new Date(year, month, day);
-    const formattedDate = selectedDate.toISOString().split("T")[0];
+    // Format tanggal manual untuk menghindari timezone issue
+    const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     setFormData({ ...formData, date: formattedDate });
     setShowDatePicker(false);
   };
@@ -550,7 +552,9 @@ export default function SupplyInputPage() {
 
     // Format date
     const formatDate = (dateStr: string) => {
-      const date = new Date(dateStr);
+      // Parse tanggal manual untuk menghindari timezone issue
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
       return date.toLocaleDateString("id-ID", {
         weekday: "long",
         day: "numeric",
@@ -1192,23 +1196,18 @@ export default function SupplyInputPage() {
                                       getDaysInMonth(currentMonth).daysInMonth,
                                   }).map((_, i) => {
                                     const day = i + 1;
-                                    const dateStr = new Date(
-                                      currentMonth.getFullYear(),
-                                      currentMonth.getMonth(),
-                                      day,
-                                    )
-                                      .toISOString()
-                                      .split("T")[0];
+                                    const year = currentMonth.getFullYear();
+                                    const month = currentMonth.getMonth();
+                                    // Format tanggal manual untuk menghindari timezone issue
+                                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                                     const isSelected =
                                       formData.date === dateStr;
-                                    const isToday =
-                                      dateStr ===
-                                      new Date().toISOString().split("T")[0];
-                                    const isPast =
-                                      new Date(dateStr) <
-                                      new Date(
-                                        new Date().toISOString().split("T")[0],
-                                      );
+
+                                    // Get today's date in local timezone
+                                    const today = new Date();
+                                    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                                    const isToday = dateStr === todayStr;
+                                    const isPast = dateStr < todayStr;
 
                                     return (
                                       <button
@@ -1415,11 +1414,16 @@ export default function SupplyInputPage() {
                     <div className="flex items-center justify-between py-2 border-b border-white/20">
                       <span className="text-white/70">Tanggal Pickup</span>
                       <span className="font-medium">
-                        {new Date(formData.date).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {(() => {
+                          // Parse tanggal manual untuk menghindari timezone issue
+                          const [year, month, day] = formData.date.split('-').map(Number);
+                          const date = new Date(year, month - 1, day);
+                          return date.toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          });
+                        })()}
                       </span>
                     </div>
                   )}

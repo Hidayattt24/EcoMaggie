@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getDefaultAddress } from "@/lib/api/address.actions";
+import { getCurrentUserProfile } from "@/lib/api/profile.actions";
 import { isLocationSupported } from "@/lib/utils/region-validator";
 
 // ============================================
@@ -33,17 +34,18 @@ export function useUserLocation(): UseUserLocationReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [hasAddress, setHasAddress] = useState(false);
 
-  // Fetch user's default address from database
+  // Fetch user's location from addresses table or user profile as fallback
   const fetchUserLocation = useCallback(async () => {
     setIsLoading(true);
     try {
       console.log("🔍 [useUserLocation] Fetching default address...");
-      
-      const result = await getDefaultAddress();
 
-      if (result.success && result.data) {
-        const address = result.data;
-        console.log("✅ [useUserLocation] Address found:", {
+      // Try to get address from addresses table first
+      const addressResult = await getDefaultAddress();
+
+      if (addressResult.success && addressResult.data) {
+        const address = addressResult.data;
+        console.log("✅ [useUserLocation] Address found in addresses table:", {
           province: address.province,
           city: address.city,
         });
@@ -58,9 +60,40 @@ export function useUserLocation(): UseUserLocationReturn {
         setUserLocationState(locationData);
         setHasAddress(true);
       } else {
-        console.log("⚠️ [useUserLocation] No default address found");
-        setUserLocationState(null);
-        setHasAddress(false);
+        // Fallback: Try to get address from user profile
+        console.log("⚠️ [useUserLocation] No address in addresses table, checking user profile...");
+
+        const profileResult = await getCurrentUserProfile();
+
+        if (profileResult.success && profileResult.data) {
+          const profile = profileResult.data;
+
+          // Check if user has address data in profile
+          if (profile.province && profile.city && profile.postalCode) {
+            console.log("✅ [useUserLocation] Address found in user profile:", {
+              province: profile.province,
+              city: profile.city,
+            });
+
+            const locationData: UserLocationData = {
+              provinsi: profile.province,
+              kabupatenKota: profile.city,
+              kodePos: profile.postalCode,
+              alamatLengkap: profile.fullAddress || "",
+            };
+
+            setUserLocationState(locationData);
+            setHasAddress(true);
+          } else {
+            console.log("⚠️ [useUserLocation] No address found in user profile either");
+            setUserLocationState(null);
+            setHasAddress(false);
+          }
+        } else {
+          console.log("⚠️ [useUserLocation] Could not fetch user profile");
+          setUserLocationState(null);
+          setHasAddress(false);
+        }
       }
     } catch (error) {
       console.error("❌ [useUserLocation] Error fetching location:", error);

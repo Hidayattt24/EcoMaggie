@@ -35,9 +35,12 @@ import {
   Sunset,
   History,
   Coffee,
+  Check,
+  ChevronDown,
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useDefaultAddress } from "@/hooks/useDefaultAddress";
+import { getUserAddresses } from "@/lib/api/address.actions";
 import MediaUploader from "@/components/supply/MediaUploader";
 import { useToast } from "@/hooks/useToast";
 import Toast from "@/components/ui/Toast";
@@ -145,6 +148,20 @@ const impactStats = [
   { label: "Peternak Terbantu", value: "12", icon: TreePine },
 ];
 
+interface Address {
+  id: string;
+  label: string;
+  recipientName: string;
+  recipientPhone: string;
+  streetAddress: string;
+  city: string;
+  province: string;
+  district?: string;
+  village?: string;
+  postalCode: string;
+  isDefault: boolean;
+}
+
 export default function SupplyInputPage() {
   const router = useRouter();
   const { toast, success, error: showError, hideToast } = useToast();
@@ -179,17 +196,81 @@ export default function SupplyInputPage() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [useCustomAddress, setUseCustomAddress] = useState(false);
   const [customAddress, setCustomAddress] = useState("");
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
 
-  // Update form address when defaultAddress loads
+  // Fetch addresses on mount
   useEffect(() => {
-    if (defaultAddressData && !useCustomAddress) {
+    async function fetchAddresses() {
+      try {
+        const addressResult = await getUserAddresses();
+        let allAddresses: Address[] = [];
+
+        if (addressResult.success && addressResult.data && addressResult.data.length > 0) {
+          allAddresses = addressResult.data.map((addr) => ({
+            id: addr.id,
+            label: addr.label,
+            recipientName: addr.recipientName,
+            recipientPhone: addr.recipientPhone,
+            streetAddress: addr.streetAddress,
+            city: addr.city,
+            province: addr.province,
+            district: addr.district,
+            village: addr.village,
+            postalCode: addr.postalCode,
+            isDefault: addr.isDefault,
+          }));
+        }
+
+        setAddresses(allAddresses);
+
+        // Set default address as selected
+        const defaultAddr = allAddresses.find(a => a.isDefault) || allAddresses[0];
+        if (defaultAddr) {
+          // Build detailed address string
+          const addressParts = [];
+          if (defaultAddr.streetAddress) addressParts.push(defaultAddr.streetAddress);
+
+          const subLocality = [defaultAddr.village, defaultAddr.district]
+            .filter(Boolean)
+            .join(", ");
+          if (subLocality) addressParts.push(subLocality);
+
+          const locality = [defaultAddr.city, defaultAddr.province]
+            .filter(Boolean)
+            .join(", ");
+          if (locality) addressParts.push(locality);
+
+          if (defaultAddr.postalCode) addressParts.push(`Kode Pos: ${defaultAddr.postalCode}`);
+
+          const fullAddressDetail = addressParts.join("\n");
+
+          setSelectedAddress(defaultAddr);
+          setFormData((prev) => ({
+            ...prev,
+            address: fullAddressDetail,
+            addressId: defaultAddr.id,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      }
+    }
+
+    fetchAddresses();
+  }, []);
+
+  // Update form address when defaultAddress loads (fallback)
+  useEffect(() => {
+    if (defaultAddressData && !useCustomAddress && !selectedAddress) {
       setFormData((prev) => ({
         ...prev,
         address: defaultAddressData.fullAddress,
         addressId: defaultAddressData.id,
       }));
     }
-  }, [defaultAddressData, useCustomAddress]);
+  }, [defaultAddressData, useCustomAddress, selectedAddress]);
 
   // Date picker helpers
   const getDaysInMonth = (date: Date) => {
@@ -287,14 +368,59 @@ export default function SupplyInputPage() {
         }
       }
 
+      // Format full address detail
+      let fullAddressDetail = "";
+      if (selectedAddress) {
+        // Build detailed address string like in profile addresses
+        const addressParts = [];
+
+        // Street address
+        if (selectedAddress.streetAddress) {
+          addressParts.push(selectedAddress.streetAddress);
+        }
+
+        // Village, District
+        const subLocality = [selectedAddress.village, selectedAddress.district]
+          .filter(Boolean)
+          .join(", ");
+        if (subLocality) {
+          addressParts.push(subLocality);
+        }
+
+        // City, Province
+        const locality = [selectedAddress.city, selectedAddress.province]
+          .filter(Boolean)
+          .join(", ");
+        if (locality) {
+          addressParts.push(locality);
+        }
+
+        // Postal Code
+        if (selectedAddress.postalCode) {
+          addressParts.push(`Kode Pos: ${selectedAddress.postalCode}`);
+        }
+
+        fullAddressDetail = addressParts.join("\n");
+      } else {
+        fullAddressDetail = useCustomAddress ? customAddress : defaultAddress;
+      }
+
+      // Get the waste type name (label) instead of ID
+      const selectedWasteType = wasteTypes.find(t => t.id === formData.wasteType);
+      const wasteTypeName = selectedWasteType ? selectedWasteType.name : formData.wasteType;
+
       // Prepare data
       const supplyData = {
-        wasteType: formData.wasteType,
+        wasteType: wasteTypeName, // Use the proper name, not the ID
         estimatedWeight: formData.weight,
         photoUrl: uploadedPhotoUrl,
-        pickupAddress: useCustomAddress ? customAddress : defaultAddress,
+        pickupAddress: fullAddressDetail,
         pickupAddressId:
-          (useCustomAddress ? undefined : defaultAddressId) || undefined,
+          useCustomAddress
+            ? undefined
+            : selectedAddress
+              ? selectedAddress.id
+              : defaultAddressId || undefined,
         pickupDate: formData.date,
         pickupTimeSlot: formData.timeSlot,
         pickupLatitude: formData.latitude || undefined,
@@ -935,101 +1061,155 @@ export default function SupplyInputPage() {
                           </div>
                         </div>
 
-                        {/* Step 1: Address Selection */}
+                        {/* Step 1: Address Selection - With Dropdown */}
                         <div className="bg-gradient-to-br from-[#A3AF87]/20 to-[#8a9670]/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-3 border-[#A3AF87] shadow-lg ring-2 ring-[#A3AF87]/30">
-                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-[#435664] to-[#303646] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-base shadow-md">
-                              1
+                          <div className="flex items-center justify-between mb-3 sm:mb-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-[#435664] to-[#303646] text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-base shadow-md">
+                                1
+                              </div>
+                              <h4 className="font-bold text-[#435664] text-base sm:text-lg">Pilih Alamat Penjemputan</h4>
                             </div>
-                            <h4 className="font-bold text-[#435664] text-base sm:text-lg">Pilih Alamat Penjemputan</h4>
+                            <Link
+                              href="/profile/addresses"
+                              className="px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-[#435664] hover:bg-[#303646] rounded-lg transition-all flex items-center gap-1.5 sm:gap-2"
+                            >
+                              <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                              <span className="hidden sm:inline">Kelola</span>
+                            </Link>
                           </div>
 
-                          {/* Default Address Option */}
-                          {!useCustomAddress && (
-                            <div className="space-y-2 sm:space-y-3">
-                              <div className="bg-gradient-to-br from-white to-[#A3AF87]/5 rounded-lg sm:rounded-xl p-4 sm:p-5 border-3 border-[#A3AF87] shadow-md ring-2 ring-[#A3AF87]/20">
-                                <div className="flex items-start gap-2 sm:gap-3">
-                                  <div className="p-2 sm:p-2.5 bg-[#A3AF87] rounded-xl shadow-sm">
+                          {/* Address Selector Dropdown */}
+                          {addresses.length > 0 && (
+                            <div className="mb-3 relative">
+                              <button
+                                type="button"
+                                onClick={() => setShowAddressDropdown(!showAddressDropdown)}
+                                className="w-full bg-gradient-to-br from-white to-[#A3AF87]/5 rounded-lg sm:rounded-xl p-3 sm:p-4 text-left flex items-center justify-between hover:shadow-md transition-all border-2 border-[#A3AF87]"
+                              >
+                                <div className="flex-1 flex items-start gap-2 sm:gap-3 min-w-0">
+                                  <div className="p-2 sm:p-2.5 bg-[#A3AF87] rounded-xl shadow-sm flex-shrink-0">
                                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
-                                      <p className="text-xs sm:text-sm font-bold text-[#A3AF87]">
-                                        ✓ ALAMAT TERPILIH
-                                      </p>
-                                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[#A3AF87]" />
-                                    </div>
-                                    <p className="text-sm sm:text-base text-gray-900 font-semibold break-words leading-relaxed">
-                                      {defaultAddress}
+                                    <p className="text-xs sm:text-sm font-bold text-[#A3AF87] mb-0.5">
+                                      {selectedAddress ? "✓ ALAMAT TERPILIH" : "Pilih Alamat"}
                                     </p>
+                                    {selectedAddress && (
+                                      <>
+                                        <p className="text-sm sm:text-base font-bold text-[#435664]">
+                                          {selectedAddress.label}
+                                        </p>
+                                        <p className="text-xs sm:text-sm text-gray-600 mt-0.5 break-words">
+                                          {selectedAddress.streetAddress}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                          {selectedAddress.city}, {selectedAddress.province}
+                                        </p>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
-                              </div>
-                              
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setUseCustomAddress(true);
-                                  setCustomAddress("");
-                                  setFormData({
-                                    ...formData,
-                                    address: "",
-                                    addressId: null,
-                                  });
-                                }}
-                                className="w-full py-3 sm:py-3.5 px-3 sm:px-4 bg-white border-2 border-[#A3AF87]/30 rounded-lg sm:rounded-xl text-[#435664] font-semibold text-sm sm:text-base hover:border-[#A3AF87] hover:bg-[#A3AF87]/10 hover:shadow-md transition-all flex items-center justify-center gap-2"
-                              >
-                                <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
-                                Gunakan Alamat Lain
+                                <ChevronDown className={`h-5 w-5 text-[#435664] transition-transform flex-shrink-0 ml-2 ${showAddressDropdown ? "rotate-180" : ""}`} />
                               </button>
+
+                              {/* Dropdown List */}
+                              <AnimatePresence>
+                                {showAddressDropdown && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto border-2 border-[#A3AF87]"
+                                  >
+                                    {addresses.map((address) => (
+                                      <button
+                                        key={address.id}
+                                        type="button"
+                                        onClick={() => {
+                                          // Build detailed address string
+                                          const addressParts = [];
+                                          if (address.streetAddress) addressParts.push(address.streetAddress);
+
+                                          const subLocality = [address.village, address.district]
+                                            .filter(Boolean)
+                                            .join(", ");
+                                          if (subLocality) addressParts.push(subLocality);
+
+                                          const locality = [address.city, address.province]
+                                            .filter(Boolean)
+                                            .join(", ");
+                                          if (locality) addressParts.push(locality);
+
+                                          if (address.postalCode) addressParts.push(`Kode Pos: ${address.postalCode}`);
+
+                                          const fullAddressDetail = addressParts.join("\n");
+
+                                          setSelectedAddress(address);
+                                          setFormData({
+                                            ...formData,
+                                            address: fullAddressDetail,
+                                            addressId: address.id,
+                                          });
+                                          setShowAddressDropdown(false);
+                                          setUseCustomAddress(false);
+                                        }}
+                                        className={`w-full p-3 text-left hover:bg-[#fdf8d4] transition-all border-b border-gray-100 last:border-0 ${
+                                          selectedAddress?.id === address.id ? "bg-[#fdf8d4]" : ""
+                                        }`}
+                                      >
+                                        <div className="flex items-start gap-2">
+                                          <div
+                                            className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center flex-shrink-0 ${
+                                              selectedAddress?.id === address.id
+                                                ? "border-[#a3af87] bg-[#a3af87]"
+                                                : "border-gray-300"
+                                            }`}
+                                          >
+                                            {selectedAddress?.id === address.id && (
+                                              <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                                            )}
+                                          </div>
+                                          <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                              <p className="text-sm font-bold text-[#435664]">
+                                                {address.label}
+                                              </p>
+                                              {address.isDefault && (
+                                                <span className="px-2 py-0.5 bg-[#a3af87] text-white text-xs font-bold rounded">
+                                                  Utama
+                                                </span>
+                                              )}
+                                            </div>
+                                            <p className="text-xs text-[#435664]/70 mt-0.5">
+                                              {address.streetAddress}
+                                            </p>
+                                            <p className="text-xs text-[#435664]/70">
+                                              {address.city}, {address.province}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                             </div>
                           )}
 
-                          {/* Custom Address Input */}
-                          {useCustomAddress && (
-                            <div className="space-y-2 sm:space-y-3">
-                              <textarea
-                                value={customAddress}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  setCustomAddress(value);
-                                  setFormData({
-                                    ...formData,
-                                    address: value,
-                                    addressId: null,
-                                  });
-                                }}
-                                placeholder="Masukkan alamat lengkap pickup...\nContoh: Jl. Sudirman No. 45, Peunayong, Banda Aceh"
-                                rows={3}
-                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 border-gray-300 focus:border-[#A3AF87] focus:outline-none resize-none text-xs sm:text-sm text-gray-900 placeholder:text-gray-400"
-                              />
-                              
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setUseCustomAddress(false);
-                                    setCustomAddress("");
-                                    if (defaultAddressData) {
-                                      setFormData({
-                                        ...formData,
-                                        address: defaultAddressData.fullAddress,
-                                        addressId: defaultAddressData.id,
-                                      });
-                                    }
-                                  }}
-                                  className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
-                                >
-                                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                  Batal
-                                </button>
-                                
-                                {customAddress && (
-                                  <div className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 bg-green-50 text-green-700 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2">
-                                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                    Tersimpan
-                                  </div>
-                                )}
+                          {/* No Address Warning */}
+                          {addresses.length === 0 && (
+                            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                              <div className="flex items-start gap-3">
+                                <Info className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-sm text-amber-900 font-medium">
+                                    Belum ada alamat terdaftar
+                                  </p>
+                                  <p className="text-xs text-amber-700 mt-1">
+                                    Silakan tambahkan alamat terlebih dahulu dengan klik tombol "Kelola" di atas.
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -1069,7 +1249,11 @@ export default function SupplyInputPage() {
                             initialLat={formData.latitude || undefined}
                             initialLng={formData.longitude || undefined}
                             defaultAddress={
-                              useCustomAddress ? customAddress : defaultAddress
+                              useCustomAddress
+                                ? customAddress
+                                : selectedAddress
+                                  ? selectedAddress.streetAddress
+                                  : defaultAddress
                             }
                           />
                         </div>
@@ -1548,11 +1732,41 @@ export default function SupplyInputPage() {
                 <div className="mt-4 p-3 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
                   <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-[#A3AF87] flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      {useCustomAddress && customAddress
-                        ? customAddress
-                        : defaultAddress}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      {selectedAddress ? (
+                        <>
+                          <p className="text-xs font-bold text-[#435664] mb-1">
+                            {selectedAddress.label}
+                          </p>
+                          <div className="text-xs text-gray-600 leading-relaxed space-y-0.5">
+                            <p className="font-medium">{selectedAddress.streetAddress}</p>
+                            {(selectedAddress.village || selectedAddress.district) && (
+                              <p>
+                                {[selectedAddress.village, selectedAddress.district]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </p>
+                            )}
+                            <p>
+                              {[selectedAddress.city, selectedAddress.province]
+                                .filter(Boolean)
+                                .join(", ")}
+                            </p>
+                            {selectedAddress.postalCode && (
+                              <p className="text-[#435664] font-medium">
+                                Kode Pos: {selectedAddress.postalCode}
+                              </p>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                          {useCustomAddress && customAddress
+                            ? customAddress
+                            : defaultAddress}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

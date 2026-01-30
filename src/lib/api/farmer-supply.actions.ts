@@ -32,6 +32,14 @@ export interface SupplyWithUser extends UserSupply {
   wasteCondition?: string;
   internalNotes?: string;
   conditionPhotoUrl?: string | null;
+  // Address details
+  addressProvince?: string;
+  addressCity?: string;
+  addressDistrict?: string;
+  addressVillage?: string;
+  addressPostalCode?: string;
+  addressLabel?: string;
+  addressStreet?: string;
 }
 
 export interface UpdateSupplyStatusData {
@@ -139,39 +147,68 @@ export async function getFarmerSupplyOrders(
       };
     }
 
+    // Fetch address details for supplies with pickupAddressId
+    const addressIds = supplies?.filter((s: any) => s.pickup_address_id).map((s: any) => s.pickup_address_id) || [];
+    let addressesMap: Record<string, any> = {};
+
+    if (addressIds.length > 0) {
+      const { data: addresses } = await supabase
+        .from("addresses")
+        .select("*")
+        .in("id", addressIds);
+
+      if (addresses) {
+        addressesMap = Object.fromEntries(
+          addresses.map(addr => [addr.id, addr])
+        );
+      }
+    }
+
     // Transform data
-    const transformedSupplies: SupplyWithUser[] = (supplies || []).map((supply: any) => ({
-      id: supply.id,
-      userId: supply.user_id,
-      supplyNumber: supply.supply_number,
-      wasteType: supply.waste_type,
-      estimatedWeight: supply.estimated_weight,
-      photoUrl: supply.photo_url,
-      pickupAddress: supply.pickup_address,
-      pickupAddressId: supply.pickup_address_id,
-      pickupLatitude: supply.pickup_latitude,
-      pickupLongitude: supply.pickup_longitude,
-      pickupDate: supply.pickup_date,
-      pickupTimeSlot: supply.pickup_time_slot,
-      pickupTimeRange: supply.pickup_time_range,
-      notes: supply.notes,
-      courierName: supply.courier_name,
-      courierPhone: supply.courier_phone,
-      status: supply.status,
-      statusHistory: supply.status_history || [],
-      createdAt: supply.created_at,
-      updatedAt: supply.updated_at,
-      pickedUpAt: supply.picked_up_at,
-      completedAt: supply.completed_at,
-      userName: supply.users?.name || "Unknown",
-      userPhone: supply.users?.phone || "",
-      userEmail: supply.users?.email || "",
-      estimatedArrival: supply.estimated_arrival,
-      actualWeight: supply.actual_weight,
-      wasteCondition: supply.waste_condition,
-      internalNotes: supply.internal_notes,
-      conditionPhotoUrl: supply.condition_photo_url,
-    }));
+    const transformedSupplies: SupplyWithUser[] = (supplies || []).map((supply: any) => {
+      const addressDetail = supply.pickup_address_id ? addressesMap[supply.pickup_address_id] : null;
+
+      return {
+        id: supply.id,
+        userId: supply.user_id,
+        supplyNumber: supply.supply_number,
+        wasteType: supply.waste_type,
+        estimatedWeight: supply.estimated_weight,
+        photoUrl: supply.photo_url,
+        pickupAddress: supply.pickup_address,
+        pickupAddressId: supply.pickup_address_id,
+        pickupLatitude: supply.pickup_latitude,
+        pickupLongitude: supply.pickup_longitude,
+        pickupDate: supply.pickup_date,
+        pickupTimeSlot: supply.pickup_time_slot,
+        pickupTimeRange: supply.pickup_time_range,
+        notes: supply.notes,
+        courierName: supply.courier_name,
+        courierPhone: supply.courier_phone,
+        status: supply.status,
+        statusHistory: supply.status_history || [],
+        createdAt: supply.created_at,
+        updatedAt: supply.updated_at,
+        pickedUpAt: supply.picked_up_at,
+        completedAt: supply.completed_at,
+        userName: supply.users?.name || "Unknown",
+        userPhone: supply.users?.phone || "",
+        userEmail: supply.users?.email || "",
+        estimatedArrival: supply.estimated_arrival,
+        actualWeight: supply.actual_weight,
+        wasteCondition: supply.waste_condition,
+        internalNotes: supply.internal_notes,
+        conditionPhotoUrl: supply.condition_photo_url,
+        // Address details if available
+        addressProvince: addressDetail?.province,
+        addressCity: addressDetail?.city,
+        addressDistrict: addressDetail?.district,
+        addressVillage: addressDetail?.village,
+        addressPostalCode: addressDetail?.postal_code,
+        addressLabel: addressDetail?.label,
+        addressStreet: addressDetail?.street_address,
+      };
+    });
 
     return {
       success: true,
@@ -250,6 +287,20 @@ export async function getFarmerSupplyById(
       };
     }
 
+    // Fetch address details if pickupAddressId exists
+    let addressDetail: any = null;
+    if (supply.pickup_address_id) {
+      const { data: address } = await supabase
+        .from("addresses")
+        .select("*")
+        .eq("id", supply.pickup_address_id)
+        .single();
+
+      if (address) {
+        addressDetail = address;
+      }
+    }
+
     // Transform data
     const transformedSupply: SupplyWithUser = {
       id: supply.id,
@@ -282,6 +333,14 @@ export async function getFarmerSupplyById(
       wasteCondition: supply.waste_condition,
       internalNotes: supply.internal_notes,
       conditionPhotoUrl: supply.condition_photo_url,
+      // Address details if available
+      addressProvince: addressDetail?.province,
+      addressCity: addressDetail?.city,
+      addressDistrict: addressDetail?.district,
+      addressVillage: addressDetail?.village,
+      addressPostalCode: addressDetail?.postal_code,
+      addressLabel: addressDetail?.label,
+      addressStreet: addressDetail?.street_address,
     };
 
     return {

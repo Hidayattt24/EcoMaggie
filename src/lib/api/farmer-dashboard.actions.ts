@@ -529,7 +529,8 @@ export async function getOperationalAlerts(): Promise<Alert[]> {
 
     pendingSupplies.forEach((supply: any) => {
       const userName = supply.users?.name || "Penyuplai";
-      const wasteTypeName = wasteTypeLabels[supply.waste_type] || supply.waste_type;
+      // Since waste_type now stores the proper name (not ID), use it directly
+      const wasteTypeName = supply.waste_type;
       const weightLabel = weightLabels[supply.estimated_weight] || `${supply.estimated_weight} kg`;
 
       // Convert estimated weight to number for metadata

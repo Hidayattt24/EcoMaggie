@@ -27,6 +27,7 @@ import {
   RefreshCw,
   X,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import {
   type SupplyWithUser,
@@ -630,11 +631,7 @@ export default function SupplyMonitoringPage() {
         supplyId: supply.supplyNumber,
         supplierName: supply.userName,
         supplierPhone: supply.userPhone,
-        wasteType: supply.wasteType === "sisa_makanan" ? "Sisa Makanan" :
-                   supply.wasteType === "sayuran_buah" ? "Sayuran & Buah" :
-                   supply.wasteType === "sisa_dapur" ? "Sisa Dapur" :
-                   supply.wasteType === "campuran" ? "Campuran Organik" :
-                   supply.wasteType,
+        wasteType: supply.wasteType,
         estimatedWeight: supply.estimatedWeight === "1" ? "1 kg" :
                         supply.estimatedWeight === "3" ? "1-3 kg" :
                         supply.estimatedWeight === "5" ? "3-5 kg" :
@@ -1320,11 +1317,7 @@ export default function SupplyMonitoringPage() {
                       <td className="py-4 px-4">
                         <div>
                           <p className="font-medium text-[#303646]">
-                            {supply.wasteType === "sisa_makanan" ? "Sisa Makanan" :
-                             supply.wasteType === "sayuran_buah" ? "Sayuran & Buah" :
-                             supply.wasteType === "sisa_dapur" ? "Sisa Dapur" :
-                             supply.wasteType === "campuran" ? "Campuran Organik" :
-                             supply.wasteType}
+                            {supply.wasteType}
                           </p>
                           <div className="flex items-center gap-1 mt-1">
                             <Scale className="h-3 w-3 text-[#a3af87]" />
@@ -1342,11 +1335,49 @@ export default function SupplyMonitoringPage() {
 
                       {/* Location */}
                       <td className="py-4 px-4">
-                        <div className="flex items-start gap-2 max-w-xs">
-                          <MapPin className="h-4 w-4 text-[#a3af87] mt-0.5 flex-shrink-0" />
-                          <p className="text-sm text-[#435664] line-clamp-2">
-                            {supply.pickupAddress}
-                          </p>
+                        <div className="max-w-xs">
+                          <div className="flex items-start gap-2 mb-1">
+                            <MapPin className="h-4 w-4 text-[#a3af87] mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              {supply.addressLabel && (
+                                <p className="text-xs font-bold text-[#a3af87] mb-0.5">
+                                  {supply.addressLabel}
+                                </p>
+                              )}
+                              {supply.addressStreet ? (
+                                <>
+                                  <p className="text-sm text-[#303646] font-medium line-clamp-1">
+                                    {supply.addressStreet}
+                                  </p>
+                                  <p className="text-xs text-[#435664] mt-0.5">
+                                    {[supply.addressVillage, supply.addressDistrict, supply.addressCity, supply.addressProvince]
+                                      .filter(Boolean)
+                                      .join(", ")}
+                                  </p>
+                                  {supply.addressPostalCode && (
+                                    <p className="text-xs text-[#435664]">
+                                      Kode Pos: {supply.addressPostalCode}
+                                    </p>
+                                  )}
+                                </>
+                              ) : (
+                                <p className="text-sm text-[#435664] line-clamp-2">
+                                  {supply.pickupAddress}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {supply.pickupLatitude && supply.pickupLongitude && (
+                            <a
+                              href={`https://www.google.com/maps?q=${supply.pickupLatitude},${supply.pickupLongitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium mt-1 hover:underline"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Buka di Maps
+                            </a>
+                          )}
                         </div>
                       </td>
 

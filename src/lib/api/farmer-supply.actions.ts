@@ -40,6 +40,8 @@ export interface SupplyWithUser extends UserSupply {
   addressPostalCode?: string;
   addressLabel?: string;
   addressStreet?: string;
+  addressRecipientName?: string;
+  addressRecipientPhone?: string;
 }
 
 export interface UpdateSupplyStatusData {
@@ -108,7 +110,7 @@ export async function getFarmerSupplyOrders(
       };
     }
 
-    // Build query
+    // Build query - fetch supplies with user data
     let query = supabase
       .from("user_supplies")
       .select(`
@@ -136,10 +138,11 @@ export async function getFarmerSupplyOrders(
 
     const { data: supplies, error: fetchError } = await query;
 
-    console.log("Fetched supplies count:", supplies?.length || 0); // Debug log
-
+    console.log("========================================");
+    console.log("📦 [FARMER SUPPLY] Fetched supplies count:", supplies?.length || 0);
+    
     if (fetchError) {
-      console.error("Fetch supplies error:", fetchError);
+      console.error("❌ [FARMER SUPPLY] Fetch supplies error:", fetchError);
       return {
         success: false,
         message: "Gagal mengambil data supply orders",
@@ -147,26 +150,63 @@ export async function getFarmerSupplyOrders(
       };
     }
 
-    // Fetch address details for supplies with pickupAddressId
-    const addressIds = supplies?.filter((s: any) => s.pickup_address_id).map((s: any) => s.pickup_address_id) || [];
+    // Fetch addresses for all supplies that have pickup_address_id
+    const addressIds = supplies
+      ?.filter((s: any) => s.pickup_address_id)
+      .map((s: any) => s.pickup_address_id) || [];
+    
     let addressesMap: Record<string, any> = {};
 
     if (addressIds.length > 0) {
-      const { data: addresses } = await supabase
+      console.log("📍 [FARMER SUPPLY] Fetching addresses for IDs:", addressIds);
+      
+      const { data: addresses, error: addressError } = await supabase
         .from("addresses")
-        .select("*")
+        .select("id, label, recipient, phone, street, city, province, district, village, postal_code")
         .in("id", addressIds);
 
-      if (addresses) {
+      if (addressError) {
+        console.error("❌ [FARMER SUPPLY] Fetch addresses error:", addressError);
+      } else {
+        console.log("📍 [FARMER SUPPLY] Fetched addresses:", addresses);
         addressesMap = Object.fromEntries(
-          addresses.map(addr => [addr.id, addr])
+          (addresses || []).map((addr: any) => [addr.id, addr])
         );
       }
     }
+    
+    // Debug: Log first supply to see structure
+    if (supplies && supplies.length > 0) {
+      const firstSupply = supplies[0];
+      const firstAddress = firstSupply.pickup_address_id ? addressesMap[firstSupply.pickup_address_id] : null;
+      
+      console.log("📦 [FARMER SUPPLY] First supply structure:", {
+        id: firstSupply.id,
+        supply_number: firstSupply.supply_number,
+        pickup_address_id: firstSupply.pickup_address_id,
+        users: firstSupply.users,
+        address_from_map: firstAddress,
+      });
+    }
+    console.log("========================================");
 
     // Transform data
     const transformedSupplies: SupplyWithUser[] = (supplies || []).map((supply: any) => {
       const addressDetail = supply.pickup_address_id ? addressesMap[supply.pickup_address_id] : null;
+
+      // Determine userName and userPhone
+      const userName = addressDetail?.recipient || supply.users?.name || "Unknown";
+      const userPhone = addressDetail?.phone || supply.users?.phone || "";
+
+      console.log(`📦 [TRANSFORM] Supply ${supply.supply_number}:`, {
+        pickup_address_id: supply.pickup_address_id,
+        addressDetail_recipient: addressDetail?.recipient,
+        addressDetail_phone: addressDetail?.phone,
+        users_name: supply.users?.name,
+        users_phone: supply.users?.phone,
+        final_userName: userName,
+        final_userPhone: userPhone,
+      });
 
       return {
         id: supply.id,
@@ -191,8 +231,8 @@ export async function getFarmerSupplyOrders(
         updatedAt: supply.updated_at,
         pickedUpAt: supply.picked_up_at,
         completedAt: supply.completed_at,
-        userName: supply.users?.name || "Unknown",
-        userPhone: supply.users?.phone || "",
+        userName: userName,
+        userPhone: userPhone,
         userEmail: supply.users?.email || "",
         estimatedArrival: supply.estimated_arrival,
         actualWeight: supply.actual_weight,
@@ -206,7 +246,9 @@ export async function getFarmerSupplyOrders(
         addressVillage: addressDetail?.village,
         addressPostalCode: addressDetail?.postal_code,
         addressLabel: addressDetail?.label,
-        addressStreet: addressDetail?.street_address,
+        addressStreet: addressDetail?.street,
+        addressRecipientName: addressDetail?.recipient,
+        addressRecipientPhone: addressDetail?.phone,
       };
     });
 
@@ -279,7 +321,7 @@ export async function getFarmerSupplyById(
       .single();
 
     if (fetchError || !supply) {
-      console.error("Fetch supply error:", fetchError);
+      console.error("❌ [FARMER SUPPLY BY ID] Fetch supply error:", fetchError);
       return {
         success: false,
         message: "Supply tidak ditemukan",
@@ -287,19 +329,44 @@ export async function getFarmerSupplyById(
       };
     }
 
+    console.log("📦 [FARMER SUPPLY BY ID] Supply fetched:", {
+      id: supply.id,
+      supply_number: supply.supply_number,
+      pickup_address_id: supply.pickup_address_id,
+      users: supply.users,
+    });
+
     // Fetch address details if pickupAddressId exists
     let addressDetail: any = null;
     if (supply.pickup_address_id) {
-      const { data: address } = await supabase
+      console.log("📍 [FARMER SUPPLY BY ID] Fetching address:", supply.pickup_address_id);
+      
+      const { data: address, error: addressError } = await supabase
         .from("addresses")
         .select("*")
         .eq("id", supply.pickup_address_id)
         .single();
 
-      if (address) {
+      if (addressError) {
+        console.error("❌ [FARMER SUPPLY BY ID] Fetch address error:", addressError);
+      } else {
+        console.log("📍 [FARMER SUPPLY BY ID] Address fetched:", address);
         addressDetail = address;
       }
     }
+
+    // Determine userName and userPhone
+    const userName = addressDetail?.recipient || supply.users?.name || "Unknown";
+    const userPhone = addressDetail?.phone || supply.users?.phone || "";
+
+    console.log("📦 [FARMER SUPPLY BY ID] Final data:", {
+      addressDetail_recipient: addressDetail?.recipient,
+      addressDetail_phone: addressDetail?.phone,
+      users_name: supply.users?.name,
+      users_phone: supply.users?.phone,
+      final_userName: userName,
+      final_userPhone: userPhone,
+    });
 
     // Transform data
     const transformedSupply: SupplyWithUser = {
@@ -325,8 +392,8 @@ export async function getFarmerSupplyById(
       updatedAt: supply.updated_at,
       pickedUpAt: supply.picked_up_at,
       completedAt: supply.completed_at,
-      userName: supply.users?.name || "Unknown",
-      userPhone: supply.users?.phone || "",
+      userName: userName,
+      userPhone: userPhone,
       userEmail: supply.users?.email || "",
       estimatedArrival: supply.estimated_arrival,
       actualWeight: supply.actual_weight,
@@ -340,7 +407,9 @@ export async function getFarmerSupplyById(
       addressVillage: addressDetail?.village,
       addressPostalCode: addressDetail?.postal_code,
       addressLabel: addressDetail?.label,
-      addressStreet: addressDetail?.street_address,
+      addressStreet: addressDetail?.street,
+      addressRecipientName: addressDetail?.recipient,
+      addressRecipientPhone: addressDetail?.phone,
     };
 
     return {

@@ -491,8 +491,32 @@ export default function SupplyMonitoringDetailPage({
                     <MapPin className="h-5 w-5 text-[#a3af87]" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-[#435664] font-semibold mb-1 uppercase tracking-wide">Alamat Lengkap</p>
-                    <p className="text-[#303646] font-medium leading-relaxed">{supply.pickupAddress}</p>
+                    {supply.addressLabel && (
+                      <div className="mb-2">
+                        <span className="inline-block px-2.5 py-1 bg-[#a3af87]/10 border border-[#a3af87]/30 rounded-lg text-xs font-bold text-[#a3af87] uppercase tracking-wide">
+                          {supply.addressLabel}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-[#435664] font-semibold mb-2 uppercase tracking-wide">Alamat Lengkap</p>
+                    {supply.addressStreet ? (
+                      <div className="space-y-1">
+                        <p className="text-[#303646] font-semibold">{supply.addressStreet}</p>
+                        {(supply.addressVillage || supply.addressDistrict) && (
+                          <p className="text-sm text-[#435664]">
+                            {[supply.addressVillage, supply.addressDistrict].filter(Boolean).join(", ")}
+                          </p>
+                        )}
+                        <p className="text-sm text-[#435664]">
+                          {[supply.addressCity, supply.addressProvince].filter(Boolean).join(", ")}
+                        </p>
+                        {supply.addressPostalCode && (
+                          <p className="text-sm text-[#435664]">Kode Pos: {supply.addressPostalCode}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-[#303646] font-medium leading-relaxed">{supply.pickupAddress}</p>
+                    )}
                   </div>
                 </div>
               </div>

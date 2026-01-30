@@ -1100,6 +1100,9 @@ export default function SupplyInputPage() {
                                         <p className="text-sm sm:text-base font-bold text-[#435664]">
                                           {selectedAddress.label}
                                         </p>
+                                        <p className="text-xs sm:text-sm font-semibold text-[#A3AF87] mt-0.5">
+                                          {selectedAddress.recipientName}
+                                        </p>
                                         <p className="text-xs sm:text-sm text-gray-600 mt-0.5 break-words">
                                           {selectedAddress.streetAddress}
                                         </p>
@@ -1181,6 +1184,9 @@ export default function SupplyInputPage() {
                                                 </span>
                                               )}
                                             </div>
+                                            <p className="text-xs font-semibold text-[#a3af87] mt-0.5">
+                                              {address.recipientName}
+                                            </p>
                                             <p className="text-xs text-[#435664]/70 mt-0.5">
                                               {address.streetAddress}
                                             </p>
@@ -1737,6 +1743,9 @@ export default function SupplyInputPage() {
                         <>
                           <p className="text-xs font-bold text-[#435664] mb-1">
                             {selectedAddress.label}
+                          </p>
+                          <p className="text-xs font-semibold text-[#A3AF87] mb-1">
+                            {selectedAddress.recipientName}
                           </p>
                           <div className="text-xs text-gray-600 leading-relaxed space-y-0.5">
                             <p className="font-medium">{selectedAddress.streetAddress}</p>

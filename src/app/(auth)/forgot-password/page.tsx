@@ -307,7 +307,7 @@ export default function ForgotPasswordPage() {
                         setError("");
                       }}
                       disabled={isLoading}
-                      className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 poppins-regular focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 poppins-regular text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
                         error
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-transparent"

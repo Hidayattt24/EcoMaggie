@@ -279,7 +279,7 @@ export default function FooterSection() {
                     Alam Banda Aceh
                   </p>
                   <a
-                    href="https://maps.google.com/?q=Jl.T.+Batee+Treun+Gampong+Ganoe+Desa+Lamdingin+Kec.+Kuta+Alam+Banda+Aceh"
+                    href="https://maps.app.goo.gl/wXfbgFnfzQW5Nc2UA"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#4285F4] text-white text-xs font-medium hover:bg-[#3367D6] transition-colors"

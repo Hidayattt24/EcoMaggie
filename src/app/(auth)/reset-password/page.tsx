@@ -15,7 +15,8 @@ import {
   EyeOff,
   ShieldCheck,
 } from "lucide-react";
-import { resetPassword, verifyResetSession } from "@/lib/api/auth.actions";
+import { resetPassword } from "@/lib/api/auth.actions";
+import { createClient } from "@/lib/supabase/client";
 import Swal from "sweetalert2";
 
 function ResetPasswordForm() {
@@ -61,16 +62,41 @@ function ResetPasswordForm() {
   // Verify reset session on mount
   useEffect(() => {
     const checkSession = async () => {
-      const result = await verifyResetSession();
-      setIsValidSession(result.success);
-      setIsVerifying(false);
+      try {
+        const supabase = createClient();
 
-      if (!result.success) {
+        // Get session - Supabase SDK will automatically handle hash fragment from URL
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error || !session) {
+          setIsValidSession(false);
+          setIsVerifying(false);
+
+          Swal.fire({
+            icon: "error",
+            title: "Link Tidak Valid",
+            text: "Link pemulihan tidak valid atau telah kedaluwarsa. Silakan minta link baru.",
+            confirmButtonText: "Kembali ke Lupa Password",
+            confirmButtonColor: "#A3AF87",
+          }).then(() => {
+            router.push("/forgot-password");
+          });
+          return;
+        }
+
+        // Valid session found
+        setIsValidSession(true);
+        setIsVerifying(false);
+      } catch (error) {
+        console.error("Session verification error:", error);
+        setIsValidSession(false);
+        setIsVerifying(false);
+
         Swal.fire({
           icon: "error",
-          title: "Link Tidak Valid",
-          text: result.message,
-          confirmButtonText: "Kembali ke Login",
+          title: "Terjadi Kesalahan",
+          text: "Gagal memverifikasi sesi. Silakan coba lagi.",
+          confirmButtonText: "Kembali ke Lupa Password",
           confirmButtonColor: "#A3AF87",
         }).then(() => {
           router.push("/forgot-password");
@@ -79,7 +105,7 @@ function ResetPasswordForm() {
     };
 
     checkSession();
-  }, [router, searchParams]);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

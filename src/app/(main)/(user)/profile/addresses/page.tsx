@@ -569,10 +569,15 @@ export default function AddressesPage() {
                     }}
                     errors={formErrors}
                     onChange={(field, value) => {
-                      setNewAddress({ ...newAddress, [field]: value });
+                      console.log(`📝 [onChange] Field: ${field}, Value:`, value);
+                      setNewAddress((prev) => {
+                        const updated = { ...prev, [field]: value };
+                        console.log("📝 [onChange] Updated state:", updated);
+                        return updated;
+                      });
                       // Clear error when user starts typing
                       if (formErrors[field]) {
-                        setFormErrors({ ...formErrors, [field]: "" });
+                        setFormErrors((prev) => ({ ...prev, [field]: "" }));
                       }
                     }}
                     resetTrigger={resetTrigger}

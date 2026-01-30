@@ -320,9 +320,14 @@ export default function SupplyPage() {
                         {selectedAddress?.label || "Pilih Alamat"}
                       </p>
                       {selectedAddress && (
-                        <p className="text-xs text-[#435664]/70 mt-0.5">
-                          {selectedAddress.city}, {selectedAddress.province}
-                        </p>
+                        <>
+                          <p className="text-xs text-[#435664] mt-0.5">
+                            {selectedAddress.recipientName}
+                          </p>
+                          <p className="text-xs text-[#435664]/70 mt-0.5">
+                            {selectedAddress.city}, {selectedAddress.province}
+                          </p>
+                        </>
                       )}
                     </div>
                     <ChevronDown className={`h-5 w-5 text-[#435664] transition-transform ${showAddressDropdown ? "rotate-180" : ""}`} />
@@ -371,6 +376,9 @@ export default function SupplyPage() {
                                     </span>
                                   )}
                                 </div>
+                                <p className="text-xs text-[#435664] mt-0.5">
+                                  {address.recipientName}
+                                </p>
                                 <p className="text-xs text-[#435664]/70 mt-0.5">
                                   {address.streetAddress}
                                 </p>

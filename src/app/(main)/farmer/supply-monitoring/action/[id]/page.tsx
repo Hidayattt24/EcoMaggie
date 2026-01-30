@@ -442,17 +442,25 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
             transition={{ delay: 0.1 }}
             className="lg:col-span-4 space-y-4 lg:space-y-6"
           >
-            {/* Supplier Card */}
+            {/* Supplier Card - Use address recipient data if available */}
             <div className="bg-[#fdf8d4]/30 rounded-2xl border-2 border-[#a3af87]/30 p-6">
               <h3 className="font-bold text-[#303646] mb-4 flex items-center gap-2">
                 <User className="h-5 w-5 text-[#a3af87]" />
                 Penyuplai
               </h3>
               <div className="space-y-3">
+                {supply.addressLabel && (
+                  <div>
+                    <p className="text-sm text-[#435664]">Label Alamat</p>
+                    <p className="font-semibold text-[#a3af87]">
+                      📍 {supply.addressLabel}
+                    </p>
+                  </div>
+                )}
                 <div>
-                  <p className="text-sm text-[#435664]">Nama</p>
+                  <p className="text-sm text-[#435664]">Nama Penerima</p>
                   <p className="font-semibold text-[#303646]">
-                    {supply.userName}
+                    {supply.addressRecipientName || supply.userName}
                   </p>
                 </div>
                 <div>
@@ -460,10 +468,10 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-[#a3af87]" />
                     <a
-                      href={`tel:${supply.userPhone}`}
+                      href={`tel:${supply.addressRecipientPhone || supply.userPhone}`}
                       className="font-semibold text-[#303646] hover:text-[#a3af87]"
                     >
-                      {supply.userPhone}
+                      {supply.addressRecipientPhone || supply.userPhone}
                     </a>
                   </div>
                 </div>

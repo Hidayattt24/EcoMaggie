@@ -1296,23 +1296,29 @@ export default function SupplyMonitoringPage() {
                         </div>
                       </td>
 
-                      {/* Supplier Name */}
+                      {/* Supplier Name - Use address recipient data if available */}
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-[#a3af87] flex items-center justify-center">
                             <User className="h-5 w-5 text-white" />
                           </div>
                           <div>
+                            {supply.addressLabel && (
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className="px-2 py-0.5 bg-[#a3af87]/10 border border-[#a3af87]/30 rounded text-[10px] font-bold text-[#a3af87] uppercase tracking-wide">
+                                  {supply.addressLabel}
+                                </span>
+                              </div>
+                            )}
                             <p className="font-semibold text-[#303646]">
-                              {supply.userName}
+                              {supply.addressRecipientName || supply.userName}
                             </p>
                             <p className="text-xs text-[#435664]">
-                              {supply.userPhone}
+                              {supply.addressRecipientPhone || supply.userPhone}
                             </p>
                           </div>
                         </div>
                       </td>
-
                       {/* Type & Weight */}
                       <td className="py-4 px-4">
                         <div>
@@ -1340,9 +1346,9 @@ export default function SupplyMonitoringPage() {
                             <MapPin className="h-4 w-4 text-[#a3af87] mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               {supply.addressLabel && (
-                                <p className="text-xs font-bold text-[#a3af87] mb-0.5">
+                                <span className="inline-block px-2 py-0.5 bg-[#a3af87]/10 border border-[#a3af87]/30 rounded text-[10px] font-bold text-[#a3af87] uppercase tracking-wide mb-1">
                                   {supply.addressLabel}
-                                </p>
+                                </span>
                               )}
                               {supply.addressStreet ? (
                                 <>

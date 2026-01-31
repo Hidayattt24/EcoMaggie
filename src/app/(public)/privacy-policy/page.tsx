@@ -208,7 +208,7 @@ export default function PrivacyPolicyPage() {
                     WhatsApp: <a href="https://wa.me/6289534198039" className="hover:underline" style={{ color: "#A3AF87" }}>+62 895-3419-80391</a>
                   </p>
                   <p className="poppins-regular text-sm mb-1" style={{ color: "#666" }}>
-                    Email: <a href="mailto:cs@ecomaggie.com" className="hover:underline" style={{ color: "#8a9670" }}>cs@ecomaggie.com</a>
+                    Email: <a href="mailto:ecomaggie1@gmail.com" className="hover:underline" style={{ color: "#8a9670" }}>ecomaggie1@gmail.com</a>
                   </p>
                   <p className="poppins-regular text-sm" style={{ color: "#666" }}>
                     Alamat: Jl. T. Batee Treun Gampong Ganoe, Desa Lamdingin, Kec. Kuta Alam, Banda Aceh

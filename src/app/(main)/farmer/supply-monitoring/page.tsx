@@ -28,6 +28,7 @@ import {
   X,
   AlertTriangle,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import {
   type SupplyWithUser,
@@ -41,7 +42,7 @@ const mockSupplyData = [
     id: "SUP-001",
     supplierId: "USR-123",
     supplierName: "Ahmad Yani",
-    supplierPhone: "082288953268",
+    supplierPhone: "082172319892",
     wasteType: "Sisa Makanan",
     weight: "3-5 kg",
     estimatedWeight: 4,
@@ -464,6 +465,11 @@ export default function SupplyMonitoringPage() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
 
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedSupplyToDelete, setSelectedSupplyToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Toast notification state
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", type: "success" as "success" | "error" });
@@ -703,6 +709,69 @@ export default function SupplyMonitoringPage() {
       setTimeout(() => setShowToast(false), 5000);
     } finally {
       setIsRejecting(false);
+    }
+  };
+
+  // Handle delete supply
+  const handleDeleteClick = (supplyId: string) => {
+    setSelectedSupplyToDelete(supplyId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedSupplyToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { deleteSupplyByFarmer } = await import("@/lib/api/supply.actions");
+      const result = await deleteSupplyByFarmer(selectedSupplyToDelete);
+
+      if (result.success) {
+        console.log("✅ [DELETE] Supply deleted successfully, refreshing data...");
+
+        // Close modal
+        setShowDeleteModal(false);
+        setSelectedSupplyToDelete(null);
+
+        // Small delay to ensure database transaction is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Force refresh both supplies and trend data from server
+        console.log("🔄 [DELETE] Refreshing supplies and trend...");
+        await Promise.all([
+          refreshSupplies(),
+          refreshTrend(),
+        ]);
+        console.log("✅ [DELETE] Data refreshed successfully");
+
+        // Show success toast notification
+        setToastMessage({
+          title: "Supply Berhasil Dihapus",
+          description: "Data supply dan statistik telah diperbarui",
+          type: "success"
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
+      } else {
+        setToastMessage({
+          title: "Gagal Menghapus Supply",
+          description: result.message || "Terjadi kesalahan saat menghapus supply",
+          type: "error"
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
+      }
+    } catch (error) {
+      console.error("❌ [DELETE] Error deleting supply:", error);
+      setToastMessage({
+        title: "Terjadi Kesalahan",
+        description: "Tidak dapat menghapus supply. Silakan coba lagi.",
+        type: "error"
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1463,6 +1532,14 @@ export default function SupplyMonitoringPage() {
                               )}
                             </>
                           )}
+                          {/* Tombol Hapus - tersedia untuk semua status */}
+                          <button
+                            onClick={() => handleDeleteClick(supply.id)}
+                            className="p-2 bg-gray-50 border border-gray-300 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors group/btn"
+                            title="Hapus Supply"
+                          >
+                            <Trash2 className="h-4 w-4 text-gray-600 group-hover/btn:text-red-600" />
+                          </button>
                         </div>
                       </td>
                     </motion.tr>
@@ -1577,6 +1654,100 @@ export default function SupplyMonitoringPage() {
                         <>
                           <X className="h-4 w-4" />
                           Tolak Supply
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Supply Modal */}
+        <AnimatePresence>
+          {showDeleteModal && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => !isDeleting && setShowDeleteModal(false)}
+                className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+              >
+                {/* Modal */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                >
+                  {/* Header */}
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 border-b-2 border-red-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                        <Trash2 className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-red-900">
+                          Hapus Supply
+                        </h3>
+                        <p className="text-sm text-red-700">
+                          Tindakan ini tidak dapat dibatalkan
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 space-y-4">
+                    <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-amber-900 mb-1">
+                            Peringatan!
+                          </p>
+                          <p className="text-sm text-amber-800">
+                            Data supply akan <strong>dihapus permanent</strong> dari database.
+                            Tindakan ini tidak dapat dibatalkan dan data tidak dapat dikembalikan.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <p className="text-sm text-gray-700">
+                        Apakah Anda yakin ingin menghapus data supply ini?
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="bg-gray-50 px-6 py-4 flex gap-3 border-t border-gray-100">
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={handleDeleteConfirm}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Menghapus...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4" />
+                          Hapus Permanent
                         </>
                       )}
                     </button>

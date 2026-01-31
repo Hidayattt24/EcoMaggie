@@ -109,9 +109,12 @@ function OrderSuccessContent() {
   useEffect(() => {
     fetchTransactionData();
 
-    // Load Midtrans Snap script
+    // Load Midtrans Snap script (auto-switch production/sandbox)
     const snapScript = document.createElement("script");
-    snapScript.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const isProduction = process.env.NEXT_PUBLIC_MIDTRANS_ENVIRONMENT === "production";
+    snapScript.src = isProduction
+      ? "https://app.midtrans.com/snap/snap.js"
+      : "https://app.sandbox.midtrans.com/snap/snap.js";
     snapScript.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "");
     document.body.appendChild(snapScript);
 

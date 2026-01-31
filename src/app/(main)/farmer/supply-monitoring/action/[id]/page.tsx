@@ -679,7 +679,7 @@ export default function SupplyActionPage({ params }: SupplyActionPageProps) {
                       name="driverPhone"
                       value={formData.driverPhone}
                       onChange={handleInputChange}
-                      placeholder="Contoh: 082288953268"
+                      placeholder="Contoh: 082172319892"
                       className="w-full px-4 py-3 rounded-xl border-2 border-[#a3af87]/30 focus:border-[#a3af87] focus:outline-none transition-colors text-[#303646] placeholder:text-[#435664]"
                     />
                   </div>

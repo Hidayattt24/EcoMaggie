@@ -682,7 +682,7 @@ export default function SupplyDetailPage({
                 </div>
               </div>
               <a
-                href="https://wa.me/6282288953268?text=Halo%20EcoMaggie,%20saya%20butuh%20bantuan%20terkait%20supply%20sampah%20organik"
+                href="https://wa.me/6282172319892?text=Halo%20EcoMaggie,%20saya%20butuh%20bantuan%20terkait%20supply%20sampah%20organik"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-[#a3af87] to-[#8a9670]"

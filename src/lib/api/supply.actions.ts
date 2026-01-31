@@ -341,14 +341,36 @@ export async function createSupply(
         .eq("role", "FARMER");
 
       if (farmers && farmers.length > 0) {
-        // Get user data for supply details
+        // Fetch address details if pickup_address_id exists
+        let addressDetail: any = null;
+        if (transformedSupply.pickupAddressId) {
+          const { data: address } = await supabase
+            .from("addresses")
+            .select("recipient, phone")
+            .eq("id", transformedSupply.pickupAddressId)
+            .single();
+          
+          if (address) {
+            addressDetail = address;
+          }
+        }
+
+        // Get user data for fallback
         const { data: userData } = await supabase
           .from("users")
           .select("name")
           .eq("id", user.id)
           .single();
 
-        const userName = userData?.name || "User";
+        // Use recipient name from address if available, otherwise use user name
+        const requestorName = addressDetail?.recipient || userData?.name || "User";
+
+        console.log("📱 [WhatsApp to Farmer] Requestor info:", {
+          requestorName,
+          hasAddress: !!addressDetail,
+          addressRecipient: addressDetail?.recipient,
+          userName: userData?.name,
+        });
 
         // Send notification to each farmer
         for (const farmer of farmers) {
@@ -360,7 +382,7 @@ export async function createSupply(
               farmer.phone,
               farmerName,
               transformedSupply.supplyNumber || "N/A",
-              userName,
+              requestorName,
               transformedSupply.wasteType,
               transformedSupply.estimatedWeight,
               transformedSupply.pickupDate,
@@ -369,7 +391,7 @@ export async function createSupply(
             );
 
             if (whatsappResult.success) {
-              console.log(`✅ WhatsApp sent to farmer: ${farmerName}`);
+              console.log(`✅ WhatsApp sent to farmer: ${farmerName} (Requestor: ${requestorName})`);
             } else {
               console.error(`⚠️ Failed to send WhatsApp to farmer ${farmerName}: ${whatsappResult.message}`);
             }
@@ -945,16 +967,41 @@ export async function rejectSupplyByFarmer(
     // Send WhatsApp notification to user
     console.log("📱 Sending rejection notification to user...");
     try {
-      const userPhone = supply.users?.phone;
-      const userName = supply.users?.name || "Pengguna";
+      // Fetch address details if pickup_address_id exists
+      let addressDetail: any = null;
+      if (supply.pickup_address_id) {
+        const { data: address } = await supabase
+          .from("addresses")
+          .select("recipient, phone")
+          .eq("id", supply.pickup_address_id)
+          .single();
+        
+        if (address) {
+          addressDetail = address;
+        }
+      }
 
-      if (userPhone) {
+      // Use recipient name and phone from address if available, otherwise use user data
+      const recipientPhone = addressDetail?.phone || supply.users?.phone;
+      const recipientName = addressDetail?.recipient || supply.users?.name || "Pengguna";
+
+      console.log("📱 [WhatsApp] Sending cancellation to:", {
+        recipientPhone,
+        recipientName,
+        hasAddress: !!addressDetail,
+        addressRecipient: addressDetail?.recipient,
+        addressPhone: addressDetail?.phone,
+        userPhone: supply.users?.phone,
+        userName: supply.users?.name,
+      });
+
+      if (recipientPhone) {
         // Import sendCancellationNotificationToUser from whatsapp module
         const { sendCancellationNotificationToUser } = await import("@/lib/whatsapp/venusconnect");
 
         const whatsappResult = await sendCancellationNotificationToUser(
-          userPhone,
-          userName,
+          recipientPhone,
+          recipientName,
           supply.supply_number || "N/A",
           supply.waste_type,
           supply.pickup_date,
@@ -962,7 +1009,7 @@ export async function rejectSupplyByFarmer(
         );
 
         if (whatsappResult.success) {
-          console.log(`✅ WhatsApp notification sent to user: ${userName}`);
+          console.log(`✅ WhatsApp notification sent to: ${recipientName} (${recipientPhone})`);
         } else {
           console.error(`⚠️ Failed to send WhatsApp to user: ${whatsappResult.message}`);
         }
@@ -1067,6 +1114,124 @@ export async function getSupplyStatistics(): Promise<
     return {
       success: false,
       message: "Terjadi kesalahan saat mengambil statistik",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ==========================================
+// DELETE SUPPLY BY FARMER
+// ==========================================
+
+/**
+ * Delete supply permanently (Farmer only)
+ * Can delete supply with any status
+ */
+export async function deleteSupplyByFarmer(
+  supplyId: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        message: "Anda harus login untuk menghapus supply",
+        error: "Unauthorized",
+      };
+    }
+
+    // Verify user is a farmer
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (userError || !userData || userData.role !== "FARMER") {
+      return {
+        success: false,
+        message: "Hanya farmer yang dapat menghapus supply",
+        error: "Forbidden",
+      };
+    }
+
+    // Use service client to bypass RLS for delete operation
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const serviceSupabase = createServiceClient();
+
+    // Get supply details (no user_id filter for farmer)
+    const { data: supply, error: fetchError } = await serviceSupabase
+      .from("user_supplies")
+      .select("id, photo_url")
+      .eq("id", supplyId)
+      .single();
+
+    if (fetchError || !supply) {
+      return {
+        success: false,
+        message: "Supply tidak ditemukan",
+        error: fetchError?.message || "Not found",
+      };
+    }
+
+    console.log("🗑️ [DELETE] Deleting supply:", supplyId);
+
+    // Delete photo from storage if exists
+    if (supply.photo_url) {
+      try {
+        const photoPath = supply.photo_url.split("/").pop();
+        if (photoPath) {
+          console.log("🗑️ [DELETE] Deleting photo:", photoPath);
+          const { error: storageError } = await serviceSupabase.storage
+            .from("supply-photos")
+            .remove([photoPath]);
+
+          if (storageError) {
+            console.error("⚠️ [DELETE] Photo delete error:", storageError);
+          } else {
+            console.log("✅ [DELETE] Photo deleted successfully");
+          }
+        }
+      } catch (storageError) {
+        console.error("❌ [DELETE] Error deleting photo:", storageError);
+        // Continue with deletion even if photo deletion fails
+      }
+    }
+
+    // Delete supply from database using service client (bypass RLS)
+    console.log("🗑️ [DELETE] Deleting from database...");
+    const { error: deleteError, count } = await serviceSupabase
+      .from("user_supplies")
+      .delete({ count: "exact" })
+      .eq("id", supplyId);
+
+    if (deleteError) {
+      console.error("❌ [DELETE] Database delete error:", deleteError);
+      return {
+        success: false,
+        message: "Gagal menghapus supply dari database",
+        error: deleteError.message,
+      };
+    }
+
+    console.log("✅ [DELETE] Successfully deleted. Rows affected:", count);
+
+    return {
+      success: true,
+      message: "Supply berhasil dihapus permanent",
+    };
+  } catch (error) {
+    console.error("❌ [DELETE] Delete supply by farmer error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat menghapus supply",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }

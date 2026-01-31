@@ -523,44 +523,69 @@ export async function updateSupplyStatus(
     }
 
     // Send WhatsApp notification based on status
-    if (supplyData && supplyData.users) {
-      const userPhone = supplyData.users.phone;
-      const userName = supplyData.users.name;
+    if (supplyData) {
+      // Fetch address details if pickup_address_id exists
+      let addressDetail: any = null;
+      if (supplyData.pickup_address_id) {
+        const { data: address } = await supabase
+          .from("addresses")
+          .select("recipient, phone")
+          .eq("id", supplyData.pickup_address_id)
+          .single();
+        
+        if (address) {
+          addressDetail = address;
+        }
+      }
+
+      // Use recipient name and phone from address if available, otherwise use user data
+      const recipientPhone = addressDetail?.phone || supplyData.users?.phone;
+      const recipientName = addressDetail?.recipient || supplyData.users?.name;
       const supplyNumber = supplyData.supply_number;
 
-      if (userPhone) {
+      console.log("📱 [WhatsApp] Sending notification to:", {
+        recipientPhone,
+        recipientName,
+        hasAddress: !!addressDetail,
+        addressRecipient: addressDetail?.recipient,
+        addressPhone: addressDetail?.phone,
+        userPhone: supplyData.users?.phone,
+        userName: supplyData.users?.name,
+      });
+
+      if (recipientPhone) {
         try {
           if (updateData.status === "SCHEDULED") {
             // Send pickup scheduled notification
             await sendSupplyPickupScheduledWhatsApp(
-              userPhone,
-              userName,
+              recipientPhone,
+              recipientName,
               supplyNumber,
               supplyData.pickup_date,
               supplyData.pickup_time_range || supplyData.pickup_time_slot,
               updateData.courierName
             );
-            console.log(`✅ Sent SCHEDULED WhatsApp notification to ${userPhone}`);
+            console.log(`✅ Sent SCHEDULED WhatsApp notification to ${recipientPhone} (${recipientName})`);
           } else if (updateData.status === "ON_THE_WAY") {
             // Send on the way notification
             await sendSupplyOnTheWayWhatsApp(
-              userPhone,
-              userName,
+              recipientPhone,
+              recipientName,
               supplyNumber,
               updateData.courierName || supplyData.courier_name || "Kurir",
               updateData.courierPhone || supplyData.courier_phone,
               updateData.estimatedArrival || supplyData.estimated_arrival
             );
-            console.log(`✅ Sent ON_THE_WAY WhatsApp notification to ${userPhone}`);
+            console.log(`✅ Sent ON_THE_WAY WhatsApp notification to ${recipientPhone} (${recipientName})`);
           } else if (updateData.status === "COMPLETED") {
             // Send completed notification
             await sendSupplyCompletedWhatsApp(
-              userPhone,
-              userName,
+              recipientPhone,
+              recipientName,
               supplyNumber,
               updateData.actualWeight || supplyData.actual_weight
             );
-            console.log(`✅ Sent COMPLETED WhatsApp notification to ${userPhone}`);
+            console.log(`✅ Sent COMPLETED WhatsApp notification to ${recipientPhone} (${recipientName})`);
           }
         } catch (whatsappError) {
           console.error("⚠️ Failed to send WhatsApp notification:", whatsappError);

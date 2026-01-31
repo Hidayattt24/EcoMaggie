@@ -87,7 +87,7 @@ export function generateInvoicePDF(data: InvoiceData) {
     yPos
   );
   doc.text(
-    "Email: cs@ecomaggie.com  |  Telp: +62 822-8895-3268",
+    "Email: ecomaggie1@gmail.com  |  Telp: +62 821-7231-9892",
     margin,
     yPos + 5
   );
@@ -388,8 +388,8 @@ export function generateInvoicePDF(data: InvoiceData) {
   doc.text("Hubungi Kami", col2X, footerY);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.text("Email: cs@ecomaggie.com", col2X, footerY + 5);
-  doc.text("Telp: +62 822-8895-3268", col2X, footerY + 10);
+  doc.text("Email: ecomaggie1@gmail.com", col2X, footerY + 5);
+  doc.text("Telp: +62 821-7231-9892", col2X, footerY + 10);
 
   // Column 3 - Legal
   const col3X = margin + colWidth * 2;

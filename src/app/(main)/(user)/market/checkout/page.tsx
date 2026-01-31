@@ -1334,7 +1334,7 @@ function CheckoutContent() {
                   pertanyaan seputar pesanan.
                 </p>
                 <a
-                  href="https://wa.me/6282288953268"
+                  href="https://wa.me/6282172319892"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"
@@ -1556,7 +1556,7 @@ function CheckoutContent() {
                 pertanyaan seputar pesanan.
               </p>
               <a
-                href="https://wa.me/6282288953268"
+                href="https://wa.me/6282172319892"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#a3af87] text-white text-sm font-semibold rounded-xl hover:bg-[#95a17a] transition-colors"

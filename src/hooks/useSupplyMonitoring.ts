@@ -23,11 +23,18 @@ export function useSupplyOrders() {
     realtimeSWRConfig
   )
 
+  // Force refresh function that bypasses cache
+  const refresh = async () => {
+    console.log('🔄 [REFRESH] Force refreshing supply orders...')
+    await mutate(undefined, { revalidate: true })
+    console.log('✅ [REFRESH] Supply orders refreshed')
+  }
+
   return {
     supplies: data?.data || [],
     isLoading,
     error,
-    refresh: mutate, // Manual refresh function
+    refresh, // Manual refresh function with force revalidate
   }
 }
 
@@ -53,11 +60,18 @@ export function useSupplyTrend(
     realtimeSWRConfig
   )
 
+  // Force refresh function that bypasses cache
+  const refresh = async () => {
+    console.log('🔄 [REFRESH] Force refreshing supply trend...')
+    await mutate(undefined, { revalidate: true })
+    console.log('✅ [REFRESH] Supply trend refreshed')
+  }
+
   return {
     trendData: data?.data?.data || [],
     growthPercentage: data?.data?.growthPercentage || 0,
     isLoading,
     error,
-    refresh: mutate,
+    refresh, // Manual refresh function with force revalidate
   }
 }

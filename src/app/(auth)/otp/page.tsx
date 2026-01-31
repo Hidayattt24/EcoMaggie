@@ -437,11 +437,11 @@ function VerifyEmailContent() {
               <p className="text-gray-500 text-xs poppins-regular">
                 Jika email tidak kunjung masuk setelah 5 menit, hubungi kami di{" "}
                 <a
-                  href="mailto:support@ecomaggie.com"
+                  href="mailto:ecomaggie1@gmail.com"
                   className="font-semibold hover:underline"
                   style={{ color: "#A3AF87" }}
                 >
-                  support@ecomaggie.com
+                  ecomaggie1@gmail.com
                 </a>
               </p>
             </div>

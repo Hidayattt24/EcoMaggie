@@ -158,8 +158,8 @@ export async function sendDeliveryNotificationEmail(
                 Jika ada pertanyaan, silakan hubungi customer service kami:
               </p>
               <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
-                📧 Email: support@ecomaggie.com<br>
-                📱 WhatsApp: +62 822 8895 3268
+                📧 Email: ecomaggie1@gmail.com<br>
+                📱 WhatsApp: +62 82172319892
               </p>
             </td>
           </tr>
@@ -193,8 +193,8 @@ Nomor Pesanan: ${orderId}
 Terima kasih sudah berbelanja di Eco-Maggie!
 
 Jika ada pertanyaan, silakan hubungi:
-Email: support@ecomaggie.com
-WhatsApp: +62 822 8895 3268
+Email: ecomaggie1@gmail.com
+WhatsApp: +62 82172319892
 
 © 2026 Eco-Maggie
   `;

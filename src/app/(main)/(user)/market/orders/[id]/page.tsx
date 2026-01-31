@@ -150,7 +150,7 @@ function transformDbOrderToOrder(dbOrder: DbOrder): Order {
     orderId: dbOrder.order_id,
     farmName: "Eco-maggie Store",
     farmerId: 1,
-    farmerPhone: "6282288953268", // Eco-maggie contact
+    farmerPhone: "6282172319892", // Eco-maggie contact
     status: mapDbStatusToUiStatus(dbOrder.status),
     products,
     totalItems,

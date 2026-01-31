@@ -248,8 +248,8 @@ export function TransactionCard({
   const config = statusConfig[transaction.status];
   const StatusIcon = config.icon;
 
-  const firstProduct = transaction.products[0];
-  const otherProductsCount = transaction.products.length - 1;
+  const firstProduct = transaction.products?.[0];
+  const otherProductsCount = (transaction.products?.length || 1) - 1;
 
   // Detect shipping type from shipping method
   const shippingType = (() => {
@@ -381,7 +381,7 @@ export function TransactionCard({
         const whatsappMessage = encodeURIComponent(
           `Halo, saya ingin menanyakan status pesanan saya dengan ID: ${transaction.orderId}`
         );
-        const whatsappNumber = "6282288953268";
+        const whatsappNumber = "6282172319892";
         return (
           <>
             <a
@@ -405,7 +405,7 @@ export function TransactionCard({
         const whatsappMessagePickup = encodeURIComponent(
           `Halo, saya ingin mengambil pesanan dengan ID: ${transaction.orderId}. Kapan saya bisa datang?`
         );
-        const whatsappNumberPickup = "6282288953268";
+        const whatsappNumberPickup = "6282172319892";
         return (
           <>
             <a
@@ -504,13 +504,15 @@ export function TransactionCard({
 
         return (
           <>
-            <Link
-              href={`/market/products/${firstProduct.slug || firstProduct.productId}#ulasan`}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
-            >
-              <Star className="h-4 w-4" />
-              Beri Nilai
-            </Link>
+            {firstProduct && (
+              <Link
+                href={`/market/products/${firstProduct.slug || firstProduct.productId}#ulasan`}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#a3af87] to-[#8a9670] text-white rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-[#a3af87]/30 transition-all flex items-center justify-center gap-2"
+              >
+                <Star className="h-4 w-4" />
+                Beri Nilai
+              </Link>
+            )}
             <Link
               href={`/transaction/${transaction.orderId}`}
               className="flex-1 px-4 py-2.5 border border-[#435664]/30 text-[#435664] rounded-2xl font-bold text-sm hover:bg-[#435664]/10 transition-all flex items-center justify-center gap-2"
@@ -581,29 +583,48 @@ export function TransactionCard({
 
         {/* Body - Products */}
         <div className="p-4 bg-[#fdf8d4]">
-          <div className="flex gap-3 mb-3">
-            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl overflow-hidden border border-[#435664]/10">
-              <img
-                src={firstProduct.image}
-                alt={firstProduct.name}
-                className="w-full h-full object-cover"
-              />
+          {firstProduct ? (
+            <div className="flex gap-3 mb-3">
+              <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl overflow-hidden border border-[#435664]/10">
+                <img
+                  src={firstProduct.image || "/images/placeholder-product.png"}
+                  alt={firstProduct.name || "Product"}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/images/placeholder-product.png";
+                  }}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-sm text-[#303646] line-clamp-1 mb-1">
+                  {firstProduct.name}
+                </h3>
+                <p className="text-xs text-gray-500 mb-1">
+                  Varian: {firstProduct.variant || "-"}
+                </p>
+                <p className="text-xs text-gray-500">x{firstProduct.quantity}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-sm text-[#303646]">
+                  Rp {firstProduct.price.toLocaleString("id-ID")}
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-sm text-[#303646] line-clamp-1 mb-1">
-                {firstProduct.name}
-              </h3>
-              <p className="text-xs text-gray-500 mb-1">
-                Varian: {firstProduct.variant}
-              </p>
-              <p className="text-xs text-gray-500">x{firstProduct.quantity}</p>
+          ) : (
+            <div className="flex gap-3 mb-3">
+              <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl flex items-center justify-center border border-[#435664]/10">
+                <ShoppingBag className="w-8 h-8 text-gray-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-sm text-[#303646] mb-1">
+                  Produk tidak tersedia
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Data produk sedang dimuat...
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-bold text-sm text-[#303646]">
-                Rp {firstProduct.price.toLocaleString("id-ID")}
-              </p>
-            </div>
-          </div>
+          )}
 
           {otherProductsCount > 0 && (
             <div className="px-3 py-2 bg-white rounded-lg text-xs text-[#435664] font-medium border border-[#435664]/10">

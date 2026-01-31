@@ -136,7 +136,7 @@ function transformDbOrderToTransaction(dbOrder: DbOrder): Transaction {
     orderId: dbOrder.order_id,
     farmName: "Eco-maggie Store",
     farmerId: 1,
-    farmerPhone: "6282288953268",
+    farmerPhone: "6282172319892",
     status: mapDbStatusToUiStatus(dbOrder.status),
     products,
     totalItems,

@@ -158,8 +158,8 @@ Terima kasih atas kepercayaan Anda berbelanja di Eco-Maggie. Kami berharap produ
 Review dan rating Anda sangat berharga untuk membantu petani lokal kami berkembang dan membantu pelanggan lain membuat keputusan yang tepat.
 
 *Customer Support*
-Email: support@ecomaggie.com
-WhatsApp: +62 822 8895 3268
+Email: ecomaggie1@gmail.com
+WhatsApp: +62 82172319892
 
 Salam,
 *Eco-Maggie Team*
@@ -205,7 +205,7 @@ ${courierName ? `Petugas: ${courierName}` : `Petugas: Akan dikonfirmasi`}
 Kontribusi Anda sangat berarti untuk program daur ulang berkelanjutan kami. Sampah organik akan diproses menjadi pupuk kompos berkualitas tinggi.
 
 *Butuh bantuan?*
-WhatsApp: +62 822 8895 3268
+WhatsApp: +62 82172319892
 
 Terima kasih,
 *Eco-Maggie Team*
@@ -245,7 +245,7 @@ ${estimatedArrival ? `Estimasi Tiba: ${estimatedArrival}` : `Estimasi Tiba: Sege
 
 Mohon pastikan sampah organik sudah disiapkan di lokasi penjemputan yang telah ditentukan.
 
-${courierPhone ? `Jika ada kendala, hubungi petugas di ${courierPhone}` : `Jika ada kendala, hubungi kami di WhatsApp +62 822 8895 3268`}
+${courierPhone ? `Jika ada kendala, hubungi petugas di ${courierPhone}` : `Jika ada kendala, hubungi kami di WhatsApp +62 82172319892`}
 
 Terima kasih,
 *Eco-Maggie Team*
@@ -448,8 +448,8 @@ Review dan rating Anda sangat berharga untuk:
 • Membangun komunitas yang lebih baik
 
 *Customer Support*
-Email: support@ecomaggie.com
-WhatsApp: +62 822 8895 3268
+Email: ecomaggie1@gmail.com
+WhatsApp: +62 82172319892
 
 Thank you for your trust,
 *Eco-Maggie Team*
@@ -494,8 +494,8 @@ Status: Menunggu Pembayaran
 Pesanan akan otomatis dibatalkan jika pembayaran tidak diselesaikan dalam waktu yang ditentukan.
 
 *Butuh bantuan?*
-WhatsApp: +62 822 8895 3268
-Email: support@ecomaggie.com
+WhatsApp: +62 82172319892
+Email: ecomaggie1@gmail.com
 
 Terima kasih,
 *Eco-Maggie Team*
@@ -538,8 +538,8 @@ Pesanan Anda sedang menunggu konfirmasi dari penjual. Kami akan memberitahu Anda
 Pantau status pesanan Anda di halaman "Pesanan Saya"
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
-Email: support@ecomaggie.com
+WhatsApp: +62 82172319892
+Email: ecomaggie1@gmail.com
 
 Terima kasih,
 *Eco-Maggie Team*
@@ -580,7 +580,7 @@ Penjual sedang mempersiapkan pesanan Anda. Kami akan memberitahu Anda ketika pes
 Pantau progress pesanan di halaman "Pesanan Saya"
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
+WhatsApp: +62 82172319892
 
 Best regards,
 *Eco-Maggie Team*
@@ -621,7 +621,7 @@ Setelah selesai dikemas, pesanan Anda akan segera dikirim. Kami akan memberitahu
 Pantau status di halaman "Pesanan Saya"
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
+WhatsApp: +62 82172319892
 
 Best regards,
 *Eco-Maggie Team*
@@ -667,7 +667,7 @@ ${trackingNumber ? `Gunakan nomor resi di atas untuk tracking pengiriman` : `Pan
 Pastikan ada yang menerima paket di alamat tujuan.
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
+WhatsApp: +62 82172319892
 
 Best regards,
 *Eco-Maggie Team*
@@ -709,7 +709,7 @@ Date: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", 
 • Periksa kondisi produk saat pengambilan
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
+WhatsApp: +62 82172319892
 
 Best regards,
 *Eco-Maggie Team*
@@ -753,8 +753,8 @@ ${reason.toLowerCase().includes("bayar") || reason.toLowerCase().includes("paid"
 Kami mohon maaf atas ketidaknyamanan ini. Silakan hubungi kami jika ada pertanyaan.
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
-Email: support@ecomaggie.com
+WhatsApp: +62 82172319892
+Email: ecomaggie1@gmail.com
 
 *Lanjut Belanja*
 Jelajahi produk segar lainnya di marketplace kami.
@@ -802,8 +802,8 @@ Date: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", 
 Jika ada pertanyaan, silakan hubungi kami.
 
 *Partner Support*
-WhatsApp: +62 822 8895 3268
-Email: partner@ecomaggie.com
+Email: ecomaggie1@gmail.com
+WhatsApp: +62 82172319892
 
 Best regards,
 *Eco-Maggie Partnership Team*
@@ -895,8 +895,8 @@ Anda dapat membuat permintaan penjemputan baru kapan saja melalui aplikasi Eco-M
 Mohon maaf atas ketidaknyamanan ini. Jika ada pertanyaan, jangan ragu untuk menghubungi kami.
 
 *Customer Support*
-WhatsApp: +62 822 8895 3268
-Email: support@ecomaggie.com
+WhatsApp: +62 82172319892
+Email: ecomaggie1@gmail.com
 
 Terima kasih atas pengertian Anda,
 *Eco-Maggie Team*
@@ -908,3 +908,4 @@ _Supporting Local Farmers, Sustaining Nature_
     message,
   });
 }
+

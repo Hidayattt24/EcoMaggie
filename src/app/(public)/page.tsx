@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { NavbarUser } from "@/components/user/NavbarUser";
 import HeroSection from "@/components/landing/HeroSection";
+import AboutOrganic from "@/components/landing/AboutOrganic";
+import AboutMaggot from "@/components/landing/AboutMaggot";
 // import Headline from "@/components/landing/Headline";
 // import TentangSection from "@/components/landing/TentangSection";
 // import SolusiSection from "@/components/landing/SolusiSection";
@@ -18,18 +20,19 @@ import LoadingScreen from "@/components/landing/LoadingScreen";
 import PWAInstallBanner from "@/components/landing/PWAInstallBanner";
 
 export const metadata: Metadata = {
-  title: "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
+  title:
+    "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
   description:
     "Tahukah kamu? EcoMaggie membangun sistem ekonomi sirkular di Gampong Rukoh dengan menghubungkan sumber limbah organik langsung ke petani maggot melalui platform digital. Bersama-sama, kita mengurangi beban sampah di TPA sekaligus menciptakan produk pakan ternak bernilai ekonomi bagi kesejahteraan masyarakat lokal.",
   keywords: [
-// --- Brand & Core Concept ---
+    // --- Brand & Core Concept ---
     "EcoMaggie",
     "supply connect",
     "maggot market",
     "ekonomi sirkular",
     "sustainable waste management",
     "zero waste Indonesia",
-    
+
     // --- Lokasi & Komunitas Spesifik (SEO Lokal) ---
     "Banda Aceh",
     "UMKM Banda Aceh",
@@ -42,7 +45,7 @@ export const metadata: Metadata = {
     "pengelolaan sampah Banda Aceh",
     "maggot BSF Aceh",
     "DLHK3 Banda Aceh",
-    
+
     // --- Masalah & Solusi (Pertanyaan Orang Awam) ---
     "cara olah sampah rumah tangga",
     "tempat buang sampah organik",
@@ -52,7 +55,7 @@ export const metadata: Metadata = {
     "pengomposan praktis",
     "pemanfaatan limbah dapur",
     "pupuk organik cair maggot",
-    
+
     // --- Sektor Peternakan & Bisnis (Target UMKM/Petani) ---
     "pakan ternak alternatif murah",
     "pakan ikan lele Aceh",
@@ -62,7 +65,7 @@ export const metadata: Metadata = {
     "pakan burung bernutrisi",
     "kemitraan pengolahan sampah",
     "peluang usaha pakan ternak",
-    
+
     // --- Terminologi Teknis & Umum ---
     "maggot BSF",
     "black soldier fly",
@@ -72,7 +75,8 @@ export const metadata: Metadata = {
     "biokonversi sampah",
   ],
   openGraph: {
-    title: "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
+    title:
+      "EcoMaggie - Kolaborasi Pengelolaan Sampah Organik & Budidaya Maggot BSF",
     description:
       "Tahukah Anda sampah organik bisa jadi sumber penghasilan? Bergabunglah dengan 500+ mitra sukses yang sudah menghasilkan passive income dari sampah. Mulai transformasi Anda hari ini!",
     url: "https://www.ecomaggie.com",
@@ -104,6 +108,12 @@ export default function Home() {
       <main className="scroll-smooth">
         {/* Hero Section - Introduction to EcoMaggie */}
         <HeroSection />
+
+        {/* About Organic Section - Pengertian Sampah Organik */}
+        <AboutOrganic />
+
+        {/* About Maggot Section - Maggot sebagai Solusi Ekonomi Sirkular */}
+        <AboutMaggot />
 
         {/* Featured Products Section - Produk Unggulan */}
         <FeaturedProductsSection />

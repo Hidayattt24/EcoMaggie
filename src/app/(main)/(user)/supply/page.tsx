@@ -62,8 +62,29 @@ export default function SupplyPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [locationStatus, setLocationStatus] = useState<LocationStatus>("loading");
+  const [locationStatus, setLocationStatus] =
+    useState<LocationStatus>("loading");
   const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<{
+    acceptedWastes: boolean;
+    wasteConditions: boolean;
+    notAcceptedWastes: boolean;
+    restrictionReason: boolean;
+    tips: boolean;
+  }>({
+    acceptedWastes: false,
+    wasteConditions: false,
+    notAcceptedWastes: false,
+    restrictionReason: false,
+    tips: false,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
   // Fetch addresses on mount
   useEffect(() => {
@@ -74,7 +95,11 @@ export default function SupplyPage() {
         const addressResult = await getUserAddresses();
         let allAddresses: Address[] = [];
 
-        if (addressResult.success && addressResult.data && addressResult.data.length > 0) {
+        if (
+          addressResult.success &&
+          addressResult.data &&
+          addressResult.data.length > 0
+        ) {
           allAddresses = addressResult.data.map((addr) => ({
             id: addr.id,
             label: addr.label,
@@ -119,7 +144,8 @@ export default function SupplyPage() {
         setAddresses(allAddresses);
 
         // Set default address as selected
-        const defaultAddr = allAddresses.find(a => a.isDefault) || allAddresses[0];
+        const defaultAddr =
+          allAddresses.find((a) => a.isDefault) || allAddresses[0];
         if (defaultAddr) {
           setSelectedAddress(defaultAddr);
         }
@@ -146,7 +172,10 @@ export default function SupplyPage() {
     }
 
     // Check if selected address is in supported region
-    const isSupported = isLocationSupported(selectedAddress.province, selectedAddress.city);
+    const isSupported = isLocationSupported(
+      selectedAddress.province,
+      selectedAddress.city,
+    );
     if (isSupported) {
       setLocationStatus("allowed");
     } else {
@@ -232,25 +261,27 @@ export default function SupplyPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8 lg:mb-12"
         >
-          <div 
+          <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
-            style={{
-              backgroundColor: "#fdf8d4",
-              border: "2px solid #a3af87",
-            } as React.CSSProperties}
+            style={
+              {
+                backgroundColor: "#fdf8d4",
+                border: "2px solid #a3af87",
+              } as React.CSSProperties
+            }
           >
-            <Recycle 
-              className="h-4 w-4" 
+            <Recycle
+              className="h-4 w-4"
               style={{ color: "#435664" } as React.CSSProperties}
             />
-            <span 
+            <span
               className="text-xs font-bold tracking-wider uppercase"
               style={{ color: "#303646" } as React.CSSProperties}
             >
               Supply Connect
             </span>
           </div>
-          <h1 
+          <h1
             className="text-3xl lg:text-4xl font-bold mb-3"
             style={{ color: "#303646" } as React.CSSProperties}
           >
@@ -259,8 +290,8 @@ export default function SupplyPage() {
           </h1>
           <p className="text-gray-500 text-sm lg:text-base max-w-2xl mx-auto">
             Berkontribusi untuk lingkungan yang lebih bersih dengan menyetorkan
-            sampah organik nabati rumah tangga Anda. Gratis pickup untuk wilayah Banda
-            Aceh.
+            sampah organik nabati rumah tangga Anda. Gratis pickup untuk wilayah
+            Banda Aceh.
           </p>
         </motion.div>
 
@@ -330,7 +361,9 @@ export default function SupplyPage() {
                         </>
                       )}
                     </div>
-                    <ChevronDown className={`h-5 w-5 text-[#435664] transition-transform ${showAddressDropdown ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`h-5 w-5 text-[#435664] transition-transform ${showAddressDropdown ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   {/* Dropdown List */}
@@ -350,7 +383,9 @@ export default function SupplyPage() {
                               setShowAddressDropdown(false);
                             }}
                             className={`w-full p-3 text-left hover:bg-[#fdf8d4] transition-all border-b border-gray-100 last:border-0 ${
-                              selectedAddress?.id === address.id ? "bg-[#fdf8d4]" : ""
+                              selectedAddress?.id === address.id
+                                ? "bg-[#fdf8d4]"
+                                : ""
                             }`}
                           >
                             <div className="flex items-start gap-2">
@@ -362,7 +397,10 @@ export default function SupplyPage() {
                                 }`}
                               >
                                 {selectedAddress?.id === address.id && (
-                                  <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                                  <Check
+                                    className="w-3 h-3 text-white"
+                                    strokeWidth={3}
+                                  />
                                 )}
                               </div>
                               <div className="flex-1">
@@ -452,7 +490,8 @@ export default function SupplyPage() {
                           {selectedAddress.city}, {selectedAddress.province}
                         </p>
                         <p className="text-xs text-gray-600 mt-1">
-                          Lokasi terverifikasi! Anda dapat menggunakan Supply Connect.
+                          Lokasi terverifikasi! Anda dapat menggunakan Supply
+                          Connect.
                         </p>
                       </div>
                     </div>
@@ -474,9 +513,10 @@ export default function SupplyPage() {
                           Di Luar Jangkauan Layanan
                         </p>
                         <p className="text-xs text-gray-600 mt-1">
-                          Alamat "{selectedAddress.label}" ({selectedAddress.city},{" "}
-                          {selectedAddress.province}) berada di luar wilayah
-                          layanan. Silakan pilih alamat lain atau tambahkan alamat di Banda Aceh.
+                          Alamat "{selectedAddress.label}" (
+                          {selectedAddress.city}, {selectedAddress.province})
+                          berada di luar wilayah layanan. Silakan pilih alamat
+                          lain atau tambahkan alamat di Banda Aceh.
                         </p>
                       </div>
                     </div>
@@ -539,7 +579,7 @@ export default function SupplyPage() {
                       {/* Decorative circles */}
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-                      
+
                       <div className="relative">
                         <div className="w-14 h-14 lg:w-16 lg:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-all group-hover:scale-110">
                           <Package className="h-7 w-7 lg:h-8 lg:w-8 text-white" />
@@ -570,7 +610,7 @@ export default function SupplyPage() {
                       {/* Decorative circles */}
                       <div className="absolute top-0 right-0 w-32 h-32 bg-[#a3af87]/30 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#a3af87]/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-                      
+
                       <div className="relative">
                         <div className="w-14 h-14 lg:w-16 lg:h-16 bg-[#a3af87]/20 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-[#a3af87] transition-all group-hover:scale-110">
                           <History className="h-7 w-7 lg:h-8 lg:w-8 text-[#435664] group-hover:text-white transition-colors" />
@@ -677,15 +717,37 @@ export default function SupplyPage() {
           {/* Guidelines Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             {/* 1. Jenis yang Diterima */}
-            <motion.div variants={itemVariants} className="rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#a3af87] to-[#8a9670]">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-white" />
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#a3af87] to-[#8a9670]"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="font-bold text-white text-base lg:text-lg">
+                    Jenis yang Diterima
+                  </h3>
                 </div>
-                <h3 className="font-bold text-white text-base lg:text-lg">
-                  Jenis yang Diterima
-                </h3>
+                <button
+                  onClick={() => toggleSection("acceptedWastes")}
+                  className="flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg transition-colors"
+                  aria-label="Toggle detail"
+                >
+                  <span className="text-xs font-medium text-white">
+                    {expandedSections.acceptedWastes
+                      ? "Tutup"
+                      : "Klik Lebih Lanjut"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-white transition-transform duration-300 ${
+                      expandedSections.acceptedWastes ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
               </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 lg:gap-3">
                 {acceptedWastes.map((waste, index) => {
                   const Icon = waste.icon;
@@ -704,18 +766,93 @@ export default function SupplyPage() {
                   );
                 })}
               </div>
+
+              <AnimatePresence>
+                {expandedSections.acceptedWastes && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4 bg-white/90 rounded-xl p-4 space-y-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Sampah Nabati Rumah Tangga
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Semua jenis sampah organik yang berasal dari tumbuhan
+                          seperti sisa sayuran, kulit buah, dan sisa makanan
+                          nabati sangat cocok untuk diolah menjadi pakan maggot
+                          BSF.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Kualitas Terjaga
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Sampah organik nabati memiliki kandungan nutrisi yang
+                          stabil dan aman untuk budidaya maggot BSF,
+                          menghasilkan pakan ternak berkualitas tinggi.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Ramah Lingkungan
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Dengan menyetorkan sampah organik nabati, Anda ikut
+                          mengurangi limbah yang berakhir di TPA dan mendukung
+                          ekonomi sirkular yang berkelanjutan.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* 2. Kondisi Sampah */}
-            <motion.div variants={itemVariants} className="rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#435664] to-[#303646]">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <ShieldCheck className="h-5 w-5 text-white" />
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#435664] to-[#303646]"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <ShieldCheck className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="font-bold text-white text-base lg:text-lg">
+                    Kondisi Sampah
+                  </h3>
                 </div>
-                <h3 className="font-bold text-white text-base lg:text-lg">
-                  Kondisi Sampah
-                </h3>
+                <button
+                  onClick={() => toggleSection("wasteConditions")}
+                  className="flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg transition-colors"
+                  aria-label="Toggle detail"
+                >
+                  <span className="text-xs font-medium text-white">
+                    {expandedSections.wasteConditions
+                      ? "Tutup"
+                      : "Klik Lebih Lanjut"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-white transition-transform duration-300 ${
+                      expandedSections.wasteConditions ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
               </div>
+
               <div className="space-y-3">
                 {wasteConditions.map((condition, index) => {
                   const Icon = condition.icon;
@@ -734,18 +871,81 @@ export default function SupplyPage() {
                   );
                 })}
               </div>
+
+              <AnimatePresence>
+                {expandedSections.wasteConditions && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4 bg-white/90 rounded-xl p-4 space-y-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-[#435664] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Mengapa Kondisi Penting?
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Maggot BSF sangat sensitif terhadap bahan kimia dan
+                          kontaminan tertentu. Sampah yang bersih akan
+                          menghasilkan maggot berkualitas tinggi yang aman untuk
+                          pakan ternak.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-[#435664] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Standar Kualitas
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Kami menerapkan standar kualitas ketat untuk
+                          memastikan sampah organik yang diterima dapat diolah
+                          dengan optimal dan menghasilkan produk akhir yang
+                          berkualitas.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* 3. Yang Tidak Diterima */}
-            <motion.div variants={itemVariants} className="lg:col-span-2 rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#a3af87] to-[#8a9670]">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <XCircle className="h-5 w-5 text-white" />
+            <motion.div
+              variants={itemVariants}
+              className="lg:col-span-2 rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#a3af87] to-[#8a9670]"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <XCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="font-bold text-base lg:text-lg text-white">
+                    Yang Tidak Diterima
+                  </h3>
                 </div>
-                <h3 className="font-bold text-base lg:text-lg text-white">
-                  Yang Tidak Diterima
-                </h3>
+                <button
+                  onClick={() => toggleSection("notAcceptedWastes")}
+                  className="flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg transition-colors"
+                  aria-label="Toggle detail"
+                >
+                  <span className="text-xs font-medium text-white">
+                    {expandedSections.notAcceptedWastes
+                      ? "Tutup"
+                      : "Klik Lebih Lanjut"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-white transition-transform duration-300 ${
+                      expandedSections.notAcceptedWastes ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
               </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
                 {notAcceptedWastes.map((waste, index) => {
                   const Icon = waste.icon;
@@ -764,18 +964,80 @@ export default function SupplyPage() {
                   );
                 })}
               </div>
+
+              <AnimatePresence>
+                {expandedSections.notAcceptedWastes && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4 bg-white/90 rounded-xl p-4 space-y-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Risiko Kontaminasi
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Sampah hewani dapat menarik lalat hijau yang berbahaya
+                          dan mengganggu proses budidaya maggot BSF. Lalat jenis
+                          ini dapat membawa penyakit dan menurunkan kualitas
+                          hasil panen.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Bau dan Kesehatan
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Sampah berminyak dan hewani cenderung menimbulkan bau
+                          yang kuat dan dapat menjadi sumber bakteri patogen
+                          yang merugikan untuk budidaya maggot.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* 4. Alasan Pembatasan */}
-            <motion.div variants={itemVariants} className="lg:col-span-2 rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#a3af87]/20">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-amber-100 rounded-lg">
-                  <TriangleAlert className="h-5 w-5 text-amber-600" />
+            <motion.div
+              variants={itemVariants}
+              className="lg:col-span-2 rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#fdf8d4] to-[#f5efc0] border-2 border-[#a3af87]/20"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <TriangleAlert className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <h3 className="font-bold text-base lg:text-lg text-[#303646]">
+                    Alasan Pembatasan Ini
+                  </h3>
                 </div>
-                <h3 className="font-bold text-base lg:text-lg text-[#303646]">
-                  Alasan Pembatasan Ini
-                </h3>
+                <button
+                  onClick={() => toggleSection("restrictionReason")}
+                  className="flex items-center gap-1 px-3 py-2 hover:bg-amber-100/50 rounded-lg transition-colors"
+                  aria-label="Toggle detail"
+                >
+                  <span className="text-xs font-medium text-[#303646]">
+                    {expandedSections.restrictionReason
+                      ? "Tutup"
+                      : "Klik Lebih Lanjut"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-[#303646] transition-transform duration-300 ${
+                      expandedSections.restrictionReason ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
               </div>
+
               <div className="bg-white rounded-xl p-4 lg:p-5 hover:shadow-md transition-all border-2 border-[#a3af87]/20">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-amber-100">
@@ -783,14 +1045,64 @@ export default function SupplyPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs lg:text-sm leading-relaxed text-[#435664]">
-                      <span className="font-bold text-[#303646]">Sampah hewani dapat memicu munculnya lalat hijau</span> (bukan BSF) yang berbahaya bagi budidaya, serta meningkatkan risiko bau dan penyakit.
+                      <span className="font-bold text-[#303646]">
+                        Sampah hewani dapat memicu munculnya lalat hijau
+                      </span>{" "}
+                      (bukan BSF) yang berbahaya bagi budidaya, serta
+                      meningkatkan risiko bau dan penyakit.
                     </p>
                     <p className="text-xs lg:text-sm leading-relaxed mt-2 text-[#435664]">
-                      Oleh karena itu, <span className="font-semibold text-[#a3af87]">EcoMaggie hanya memprioritaskan limbah nabati</span> yang lebih aman, stabil, dan sesuai untuk pakan maggot BSF.
+                      Oleh karena itu,{" "}
+                      <span className="font-semibold text-[#a3af87]">
+                        EcoMaggie hanya memprioritaskan limbah nabati
+                      </span>{" "}
+                      yang lebih aman, stabil, dan sesuai untuk pakan maggot
+                      BSF.
                     </p>
                   </div>
                 </div>
               </div>
+
+              <AnimatePresence>
+                {expandedSections.restrictionReason && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4 bg-white rounded-xl p-4 border-2 border-[#a3af87]/20 space-y-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Bug className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Fokus pada Maggot BSF
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Black Soldier Fly (BSF) adalah spesies lalat yang
+                          ramah lingkungan dan tidak menyebarkan penyakit.
+                          Berbeda dengan lalat rumah atau lalat hijau yang dapat
+                          membawa patogen berbahaya.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Leaf className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Keunggulan Limbah Nabati
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Limbah nabati menghasilkan maggot dengan kandungan
+                          protein optimal, bebas dari kontaminan hewani, dan
+                          lebih mudah dikelola dalam proses budidaya skala
+                          besar.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* 5. Tips */}
@@ -798,14 +1110,31 @@ export default function SupplyPage() {
               variants={itemVariants}
               className="lg:col-span-2 rounded-2xl p-5 lg:p-6 shadow-lg bg-gradient-to-br from-[#435664] to-[#303646]"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Info className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Info className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="font-bold text-white text-base lg:text-lg">
+                    Tips Menyimpan Sampah Organik
+                  </h3>
                 </div>
-                <h3 className="font-bold text-white text-base lg:text-lg">
-                  Tips Menyimpan Sampah Organik
-                </h3>
+                <button
+                  onClick={() => toggleSection("tips")}
+                  className="flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg transition-colors"
+                  aria-label="Toggle detail"
+                >
+                  <span className="text-xs font-medium text-white">
+                    {expandedSections.tips ? "Tutup" : "Klik Lebih Lanjut"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-white transition-transform duration-300 ${
+                      expandedSections.tips ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
               </div>
+
               <div className="space-y-3">
                 {[
                   {
@@ -832,11 +1161,53 @@ export default function SupplyPage() {
                       <h4 className="font-semibold text-xs lg:text-sm text-[#303646]">
                         {tip.title}
                       </h4>
-                      <p className="text-xs mt-0.5 text-[#435664]">{tip.desc}</p>
+                      <p className="text-xs mt-0.5 text-[#435664]">
+                        {tip.desc}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
+
+              <AnimatePresence>
+                {expandedSections.tips && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4 bg-white/90 rounded-xl p-4 space-y-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-[#435664] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Persiapan Optimal
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Dengan mengikuti tips di atas, sampah organik Anda
+                          akan tetap dalam kondisi baik hingga waktu
+                          penjemputan. Hal ini memudahkan proses pengolahan dan
+                          menghasilkan kualitas maggot yang lebih baik.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Recycle className="h-5 w-5 text-[#a3af87] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[#303646] mb-1">
+                          Maksimalkan Kontribusi
+                        </h4>
+                        <p className="text-xs text-[#435664] leading-relaxed">
+                          Sampah organik yang tersimpan dengan baik dapat
+                          diproses lebih efisien, meningkatkan dampak positif
+                          Anda terhadap lingkungan dan ekonomi sirkular.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
         </motion.div>

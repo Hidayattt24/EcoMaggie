@@ -97,7 +97,7 @@ export function NavbarUser() {
       ),
     },
     {
-      name: "Sektor Sampah",
+      name: "Setor Sampah",
       link: "/supply",
       icon: <Recycle className="h-4 w-4" />,
     },
@@ -234,9 +234,7 @@ export function NavbarUser() {
             <Link
               href="/wishlist"
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                pathname === "/wishlist"
-                  ? "shadow-md scale-105"
-                  : ""
+                pathname === "/wishlist" ? "shadow-md scale-105" : ""
               }`}
               style={
                 {
@@ -287,9 +285,7 @@ export function NavbarUser() {
             <Link
               href="/market/cart"
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                pathname === "/market/cart"
-                  ? "shadow-md scale-105"
-                  : ""
+                pathname === "/market/cart" ? "shadow-md scale-105" : ""
               }`}
               style={
                 {
@@ -340,9 +336,7 @@ export function NavbarUser() {
             <Link
               href="/transaction"
               className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                pathname === "/transaction"
-                  ? "shadow-md scale-105"
-                  : ""
+                pathname === "/transaction" ? "shadow-md scale-105" : ""
               }`}
               style={
                 {
@@ -584,7 +578,10 @@ export function NavbarUser() {
 
       <div className="lg:hidden fixed top-0 inset-x-0 z-50 pt-safe">
         <div className="mx-2 mt-3">
-          <div className="relative rounded-3xl shadow-2xl border border-gray-200/50 px-4 py-3" style={{ backgroundColor: "#fdf8d4" }}>
+          <div
+            className="relative rounded-3xl shadow-2xl border border-gray-200/50 px-4 py-3"
+            style={{ backgroundColor: "#fdf8d4" }}
+          >
             <div
               className="absolute inset-0 rounded-3xl pointer-events-none"
               style={{
@@ -757,7 +754,9 @@ export function NavbarUser() {
                   {isLoggedIn ? (
                     <>
                       <button
-                        onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                        onClick={() =>
+                          setShowProfileDropdown(!showProfileDropdown)
+                        }
                         className={`flex h-10 w-10 items-center justify-center rounded-full transition-all hover:shadow-lg active:scale-95 overflow-hidden ${
                           pathname?.startsWith("/profile")
                             ? "shadow-xl scale-105 ring-2"
@@ -765,7 +764,9 @@ export function NavbarUser() {
                         }`}
                         style={{
                           backgroundColor: "#303646",
-                          borderColor: pathname?.startsWith("/profile") ? "#ebfba8" : undefined
+                          borderColor: pathname?.startsWith("/profile")
+                            ? "#ebfba8"
+                            : undefined,
                         }}
                         title="Profile"
                       >
@@ -949,7 +950,10 @@ export function NavbarUser() {
           !pathname?.includes("/cart") &&
           !pathname?.includes("/profile") && (
             <div className="mx-2 mb-3">
-              <nav className="relative rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3" style={{ backgroundColor: "#fdf8d4" }}>
+              <nav
+                className="relative rounded-3xl shadow-2xl border border-gray-200/50 px-3 py-3"
+                style={{ backgroundColor: "#fdf8d4" }}
+              >
                 <div
                   className="absolute inset-0 rounded-3xl pointer-events-none"
                   style={{
